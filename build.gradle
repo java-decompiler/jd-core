@@ -1,0 +1,33 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
+
+version='1.0.0'
+
+tasks.withType(JavaCompile) {
+	sourceCompatibility = targetCompatibility = '1.8'
+	options.compilerArgs << '-Xlint:deprecation'
+	options.compilerArgs << '-Xlint:unchecked' 
+	options.encoding = 'UTF-8'	
+}
+
+repositories {
+	mavenCentral()
+}
+
+jar {
+	manifest {
+		attributes 'JD-Core-Version': version
+	}
+}
+
+// 'cleanIdea' task extension //
+cleanIdea.doFirst {
+  delete project.name + '.iws'
+  delete 'out'
+  followSymlinks = true
+}
