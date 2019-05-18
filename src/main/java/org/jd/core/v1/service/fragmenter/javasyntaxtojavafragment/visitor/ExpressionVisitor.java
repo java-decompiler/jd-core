@@ -24,6 +24,7 @@ import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.CharacterUtil;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
+import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.StringUtil;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashSet;
@@ -529,7 +530,7 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(StringConstantExpression expression) {
         tokens.addLineNumberToken(expression);
-        tokens.add(new StringConstantToken(expression.getString(), currentInternalTypeName));
+        tokens.add(new StringConstantToken(StringUtil.escapeString(expression.getString()), currentInternalTypeName));
     }
 
     @Override

@@ -5,20 +5,19 @@
  * copy and modify the code freely for non-commercial purposes.
  */
 
-package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
+package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util;
 
 
 public class StringUtil {
 
     public static String escapeString(String s) {
         int length = s.length();
-        int i = 0;
 
-        for (; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             char c = s.charAt(i);
 
-            if ((c == '\\') || (c < ' ')) {
-                StringBuilder sb = new StringBuilder(length * 2 + 2);
+            if ((c == '\\') || (c == '"') || (c < ' ')) {
+                StringBuilder sb = new StringBuilder(length * 2);
 
                 sb.append(s.substring(0, i));
 

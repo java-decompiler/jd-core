@@ -1043,7 +1043,7 @@ public class ByteCodeParser {
                 break;
             case Constant.CONSTANT_String:
                 int stringIndex = ((ConstantString)constant).getStringIndex();
-                stack.push(new StringConstantExpression(lineNumber, StringUtil.escapeString(constants.getConstantString(stringIndex))));
+                stack.push(new StringConstantExpression(lineNumber, constants.getConstantString(stringIndex)));
                 break;
         }
     }
