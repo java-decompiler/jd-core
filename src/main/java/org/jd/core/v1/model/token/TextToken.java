@@ -38,6 +38,7 @@ public class TextToken implements Token {
     public static final TextToken SEMICOLON_SPACE = new TextToken("; ");
     public static final TextToken VARARGS = new TextToken("... ");
     public static final TextToken VERTICALLINE = new TextToken("|");
+    public static final TextToken EXCLAMATION = new TextToken("!");
 
     protected final String text;
 

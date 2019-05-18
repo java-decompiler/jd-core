@@ -558,44 +558,40 @@ public class ExpressionVisitor extends TypeVisitor {
     public void visit(TernaryOperatorExpression expression) {
         tokens.addLineNumberToken(expression.getCondition());
 
-        if (expression.getCondition().getPriority() > 3) {
-            tokens.add(TextToken.LEFTROUNDBRACKET);
-            expression.getCondition().accept(this);
-            tokens.add(TextToken.RIGHTROUNDBRACKET);
-        } else {
-            expression.getCondition().accept(this);
-        }
-
-        if ((expression.getType() == PrimitiveType.TYPE_BOOLEAN) &&
-            (expression.getExpressionTrue().getClass() == BooleanExpression.class) &&
+        if ((expression.getExpressionTrue().getClass() == BooleanExpression.class) &&
             (expression.getExpressionFalse().getClass() == BooleanExpression.class)) {
 
             BooleanExpression be1 = (BooleanExpression)expression.getExpressionTrue();
             BooleanExpression be2 = (BooleanExpression)expression.getExpressionFalse();
 
             if (be1.isTrue() && be2.isFalse()) {
+                printTernaryOperatorExpression(expression.getCondition());
+                return;
+            }
+
+            if (be1.isFalse() && be2.isTrue()) {
+                tokens.add(TextToken.EXCLAMATION);
+                tokens.add(TextToken.LEFTROUNDBRACKET);
+                expression.getCondition().accept(this);
+                tokens.add(TextToken.RIGHTROUNDBRACKET);
                 return;
             }
         }
 
+        printTernaryOperatorExpression(expression.getCondition());
         tokens.add(TextToken.SPACE_QUESTION_SPACE);
-
-        if (expression.getExpressionTrue().getPriority() > 3) {
-            tokens.add(TextToken.LEFTROUNDBRACKET);
-            expression.getExpressionTrue().accept(this);
-            tokens.add(TextToken.RIGHTROUNDBRACKET);
-        } else {
-            expression.getExpressionTrue().accept(this);
-        }
-
+        printTernaryOperatorExpression(expression.getExpressionTrue());
         tokens.add(TextToken.SPACE_COLON_SPACE);
+        printTernaryOperatorExpression(expression.getExpressionFalse());
+    }
 
-        if (expression.getExpressionFalse().getPriority() > 3) {
+    protected void printTernaryOperatorExpression(Expression expression) {
+        if (expression.getPriority() > 3) {
             tokens.add(TextToken.LEFTROUNDBRACKET);
-            expression.getExpressionFalse().accept(this);
+            expression.accept(this);
             tokens.add(TextToken.RIGHTROUNDBRACKET);
         } else {
-            expression.getExpressionFalse().accept(this);
+            expression.accept(this);
         }
     }
 

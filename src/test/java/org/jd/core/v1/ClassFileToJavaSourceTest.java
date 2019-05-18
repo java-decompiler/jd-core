@@ -1051,7 +1051,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(":  15]", "\"1\"")));
         assertTrue(source.matches(PatternMaker.make(":  16]", "\"2\";")));
         assertTrue(source.matches(PatternMaker.make(":  24]", "s = (s == null) ? ((s == null) ? \"1\" : \"2\") : ((s == null) ? \"3\" : \"4\");")));
-        assertTrue(source.matches(PatternMaker.make(":  34]", "return (s != s || time < time) ? false : true;")));
+        assertTrue(source.matches(PatternMaker.make(":  34]", "return !(s != s || time < time);")));
         assertTrue(source.matches(PatternMaker.make(":  40]", "if ((s1 == null) ? (s2 == null) : s1.equals(s2))")));
         assertTrue(source.matches(PatternMaker.make(":  60]", "if ((s1 == null) ? (s2 == null) : s1.equals(s2))")));
         assertTrue(source.matches(PatternMaker.make(":  71]", "if ((s1 == null) ? false : (s1.length() > 0))")));
