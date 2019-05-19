@@ -55,7 +55,12 @@ public class LayoutFragmentProcessor implements Processor {
             UpdateSpacerBetweenMovableBlocksVisitor visitor = new UpdateSpacerBetweenMovableBlocksVisitor();
 
             // Try to release constraints twice for each section
+            int sumOfRates = Integer.MAX_VALUE;
             int max = sections.size() * 2;
+
+            if (max > 20) {
+                max = 20;
+            }
 
             for (int loop=0; loop<max; loop++) {
                 // Update spacers
@@ -84,6 +89,7 @@ public class LayoutFragmentProcessor implements Processor {
                 }
 
                 // Update the ratings
+                int newSumOfRates = 0;
                 Section mostConstrainedSection = sections.get(0);
 
                 for (Section section : sections) {
@@ -92,11 +98,20 @@ public class LayoutFragmentProcessor implements Processor {
                     if (mostConstrainedSection.getRate() < section.getRate()) {
                         mostConstrainedSection = section;
                     }
+
+                    newSumOfRates += section.getRate();
                 }
 
                 //  Move fragments from the most constrained section
                 if (mostConstrainedSection.getRate() == 0) {
                     // No more constrained section -> Quit loop
+                    break;
+                }
+
+                if (sumOfRates > newSumOfRates) {
+                    sumOfRates = newSumOfRates;
+                } else {
+                    // The sum of the constraints does not decrease -> Quit loop
                     break;
                 }
 
