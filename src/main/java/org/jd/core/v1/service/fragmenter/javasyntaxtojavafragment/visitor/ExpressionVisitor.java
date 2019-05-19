@@ -571,9 +571,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
             if (be1.isFalse() && be2.isTrue()) {
                 tokens.add(TextToken.EXCLAMATION);
-                tokens.add(TextToken.LEFTROUNDBRACKET);
-                expression.getCondition().accept(this);
-                tokens.add(TextToken.RIGHTROUNDBRACKET);
+                printTernaryOperatorExpression(expression.getCondition());
                 return;
             }
         }
