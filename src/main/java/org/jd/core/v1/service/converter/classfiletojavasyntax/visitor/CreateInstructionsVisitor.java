@@ -12,6 +12,7 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
@@ -48,6 +49,15 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             for (ClassFileConstructorOrMethodDeclaration method : methods) {
                 if ((method.getFlags() & FLAG_SYNTHETIC) != 0) {
                     method.accept(this);
+                } else if (method.getParameterTypes() != null) {
+                    for (Type type : method.getParameterTypes()) {
+                        if (type.isObject() && ((ObjectType)type).getName() == null) {
+                            // Synthetic type in parameters -> synthetic method
+                            method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
+                            method.accept(this);
+                            break;
+                        }
+                    }
                 }
             }
             for (ClassFileConstructorOrMethodDeclaration method : methods) {

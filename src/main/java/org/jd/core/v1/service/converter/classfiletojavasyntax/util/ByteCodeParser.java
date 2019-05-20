@@ -1295,7 +1295,7 @@ public class ByteCodeParser {
         String name1 = constants.getConstantString(cnat1.getNameIndex());
         String descriptor1 = constants.getConstantString(cnat1.getDescriptorIndex());
 
-        if (name1.startsWith("lambda$") && (typeName.equals(internalTypeName))) {
+        if (typeName.equals(internalTypeName)) {
             for (ClassFileConstructorOrMethodDeclaration methodDeclaration : bodyDeclaration.getMethodDeclarations()) {
                 if (((methodDeclaration.getFlags() & (FLAG_SYNTHETIC|FLAG_PRIVATE)) == (FLAG_SYNTHETIC|FLAG_PRIVATE)) && methodDeclaration.getMethod().getName().equals(name1) && methodDeclaration.getMethod().getDescriptor().equals(descriptor1)) {
                     // Create lambda expression
