@@ -101,7 +101,7 @@ public class ClassFileDeserializer {
         int superClassIndex = reader.readUnsignedShort();
 
         String internalTypeName = constants.getConstantTypeName(thisClassIndex);
-        String superTypeName = constants.getConstantTypeName(superClassIndex);
+        String superTypeName = "java/lang/Object".equals(internalTypeName) ? null : constants.getConstantTypeName(superClassIndex);
         String[] interfaceTypeNames = loadInterfaces(reader, constants);
         Field[] fields = loadFields(reader, constants);
         Method[] methods = loadMethods(reader, constants);

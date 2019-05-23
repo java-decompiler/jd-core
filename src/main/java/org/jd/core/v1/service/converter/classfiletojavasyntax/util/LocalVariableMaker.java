@@ -74,7 +74,10 @@ public class LocalVariableMaker {
         }
 
         objectTypeMaker.make(classFile.getInternalTypeName()).accept(populateBlackListNamesVisitor);
-        objectTypeMaker.make(classFile.getSuperTypeName()).accept(populateBlackListNamesVisitor);
+
+        if (classFile.getSuperTypeName() != null) {
+            objectTypeMaker.make(classFile.getSuperTypeName()).accept(populateBlackListNamesVisitor);
+        }
 
         if (classFile.getInterfaceTypeNames() != null) {
             for (String interfaceTypeName : classFile.getInterfaceTypeNames()) {
