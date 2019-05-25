@@ -16,23 +16,35 @@ import org.jd.core.v1.model.javasyntax.statement.*;
 import java.util.List;
 
 public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
+    // Minimal line number of visited statements
     protected int minLineNumber;
+    // Maximal line number of visited statements
     protected int maxLineNumber;
+    // Estimated number of statements if line numbers are unknown
+    protected int statementCount;
 
     public void init() {
         minLineNumber = -2;
         maxLineNumber = -1;
+        statementCount = 0;
     }
 
     public boolean isSingleLineStatement() {
-        return minLineNumber == maxLineNumber;
+        if (minLineNumber <= 0) {
+            // Line numbers are unknown
+            return statementCount <= 1;
+        } else {
+            return minLineNumber == maxLineNumber;
+        }
     }
 
+    // -- Statement -- //
     @Override
     public void visit(AssertStatement statement) {
         statement.getCondition().accept(this);
         safeAccept(statement.getMessage());
         minLineNumber = statement.getCondition().getLineNumber();
+        statementCount = 1;
     }
 
     @Override
@@ -40,12 +52,14 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         minLineNumber = statement.getCondition().getLineNumber();
         safeAccept(statement.getStatements());
         statement.getCondition().accept(this);
+        statementCount = 2;
     }
 
     @Override
     public void visit(ExpressionStatement statement) {
         statement.getExpression().accept(this);
         minLineNumber = statement.getExpression().getLineNumber();
+        statementCount = 1;
     }
 
     @Override
@@ -53,6 +67,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         statement.getExpression().accept(this);
         safeAccept(statement.getStatements());
         minLineNumber = statement.getExpression().getLineNumber();
+        statementCount = 2;
     }
 
     @Override
@@ -66,7 +81,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         } else if (statement.getInit() != null) {
             statement.getInit().accept(this);
         } else {
-            maxLineNumber = Integer.MAX_VALUE;
+            maxLineNumber = 0;
         }
 
         if (statement.getCondition() != null) {
@@ -76,6 +91,8 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         } else {
             minLineNumber = maxLineNumber;
         }
+
+        statementCount = 2;
     }
 
     @Override
@@ -83,6 +100,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         statement.getCondition().accept(this);
         safeAccept(statement.getStatements());
         minLineNumber = statement.getCondition().getLineNumber();
+        statementCount = 2;
     }
 
     @Override
@@ -90,28 +108,33 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         statement.getCondition().accept(this);
         statement.getElseStatements().accept(this);
         minLineNumber = statement.getCondition().getLineNumber();
+        statementCount = 2;
     }
 
     @Override
     public void visit(LabelStatement statement) {
-        minLineNumber = maxLineNumber = Integer.MAX_VALUE;
+        minLineNumber = maxLineNumber = 0;
         safeAccept(statement.getStatement());
+        statementCount = 1;
     }
 
     @Override
     public void visit(LambdaExpressionStatement statement) {
         statement.getExpression().accept(this);
         minLineNumber = statement.getExpression().getLineNumber();
+        statementCount = 1;
     }
 
     @Override
     public void visit(LocalVariableDeclarationStatement statement) {
         visit((LocalVariableDeclaration) statement);
+        statementCount = 1;
     }
 
     @Override public void visit(ReturnExpressionStatement statement) {
         statement.getExpression().accept(this);
         minLineNumber = statement.getExpression().getLineNumber();
+        statementCount = 1;
     }
 
     @Override
@@ -119,6 +142,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         statement.getCondition().accept(this);
         acceptListStatement(statement.getBlocks());
         minLineNumber = statement.getCondition().getLineNumber();
+        statementCount = 2;
     }
 
     @Override
@@ -126,12 +150,14 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         statement.getMonitor().accept(this);
         safeAccept(statement.getStatements());
         minLineNumber = statement.getMonitor().getLineNumber();
+        statementCount = 2;
     }
 
     @Override
     public void visit(ThrowStatement statement) {
         statement.getExpression().accept(this);
         minLineNumber = statement.getExpression().getLineNumber();
+        statementCount = 1;
     }
 
     @Override
@@ -143,6 +169,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         safeAcceptListStatement(statement.getCatchClauses());
         safeAccept(statement.getFinallyStatements());
         minLineNumber = min;
+        statementCount = 2;
     }
 
     @Override
@@ -152,7 +179,8 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(TypeDeclarationStatement statement) {
-        minLineNumber = maxLineNumber = Integer.MAX_VALUE;
+        minLineNumber = maxLineNumber = 0;
+        statementCount = 1;
     }
 
     @Override
@@ -160,6 +188,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         statement.getCondition().accept(this);
         safeAccept(statement.getStatements());
         minLineNumber = statement.getCondition().getLineNumber();
+        statementCount = 2;
     }
 
     protected void acceptListStatement(List<? extends Statement> list) {
@@ -167,7 +196,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
 
         switch (size) {
             case 0:
-                minLineNumber = maxLineNumber = Integer.MAX_VALUE;
+                minLineNumber = maxLineNumber = 0;
                 break;
             case 1:
                 list.get(0).accept(this);
@@ -180,18 +209,20 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
                 list.get(size - 1).accept(this);
 
                 minLineNumber = min;
+                statementCount = size;
                 break;
         }
     }
 
     protected void safeAcceptListStatement(List<? extends Statement> list) {
         if (list == null) {
-            minLineNumber = maxLineNumber = Integer.MAX_VALUE;
+            minLineNumber = maxLineNumber = 0;
         } else {
             acceptListStatement(list);
         }
     }
 
+    // -- Expression -- //
     @Override
     public void visit(ConstructorInvocationExpression expression) {
         BaseExpression parameters = expression.getParameters();
@@ -249,7 +280,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
                 parameters.accept(this);
             }
         } else {
-            maxLineNumber = Integer.MAX_VALUE;
+            maxLineNumber = expression.getLineNumber() + 1;
         }
     }
 
@@ -262,7 +293,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         int size = list.size();
 
         if (size == 0) {
-            maxLineNumber = Integer.MAX_VALUE;
+            maxLineNumber = 0;
         } else {
             list.get(size - 1).accept(this);
         }
