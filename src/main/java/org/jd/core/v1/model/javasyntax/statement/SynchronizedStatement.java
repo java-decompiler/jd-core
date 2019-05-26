@@ -22,6 +22,10 @@ public class SynchronizedStatement implements Statement {
         return monitor;
     }
 
+    public void setMonitor(Expression monitor) {
+        this.monitor = monitor;
+    }
+
     public BaseStatement getStatements() {
         return statements;
     }

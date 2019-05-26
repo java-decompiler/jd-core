@@ -23,6 +23,10 @@ public class NewInnerExpression extends NewExpression {
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     @Override
     public int getPriority() {
         return 3;

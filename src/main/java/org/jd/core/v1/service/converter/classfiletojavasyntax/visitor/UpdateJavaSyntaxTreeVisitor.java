@@ -16,13 +16,14 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignaturePars
 
 
 public class UpdateJavaSyntaxTreeVisitor extends AbstractJavaSyntaxVisitor {
-    protected static AggregateFieldsVisitor aggregateFieldsVisitor = new AggregateFieldsVisitor();
-    protected static SortMembersVisitor sortMembersVisitor = new SortMembersVisitor();
+    protected static final AggregateFieldsVisitor AGGREGATE_FIELDS_VISITOR = new AggregateFieldsVisitor();
+    protected static final SortMembersVisitor SORT_MEMBERS_VISITOR = new SortMembersVisitor();
 
     protected InitInnerClassVisitor initInnerClassVisitor = new InitInnerClassVisitor();
     protected InitStaticFieldVisitor initStaticFieldVisitor = new InitStaticFieldVisitor();
     protected InitInstanceFieldVisitor initInstanceFieldVisitor = new InitInstanceFieldVisitor();
     protected InitEnumVisitor initEnumVisitor = new InitEnumVisitor();
+    protected UpdateBridgeMethodVisitor replaceBridgeMethodVisitor = new UpdateBridgeMethodVisitor();
 
     protected CreateInstructionsVisitor createInstructionsVisitor;
     protected RemoveDefaultConstructorVisitor removeDefaultConstructorVisitor;
@@ -60,8 +61,13 @@ public class UpdateJavaSyntaxTreeVisitor extends AbstractJavaSyntaxVisitor {
         initStaticFieldVisitor.visit(declaration);
         initInstanceFieldVisitor.visit(declaration);
         removeDefaultConstructorVisitor.visit(declaration);
-        aggregateFieldsVisitor.visit(declaration);
-        sortMembersVisitor.visit(declaration);
+        AGGREGATE_FIELDS_VISITOR.visit(declaration);
+        SORT_MEMBERS_VISITOR.visit(declaration);
+
+        if ((bodyDeclaration.getOuterBodyDeclaration() == null) && (bodyDeclaration.getInnerTypeDeclarations() != null) && replaceBridgeMethodVisitor.init(bodyDeclaration)) {
+            // Replace bridge method invocation
+            replaceBridgeMethodVisitor.visit(bodyDeclaration);
+        }
     }
 
     @Override

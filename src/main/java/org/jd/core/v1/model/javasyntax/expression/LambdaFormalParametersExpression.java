@@ -28,6 +28,10 @@ public class LambdaFormalParametersExpression extends AbstractLambdaExpression {
         return parameters;
     }
 
+    public void setParameters(BaseFormalParameter parameters) {
+        this.parameters = parameters;
+    }
+
     @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);

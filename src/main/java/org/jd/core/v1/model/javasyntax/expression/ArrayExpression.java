@@ -29,6 +29,10 @@ public class ArrayExpression extends AbstractLineNumberTypeExpression {
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     public Expression getIndex() {
         return index;
     }

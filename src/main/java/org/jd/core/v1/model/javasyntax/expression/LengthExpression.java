@@ -31,6 +31,10 @@ public class LengthExpression extends AbstractLineNumberExpression {
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);

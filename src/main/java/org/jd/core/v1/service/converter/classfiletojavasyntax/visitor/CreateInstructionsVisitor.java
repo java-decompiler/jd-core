@@ -47,8 +47,14 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
 
         if (methods != null) {
             for (ClassFileConstructorOrMethodDeclaration method : methods) {
-                if ((method.getFlags() & FLAG_SYNTHETIC) != 0) {
+                if ((method.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) != 0) {
                     method.accept(this);
+                } else if ((method.getFlags() & (FLAG_STATIC|FLAG_BRIDGE)) == FLAG_STATIC) {
+                    if (method.getMethod().getName().startsWith("access$")) {
+                        // Accessor -> bridge method
+                        method.setFlags(method.getFlags() | FLAG_BRIDGE);
+                        method.accept(this);
+                    }
                 } else if (method.getParameterTypes() != null) {
                     for (Type type : method.getParameterTypes()) {
                         if (type.isObject() && ((ObjectType)type).getName() == null) {
@@ -60,8 +66,9 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                     }
                 }
             }
+
             for (ClassFileConstructorOrMethodDeclaration method : methods) {
-                if ((method.getFlags() & FLAG_SYNTHETIC) == 0) {
+                if ((method.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) == 0) {
                     method.accept(this);
                 }
             }

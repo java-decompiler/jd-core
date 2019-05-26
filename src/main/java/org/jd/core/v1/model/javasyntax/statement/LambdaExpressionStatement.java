@@ -20,6 +20,10 @@ public class LambdaExpressionStatement implements Statement {
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     @Override
     public void accept(StatementVisitor visitor) {
         visitor.visit(this);

@@ -32,6 +32,10 @@ public class PreOperatorExpression extends AbstractLineNumberExpression {
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     @Override
     public Type getType() {
         return expression.getType();

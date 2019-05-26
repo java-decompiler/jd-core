@@ -30,6 +30,10 @@ public class InstanceOfExpression extends AbstractLineNumberExpression {
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     public Type getInstanceOfType() {
         return instanceOfType;
     }

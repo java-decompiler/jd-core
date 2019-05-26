@@ -111,6 +111,10 @@ public class EnumDeclaration extends TypeDeclaration {
             return arguments;
         }
 
+        public void setArguments(BaseExpression arguments) {
+            this.arguments = arguments;
+        }
+
         public BodyDeclaration getBodyDeclaration() {
             return bodyDeclaration;
         }

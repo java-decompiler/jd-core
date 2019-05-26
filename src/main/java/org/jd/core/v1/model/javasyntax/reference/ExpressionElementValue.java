@@ -20,6 +20,10 @@ public class ExpressionElementValue implements ElementValue {
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     @Override
     public void accept(ReferenceVisitor visitor) {
         visitor.visit(this);

@@ -60,6 +60,10 @@ public class ForStatement implements Statement {
         return update;
     }
 
+    public void setUpdate(BaseExpression update) {
+        this.update = update;
+    }
+
     public BaseStatement getStatements() {
         return statements;
     }

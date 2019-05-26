@@ -35,6 +35,10 @@ public class ForEachStatement implements Statement {
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     public BaseStatement getStatements() {
         return statements;
     }

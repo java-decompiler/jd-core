@@ -35,6 +35,10 @@ public class MethodReferenceExpression extends AbstractLineNumberTypeExpression 
         return expression;
     }
 
+    public void setExpression(Expression expression) {
+        this.expression = expression;
+    }
+
     public String getInternalTypeName() {
         return internalTypeName;
     }
