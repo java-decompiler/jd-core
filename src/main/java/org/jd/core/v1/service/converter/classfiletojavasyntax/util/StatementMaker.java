@@ -107,7 +107,7 @@ public class StatementMaker {
 
         localVariableMaker.popFrame();
 
-        // Update integer constant type to 'byte', 'char', 'short', 'int'
+        // Update integer constant type to 'byte', 'char', 'short' or 'int'
         statements.accept(updateIntegerConstantTypeVisitor);
 
         // Change ++i; with i++;

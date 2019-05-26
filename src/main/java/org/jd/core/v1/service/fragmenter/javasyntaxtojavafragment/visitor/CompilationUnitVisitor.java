@@ -24,6 +24,8 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragm
 import java.util.Iterator;
 import java.util.List;
 
+import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
+
 public class CompilationUnitVisitor extends StatementVisitor {
     public static final KeywordToken ABSTRACT = new KeywordToken("abstract");
     public static final KeywordToken ANNOTATION = new KeywordToken("@interface");
@@ -54,10 +56,10 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(AnnotationDeclaration declaration) {
-        if ((declaration.getFlags() & (Declaration.FLAG_SYNTHETIC | Declaration.FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
-            buildFragmentsForTypeDeclaration(declaration, declaration.getFlags() & ~Declaration.FLAG_ABSTRACT, ANNOTATION);
+            buildFragmentsForTypeDeclaration(declaration, declaration.getFlags() & ~FLAG_ABSTRACT, ANNOTATION);
 
             fragments.addTokensFragment(tokens);
 
@@ -207,7 +209,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(ClassDeclaration declaration) {
-        if ((declaration.getFlags() & (Declaration.FLAG_SYNTHETIC | Declaration.FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags(), CLASS);
@@ -318,7 +320,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        if ((declaration.getFlags() & (Declaration.FLAG_SYNTHETIC|Declaration.FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK);
 
             tokens = new Tokens();
@@ -463,7 +465,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(EnumDeclaration declaration) {
-        if ((declaration.getFlags() & (Declaration.FLAG_SYNTHETIC | Declaration.FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForTypeDeclaration(declaration, declaration.getFlags(), ENUM);
@@ -605,7 +607,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(FieldDeclaration declaration) {
-        if ((declaration.getFlags() & (Declaration.FLAG_SYNTHETIC | Declaration.FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_FIELD_BLOCK);
 
             tokens = new Tokens();
@@ -755,10 +757,10 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(InterfaceDeclaration declaration) {
-        if ((declaration.getFlags() & (Declaration.FLAG_SYNTHETIC | Declaration.FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
-            buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags() & ~Declaration.FLAG_ABSTRACT, INTERFACE);
+            buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags() & ~FLAG_ABSTRACT, INTERFACE);
 
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
 
@@ -882,7 +884,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(MethodDeclaration declaration) {
-        if ((declaration.getFlags() & (Declaration.FLAG_SYNTHETIC | Declaration.FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK);
 
             tokens = new Tokens();
@@ -1083,41 +1085,41 @@ public class CompilationUnitVisitor extends StatementVisitor {
     }
 
     protected void buildTokensForAccessFlags(int flags) {
-        if ((flags & Declaration.FLAG_PUBLIC) != 0) {
+        if ((flags & FLAG_PUBLIC) != 0) {
             tokens.add(PUBLIC);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & Declaration.FLAG_PRIVATE) != 0) {
+        if ((flags & FLAG_PRIVATE) != 0) {
             tokens.add(PRIVATE);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & Declaration.FLAG_PROTECTED) != 0) {
+        if ((flags & FLAG_PROTECTED) != 0) {
             tokens.add(PROTECTED);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & Declaration.FLAG_STATIC) != 0) {
+        if ((flags & FLAG_STATIC) != 0) {
             tokens.add(STATIC);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & Declaration.FLAG_FINAL) != 0) {
+        if ((flags & FLAG_FINAL) != 0) {
             tokens.add(FINAL);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & Declaration.FLAG_NATIVE) != 0) {
+        if ((flags & FLAG_NATIVE) != 0) {
             tokens.add(NATIVE);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & Declaration.FLAG_ABSTRACT) != 0) {
+        if ((flags & FLAG_ABSTRACT) != 0) {
             tokens.add(ABSTRACT);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & Declaration.FLAG_BRIDGE) != 0) {
+        if ((flags & FLAG_BRIDGE) != 0) {
             tokens.add(StartMarkerToken.COMMENT);
             tokens.add(COMMENT_BRIDGE);
             tokens.add(EndMarkerToken.COMMENT);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & Declaration.FLAG_SYNTHETIC) != 0) {
+        if ((flags & FLAG_SYNTHETIC) != 0) {
             tokens.add(StartMarkerToken.COMMENT);
             tokens.add(COMMENT_SYNTHETIC);
             tokens.add(EndMarkerToken.COMMENT);

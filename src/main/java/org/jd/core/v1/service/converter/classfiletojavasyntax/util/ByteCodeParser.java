@@ -760,7 +760,7 @@ public class ByteCodeParser {
                         }
                         if (TYPE_VOID.equals(returnedType)) {
                             if ((opcode == 183) && // INVOKESPECIAL
-                                    "<init>".equals(name)) {
+                                "<init>".equals(name)) {
 
                                 if (expression1.getClass() == NewExpression.class) {
                                     ((NewExpression) expression1).setParameters(parameters);
@@ -774,7 +774,7 @@ public class ByteCodeParser {
                             }
                         } else {
                             if ((opcode == 182) && // INVOKEVIRTUAL
-                                    "toString".equals(name) && "()Ljava/lang/String;".equals(descriptor)) {
+                                "toString".equals(name) && "()Ljava/lang/String;".equals(descriptor)) {
                                 typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                                 if ("java/lang/StringBuilder".equals(typeName) || "java/lang/StringBuffer".equals(typeName)) {
                                     stack.push(CreateConcatStringUtil.create(expression1, lineNumber, typeName));
