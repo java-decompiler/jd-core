@@ -2,16 +2,16 @@
 
 JD-Core is a JAVA decompiler written in JAVA.
 
-- Java Decompiler projects home page:
+- Java Decompiler project home page:
 [http://java-decompiler.github.io](http://java-decompiler.github.io)
-- JD-GUI source code:
+- JD-Core source code:
 [https://github.com/java-decompiler/jd-core](https://github.com/java-decompiler/jd-core)
 - Maven repository:
 [https://raw.github.com/java-decompiler/mvn-repo/master](https://raw.github.com/java-decompiler/mvn-repo/master)
 
 ## Description
 JD-Core is a standalone JAVA library containing the JAVA decompiler of
-"Java Decompiler project". It support Java 1.1.8 to Java 10.0,
+"Java Decompiler project". It support Java 1.1.8 to Java 12.0,
 including Lambda expressions, method references and default methods.
 JD-Core is the engine of JD-GUI.
 
