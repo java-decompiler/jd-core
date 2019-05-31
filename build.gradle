@@ -6,28 +6,28 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version='1.0.2'
+version='1.0.3'
 
 tasks.withType(JavaCompile) {
-	sourceCompatibility = targetCompatibility = '1.8'
-	options.compilerArgs << '-Xlint:deprecation'
-	options.compilerArgs << '-Xlint:unchecked' 
-	options.encoding = 'UTF-8'	
+    sourceCompatibility = targetCompatibility = '1.8'
+    options.compilerArgs << '-Xlint:deprecation'
+    options.compilerArgs << '-Xlint:unchecked' 
+    options.encoding = 'UTF-8'    
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 jar {
-	manifest {
-		attributes 'JD-Core-Version': version
-	}
+    manifest {
+        attributes 'JD-Core-Version': version
+    }
 }
 
 // 'cleanIdea' task extension //
 cleanIdea.doFirst {
-  delete project.name + '.iws'
-  delete 'out'
-  followSymlinks = true
+    delete project.name + '.iws'
+    delete 'out'
+    followSymlinks = true
 }
