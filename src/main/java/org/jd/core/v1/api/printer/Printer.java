@@ -9,7 +9,7 @@ package org.jd.core.v1.api.printer;
 
 
 public interface Printer {
-	int UNKNOWN_LINE_NUMBER = 0;
+    int UNKNOWN_LINE_NUMBER = 0;
 
     // Declaration & reference flags
     int TYPE_FLAG = 1;
@@ -27,20 +27,20 @@ public interface Printer {
     void end();
 
     void printText(String text);
-	void printNumericConstant(String constant);
-	void printStringConstant(String constant, String ownerInternalName);
-	void printKeyword(String keyword);
+    void printNumericConstant(String constant);
+    void printStringConstant(String constant, String ownerInternalName);
+    void printKeyword(String keyword);
 
     void printDeclaration(int flags, String internalTypeName, String name, String descriptor);
-	void printReference(int flags, String internalTypeName, String name, String descriptor, String ownerInternalName);
+    void printReference(int flags, String internalTypeName, String name, String descriptor, String ownerInternalName);
 
-	void indent();
-	void unindent();
-	
-	void startLine(int lineNumber);
-	void endLine();
-	void extraLine(int count);
+    void indent();
+    void unindent();
 
-	void startMarker(int type);
-	void endMarker(int type);
+    void startLine(int lineNumber);
+    void endLine();
+    void extraLine(int count);
+
+    void startMarker(int type);
+    void endMarker(int type);
 }

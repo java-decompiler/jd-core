@@ -35,12 +35,22 @@ public class DefaultList<E> extends ArrayList<E> {
     }
 
     public DefaultList(E element, E... elements) {
-        super(elements.length + 1);
+        ensureCapacity(elements.length + 1);
 
         add(element);
 
         for (E e : elements) {
             add(e);
+        }
+    }
+
+    public DefaultList(E[] elements) {
+        if ((elements != null) && (elements.length > 0)) {
+            ensureCapacity(elements.length);
+
+            for (E e : elements) {
+                add(e);
+            }
         }
     }
 

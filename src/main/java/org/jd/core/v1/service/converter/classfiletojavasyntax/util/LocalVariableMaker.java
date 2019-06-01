@@ -94,7 +94,7 @@ public class LocalVariableMaker {
         // Initialize local variables from 'LocalVariableTable' and 'LocalVariableTypeTable' attributes
         initLocalVariablesFromAttributes(method);
 
-        // Initialize local variables from access flag & signature
+        // Initialize local variables from access flags & signature
         int firstVariableIndex = 0;
 
         if ((method.getAccessFlags() & FLAG_STATIC) == 0) {
@@ -358,7 +358,7 @@ public class LocalVariableMaker {
                 Type valueType = value.getType();
 
                 if (lv.isAssignable(valueType)) {
-                    // Reduce lastType flag
+                    // Reduce lastType flags
                     lv.leftReduce(valueType);
                 } else {
                     // Not assignable -> Create a new local variable

@@ -101,7 +101,7 @@ public class ClassFileDeserializer {
         int superClassIndex = reader.readUnsignedShort();
 
         String internalTypeName = constants.getConstantTypeName(thisClassIndex);
-        String superTypeName = "java/lang/Object".equals(internalTypeName) ? null : constants.getConstantTypeName(superClassIndex);
+        String superTypeName = (superClassIndex == 0) ? null : constants.getConstantTypeName(superClassIndex);
         String[] interfaceTypeNames = loadInterfaces(reader, constants);
         Field[] fields = loadFields(reader, constants);
         Method[] methods = loadMethods(reader, constants);
@@ -137,13 +137,13 @@ public class ClassFileDeserializer {
                 case 6:
                     constants[i++] = new ConstantDouble(reader.readDouble());
                     break;
-                case 7:
+                case 7: case 19: case 20:
                     constants[i] = new ConstantClass(reader.readUnsignedShort());
                     break;
                 case 8:
                     constants[i] = new ConstantString(reader.readUnsignedShort());
                     break;
-                case 9: case 10: case 11: case 18:
+                case 9: case 10: case 11: case 17: case 18:
                     constants[i] = new ConstantMemberRef(reader.readUnsignedShort(), reader.readUnsignedShort());
                     break;
                 case 12:
@@ -277,6 +277,26 @@ public class ClassFileDeserializer {
                     case "LineNumberTable":
                         attributes.put(name, new AttributeLineNumberTable(loadLineNumbers(reader)));
                         break;
+                    case "MethodParameters":
+                        attributes.put(name, new AttributeMethodParameters(loadParameters(reader, constants)));
+                        break;
+                    case "Module":
+                        attributes.put(name, new AttributeModule(
+                                constants.getConstantTypeName(reader.readUnsignedShort()),
+                                reader.readUnsignedShort(),
+                                constants.getConstantString(reader.readUnsignedShort()),
+                                loadModuleInfos(reader, constants),
+                                loadPackageInfos(reader, constants),
+                                loadPackageInfos(reader, constants),
+                                loadConstantClassNames(reader, constants),
+                                loadServiceInfos(reader, constants)));
+                        break;
+                    case "ModulePackages":
+                        attributes.put(name, new AttributeModulePackages(loadConstantClassNames(reader, constants)));
+                        break;
+                    case "ModuleMainClass":
+                        attributes.put(name, new AttributeModuleMainClass(constants.getConstant(reader.readUnsignedShort())));
+                        break;
                     case "RuntimeInvisibleAnnotations":
                     case "RuntimeVisibleAnnotations":
                         Annotation[] annotations = loadAnnotations(reader, constants);
@@ -290,16 +310,12 @@ public class ClassFileDeserializer {
                     case "Signature":
                         if (attributeLength != 2)
                             throw new ClassFileFormatException("Invalid attribute length");
-                        int signatureIndex = reader.readUnsignedShort();
-                        String signature = constants.getConstantString(signatureIndex);
-                        attributes.put(name, new AttributeSignature(signature));
+                        attributes.put(name, new AttributeSignature(constants.getConstantString(reader.readUnsignedShort())));
                         break;
                     case "SourceFile":
                         if (attributeLength != 2)
                             throw new ClassFileFormatException("Invalid attribute length");
-                        int sourceFileIndex = reader.readUnsignedShort();
-                        String sourceFile = constants.getConstantString(sourceFileIndex);
-                        attributes.put(name, new AttributeSourceFile(sourceFile));
+                        attributes.put(name, new AttributeSourceFile(constants.getConstantString(reader.readUnsignedShort())));
                         break;
                     case "Synthetic":
                         if (attributeLength != 0)
@@ -537,6 +553,94 @@ public class ClassFileDeserializer {
         }
 
         return lineNumbers;
+    }
+
+    protected MethodParameter[] loadParameters(ClassFileReader reader, ConstantPool constants) {
+        int count = reader.readUnsignedShort();
+        if (count == 0)
+            return null;
+
+        MethodParameter[] parameters = new MethodParameter[count];
+
+        for (int i=0; i<count; i++) {
+            int nameIndex = reader.readUnsignedShort();
+
+            String name = constants.getConstantString(nameIndex);
+
+            parameters[i] = new MethodParameter(name, reader.readUnsignedShort());
+        }
+
+        return parameters;
+    }
+
+    protected ModuleInfo[] loadModuleInfos(ClassFileReader reader, ConstantPool constants) {
+        int count = reader.readUnsignedShort();
+        if (count == 0)
+            return null;
+
+        ModuleInfo[] moduleInfos = new ModuleInfo[count];
+
+        for (int i=0; i<count; i++) {
+            int moduleInfoIndex = reader.readUnsignedShort();
+            int moduleFlag = reader.readUnsignedShort();
+            int moduleVersionIndex = reader.readUnsignedShort();
+
+            String moduleInfoName = constants.getConstantTypeName(moduleInfoIndex);
+            String moduleVersion = (moduleVersionIndex==0) ? null : constants.getConstantString(moduleVersionIndex);
+
+            moduleInfos[i] = new ModuleInfo(moduleInfoName, moduleFlag, moduleVersion);
+        }
+
+        return moduleInfos;
+    }
+
+    protected PackageInfo[] loadPackageInfos(ClassFileReader reader, ConstantPool constants) {
+        int count = reader.readUnsignedShort();
+        if (count == 0)
+            return null;
+
+        PackageInfo[] packageInfos = new PackageInfo[count];
+
+        for (int i=0; i<count; i++) {
+            int packageInfoIndex = reader.readUnsignedShort();
+            int packageFlag = reader.readUnsignedShort();
+
+            String packageInfoName = constants.getConstantTypeName(packageInfoIndex);
+
+            packageInfos[i] = new PackageInfo(packageInfoName, packageFlag, loadConstantClassNames(reader, constants));
+        }
+
+        return packageInfos;
+    }
+
+    protected String[] loadConstantClassNames(ClassFileReader reader, ConstantPool constants) {
+        int count = reader.readUnsignedShort();
+        if (count == 0)
+            return null;
+
+        String[] names = new String[count];
+
+        for (int i=0; i<count; i++) {
+            names[i] = constants.getConstantTypeName(reader.readUnsignedShort());
+        }
+
+        return names;
+    }
+
+    protected ServiceInfo[] loadServiceInfos(ClassFileReader reader, ConstantPool constants) {
+        int count = reader.readUnsignedShort();
+        if (count == 0)
+            return null;
+
+        ServiceInfo[] services = new ServiceInfo[count];
+
+        for (int i=0; i<count; i++) {
+            services[i] = new ServiceInfo(
+                    constants.getConstantTypeName(reader.readUnsignedShort()),
+                    loadConstantClassNames(reader, constants));
+        }
+
+        return services;
     }
 
     protected Annotation[] loadAnnotations(ClassFileReader reader, ConstantPool constants) {

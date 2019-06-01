@@ -862,7 +862,7 @@ public class StatementMaker {
 
     @SuppressWarnings("unchecked")
     protected Expression createObjectTypeReferenceDotClassExpression(int lineNumber, String fieldName, MethodInvocationExpression mie) {
-        // Add SYNTHETIC flag to field
+        // Add SYNTHETIC flags to field
         memberVisitor.init(fieldName);
 
         for (ClassFileFieldDeclaration field : bodyDeclaration.getFieldDeclarations()) {
@@ -873,7 +873,7 @@ public class StatementMaker {
             }
         }
 
-        // Add SYNTHETIC flag to method named 'class$'
+        // Add SYNTHETIC flags to method named 'class$'
         memberVisitor.init("class$");
 
         for (ClassFileConstructorOrMethodDeclaration member : bodyDeclaration.getMethodDeclarations()) {

@@ -16,6 +16,7 @@ import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.ModuleDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
@@ -54,6 +55,8 @@ public class ConvertClassFileProcessor implements Processor {
             typeDeclaration = convertEnumDeclaration(signatureParser, annotationConverter, classFile, null);
         } else if ((flags & Constants.ACC_ANNOTATION) != 0) {
             typeDeclaration = convertAnnotationDeclaration(signatureParser, annotationConverter, classFile, null);
+        } else if ((flags & Constants.ACC_MODULE) != 0) {
+            typeDeclaration = convertModuleDeclaration(classFile);
         } else if ((flags & Constants.ACC_INTERFACE) != 0) {
             typeDeclaration = convertInterfaceDeclaration(signatureParser, annotationConverter, classFile, null);
         } else {
@@ -269,6 +272,65 @@ public class ConvertClassFileProcessor implements Processor {
             }
 
             return new ExpressionVariableInitializer(expression);
+        }
+    }
+
+    protected ModuleDeclaration convertModuleDeclaration(ClassFile classFile) {
+        AttributeModule attributeModule = classFile.getAttribute("Module");
+        List<ModuleDeclaration.ModuleInfo> requires = convertModuleDeclarationModuleInfo(attributeModule.getRequires());
+        List<ModuleDeclaration.PackageInfo> exports = convertModuleDeclarationPackageInfo(attributeModule.getExports());
+        List<ModuleDeclaration.PackageInfo> opens = convertModuleDeclarationPackageInfo(attributeModule.getOpens());
+        DefaultList<String> uses = new DefaultList<>(attributeModule.getUses());
+        List<ModuleDeclaration.ServiceInfo> provides = convertModuleDeclarationServiceInfo(attributeModule.getProvides());
+
+        return new ModuleDeclaration(
+                attributeModule.getFlags(), attributeModule.getName(), attributeModule.getName(),
+                attributeModule.getVersion(), requires, exports, opens, uses, provides);
+    }
+
+    protected List<ModuleDeclaration.ModuleInfo> convertModuleDeclarationModuleInfo(ModuleInfo[] moduleInfos) {
+        if ((moduleInfos == null) || (moduleInfos.length == 0)) {
+            return null;
+        } else {
+            DefaultList<ModuleDeclaration.ModuleInfo> list = new DefaultList<>(moduleInfos.length);
+
+            for (ModuleInfo moduleInfo : moduleInfos) {
+                list.add(new ModuleDeclaration.ModuleInfo(moduleInfo.getName(), moduleInfo.getFlags(), moduleInfo.getVersion()));
+            }
+
+            return list;
+        }
+    }
+
+    protected List<ModuleDeclaration.PackageInfo> convertModuleDeclarationPackageInfo(PackageInfo[] packageInfos) {
+        if ((packageInfos == null) || (packageInfos.length == 0)) {
+            return null;
+        } else {
+            DefaultList<ModuleDeclaration.PackageInfo> list = new DefaultList<>(packageInfos.length);
+
+            for (PackageInfo packageInfo : packageInfos) {
+                DefaultList<String> moduleInfoNames = (packageInfo.getModuleInfoNames() == null) ?
+                        null : new DefaultList<String>(packageInfo.getModuleInfoNames());
+                list.add(new ModuleDeclaration.PackageInfo(packageInfo.getInternalName(), packageInfo.getFlags(), moduleInfoNames));
+            }
+
+            return list;
+        }
+    }
+
+    protected List<ModuleDeclaration.ServiceInfo> convertModuleDeclarationServiceInfo(ServiceInfo[] serviceInfos) {
+        if ((serviceInfos == null) || (serviceInfos.length == 0)) {
+            return null;
+        } else {
+            DefaultList<ModuleDeclaration.ServiceInfo> list = new DefaultList<>(serviceInfos.length);
+
+            for (ServiceInfo serviceInfo : serviceInfos) {
+                DefaultList<String> implementationTypeNames = (serviceInfo.getImplementationTypeNames() == null) ?
+                        null : new DefaultList<String>(serviceInfo.getImplementationTypeNames());
+                list.add(new ModuleDeclaration.ServiceInfo(serviceInfo.getInterfaceTypeName(), implementationTypeNames));
+            }
+
+            return list;
         }
     }
 }

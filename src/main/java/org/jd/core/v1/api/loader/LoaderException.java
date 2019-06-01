@@ -9,10 +9,10 @@ package org.jd.core.v1.api.loader;
 
 
 public class LoaderException extends Exception {
-	private static final long serialVersionUID = 9506606333927794L;
-	public LoaderException() {}
-	
-	public LoaderException(String msg) { super(msg); }
+    private static final long serialVersionUID = 9506606333927794L;
+    public LoaderException() {}
 
-	public LoaderException(Throwable cause) { super(cause); }
+    public LoaderException(String msg) { super(msg); }
+
+    public LoaderException(Throwable cause) { super(cause); }
 }

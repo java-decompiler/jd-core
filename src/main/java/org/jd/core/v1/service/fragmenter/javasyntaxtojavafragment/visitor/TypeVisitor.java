@@ -28,13 +28,23 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     public static final KeywordToken BYTE = new KeywordToken("byte");
     public static final KeywordToken CHAR = new KeywordToken("char");
     public static final KeywordToken DOUBLE = new KeywordToken("double");
+    public static final KeywordToken EXPORTS = new KeywordToken("exports");
     public static final KeywordToken EXTENDS = new KeywordToken("extends");
     public static final KeywordToken FLOAT = new KeywordToken("float");
     public static final KeywordToken INT = new KeywordToken("int");
     public static final KeywordToken LONG = new KeywordToken("long");
+    public static final KeywordToken MODULE = new KeywordToken("module");
+    public static final KeywordToken OPEN = new KeywordToken("open");
+    public static final KeywordToken OPENS = new KeywordToken("opens");
+    public static final KeywordToken PROVIDES = new KeywordToken("provides");
+    public static final KeywordToken REQUIRES = new KeywordToken("requires");
     public static final KeywordToken SHORT = new KeywordToken("short");
     public static final KeywordToken SUPER = new KeywordToken("super");
+    public static final KeywordToken TO = new KeywordToken("to");
+    public static final KeywordToken TRANSITIVE = new KeywordToken("transitive");
+    public static final KeywordToken USES = new KeywordToken("uses");
     public static final KeywordToken VOID = new KeywordToken("void");
+    public static final KeywordToken WITH = new KeywordToken("with");
 
     public static final int UNKNOWN_LINE_NUMBER = Printer.UNKNOWN_LINE_NUMBER;
 

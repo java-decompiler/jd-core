@@ -407,13 +407,13 @@ public class ObjectTypeMaker {
                 case 7:
                     constants[i] = new ConstantClass(reader.readUnsignedShort());
                     break;
-                case 8: case 16:
+                case 8: case 16: case 19: case 20:
                     reader.skip(2);
                     break;
                 case 15:
                     reader.skip(3);
                     break;
-                case 3: case 4: case 9: case 10: case 11: case 12: case 18:
+                case 3: case 4: case 9: case 10: case 11: case 12: case 17: case 18:
                     reader.skip(4);
                     break;
                 case 5: case 6:

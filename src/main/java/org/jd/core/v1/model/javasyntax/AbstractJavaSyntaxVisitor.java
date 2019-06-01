@@ -165,6 +165,9 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
     }
 
     @Override
+    public void visit(ModuleDeclaration declarations) {}
+
+    @Override
     @SuppressWarnings("unchecked")
     public void visit(TypeDeclarations list) {
         acceptListDeclaration(list);

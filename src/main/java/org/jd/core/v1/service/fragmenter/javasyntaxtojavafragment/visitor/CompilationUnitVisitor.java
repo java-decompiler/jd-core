@@ -812,6 +812,184 @@ public class CompilationUnitVisitor extends StatementVisitor {
     }
 
     @Override
+    public void visit(ModuleDeclaration declaration) {
+        boolean needNewLine = false;
+
+        fragments.clear();
+        fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
+
+        tokens = new Tokens();
+
+        if ((declaration.getFlags() & FLAG_OPEN) != 0) {
+            tokens.add(OPEN);
+            tokens.add(TextToken.SPACE);
+        }
+
+        tokens.add(MODULE);
+        tokens.add(TextToken.SPACE);
+        tokens.add(new TextToken(declaration.getName()));
+        fragments.addTokensFragment(tokens);
+
+        StartBodyFragment start = JavaFragmentFactory.addStartTypeBody(fragments);
+
+        tokens = new Tokens();
+
+        if ((declaration.getRequires() != null) && !declaration.getRequires().isEmpty()) {
+            Iterator<ModuleDeclaration.ModuleInfo> iterator = declaration.getRequires().iterator();
+            visitModuleDeclaration(iterator.next());
+            while (iterator.hasNext()) {
+                tokens.add(NewLineToken.NEWLINE_1);
+                visitModuleDeclaration(iterator.next());
+            }
+            needNewLine = true;
+        }
+
+        if ((declaration.getExports() != null) && !declaration.getExports().isEmpty()) {
+            if (needNewLine) {
+                tokens.add(NewLineToken.NEWLINE_2);
+            }
+            Iterator<ModuleDeclaration.PackageInfo> iterator = declaration.getExports().iterator();
+            visitModuleDeclaration(iterator.next(), EXPORTS);
+            while (iterator.hasNext()) {
+                tokens.add(NewLineToken.NEWLINE_1);
+                visitModuleDeclaration(iterator.next(), EXPORTS);
+            }
+            needNewLine = true;
+        }
+
+        if ((declaration.getOpens() != null) && !declaration.getOpens().isEmpty()) {
+            if (needNewLine) {
+                tokens.add(NewLineToken.NEWLINE_2);
+            }
+            Iterator<ModuleDeclaration.PackageInfo> iterator = declaration.getOpens().iterator();
+            visitModuleDeclaration(iterator.next(), OPENS);
+            while (iterator.hasNext()) {
+                tokens.add(NewLineToken.NEWLINE_1);
+                visitModuleDeclaration(iterator.next(), OPENS);
+            }
+            needNewLine = true;
+        }
+
+        if ((declaration.getUses() != null) && !declaration.getUses().isEmpty()) {
+            if (needNewLine) {
+                tokens.add(NewLineToken.NEWLINE_2);
+            }
+            Iterator<String> iterator = declaration.getUses().iterator();
+            visitModuleDeclaration(iterator.next());
+            while (iterator.hasNext()) {
+                tokens.add(NewLineToken.NEWLINE_1);
+                visitModuleDeclaration(iterator.next());
+            }
+            needNewLine = true;
+        }
+
+        if ((declaration.getProvides() != null) && !declaration.getProvides().isEmpty()) {
+            if (needNewLine) {
+                tokens.add(NewLineToken.NEWLINE_2);
+            }
+            Iterator<ModuleDeclaration.ServiceInfo> iterator = declaration.getProvides().iterator();
+            visitModuleDeclaration(iterator.next());
+            while (iterator.hasNext()) {
+                tokens.add(NewLineToken.NEWLINE_1);
+                visitModuleDeclaration(iterator.next());
+            }
+        }
+
+        fragments.addTokensFragment(tokens);
+
+        JavaFragmentFactory.addEndTypeBody(fragments, start);
+
+        fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
+    }
+
+    protected void visitModuleDeclaration(ModuleDeclaration.ModuleInfo moduleInfo) {
+        tokens.add(REQUIRES);
+
+        if ((moduleInfo.getFlags() & FLAG_TRANSITIVE) != 0) {
+            tokens.add(TextToken.SPACE);
+            tokens.add(TRANSITIVE);
+        }
+
+        tokens.add(TextToken.SPACE);
+        tokens.add(new TextToken(moduleInfo.getName()));
+        tokens.add(TextToken.SEMICOLON);
+    }
+
+    protected void visitModuleDeclaration(ModuleDeclaration.PackageInfo packageInfo, KeywordToken keywordToken) {
+        tokens.add(keywordToken);
+        tokens.add(TextToken.SPACE);
+        tokens.add(new TextToken(packageInfo.getInternalName().replace('/', '.')));
+
+        if ((packageInfo.getModuleInfoNames() != null) && !packageInfo.getModuleInfoNames().isEmpty()) {
+            tokens.add(TextToken.SPACE);
+            tokens.add(TO);
+
+            if (packageInfo.getModuleInfoNames().size() == 1) {
+                tokens.add(TextToken.SPACE);
+                tokens.add(new TextToken(packageInfo.getModuleInfoNames().get(0)));
+            } else {
+                tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
+                tokens.add(NewLineToken.NEWLINE_1);
+
+                Iterator<String> iterator = packageInfo.getModuleInfoNames().iterator();
+
+                tokens.add(new TextToken(iterator.next()));
+
+                while (iterator.hasNext()) {
+                    tokens.add(TextToken.COMMA);
+                    tokens.add(NewLineToken.NEWLINE_1);
+                    tokens.add(new TextToken(iterator.next()));
+                }
+
+                tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
+            }
+        }
+
+        tokens.add(TextToken.SEMICOLON);
+    }
+
+    protected void visitModuleDeclaration(String internalTypeName) {
+        tokens.add(USES);
+        tokens.add(TextToken.SPACE);
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+        tokens.add(TextToken.SEMICOLON);
+    }
+
+    protected void visitModuleDeclaration(ModuleDeclaration.ServiceInfo serviceInfo) {
+        tokens.add(PROVIDES);
+        tokens.add(TextToken.SPACE);
+        String internalTypeName = serviceInfo.getInterfaceTypeName();
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+        tokens.add(TextToken.SPACE);
+        tokens.add(WITH);
+
+        if (serviceInfo.getImplementationTypeNames().size() == 1) {
+            tokens.add(TextToken.SPACE);
+            internalTypeName = serviceInfo.getImplementationTypeNames().get(0);
+            tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+        } else {
+            tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
+            tokens.add(NewLineToken.NEWLINE_1);
+
+            Iterator<String> iterator = serviceInfo.getImplementationTypeNames().iterator();
+
+            internalTypeName = iterator.next();
+            tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+
+            while (iterator.hasNext()) {
+                tokens.add(TextToken.COMMA);
+                tokens.add(NewLineToken.NEWLINE_1);
+                internalTypeName = iterator.next();
+                tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+            }
+
+            tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
+        }
+
+        tokens.add(TextToken.SEMICOLON);
+    }
+
+    @Override
     public void visit(LocalVariableDeclaration declaration) {
         if (declaration.isFinal()) {
             tokens.add(FINAL);
