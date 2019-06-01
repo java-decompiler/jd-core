@@ -556,7 +556,7 @@ public class ClassFileDeserializer {
     }
 
     protected MethodParameter[] loadParameters(ClassFileReader reader, ConstantPool constants) {
-        int count = reader.readUnsignedShort();
+        int count = reader.readUnsignedByte();
         if (count == 0)
             return null;
 
