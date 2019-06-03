@@ -349,7 +349,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             }
 
             // Build token for type declaration
-            tokens.add(new DeclarationToken(DeclarationToken.CONSTRUCTOR_FLAG, currentInternalTypeName, currentTypeName, declaration.getDescriptor()));
+            tokens.add(new DeclarationToken(DeclarationToken.CONSTRUCTOR, currentInternalTypeName, currentTypeName, declaration.getDescriptor()));
 
             storeContext();
             currentMethodParamNames.clear();
@@ -569,7 +569,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         // Build token for type declaration
         tokens.addLineNumberToken(declaration.getLineNumber());
-        tokens.add(new DeclarationToken(DeclarationToken.FIELD_FLAG, currentInternalTypeName, declaration.getName(), 'L' + currentInternalTypeName + ';'));
+        tokens.add(new DeclarationToken(DeclarationToken.FIELD, currentInternalTypeName, declaration.getName(), 'L' + currentInternalTypeName + ';'));
 
         storeContext();
         currentMethodParamNames.clear();
@@ -648,19 +648,19 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         switch (fieldDeclarator.getDimension()) {
             case 0:
-                tokens.add(new DeclarationToken(DeclarationToken.FIELD_FLAG, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
+                tokens.add(new DeclarationToken(DeclarationToken.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
                 break;
             case 1:
-                tokens.add(new DeclarationToken(DeclarationToken.FIELD_FLAG, currentInternalTypeName, fieldDeclarator.getName(), "[" + descriptor));
+                tokens.add(new DeclarationToken(DeclarationToken.FIELD, currentInternalTypeName, fieldDeclarator.getName(), "[" + descriptor));
                 tokens.add(TextToken.DIMENSION_1);
                 break;
             case 2:
-                tokens.add(new DeclarationToken(DeclarationToken.FIELD_FLAG, currentInternalTypeName, fieldDeclarator.getName(), "[[" + descriptor));
+                tokens.add(new DeclarationToken(DeclarationToken.FIELD, currentInternalTypeName, fieldDeclarator.getName(), "[[" + descriptor));
                 tokens.add(TextToken.DIMENSION_2);
                 break;
             default:
                 descriptor = new String(new char[fieldDeclarator.getDimension()]).replaceAll("\0", "[") + descriptor;
-                tokens.add(new DeclarationToken(DeclarationToken.FIELD_FLAG, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
+                tokens.add(new DeclarationToken(DeclarationToken.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
                 tokens.add(newTextToken(new String(new char[fieldDeclarator.getDimension()]).replaceAll("\0", "[]")));
                 break;
         }
@@ -827,7 +827,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens.add(MODULE);
         tokens.add(TextToken.SPACE);
-        tokens.add(new TextToken(declaration.getName()));
+        tokens.add(new DeclarationToken(DeclarationToken.MODULE, declaration.getName().replace('.', '/'), declaration.getName(), null));
         fragments.addTokensFragment(tokens);
 
         StartBodyFragment start = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -905,20 +905,24 @@ public class CompilationUnitVisitor extends StatementVisitor {
     protected void visitModuleDeclaration(ModuleDeclaration.ModuleInfo moduleInfo) {
         tokens.add(REQUIRES);
 
+        if ((moduleInfo.getFlags() & FLAG_STATIC) != 0) {
+            tokens.add(TextToken.SPACE);
+            tokens.add(STATIC);
+        }
         if ((moduleInfo.getFlags() & FLAG_TRANSITIVE) != 0) {
             tokens.add(TextToken.SPACE);
             tokens.add(TRANSITIVE);
         }
 
         tokens.add(TextToken.SPACE);
-        tokens.add(new TextToken(moduleInfo.getName()));
+        tokens.add(new ReferenceToken(ReferenceToken.MODULE, moduleInfo.getName().replace('.', '/'), moduleInfo.getName(), null, null));
         tokens.add(TextToken.SEMICOLON);
     }
 
     protected void visitModuleDeclaration(ModuleDeclaration.PackageInfo packageInfo, KeywordToken keywordToken) {
         tokens.add(keywordToken);
         tokens.add(TextToken.SPACE);
-        tokens.add(new TextToken(packageInfo.getInternalName().replace('/', '.')));
+        tokens.add(new ReferenceToken(ReferenceToken.PACKAGE, packageInfo.getInternalName(), packageInfo.getInternalName().replace('/', '.'), null, null));
 
         if ((packageInfo.getModuleInfoNames() != null) && !packageInfo.getModuleInfoNames().isEmpty()) {
             tokens.add(TextToken.SPACE);
@@ -926,19 +930,22 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             if (packageInfo.getModuleInfoNames().size() == 1) {
                 tokens.add(TextToken.SPACE);
-                tokens.add(new TextToken(packageInfo.getModuleInfoNames().get(0)));
+                String moduleInfoName = packageInfo.getModuleInfoNames().get(0);
+                tokens.add(new ReferenceToken(ReferenceToken.MODULE, moduleInfoName.replace('.', '/'), moduleInfoName, null, null));
             } else {
                 tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
                 tokens.add(NewLineToken.NEWLINE_1);
 
                 Iterator<String> iterator = packageInfo.getModuleInfoNames().iterator();
 
-                tokens.add(new TextToken(iterator.next()));
+                String moduleInfoName = iterator.next();
+                tokens.add(new ReferenceToken(ReferenceToken.MODULE, moduleInfoName.replace('.', '/'), moduleInfoName, null, null));
 
                 while (iterator.hasNext()) {
                     tokens.add(TextToken.COMMA);
                     tokens.add(NewLineToken.NEWLINE_1);
-                    tokens.add(new TextToken(iterator.next()));
+                    moduleInfoName = iterator.next();
+                    tokens.add(new ReferenceToken(ReferenceToken.MODULE, moduleInfoName.replace('.', '/'), moduleInfoName, null, null));
                 }
 
                 tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
@@ -951,7 +958,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
     protected void visitModuleDeclaration(String internalTypeName) {
         tokens.add(USES);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
         tokens.add(TextToken.SEMICOLON);
     }
 
@@ -959,14 +966,14 @@ public class CompilationUnitVisitor extends StatementVisitor {
         tokens.add(PROVIDES);
         tokens.add(TextToken.SPACE);
         String internalTypeName = serviceInfo.getInterfaceTypeName();
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
         tokens.add(TextToken.SPACE);
         tokens.add(WITH);
 
         if (serviceInfo.getImplementationTypeNames().size() == 1) {
             tokens.add(TextToken.SPACE);
             internalTypeName = serviceInfo.getImplementationTypeNames().get(0);
-            tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+            tokens.add(new ReferenceToken(ReferenceToken.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
         } else {
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
             tokens.add(NewLineToken.NEWLINE_1);
@@ -974,13 +981,13 @@ public class CompilationUnitVisitor extends StatementVisitor {
             Iterator<String> iterator = serviceInfo.getImplementationTypeNames().iterator();
 
             internalTypeName = iterator.next();
-            tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+            tokens.add(new ReferenceToken(ReferenceToken.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
 
             while (iterator.hasNext()) {
                 tokens.add(TextToken.COMMA);
                 tokens.add(NewLineToken.NEWLINE_1);
                 internalTypeName = iterator.next();
-                tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+                tokens.add(new ReferenceToken(ReferenceToken.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
             }
 
             tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
@@ -1094,7 +1101,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             tokens.add(TextToken.SPACE);
 
             // Build token for type declaration
-            tokens.add(new DeclarationToken(DeclarationToken.METHOD_FLAG, currentInternalTypeName, declaration.getName(), declaration.getDescriptor()));
+            tokens.add(new DeclarationToken(DeclarationToken.METHOD, currentInternalTypeName, declaration.getName(), declaration.getDescriptor()));
 
             storeContext();
             currentMethodParamNames.clear();
@@ -1246,7 +1253,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         tokens.add(TextToken.SPACE);
 
         // Build token for type declaration
-        tokens.add(new DeclarationToken(DeclarationToken.TYPE_FLAG, declaration.getInternalName(), declaration.getName(), null));
+        tokens.add(new DeclarationToken(DeclarationToken.TYPE, declaration.getInternalName(), declaration.getName(), null));
     }
 
     protected void buildFragmentsForClassOrInterfaceDeclaration(InterfaceDeclaration declaration, int flags, KeywordToken keyword) {
