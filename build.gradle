@@ -6,7 +6,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version='1.0.3'
+version='1.0.4'
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = targetCompatibility = '1.8'
