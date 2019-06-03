@@ -12,14 +12,14 @@ public class ReferenceToken extends DeclarationToken {
     protected String ownerInternalName;
 
     /**
-     * @param flags @see org.jd.core.v1.model.token.DeclarationToken
+     * @param type @see org.jd.core.v1.model.token.DeclarationToken
      * @param internalTypeName
      * @param name
      * @param descriptor
      * @param ownerInternalName
      */
-    public ReferenceToken(int flags, String internalTypeName, String name, String descriptor, String ownerInternalName) {
-        super(flags, internalTypeName, name, descriptor);
+    public ReferenceToken(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) {
+        super(type, internalTypeName, name, descriptor);
         this.ownerInternalName = ownerInternalName;
     }
 

@@ -144,7 +144,7 @@ public class ExpressionVisitor extends TypeVisitor {
         tokens.addLineNumberToken(expression);
         tokens.add(newTypeReferenceToken(ot, currentInternalTypeName));
         tokens.add(TextToken.COLON_COLON);
-        //tokens.add(new ReferenceToken(ReferenceToken.CONSTRUCTOR_FLAG, ot.getInternalName(), "new", expression.getDescriptor(), currentInternalTypeName));
+        //tokens.add(new ReferenceToken(ReferenceToken.CONSTRUCTOR, ot.getInternalName(), "new", expression.getDescriptor(), currentInternalTypeName));
         tokens.add(NEW);
     }
 
@@ -160,7 +160,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         ObjectType type = expression.getObjectType();
 
-        tokens.add(new ReferenceToken(ReferenceToken.FIELD_FLAG, type.getInternalName(), expression.getName(), type.getDescriptor(), currentInternalTypeName));
+        tokens.add(new ReferenceToken(ReferenceToken.FIELD, type.getInternalName(), expression.getName(), type.getDescriptor(), currentInternalTypeName));
     }
 
     @Override
@@ -205,7 +205,7 @@ public class ExpressionVisitor extends TypeVisitor {
                 tokens.add(TextToken.DOT);
             }
 
-            tokens.add(new ReferenceToken(ReferenceToken.FIELD_FLAG, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
+            tokens.add(new ReferenceToken(ReferenceToken.FIELD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
         }
     }
 
@@ -372,7 +372,7 @@ public class ExpressionVisitor extends TypeVisitor {
         }
 
         tokens.addLineNumberToken(expression);
-        tokens.add(new ReferenceToken(ReferenceToken.METHOD_FLAG, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
+        tokens.add(new ReferenceToken(ReferenceToken.METHOD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
         if (parameters != null) {
@@ -387,7 +387,7 @@ public class ExpressionVisitor extends TypeVisitor {
         expression.getExpression().accept(this);
         tokens.addLineNumberToken(expression);
         tokens.add(TextToken.COLON_COLON);
-        tokens.add(new ReferenceToken(ReferenceToken.METHOD_FLAG, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
+        tokens.add(new ReferenceToken(ReferenceToken.METHOD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
     }
 
     @Override

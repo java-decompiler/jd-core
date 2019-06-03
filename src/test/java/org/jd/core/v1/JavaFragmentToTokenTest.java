@@ -1044,7 +1044,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1053,7 +1053,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1061,14 +1061,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1082,7 +1082,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(lineNumber),
                 new NumericConstantToken("0"),
@@ -1123,7 +1123,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1132,7 +1132,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1140,14 +1140,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1161,7 +1161,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(lineNumber),
                 new NumericConstantToken("0"),
@@ -1225,7 +1225,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1234,7 +1234,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1242,14 +1242,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1260,7 +1260,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 PUBLIC,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.CONSTRUCTOR_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", "(I)V"),
+                new DeclarationToken(DeclarationToken.CONSTRUCTOR, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", "(I)V"),
                 TextToken.LEFTROUNDBRACKET,
                 INT,
                 TextToken.SPACE,
@@ -1345,7 +1345,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1359,9 +1359,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("[] args)")
         ));
 
@@ -1405,7 +1405,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 INT,
                 new LineNumberToken(10 * factor),
                 new TextToken(" i = "),
-                new ReferenceToken(ReferenceToken.METHOD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 StartBlockToken.START_PARAMETERS_BLOCK,
                 new LineNumberToken(11 * factor),
                 new StringConstantToken("aaaa", "org/jd/core/v1/service/test/TokenWriterTest"),
@@ -1417,7 +1417,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 new LineNumberToken(13 * factor),
                 NEW,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/util/Enumeration", "java.util.Enumeration", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/util/Enumeration", "java.util.Enumeration", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         );
 
@@ -1436,7 +1436,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 BOOLEAN,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest$1", "hasMoreElements", "()Z"),
+                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "hasMoreElements", "()Z"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         ));
 
@@ -1467,9 +1467,9 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 PUBLIC,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/Object", "Object", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Object", "Object", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest$1", "nextElement", "()Ljava/lang/Object;"),
+                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "nextElement", "()Ljava/lang/Object;"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         ));
 
@@ -1505,11 +1505,11 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SEMICOLON,
                 NewLineToken.NEWLINE_1,
                 new LineNumberToken(22 * factor),
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.FIELD_FLAG, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.FIELD, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD_FLAG, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTROUNDBRACKET,
                 new TextToken("i"),
                 TextToken.RIGHTROUNDBRACKET,
@@ -1556,7 +1556,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1570,12 +1570,12 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "TIMESTAMP", "I"),
+                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "TIMESTAMP", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(4),
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD_FLAG, "java/lang/System", "currentTimeMillis", "()J", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.METHOD, "java/lang/System", "currentTimeMillis", "()J", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTRIGHTROUNDBRACKETS,
                 TextToken.SEMICOLON
         ));
@@ -1590,7 +1590,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1604,7 +1604,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "b", "I"),
+                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "b", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1618,7 +1618,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "c", "I"),
+                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "c", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1634,9 +1634,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("[] args)")
         ));
 
@@ -1646,11 +1646,11 @@ public class JavaFragmentToTokenTest extends TestCase {
         // System.out.println(TIMESTAMP);
         fragments.add(new LineNumberTokensFragment(
                 new LineNumberToken(8),
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.FIELD_FLAG, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.FIELD, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD_FLAG, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTROUNDBRACKET,
                 new TextToken("TIMESTAMP"),
                 TextToken.RIGHTROUNDBRACKET,
@@ -1677,14 +1677,14 @@ public class JavaFragmentToTokenTest extends TestCase {
      * Generate:
      * [  1:  0          ] package org.jd.core.v1.service.writer;<-- 0,2,2:9
      * [  2:  0          ]
-     * [  3:  0          ]  -->public class TokenWriterTest<META-DECLARATION flags='+TYPE' internalName='org/jd/core/v1/service/test/TokenWriterTest' descriptor='null'/><-- 0,1,2:2
+     * [  3:  0          ]  -->public class TokenWriterTest<META-DECLARATION type='+TYPE' internalName='org/jd/core/v1/service/test/TokenWriterTest' descriptor='null'/><-- 0,1,2:2
      * [  4:  0          ] {
-     * [  5:  0          ]    -->public static void main<META-DECLARATION flags='+METHOD' internalName='org/jd/core/v1/service/test/TokenWriterTest' descriptor='([Ljava/lang/String;)V'/>(String<META-REFERENCE flags='+TYPE' internalName='java/lang/String' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/TokenWriterTest'/>[] args)<-- 0,0,2:11  {
+     * [  5:  0          ]    -->public static void main<META-DECLARATION type='+METHOD' internalName='org/jd/core/v1/service/test/TokenWriterTest' descriptor='([Ljava/lang/String;)V'/>(String<META-REFERENCE type='+TYPE' internalName='java/lang/String' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/TokenWriterTest'/>[] args)<-- 0,0,2:11  {
      * [  6:  lineNumber1]      -->int i = 0;<-- 0,1,2147483647:4
      * [  7:  0          ]
      * [  8:  0          ]      -->try<-- 0,1,2:5  {
      * [  9:  lineNumber2]        --><-- 0,0,2147483647:19 -->i = 1;<-- 0,0,2147483647:18 --><-- 0,1,2:5
-     * [ 10:  0          ]     } -->catch (RuntimeException<META-REFERENCE flags='+TYPE' internalName='java/lang/RuntimeException' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/TokenWriterTest'/> e)<-- 0,1,2:5  {
+     * [ 10:  0          ]     } -->catch (RuntimeException<META-REFERENCE type='+TYPE' internalName='java/lang/RuntimeException' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/TokenWriterTest'/> e)<-- 0,1,2:5  {
      * [ 11:  lineNumber3]        --><-- 0,0,2147483647:19 -->i = 2;<-- 0,0,2147483647:18 --><-- 0,1,2:5
      * [ 12:  0          ]     } -->finally<-- 0,1,2:5  {
      * [ 13:  lineNumber4]        --><-- 0,0,2147483647:19 -->i = 3;<-- 0,0,2147483647:18 --><-- 0,1,2:5
@@ -1720,7 +1720,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1734,9 +1734,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD_FLAG, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("[] args)")
         ));
 
@@ -1766,7 +1766,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 CATCH,
                 new TextToken(" ("),
-                new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/RuntimeException", "RuntimeException", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(ReferenceToken.TYPE, "java/lang/RuntimeException", "RuntimeException", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken(" e)")
         ));
 

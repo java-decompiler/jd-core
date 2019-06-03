@@ -11,10 +11,10 @@ import org.jd.core.v1.api.printer.Printer;
 
 public class EndMarkerToken implements Token {
 
-    public static final EndMarkerToken COMMENT = new EndMarkerToken(Printer.COMMENT_TYPE);
-    public static final EndMarkerToken JAVADOC = new EndMarkerToken(Printer.JAVADOC_TYPE);
-    public static final EndMarkerToken ERROR = new EndMarkerToken(Printer.ERROR_TYPE);
-    public static final EndMarkerToken IMPORT_STATEMENTS = new EndMarkerToken(Printer.IMPORT_STATEMENTS_TYPE);
+    public static final EndMarkerToken COMMENT = new EndMarkerToken(Printer.COMMENT);
+    public static final EndMarkerToken JAVADOC = new EndMarkerToken(Printer.JAVADOC);
+    public static final EndMarkerToken ERROR = new EndMarkerToken(Printer.ERROR);
+    public static final EndMarkerToken IMPORT_STATEMENTS = new EndMarkerToken(Printer.IMPORT_STATEMENTS);
 
     protected int type;
 

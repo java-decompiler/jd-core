@@ -118,7 +118,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         // Build token for type reference
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, type.getInternalName(), type.getName(), null, currentInternalTypeName));
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE, type.getInternalName(), type.getName(), null, currentInternalTypeName));
 
         // Build token for type arguments
         visitTypeArgumentList(type.getTypeArguments());
@@ -221,16 +221,16 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
         if (packageContainsType(internalPackageName, internalName)) {
             // In the current package
-            return new ReferenceToken(ReferenceToken.TYPE_FLAG, internalName, name, null, ownerInternalName);
+            return new ReferenceToken(ReferenceToken.TYPE, internalName, name, null, ownerInternalName);
         } else {
             if (packageContainsType("java/lang/", internalName)) {
                 // A 'java.lang' class
                 String internalLocalTypeName = internalPackageName + name;
 
                 if (loader.canLoad(internalLocalTypeName)) {
-                    return new ReferenceToken(ReferenceToken.TYPE_FLAG, internalName, qualifiedName, null, ownerInternalName);
+                    return new ReferenceToken(ReferenceToken.TYPE, internalName, qualifiedName, null, ownerInternalName);
                 } else {
-                    return new ReferenceToken(ReferenceToken.TYPE_FLAG, internalName, name, null, ownerInternalName);
+                    return new ReferenceToken(ReferenceToken.TYPE, internalName, name, null, ownerInternalName);
                 }
             } else {
                 return new TypeReferenceToken(importsFragment, internalName, qualifiedName, name, ownerInternalName);
@@ -251,7 +251,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         protected String qualifiedName;
 
         public TypeReferenceToken(ImportsFragment importsFragment, String internalTypeName, String qualifiedName, String name, String ownerInternalName) {
-            super(TYPE_FLAG, internalTypeName, name, null, ownerInternalName);
+            super(TYPE, internalTypeName, name, null, ownerInternalName);
             this.importsFragment = importsFragment;
             this.qualifiedName = qualifiedName;
         }

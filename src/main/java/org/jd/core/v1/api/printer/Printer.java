@@ -11,17 +11,19 @@ package org.jd.core.v1.api.printer;
 public interface Printer {
     int UNKNOWN_LINE_NUMBER = 0;
 
-    // Declaration & reference flags
-    int TYPE_FLAG = 1;
-    int FIELD_FLAG = 2;
-    int METHOD_FLAG = 4;
-    int CONSTRUCTOR_FLAG = 8;
+    // Declaration & reference types
+    int TYPE = 1;
+    int FIELD = 2;
+    int METHOD = 3;
+    int CONSTRUCTOR = 4;
+    int PACKAGE = 5;
+    int MODULE = 6;
 
     // Marker types
-    int COMMENT_TYPE = 1;
-    int JAVADOC_TYPE = 2;
-    int ERROR_TYPE = 3;
-    int IMPORT_STATEMENTS_TYPE = 4;
+    int COMMENT = 1;
+    int JAVADOC = 2;
+    int ERROR = 3;
+    int IMPORT_STATEMENTS = 4;
 
     void start(int maxLineNumber, int majorVersion, int minorVersion);
     void end();
@@ -31,8 +33,8 @@ public interface Printer {
     void printStringConstant(String constant, String ownerInternalName);
     void printKeyword(String keyword);
 
-    void printDeclaration(int flags, String internalTypeName, String name, String descriptor);
-    void printReference(int flags, String internalTypeName, String name, String descriptor, String ownerInternalName);
+    void printDeclaration(int type, String internalTypeName, String name, String descriptor);
+    void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName);
 
     void indent();
     void unindent();

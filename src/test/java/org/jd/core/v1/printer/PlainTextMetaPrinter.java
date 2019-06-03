@@ -16,10 +16,10 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
         sb.append("'/>");
     }
 
-    public void printDeclaration(int flags, String internalTypeName, String name, String descriptor) {
+    public void printDeclaration(int type, String internalTypeName, String name, String descriptor) {
         sb.append(name);
-        sb.append("<META-DECLARATION flags='");
-        printFlags(flags);
+        sb.append("<META-DECLARATION type='");
+        printType(type);
         sb.append("' internalName='");
         sb.append(internalTypeName);
         sb.append("' descriptor='");
@@ -27,10 +27,10 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
         sb.append("'/>");
     }
 
-    public void printReference(int flags, String internalTypeName, String name, String descriptor, String ownerInternalName) {
+    public void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) {
         sb.append(name);
-        sb.append("<META-REFERENCE flags='");
-        printFlags(flags);
+        sb.append("<META-REFERENCE type='");
+        printType(type);
         sb.append("' internalName='");
         sb.append(internalTypeName==null ? "?" : internalTypeName);
         sb.append("' descriptor='");
@@ -68,33 +68,41 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
         sb.append("'>");
     }
 
-    protected void printFlags(int flags) {
-        if ((flags & TYPE_FLAG) != 0) {
-            sb.append("+TYPE");
-        }
-        if ((flags & FIELD_FLAG) != 0) {
-            sb.append("+FIELD");
-        }
-        if ((flags & METHOD_FLAG) != 0) {
-            sb.append("+METHOD");
-        }
-        if ((flags & CONSTRUCTOR_FLAG) != 0) {
-            sb.append("+CONSTRUCTOR");
+    protected void printType(int type) {
+        switch (type) {
+            case TYPE:
+                sb.append("TYPE");
+                break;
+            case FIELD:
+                sb.append("FIELD");
+                break;
+            case METHOD:
+                sb.append("METHOD");
+                break;
+            case CONSTRUCTOR:
+                sb.append("CONSTRUCTOR");
+                break;
+            case PACKAGE:
+                sb.append("PACKAGE");
+                break;
+            case MODULE:
+                sb.append("MODULE");
+                break;
         }
     }
 
-    protected void printMarker(int marker) {
-        switch (marker) {
-            case COMMENT_TYPE:
+    protected void printMarker(int type) {
+        switch (type) {
+            case COMMENT:
                 sb.append("COMMENT");
                 break;
-            case JAVADOC_TYPE:
+            case JAVADOC:
                 sb.append("JAVADOC");
                 break;
-            case ERROR_TYPE:
+            case ERROR:
                 sb.append("ERROR");
                 break;
-            case IMPORT_STATEMENTS_TYPE:
+            case IMPORT_STATEMENTS:
                 sb.append("IMPORT_STATEMENTS");
                 break;
         }

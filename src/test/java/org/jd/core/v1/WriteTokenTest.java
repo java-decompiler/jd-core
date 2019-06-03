@@ -43,7 +43,7 @@ public class WriteTokenTest {
         // import javasyntax.util.ArrayList;\n
         tokens.add(IMPORT);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/util/ArrayList", "java.util.ArrayList", null, null));
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/util/ArrayList", "java.util.ArrayList", null, null));
         tokens.add(TextToken.SEMICOLON);
         tokens.add(NewLineToken.NEWLINE_1);
 
@@ -52,7 +52,7 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(STATIC);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, "org/junit/Assert/*", "org.junit.Assert.*", null, null));
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "org/junit/Assert/*", "org.junit.Assert.*", null, null));
         tokens.add(TextToken.SEMICOLON);
         tokens.add(NewLineToken.NEWLINE_2);
 
@@ -61,7 +61,7 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(CLASS);
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(DeclarationToken.TYPE_FLAG, "org/jd/core/v1/service/test/WriteTokenTest", "WriteTokenTest", null));
+        tokens.add(new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/WriteTokenTest", "WriteTokenTest", null));
         tokens.add(TextToken.SPACE);
         tokens.add(StartBlockToken.START_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
@@ -73,9 +73,9 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(VOID);
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(DeclarationToken.METHOD_FLAG, "org/jd/core/v1/service/test/WriteTokenTest", "main", "([Ljava/lang/String;)V"));
+        tokens.add(new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/WriteTokenTest", "main", "([Ljava/lang/String;)V"));
         tokens.add(TextToken.LEFTROUNDBRACKET);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/String", "String", null, "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(new TextToken("[] args) "));
         tokens.add(StartBlockToken.START_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
@@ -109,7 +109,7 @@ public class WriteTokenTest {
         tokens.add(new LineNumberToken(10));
         tokens.add(INT);
         tokens.add(new TextToken(" i = "));
-        tokens.add(new ReferenceToken(ReferenceToken.METHOD_FLAG, "org/jd/core/v1/service/test/WriteTokenTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(ReferenceToken.METHOD, "org/jd/core/v1/service/test/WriteTokenTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
         tokens.add(new LineNumberToken(11));
@@ -122,7 +122,7 @@ public class WriteTokenTest {
         tokens.add(new LineNumberToken(13));
         tokens.add(NEW);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/util/Enumeration", "Enumeration", null, "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/util/Enumeration", "Enumeration", null, "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(new TextToken("() "));
         tokens.add(StartBlockToken.START_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
@@ -131,7 +131,7 @@ public class WriteTokenTest {
             tokens.add(TextToken.SPACE);
             tokens.add(BOOLEAN);
             tokens.add(TextToken.SPACE);
-            tokens.add(new DeclarationToken(DeclarationToken.METHOD_FLAG, "org/jd/core/v1/service/test/WriteTokenTest$1", "hasMoreElements", "()Z"));
+            tokens.add(new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/WriteTokenTest$1", "hasMoreElements", "()Z"));
             tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
             tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
             tokens.add(TextToken.SPACE);
@@ -149,9 +149,9 @@ public class WriteTokenTest {
             // public Object nextElement()...
             tokens.add(PUBLIC);
             tokens.add(TextToken.SPACE);
-            tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/Object", "Object", null, "org/jd/core/v1/service/test/WriteTokenTest"));
+            tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/lang/Object", "Object", null, "org/jd/core/v1/service/test/WriteTokenTest"));
             tokens.add(TextToken.SPACE);
-            tokens.add(new DeclarationToken(DeclarationToken.METHOD_FLAG, "org/jd/core/v1/service/test/WriteTokenTest$1", "nextElement", "()Ljava/lang/Object;"));
+            tokens.add(new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/WriteTokenTest$1", "nextElement", "()Ljava/lang/Object;"));
             tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
             tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
             tokens.add(TextToken.SPACE);
@@ -178,11 +178,11 @@ public class WriteTokenTest {
 
         // System.out.println(i);
         tokens.add(new LineNumberToken(22));
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE_FLAG, "java/lang/System", "System", null, "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(TextToken.DOT);
-        tokens.add(new ReferenceToken(ReferenceToken.FIELD_FLAG, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(ReferenceToken.FIELD, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(TextToken.DOT);
-        tokens.add(new ReferenceToken(ReferenceToken.METHOD_FLAG, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(ReferenceToken.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(TextToken.LEFTROUNDBRACKET);
         tokens.add(new TextToken("i"));
         tokens.add(TextToken.RIGHTROUNDBRACKET);
@@ -216,26 +216,26 @@ public class WriteTokenTest {
         String expected =
             "[  1:  0] package org.jd.core.v1.service.test;\n" +
             "[  2:  0] \n" +
-            "[  3:  0] import java.util.ArrayList<META-REFERENCE flags='+TYPE' internalName='java/util/ArrayList' descriptor='null' ownerInternalName='null'/>;\n" +
-            "[  4:  0] import static org.junit.Assert.*<META-REFERENCE flags='+TYPE' internalName='org/junit/Assert/*' descriptor='null' ownerInternalName='null'/>;\n" +
+            "[  3:  0] import java.util.ArrayList<META-REFERENCE type='TYPE' internalName='java/util/ArrayList' descriptor='null' ownerInternalName='null'/>;\n" +
+            "[  4:  0] import static org.junit.Assert.*<META-REFERENCE type='TYPE' internalName='org/junit/Assert/*' descriptor='null' ownerInternalName='null'/>;\n" +
             "[  5:  0] \n" +
-            "[  6:  0] public class WriteTokenTest<META-DECLARATION flags='+TYPE' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='null'/> {\n" +
-            "[  7:  0]   public static void main<META-DECLARATION flags='+METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='([Ljava/lang/String;)V'/>(String<META-REFERENCE flags='+TYPE' internalName='java/lang/String' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>[] args) {\n" +
+            "[  6:  0] public class WriteTokenTest<META-DECLARATION type='TYPE' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='null'/> {\n" +
+            "[  7:  0]   public static void main<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='([Ljava/lang/String;)V'/>(String<META-REFERENCE type='TYPE' internalName='java/lang/String' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>[] args) {\n" +
             "[  8:  8]     if (args == null)\n" +
             "[  9:  0]       return;\n" +
-            "[ 10: 10]     int i = call<META-REFERENCE flags='+METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='(IILjava/util/Enumeration;I)V' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>(\n" +
+            "[ 10: 10]     int i = call<META-REFERENCE type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='(IILjava/util/Enumeration;I)V' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>(\n" +
             "[ 11: 11]       \"aaaa\"<META-STRING ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>,\n" +
             "[ 12: 12]       b,\n" +
-            "[ 13: 13]       new Enumeration<META-REFERENCE flags='+TYPE' internalName='java/util/Enumeration' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>() {\n" +
-            "[ 14:  0]         public boolean hasMoreElements<META-DECLARATION flags='+METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest$1' descriptor='()Z'/>() {\n" +
+            "[ 13: 13]       new Enumeration<META-REFERENCE type='TYPE' internalName='java/util/Enumeration' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>() {\n" +
+            "[ 14:  0]         public boolean hasMoreElements<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest$1' descriptor='()Z'/>() {\n" +
             "[ 15: 15]           return false;\n" +
             "[ 16:  0]         }\n" +
-            "[ 17:  0]         public Object<META-REFERENCE flags='+TYPE' internalName='java/lang/Object' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/> nextElement<META-DECLARATION flags='+METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest$1' descriptor='()Ljava/lang/Object;'/>() {\n" +
+            "[ 17:  0]         public Object<META-REFERENCE type='TYPE' internalName='java/lang/Object' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/> nextElement<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest$1' descriptor='()Ljava/lang/Object;'/>() {\n" +
             "[ 18: 18]           return null;\n" +
             "[ 19:  0]         }\n" +
             "[ 20:  0]       },\n" +
             "[ 21: 21]       c);\n" +
-            "[ 22: 22]     System<META-REFERENCE flags='+TYPE' internalName='java/lang/System' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>.out<META-REFERENCE flags='+FIELD' internalName='java/lang/System' descriptor='java/io/PrintStream' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>.println<META-REFERENCE flags='+METHOD' internalName='java/io/PrintStream' descriptor='(I)V' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>(i);\n" +
+            "[ 22: 22]     System<META-REFERENCE type='TYPE' internalName='java/lang/System' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>.out<META-REFERENCE type='FIELD' internalName='java/lang/System' descriptor='java/io/PrintStream' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>.println<META-REFERENCE type='METHOD' internalName='java/io/PrintStream' descriptor='(I)V' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>(i);\n" +
             "[ 23:  0]   }\n" +
             "[ 24:  0] }\n";
 
@@ -269,7 +269,7 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(CLASS);
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(DeclarationToken.TYPE_FLAG, "org/jd/core/v1/service/test/WriteTokenTest", "WriteTokenTest", null));
+        tokens.add(new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/WriteTokenTest", "WriteTokenTest", null));
         tokens.add(TextToken.SPACE);
         tokens.add(StartBlockToken.START_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);

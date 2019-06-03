@@ -10,26 +10,28 @@ package org.jd.core.v1.model.token;
 import org.jd.core.v1.api.printer.Printer;
 
 public class DeclarationToken implements Token {
+    // Declaration & reference types
+    public static final int TYPE = Printer.TYPE;
+    public static final int FIELD = Printer.FIELD;
+    public static final int METHOD = Printer.METHOD;
+    public static final int CONSTRUCTOR = Printer.CONSTRUCTOR;
+    public static final int PACKAGE = Printer.PACKAGE;
+    public static final int MODULE = Printer.MODULE;
 
-    public static final int TYPE_FLAG = Printer.TYPE_FLAG;
-    public static final int FIELD_FLAG = Printer.FIELD_FLAG;
-    public static final int METHOD_FLAG = Printer.METHOD_FLAG;
-    public static final int CONSTRUCTOR_FLAG = Printer.CONSTRUCTOR_FLAG;
-
-    protected int flags;
+    protected int type;
     protected String internalTypeName;
     protected String name;
     protected String descriptor;
 
-    public DeclarationToken(int flags, String internalTypeName, String name, String descriptor) {
-        this.flags = flags;
+    public DeclarationToken(int type, String internalTypeName, String name, String descriptor) {
+        this.type = type;
         this.internalTypeName = internalTypeName;
         this.name = name;
         this.descriptor = descriptor;
     }
 
-    public int getFlags() {
-        return flags;
+    public int getType() {
+        return type;
     }
 
     public String getInternalTypeName() {

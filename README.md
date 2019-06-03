@@ -86,11 +86,11 @@ Printer printer = new Printer() {
     @Override public void printNumericConstant(String constant) { sb.append(constant); }
     @Override public void printStringConstant(String constant, String ownerInternalName) { sb.append(constant); }
     @Override public void printKeyword(String keyword) { sb.append(keyword); }
-    @Override public void printDeclaration(int flags, String internalTypeName, String name, String descriptor) { sb.append(name); }
-    @Override public void printReference(int flags, String internalTypeName, String name, String descriptor, String ownerInternalName) { sb.append(name); }
+    @Override public void printDeclaration(int type, String internalTypeName, String name, String descriptor) { sb.append(name); }
+    @Override public void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) { sb.append(name); }
 
     @Override public void indent() { this.indentationCount++; }
-    @Override public void unindent() { if (this.indentationCount > 0) this.indentationCount--; }
+    @Override public void unindent() { this.indentationCount--; }
 
     @Override public void startLine(int lineNumber) { for (int i=0; i<indentationCount; i++) sb.append(TAB); }
     @Override public void endLine() { sb.append(NEWLINE); }

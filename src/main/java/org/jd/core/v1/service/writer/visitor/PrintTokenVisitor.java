@@ -51,7 +51,7 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(DeclarationToken token) {
         prepareNewLine();
-        printer.printDeclaration(token.getFlags(), token.getInternalTypeName(), token.getName(), token.getDescriptor());
+        printer.printDeclaration(token.getType(), token.getInternalTypeName(), token.getName(), token.getDescriptor());
         index++;
     }
 
@@ -119,7 +119,7 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(ReferenceToken token) {
         prepareNewLine();
-        printer.printReference(token.getFlags(), token.getInternalTypeName(), token.getName(), token.getDescriptor(), token.getOwnerInternalName());
+        printer.printReference(token.getType(), token.getInternalTypeName(), token.getName(), token.getDescriptor(), token.getOwnerInternalName());
         index++;
     }
 

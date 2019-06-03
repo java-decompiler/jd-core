@@ -82,9 +82,9 @@ public class PlainTextPrinter implements Printer {
 
     public void printKeyword(String keyword) { sb.append(keyword); }
 
-    public void printDeclaration(int flags, String internalTypeName, String name, String descriptor) { printText(name); }
+    public void printDeclaration(int type, String internalTypeName, String name, String descriptor) { printText(name); }
 
-    public void printReference(int flags, String internalTypeName, String name, String descriptor, String ownerInternalName) { printText(name); }
+    public void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) { printText(name); }
 
     public void indent() {
         this.indentationCount++;
