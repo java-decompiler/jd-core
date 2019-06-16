@@ -24,10 +24,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.ListIterator;
+import java.util.*;
 
 public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
@@ -87,7 +84,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
         if (cfcd.getStatements().getClass() == Statements.class) {
             Statements statements = (Statements) cfcd.getStatements();
             ListIterator<Statement> iterator = statements.listIterator();
-            Expression superConstructorCall = searchSuperConstructorCall(iterator);
+            SuperConstructorInvocationExpression superConstructorCall = searchSuperConstructorCall(iterator);
 
             if (superConstructorCall != null) {
                 String internalTypeName = cfcd.getClassFile().getInternalTypeName();
@@ -95,7 +92,8 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
                 datas.add(new Data(cfcd, statements, iterator.nextIndex()));
 
                 if (datas.size() == 1) {
-                    initPutFields(internalTypeName, cfcd, iterator);
+                    int firstLineNumber = superConstructorCall.getDescriptor().equals("()V") ? Printer.UNKNOWN_LINE_NUMBER : superConstructorCall.getLineNumber();
+                    initPutFields(internalTypeName, firstLineNumber, iterator);
                 } else {
                     filterPutFields(internalTypeName, iterator);
                 }
@@ -124,7 +122,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
         containsLocalVariableReference = true;
     }
 
-    protected Expression searchSuperConstructorCall(ListIterator<Statement> iterator) {
+    protected SuperConstructorInvocationExpression searchSuperConstructorCall(ListIterator<Statement> iterator) {
         while (iterator.hasNext()) {
             Statement statement = iterator.next();
 
@@ -133,7 +131,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
                 Class clazz = expression.getClass();
 
                 if (clazz == SuperConstructorInvocationExpression.class) {
-                    return expression;
+                    return (SuperConstructorInvocationExpression)expression;
                 }
 
                 if (clazz == ConstructorInvocationExpression.class) {
@@ -145,30 +143,9 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
         return null;
     }
 
-    protected void initPutFields(String internalTypeName, ClassFileConstructorDeclaration cfcd, ListIterator<Statement> iterator) {
-        Method method = cfcd.getMethod();
+    protected void initPutFields(String internalTypeName, int firstLineNumber, ListIterator<Statement> iterator) {
         HashSet<String> fieldNames = new HashSet<>();
-        int lineNumberBefore = 0;
-        int lineNumberAfter = 0;
         Expression expression = null;
-        AttributeCode attributeCode = method.getAttribute("Code");
-
-        if (attributeCode != null) {
-            AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
-
-            if (lineNumberTable != null) {
-                LineNumber[] lineNumbers = lineNumberTable.getLineNumberTable();
-                lineNumberBefore = lineNumbers[0].getLineNumber();
-                lineNumberAfter = lineNumbers[lineNumbers.length - 1].getLineNumber();
-
-                for (ClassFileConstructorOrMethodDeclaration cfcomd : cfcd.getBodyDeclaration().getMethodDeclarations()) {
-                    if ((cfcomd.getFirstLineNumber() > lineNumberBefore) && (cfcomd.getFirstLineNumber() < lineNumberAfter)) {
-                        lineNumberAfter = Printer.UNKNOWN_LINE_NUMBER;
-                        break;
-                    }
-                }
-            }
-        }
 
         while (iterator.hasNext()) {
             Statement statement = iterator.next();
@@ -210,15 +187,27 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
 
             putFields.add(cfboe);
             fieldNames.add(fieldName);
+            expression = null;
         }
 
-        if ((lineNumberAfter != Printer.UNKNOWN_LINE_NUMBER) && (expression != null) && (expression.getLineNumber() != lineNumberAfter)) {
+        int lastLineNumber;
+
+        if (expression == null) {
+            lastLineNumber = (firstLineNumber == Printer.UNKNOWN_LINE_NUMBER) ? Printer.UNKNOWN_LINE_NUMBER : firstLineNumber+1;
+        } else {
+            lastLineNumber = expression.getLineNumber();
+        }
+
+        if (firstLineNumber < lastLineNumber) {
             Iterator<BinaryOperatorExpression> ite = putFields.iterator();
 
             while (ite.hasNext()) {
                 int lineNumber = ite.next().getLineNumber();
 
-                if ((lineNumberBefore <= lineNumber) && (lineNumber <= lineNumberAfter)) {
+                if ((firstLineNumber <= lineNumber) && (lastLineNumber <= lastLineNumber)) {
+                    if (lastLineNumber == lastLineNumber) {
+                        lastLineNumber++;
+                    }
                     ite.remove();
                 }
             }

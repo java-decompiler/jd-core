@@ -204,24 +204,24 @@ public class ByteCodeWriter {
                     ConstantMemberRef constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                     ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    String name = constants.getConstantString(constantNameAndType.getNameIndex());
-                    String descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                    String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+                    String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
 
                     sb.append(" ").append(typeName).append('.').append(name).append(" : ").append(descriptor);
                     break;
                 case 180: case 181: case 182: case 183: case 184: // GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    name = constants.getConstantString(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                    name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
                     break;
                 case 185: case 186: // INVOKEINTERFACE, INVOKEDYNAMIC
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    name = constants.getConstantString(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                    name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
 
@@ -302,7 +302,7 @@ public class ByteCodeWriter {
             case Constant.CONSTANT_String:
                 sb.append(" '");
                 int stringIndex = ((ConstantString) constant).getStringIndex();
-                String str = constants.getConstantString(stringIndex);
+                String str = constants.getConstantUtf8(stringIndex);
 
                 for (char c : str.toCharArray()) {
                     switch (c) {

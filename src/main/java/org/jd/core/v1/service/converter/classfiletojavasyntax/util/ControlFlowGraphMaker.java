@@ -98,7 +98,7 @@ public class ControlFlowGraphMaker {
                     case 182: case 183: case 184: // INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC
                         ConstantMemberRef constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                        String descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                        String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
                         if (descriptor.charAt(descriptor.length()-1) == 'V') {
                             lastStatementOffset = offset;
                         }
@@ -106,7 +106,7 @@ public class ControlFlowGraphMaker {
                     case 185: case 186: // INVOKEINTERFACE, INVOKEDYNAMIC
                         constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                         constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                        descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                        descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
                         offset += 2; // Skip 2 bytes
                         if (descriptor.charAt(descriptor.length()-1) == 'V') {
                             lastStatementOffset = offset;

@@ -22,13 +22,19 @@ public class ConstantPool {
         return (T)constants[index];
     }
 
-    public String getConstantTypeName(int classIndex) {
-        ConstantClass cc = (ConstantClass)constants[classIndex];
+    public String getConstantTypeName(int index) {
+        ConstantClass cc = (ConstantClass)constants[index];
         ConstantUtf8 cutf8 = (ConstantUtf8)constants[cc.getNameIndex()];
         return cutf8.getValue();
     }
 
     public String getConstantString(int index) {
+        ConstantString cString = (ConstantString)constants[index];
+        ConstantUtf8 cutf8 = (ConstantUtf8)constants[cString.getStringIndex()];
+        return cutf8.getValue();
+    }
+
+    public String getConstantUtf8(int index) {
         ConstantUtf8 cutf8 = (ConstantUtf8)constants[index];
         return cutf8.getValue();
     }

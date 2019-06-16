@@ -827,7 +827,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens.add(MODULE);
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(DeclarationToken.MODULE, declaration.getName().replace('.', '/'), declaration.getName(), null));
+        tokens.add(new DeclarationToken(DeclarationToken.MODULE, declaration.getInternalName(), declaration.getName(), null));
         fragments.addTokensFragment(tokens);
 
         StartBodyFragment start = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -915,7 +915,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         }
 
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(ReferenceToken.MODULE, moduleInfo.getName().replace('.', '/'), moduleInfo.getName(), null, null));
+        tokens.add(new ReferenceToken(ReferenceToken.MODULE, "module-info", moduleInfo.getName(), null, null));
         tokens.add(TextToken.SEMICOLON);
     }
 
@@ -931,7 +931,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             if (packageInfo.getModuleInfoNames().size() == 1) {
                 tokens.add(TextToken.SPACE);
                 String moduleInfoName = packageInfo.getModuleInfoNames().get(0);
-                tokens.add(new ReferenceToken(ReferenceToken.MODULE, moduleInfoName.replace('.', '/'), moduleInfoName, null, null));
+                tokens.add(new ReferenceToken(ReferenceToken.MODULE, "module-info", moduleInfoName, null, null));
             } else {
                 tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
                 tokens.add(NewLineToken.NEWLINE_1);
@@ -939,13 +939,13 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 Iterator<String> iterator = packageInfo.getModuleInfoNames().iterator();
 
                 String moduleInfoName = iterator.next();
-                tokens.add(new ReferenceToken(ReferenceToken.MODULE, moduleInfoName.replace('.', '/'), moduleInfoName, null, null));
+                tokens.add(new ReferenceToken(ReferenceToken.MODULE, "module-info", moduleInfoName, null, null));
 
                 while (iterator.hasNext()) {
                     tokens.add(TextToken.COMMA);
                     tokens.add(NewLineToken.NEWLINE_1);
                     moduleInfoName = iterator.next();
-                    tokens.add(new ReferenceToken(ReferenceToken.MODULE, moduleInfoName.replace('.', '/'), moduleInfoName, null, null));
+                    tokens.add(new ReferenceToken(ReferenceToken.MODULE, "module-info", moduleInfoName, null, null));
                 }
 
                 tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
@@ -1280,6 +1280,10 @@ public class CompilationUnitVisitor extends StatementVisitor {
         }
         if ((flags & FLAG_PROTECTED) != 0) {
             tokens.add(PROTECTED);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_DEFAULT) != 0) {
+            tokens.add(DEFAULT);
             tokens.add(TextToken.SPACE);
         }
         if ((flags & FLAG_STATIC) != 0) {

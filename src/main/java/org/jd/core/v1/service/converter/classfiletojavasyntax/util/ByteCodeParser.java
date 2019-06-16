@@ -727,8 +727,8 @@ public class ByteCodeParser {
                     typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                     ot = objectTypeMaker.make(typeName);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    name = constants.getConstantString(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                    name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
                     BaseExpression parameters = getParameters(statements, stack, descriptor);
                     Type returnedType = signatureParser.parseReturnedType(descriptor);
 
@@ -777,7 +777,7 @@ public class ByteCodeParser {
                                 "toString".equals(name) && "()Ljava/lang/String;".equals(descriptor)) {
                                 typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                                 if ("java/lang/StringBuilder".equals(typeName) || "java/lang/StringBuffer".equals(typeName)) {
-                                    stack.push(CreateConcatStringUtil.create(expression1, lineNumber, typeName));
+                                    stack.push(StringConcatenationUtil.create(expression1, lineNumber, typeName));
                                     break;
                                 }
                             }
@@ -1043,7 +1043,7 @@ public class ByteCodeParser {
                 break;
             case Constant.CONSTANT_String:
                 int stringIndex = ((ConstantString)constant).getStringIndex();
-                stack.push(new StringConstantExpression(lineNumber, constants.getConstantString(stringIndex)));
+                stack.push(new StringConstantExpression(lineNumber, constants.getConstantUtf8(stringIndex)));
                 break;
         }
     }
@@ -1273,27 +1273,39 @@ public class ByteCodeParser {
             }
         }
 
-        // Create lambda expression
+        // Create expression
         ConstantMemberRef constantMemberRef = constants.getConstant(index);
 
         ConstantNameAndType indyCnat = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        //String indyMethodName = constants.getConstantString(indyCnat.getNameIndex());
-        String indyDescriptor = constants.getConstantString(indyCnat.getDescriptorIndex());
+        String indyMethodName = constants.getConstantUtf8(indyCnat.getNameIndex());
+        String indyDescriptor = constants.getConstantUtf8(indyCnat.getDescriptorIndex());
         BaseExpression indyParameters = getParameters(statements, stack, indyDescriptor);
         Type indyType = signatureParser.parseReturnedType(indyDescriptor);
 
         BootstrapMethod bootstrapMethod = attributeBootstrapMethods.getBootstrapMethods()[constantMemberRef.getClassIndex()];
         int[] bootstrapArguments = bootstrapMethod.getBootstrapArguments();
+
+        if ("makeConcatWithConstants".equals(indyMethodName)) {
+            // Create Java 9+ string concatenation
+            String recipe = constants.getConstantString(bootstrapArguments[0]);
+            stack.push(StringConcatenationUtil.create(recipe, indyParameters));
+            return;
+        } else if ("makeConcat".equals(indyMethodName)) {
+            // Create Java 9+ string concatenation
+            stack.push(StringConcatenationUtil.create(indyParameters));
+            return;
+        }
+
         ConstantMethodType cmt0 = constants.getConstant(bootstrapArguments[0]);
-        String descriptor0 = constants.getConstantString(cmt0.getDescriptorIndex());
+        String descriptor0 = constants.getConstantUtf8(cmt0.getDescriptorIndex());
         Type returnedType = signatureParser.parseReturnedType(descriptor0);
         int parameterCount = signatureParser.parseParameterTypes(descriptor0).size();
         ConstantMethodHandle constantMethodHandle1 = constants.getConstant(bootstrapArguments[1]);
         ConstantMemberRef cmr1 = constants.getConstant(constantMethodHandle1.getReferenceIndex());
         String typeName = constants.getConstantTypeName(cmr1.getClassIndex());
         ConstantNameAndType cnat1 = constants.getConstant(cmr1.getNameAndTypeIndex());
-        String name1 = constants.getConstantString(cnat1.getNameIndex());
-        String descriptor1 = constants.getConstantString(cnat1.getDescriptorIndex());
+        String name1 = constants.getConstantUtf8(cnat1.getNameIndex());
+        String descriptor1 = constants.getConstantUtf8(cnat1.getDescriptorIndex());
 
         if (typeName.equals(internalTypeName)) {
             for (ClassFileConstructorOrMethodDeclaration methodDeclaration : bodyDeclaration.getMethodDeclarations()) {
@@ -1637,7 +1649,7 @@ public class ByteCodeParser {
         ConstantMemberRef constantMemberRef = constants.getConstant(index);
         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantString(constantNameAndType.getNameIndex());
+        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
 
         if (name.equals("TYPE") && typeName.startsWith("java/lang/")) {
             switch (typeName) {
@@ -1653,7 +1665,7 @@ public class ByteCodeParser {
             }
         }
 
-        String descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+        String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
         Type type = signatureParser.parseTypeSignature(descriptor);
         ObjectType ot = objectTypeMaker.make(typeName);
         Expression objectRef = new ObjectTypeReferenceExpression(lineNumber, ot, !internalTypeName.equals(typeName) || localVariableMaker.containsName(name));
@@ -1665,8 +1677,8 @@ public class ByteCodeParser {
         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
         ObjectType ot = objectTypeMaker.make(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantString(constantNameAndType.getNameIndex());
-        String descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+        String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
         Type type = signatureParser.parseTypeSignature(descriptor);
         Expression valueRef = stack.pop();
         Expression objectRef = new ObjectTypeReferenceExpression(lineNumber, ot, !internalTypeName.equals(typeName) || localVariableMaker.containsName(name));
@@ -1679,8 +1691,8 @@ public class ByteCodeParser {
         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
         ObjectType ot = objectTypeMaker.make(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantString(constantNameAndType.getNameIndex());
-        String descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+        String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
         Type type = signatureParser.parseTypeSignature(descriptor);
         Expression objectRef = stack.pop();
         stack.push(new FieldReferenceExpression(lineNumber, type, getFieldInstanceReference(objectRef, ot,  name), typeName, name, descriptor));
@@ -1691,8 +1703,8 @@ public class ByteCodeParser {
         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
         ObjectType ot = objectTypeMaker.make(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantString(constantNameAndType.getNameIndex());
-        String descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+        String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
         Type type = signatureParser.parseTypeSignature(descriptor);
         Expression valueRef = stack.pop();
         Expression objectRef = stack.pop();
@@ -1942,12 +1954,12 @@ public class ByteCodeParser {
         ConstantPool constants = method.getConstants();
         ConstantMemberRef constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantString(constantNameAndType.getNameIndex());
+        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
 
         if (! "$assertionsDisabled".equals(name))
             return false;
 
-        String descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+        String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
 
         if (! "Z".equals(descriptor))
             return false;
@@ -2309,7 +2321,7 @@ public class ByteCodeParser {
                 case 182: case 183: // INVOKEVIRTUAL, INVOKESPECIAL
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
                     depth -= 1 + countMethodParameters(descriptor);
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
@@ -2319,7 +2331,7 @@ public class ByteCodeParser {
                 case 184: // INVOKESTATIC
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
                     depth -= countMethodParameters(descriptor);
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
@@ -2329,7 +2341,7 @@ public class ByteCodeParser {
                 case 185: // INVOKEINTERFACE
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
                     depth -= 1 + countMethodParameters(descriptor);
                     offset += 2; // Skip 'count' and one byte
 
@@ -2340,7 +2352,7 @@ public class ByteCodeParser {
                 case 186: // INVOKEDYNAMIC
                     constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantString(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
                     depth -= countMethodParameters(descriptor);
                     offset += 2; // Skip 2 bytes
 

@@ -9,7 +9,13 @@ package org.jd.core.v1.api.printer;
 
 
 public interface Printer {
-    int UNKNOWN_LINE_NUMBER = 0;
+    void start(int maxLineNumber, int majorVersion, int minorVersion);
+    void end();
+
+    void printText(String text);
+    void printNumericConstant(String constant);
+    void printStringConstant(String constant, String ownerInternalName);
+    void printKeyword(String keyword);
 
     // Declaration & reference types
     int TYPE = 1;
@@ -19,29 +25,23 @@ public interface Printer {
     int PACKAGE = 5;
     int MODULE = 6;
 
-    // Marker types
-    int COMMENT = 1;
-    int JAVADOC = 2;
-    int ERROR = 3;
-    int IMPORT_STATEMENTS = 4;
-
-    void start(int maxLineNumber, int majorVersion, int minorVersion);
-    void end();
-
-    void printText(String text);
-    void printNumericConstant(String constant);
-    void printStringConstant(String constant, String ownerInternalName);
-    void printKeyword(String keyword);
-
     void printDeclaration(int type, String internalTypeName, String name, String descriptor);
     void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName);
 
     void indent();
     void unindent();
 
+    int UNKNOWN_LINE_NUMBER = 0;
+
     void startLine(int lineNumber);
     void endLine();
     void extraLine(int count);
+
+    // Marker types
+    int COMMENT = 1;
+    int JAVADOC = 2;
+    int ERROR = 3;
+    int IMPORT_STATEMENTS = 4;
 
     void startMarker(int type);
     void endMarker(int type);

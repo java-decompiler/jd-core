@@ -191,8 +191,8 @@ public class ClassFileDeserializer {
             int signatureIndex = reader.readUnsignedShort();
             HashMap<String, Attribute> attributes = loadAttributes(reader, constants);
 
-            String name = constants.getConstantString(nameIndex);
-            String signature = constants.getConstantString(signatureIndex);
+            String name = constants.getConstantUtf8(nameIndex);
+            String signature = constants.getConstantUtf8(signatureIndex);
 
             fields[i] = new Field(accessFlags, name, signature, attributes);
         }
@@ -213,8 +213,8 @@ public class ClassFileDeserializer {
             int signatureIndex = reader.readUnsignedShort();
             HashMap<String, Attribute> attributes = loadAttributes(reader, constants);
 
-            String name = constants.getConstantString(nameIndex);
-            String signature = constants.getConstantString(signatureIndex);
+            String name = constants.getConstantUtf8(nameIndex);
+            String signature = constants.getConstantUtf8(signatureIndex);
 
             methods[i] = new Method(accessFlags, name, signature, attributes, constants);
         }
@@ -284,7 +284,7 @@ public class ClassFileDeserializer {
                         attributes.put(name, new AttributeModule(
                                 constants.getConstantTypeName(reader.readUnsignedShort()),
                                 reader.readUnsignedShort(),
-                                constants.getConstantString(reader.readUnsignedShort()),
+                                constants.getConstantUtf8(reader.readUnsignedShort()),
                                 loadModuleInfos(reader, constants),
                                 loadPackageInfos(reader, constants),
                                 loadPackageInfos(reader, constants),
@@ -310,12 +310,12 @@ public class ClassFileDeserializer {
                     case "Signature":
                         if (attributeLength != 2)
                             throw new ClassFileFormatException("Invalid attribute length");
-                        attributes.put(name, new AttributeSignature(constants.getConstantString(reader.readUnsignedShort())));
+                        attributes.put(name, new AttributeSignature(constants.getConstantUtf8(reader.readUnsignedShort())));
                         break;
                     case "SourceFile":
                         if (attributeLength != 2)
                             throw new ClassFileFormatException("Invalid attribute length");
-                        attributes.put(name, new AttributeSourceFile(constants.getConstantString(reader.readUnsignedShort())));
+                        attributes.put(name, new AttributeSourceFile(constants.getConstantUtf8(reader.readUnsignedShort())));
                         break;
                     case "Synthetic":
                         if (attributeLength != 0)
@@ -346,17 +346,17 @@ public class ClassFileDeserializer {
                 return new ElementValuePrimitiveType(type, constValue);
             case 'e':
                 int typeNameIndex = reader.readUnsignedShort();
-                String typeName = constants.getConstantString(typeNameIndex);
+                String typeName = constants.getConstantUtf8(typeNameIndex);
                 int constNameIndex = reader.readUnsignedShort();
-                String constName = constants.getConstantString(constNameIndex);
+                String constName = constants.getConstantUtf8(constNameIndex);
                 return new ElementValueEnumConstValue(typeName, constName);
             case 'c':
                 int classInfoIndex = reader.readUnsignedShort();
-                String classInfo = constants.getConstantString(classInfoIndex);
+                String classInfo = constants.getConstantUtf8(classInfoIndex);
                 return new ElementValueClassInfo(classInfo);
             case '@':
                 int typeIndex = reader.readUnsignedShort();
-                typeName = constants.getConstantString(typeIndex);
+                typeName = constants.getConstantUtf8(typeIndex);
                 return new ElementValueAnnotationValue(new Annotation(typeName, loadElementValuePairs(reader, constants)));
             case '[':
                 return new ElementValueArrayValue(loadElementValues(reader, constants));
@@ -374,7 +374,7 @@ public class ClassFileDeserializer {
 
         for (int i=0; i < count; i++) {
             int elementNameIndex = reader.readUnsignedShort();
-            String elementName = constants.getConstantString(elementNameIndex);
+            String elementName = constants.getConstantUtf8(elementNameIndex);
             pairs[i] = new ElementValuePair(elementName, loadElementValue(reader, constants));
         }
 
@@ -487,7 +487,7 @@ public class ClassFileDeserializer {
 
             String innerTypeName = constants.getConstantTypeName(innerTypeIndex);
             String outerTypeName = (outerTypeIndex == 0) ? null : constants.getConstantTypeName(outerTypeIndex);
-            String innerName = (innerNameIndex == 0) ? null : constants.getConstantString(innerNameIndex);
+            String innerName = (innerNameIndex == 0) ? null : constants.getConstantUtf8(innerNameIndex);
 
             innerClasses[i] = new InnerClass(innerTypeName, outerTypeName, innerName, innerAccessFlags);
         }
@@ -509,8 +509,8 @@ public class ClassFileDeserializer {
             int descriptorIndex = reader.readUnsignedShort();
             int index = reader.readUnsignedShort();
 
-            String name = constants.getConstantString(nameIndex);
-            String descriptor = constants.getConstantString(descriptorIndex);
+            String name = constants.getConstantUtf8(nameIndex);
+            String descriptor = constants.getConstantUtf8(descriptorIndex);
 
             localVariables[i] = new LocalVariable(startPc, length, name, descriptor, index);
         }
@@ -532,8 +532,8 @@ public class ClassFileDeserializer {
             int descriptorIndex = reader.readUnsignedShort();
             int index = reader.readUnsignedShort();
 
-            String name = constants.getConstantString(nameIndex);
-            String descriptor = constants.getConstantString(descriptorIndex);
+            String name = constants.getConstantUtf8(nameIndex);
+            String descriptor = constants.getConstantUtf8(descriptorIndex);
 
             localVariables[i] = new LocalVariableType(startPc, length, name, descriptor, index);
         }
@@ -565,7 +565,7 @@ public class ClassFileDeserializer {
         for (int i=0; i<count; i++) {
             int nameIndex = reader.readUnsignedShort();
 
-            String name = constants.getConstantString(nameIndex);
+            String name = constants.getConstantUtf8(nameIndex);
 
             parameters[i] = new MethodParameter(name, reader.readUnsignedShort());
         }
@@ -586,7 +586,7 @@ public class ClassFileDeserializer {
             int moduleVersionIndex = reader.readUnsignedShort();
 
             String moduleInfoName = constants.getConstantTypeName(moduleInfoIndex);
-            String moduleVersion = (moduleVersionIndex==0) ? null : constants.getConstantString(moduleVersionIndex);
+            String moduleVersion = (moduleVersionIndex==0) ? null : constants.getConstantUtf8(moduleVersionIndex);
 
             moduleInfos[i] = new ModuleInfo(moduleInfoName, moduleFlag, moduleVersion);
         }
@@ -652,7 +652,7 @@ public class ClassFileDeserializer {
 
         for (int i=0; i<count; i++) {
             int typeIndex = reader.readUnsignedShort();
-            String typeName = constants.getConstantString(typeIndex);
+            String typeName = constants.getConstantUtf8(typeIndex);
             annotations[i] = new Annotation(typeName, loadElementValuePairs(reader, constants));
         }
 
