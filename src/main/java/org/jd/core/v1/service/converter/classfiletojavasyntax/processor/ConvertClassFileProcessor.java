@@ -14,10 +14,7 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.*;
 import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
-import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
-import org.jd.core.v1.model.javasyntax.declaration.ModuleDeclaration;
-import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.reference.ElementValue;
@@ -180,11 +177,18 @@ public class ConvertClassFileProcessor implements Processor {
                 } else if ("<clinit>".equals(name)) {
                     list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, firstLineNumber));
                 } else {
+                    ClassFileMethodDeclaration methodDeclaration;
                     SignatureParser.MethodTypes methodTypes = parser.parseMethodSignature(method);
-                    list.add(new ClassFileMethodDeclaration(
+                    list.add(methodDeclaration = new ClassFileMethodDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
                             methodTypes.returned, methodTypes.parameters, methodTypes.exceptions, defaultAnnotationValue,
                             firstLineNumber));
+                    if ((classFile.getAccessFlags() & Constants.ACC_INTERFACE) != 0) {
+                        if (methodDeclaration.getFlags() == Constants.ACC_PUBLIC) {
+                            // For interfaces, add 'default' access flag on public methods
+                            methodDeclaration.setFlags(Declaration.FLAG_PUBLIC|Declaration.FLAG_DEFAULT);
+                        }
+                    }
                 }
             }
 
@@ -284,7 +288,7 @@ public class ConvertClassFileProcessor implements Processor {
         List<ModuleDeclaration.ServiceInfo> provides = convertModuleDeclarationServiceInfo(attributeModule.getProvides());
 
         return new ModuleDeclaration(
-                attributeModule.getFlags(), attributeModule.getName(), attributeModule.getName(),
+                attributeModule.getFlags(), classFile.getInternalTypeName(), attributeModule.getName(),
                 attributeModule.getVersion(), requires, exports, opens, uses, provides);
     }
 

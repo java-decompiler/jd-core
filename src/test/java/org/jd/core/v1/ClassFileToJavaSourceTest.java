@@ -335,8 +335,178 @@ public class ClassFileToJavaSourceTest extends TestCase {
     }
 
     @Test
+    public void testJdk901While() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/While");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make(":  15]", "while (i-- > 0)")));
+        assertTrue(source.matches(PatternMaker.make(":  23]", "while (i < 10)")));
+        assertTrue(source.matches(PatternMaker.make(":  42]", "while (i0 > 20)")));
+        assertTrue(source.matches(PatternMaker.make("[ 113:   0]", "continue;")));
+        assertTrue(source.matches(PatternMaker.make("[ 128:   0]", "break;")));
+        assertTrue(source.matches(PatternMaker.make("[ 158:   0]", "while (true)")));
+        assertTrue(source.matches(PatternMaker.make(": 232]", "while (++i < 10)")));
+        assertTrue(source.indexOf("while (i == 4 && i == 5 && i == 6)") != -1);
+        assertTrue(source.indexOf("while ((i == 1 || (i == 5 && i == 6 && i == 7) || i == 8 || (i == 9 && i == 10 && i == 11)) && (i == 4 || i % 200 > 50) && (i > 3 || i > 4))") != -1);
+        assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4))") != -1);
+        assertFalse(source.matches(PatternMaker.make("[ 348:   0]", "default:")));
+        assertFalse(source.matches(PatternMaker.make("[ 350: 348]", "continue;")));
+        assertTrue(source.matches(PatternMaker.make("[ 404: 404]", "System.out.println(\"a\");")));
+        assertTrue(source.matches(PatternMaker.make("[ 431: 431]", "System.out.println(\"a\");")));
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
+    public void testJdk1002While() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-10.0.2.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/While");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make(":  15]", "while (i-- > 0)")));
+        assertTrue(source.matches(PatternMaker.make(":  23]", "while (i < 10)")));
+        assertTrue(source.matches(PatternMaker.make(":  42]", "while (i0 > 20)")));
+        assertTrue(source.matches(PatternMaker.make("[ 113:   0]", "continue;")));
+        assertTrue(source.matches(PatternMaker.make("[ 128:   0]", "break;")));
+        assertTrue(source.matches(PatternMaker.make("[ 158:   0]", "while (true)")));
+        assertTrue(source.matches(PatternMaker.make(": 232]", "while (++i < 10)")));
+        assertTrue(source.indexOf("while (i == 4 && i == 5 && i == 6)") != -1);
+        assertTrue(source.indexOf("while ((i == 1 || (i == 5 && i == 6 && i == 7) || i == 8 || (i == 9 && i == 10 && i == 11)) && (i == 4 || i % 200 > 50) && (i > 3 || i > 4))") != -1);
+        assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4))") != -1);
+        assertFalse(source.matches(PatternMaker.make("[ 348:   0]", "default:")));
+        assertFalse(source.matches(PatternMaker.make("[ 350: 348]", "continue;")));
+        assertTrue(source.matches(PatternMaker.make("[ 404: 404]", "System.out.println(\"a\");")));
+        assertTrue(source.matches(PatternMaker.make("[ 431: 431]", "System.out.println(\"a\");")));
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
     public void testJdk170DoWhile() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/DoWhile");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make(":  24]", "} while (i < 10);")));
+        assertTrue(source.matches(PatternMaker.make(":  32]", "} while (this == null);")));
+        assertTrue(source.matches(PatternMaker.make(":  44]", "++i;")));
+        assertTrue(source.matches(PatternMaker.make(":  46]", "while (i < 10);")));
+        assertTrue(source.matches(PatternMaker.make(":  72]", "while (i0 < 10)")));
+        assertTrue(source.matches(PatternMaker.make(":  77]", "i1--;")));
+        assertTrue(source.matches(PatternMaker.make(":  79]", "while (i1 > 0);")));
+        assertTrue(source.matches(PatternMaker.make(":  98]", "while (--i > 0.0F);")));
+        assertTrue(source.matches(PatternMaker.make(": 108]", "while (i-- > 0.0F);")));
+        assertTrue(source.indexOf("while ((i == 1 || (i == 5 && i == 6 && i == 7) || i == 8 || (i == 9 && i == 10 && i == 11)) && (i == 4 || i % 200 > 50) && (i > 3 || i > 4));") != -1);
+        assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));") != -1);
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
+    public void testJdk901DoWhile() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/DoWhile");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make(":  24]", "} while (i < 10);")));
+        assertTrue(source.matches(PatternMaker.make(":  32]", "} while (this == null);")));
+        assertTrue(source.matches(PatternMaker.make(":  44]", "++i;")));
+        assertTrue(source.matches(PatternMaker.make(":  46]", "while (i < 10);")));
+        assertTrue(source.matches(PatternMaker.make(":  72]", "while (i0 < 10)")));
+        assertTrue(source.matches(PatternMaker.make(":  77]", "i1--;")));
+        assertTrue(source.matches(PatternMaker.make(":  79]", "while (i1 > 0);")));
+        assertTrue(source.matches(PatternMaker.make(":  98]", "while (--i > 0.0F);")));
+        assertTrue(source.matches(PatternMaker.make(": 108]", "while (i-- > 0.0F);")));
+        assertTrue(source.indexOf("while ((i == 1 || (i == 5 && i == 6 && i == 7) || i == 8 || (i == 9 && i == 10 && i == 11)) && (i == 4 || i % 200 > 50) && (i > 3 || i > 4));") != -1);
+        assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));") != -1);
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
+    public void testJdk1002DoWhile() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-10.0.2.zip");
         Loader loader = new ZipLoader(is);
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
@@ -1946,6 +2116,98 @@ public class ClassFileToJavaSourceTest extends TestCase {
     }
 
     @Test
+    public void testJdk901Enum() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/Enum");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make(":  5]", "SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY;")));
+
+        assertTrue(source.matches(PatternMaker.make(":  9]", "MERCURY(3.303E23D, 2439700.0D),")));
+        assertTrue(source.matches(PatternMaker.make(": 17]", "URANUS(8.686E25D, 2.5559E7D),")));
+        assertTrue(source.matches(PatternMaker.make(": 20]", "NEPTUNE(1.024E26D, 2.4746E7D);")));
+        assertTrue(source.indexOf("this.mass = mass;") != -1);
+        assertTrue(source.matches(PatternMaker.make(": 27]", "this.radius = radius;")));
+        assertTrue(source.matches(PatternMaker.make(": 37]", "return 6.673E-11D * this.mass / this.radius * this.radius;")));
+        assertTrue(source.matches(PatternMaker.make(": 49]", "double earthWeight = Double.parseDouble(args[0]);")));
+        assertTrue(source.matches(PatternMaker.make(": 50]", "double mass = earthWeight / EARTH.surfaceGravity();")));
+        assertTrue(source.matches(PatternMaker.make(": 51]", "for (Planet p : values()) {")));
+        assertTrue(source.matches(PatternMaker.make(": 52]", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, Double.valueOf(p.surfaceWeight(mass)) } );")));
+
+        assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
+
+        assertTrue(source.indexOf("public static final enum") == -1);
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
+    public void testJdk1002Enum() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-10.0.2.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/Enum");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make(":  5]", "SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY;")));
+
+        assertTrue(source.matches(PatternMaker.make(":  9]", "MERCURY(3.303E23D, 2439700.0D),")));
+        assertTrue(source.matches(PatternMaker.make(": 17]", "URANUS(8.686E25D, 2.5559E7D),")));
+        assertTrue(source.matches(PatternMaker.make(": 20]", "NEPTUNE(1.024E26D, 2.4746E7D);")));
+        assertTrue(source.indexOf("this.mass = mass;") != -1);
+        assertTrue(source.matches(PatternMaker.make(": 27]", "this.radius = radius;")));
+        assertTrue(source.matches(PatternMaker.make(": 37]", "return 6.673E-11D * this.mass / this.radius * this.radius;")));
+        assertTrue(source.matches(PatternMaker.make(": 49]", "double earthWeight = Double.parseDouble(args[0]);")));
+        assertTrue(source.matches(PatternMaker.make(": 50]", "double mass = earthWeight / EARTH.surfaceGravity();")));
+        assertTrue(source.matches(PatternMaker.make(": 51]", "for (Planet p : values()) {")));
+        assertTrue(source.matches(PatternMaker.make(": 52]", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, Double.valueOf(p.surfaceWeight(mass)) } );")));
+
+        assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
+
+        assertTrue(source.indexOf("public static final enum") == -1);
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
     public void testJdk118Basic() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.1.8.zip");
         Loader loader = new ZipLoader(is);
@@ -2022,6 +2284,84 @@ public class ClassFileToJavaSourceTest extends TestCase {
     }
 
     @Test
+    public void testJdk901Basic() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/Basic");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make(":  18]", "protected short short56 = 56;")));
+        assertTrue(source.matches(PatternMaker.make(":  19]", "protected int int78 = 78;")));
+        assertTrue(source.matches(PatternMaker.make(":  43]", "Class class3 = String.class, class2 = class3, class1 = class2;")));
+        assertTrue(source.matches(PatternMaker.make("String stringNull = null;")));
+        assertTrue(source.indexOf("public static native int read();") != -1);
+        assertTrue(source.matches(PatternMaker.make("[ 171: 171]", "return str + str;")));
+        assertTrue(source.matches(PatternMaker.make("[ 174: 174]", "return str;")));
+        assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
+    public void testJdk1002Basic() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-10.0.2.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/Basic");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make(":  18]", "protected short short56 = 56;")));
+        assertTrue(source.matches(PatternMaker.make(":  19]", "protected int int78 = 78;")));
+        assertTrue(source.matches(PatternMaker.make(":  43]", "Class class3 = String.class, class2 = class3, class1 = class2;")));
+        assertTrue(source.matches(PatternMaker.make("String stringNull = null;")));
+        assertTrue(source.indexOf("public static native int read();") != -1);
+        assertTrue(source.matches(PatternMaker.make("[ 171: 171]", "return str + str;")));
+        assertTrue(source.matches(PatternMaker.make("[ 174: 174]", "return str;")));
+        assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
     public void testJdk180Lambda() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.8.0.zip");
         Loader loader = new ZipLoader(is);
@@ -2060,6 +2400,45 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 65]", "MethodType mtToString = MethodType.methodType(String.class);")));
         assertTrue(source.matches(PatternMaker.make(": 66]", "MethodType mtSetter = MethodType.methodType(void.class, Object.class);")));
         assertTrue(source.matches(PatternMaker.make(": 67]", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class[]", "{ String.class")));
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf("/* ") == -1);
+    }
+
+    @Test
+    public void testJdk901InterfaceWithDefaultMethods() throws Exception {
+        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", "org/jd/core/test/InterfaceWithDefaultMethods");
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        assertTrue(source.matches(PatternMaker.make("public interface InterfaceWithDefaultMethods")));
+        assertTrue(source.matches(PatternMaker.make("void setTime(int paramInt1, int paramInt2, int paramInt3);")));
+        assertTrue(source.matches(PatternMaker.make("LocalDateTime getLocalDateTime();")));
+        assertTrue(source.matches(PatternMaker.make("static ZoneId getZoneId(String zoneString)")));
+        assertTrue(source.matches(PatternMaker.make(": 24]", "return unsafeGetZoneId(zoneString);")));
+        assertTrue(source.matches(PatternMaker.make(": 26]", "System.err.println(\"Invalid time zone: \" + zoneString + \"; using default time zone instead.\");")));
+        assertTrue(source.matches(PatternMaker.make(": 27]", "return ZoneId.systemDefault();")));
+        assertTrue(source.matches(PatternMaker.make(": 32]", "default ZonedDateTime getZonedDateTime(String zoneString) { return getZonedDateTime(getLocalDateTime(), getZoneId(zoneString)); }")));
+        assertTrue(source.matches(PatternMaker.make(": 36]", "private static ZoneId unsafeGetZoneId(String zoneString) { return ZoneId.of(zoneString); }")));
+        assertTrue(source.matches(PatternMaker.make(": 40]", "private ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId) { return ZonedDateTime.of(localDateTime, zoneId); }")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
         assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
