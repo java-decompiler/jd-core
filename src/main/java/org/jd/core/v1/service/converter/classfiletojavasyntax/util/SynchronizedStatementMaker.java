@@ -10,6 +10,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.statement.SynchronizedStatement;
@@ -20,13 +21,10 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 
 import java.util.Iterator;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.util.ReflectionUtil.getExpression;
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.util.ReflectionUtil.invokeGetter;
-
 
 public class SynchronizedStatementMaker {
 
-    public static Statement make(LocalVariableMaker localVariableMaker, Statements statements, Statements<Statement> tryStatements) {
+    public static Statement make(LocalVariableMaker localVariableMaker, Statements<Statement> statements, Statements<Statement> tryStatements) {
         // Remove monitor enter
         ClassFileMonitorEnterStatement monitorEnterStatement = (ClassFileMonitorEnterStatement) statements.removeLast();
         Expression monitor = monitorEnterStatement.getMonitor();
@@ -35,16 +33,24 @@ public class SynchronizedStatementMaker {
 
         if (monitorClass == ClassFileLocalVariableReferenceExpression.class) {
             if (!statements.isEmpty()) {
-                BinaryOperatorExpression boe = invokeGetter(statements.removeLast(), getExpression, BinaryOperatorExpression.class);
+                Statement statement = statements.removeLast();
 
-                if ((boe != null) && (boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class)) {
-                    ClassFileLocalVariableReferenceExpression m = (ClassFileLocalVariableReferenceExpression) monitor;
-                    ClassFileLocalVariableReferenceExpression l = boe.getGenericLeftExpression();
-                    assert l.getLocalVariable() == m.getLocalVariable();
-                    // Update monitor
-                    monitor = boe.getRightExpression();
-                    // Store synthetic local variable
-                    localVariable = l.getLocalVariable();
+                if (statement.getClass() == ExpressionStatement.class) {
+                    Expression expression = ((ExpressionStatement)statement).getExpression();
+
+                    if (expression.getClass() == BinaryOperatorExpression.class) {
+                        BinaryOperatorExpression boe = (BinaryOperatorExpression)expression;
+
+                        if ((boe != null) && (boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class)) {
+                            ClassFileLocalVariableReferenceExpression m = (ClassFileLocalVariableReferenceExpression) monitor;
+                            ClassFileLocalVariableReferenceExpression l = boe.getGenericLeftExpression();
+                            assert l.getLocalVariable() == m.getLocalVariable();
+                            // Update monitor
+                            monitor = boe.getRightExpression();
+                            // Store synthetic local variable
+                            localVariable = l.getLocalVariable();
+                        }
+                    }
                 }
             }
         } else if (monitorClass == BinaryOperatorExpression.class) {

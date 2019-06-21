@@ -23,8 +23,6 @@ import java.util.Iterator;
 import java.util.ListIterator;
 
 import static org.jd.core.v1.model.javasyntax.statement.ContinueStatement.CONTINUE;
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.util.ReflectionUtil.getExpression;
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.util.ReflectionUtil.invokeGetter;
 
 public class LoopStatementMaker {
     protected static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
@@ -378,7 +376,19 @@ public class LoopStatementMaker {
         }
 
         // String s = arr$[i$];
-        boe = invokeGetter(subStatements.get(0), getExpression, BinaryOperatorExpression.class);
+        statement = subStatements.getFirst();
+
+        if (statement.getClass() != ExpressionStatement.class) {
+            return null;
+        }
+
+        expression = ((ExpressionStatement)statement).getExpression();
+
+        if (expression.getClass() != BinaryOperatorExpression.class) {
+            return null;
+        }
+
+        boe = (BinaryOperatorExpression)expression;
 
         if ((boe.getRightExpression().getClass() != ArrayExpression.class) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getLineNumber() != condition.getLineNumber())) {
             return null;
@@ -401,7 +411,19 @@ public class LoopStatementMaker {
         }
 
         // arr$ = array;
-        boe = invokeGetter(statements.get(statementsSize-3), getExpression, BinaryOperatorExpression.class);
+        statement = statements.get(statementsSize-3);
+
+        if (statement.getClass() != ExpressionStatement.class) {
+            return null;
+        }
+
+        expression = ((ExpressionStatement)statement).getExpression();
+
+        if (expression.getClass() != BinaryOperatorExpression.class) {
+            return null;
+        }
+
+        boe = (BinaryOperatorExpression)expression;
 
         if (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) {
             return null;
@@ -413,9 +435,21 @@ public class LoopStatementMaker {
         Expression array = boe.getRightExpression();
 
         // i$ = 0;
-        boe = invokeGetter(statements.get(statementsSize-1), getExpression, BinaryOperatorExpression.class);
+        statement = statements.get(statementsSize-1);
 
-        if ((boe == null) || (boe.getLineNumber() != lineNumber) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getRightExpression().getClass() != IntegerConstantExpression.class)) {
+        if (statement.getClass() != ExpressionStatement.class) {
+            return null;
+        }
+
+        expression = ((ExpressionStatement)statement).getExpression();
+
+        if (expression.getClass() != BinaryOperatorExpression.class) {
+            return null;
+        }
+
+        boe = (BinaryOperatorExpression)expression;
+
+        if ((boe.getLineNumber() != lineNumber) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getRightExpression().getClass() != IntegerConstantExpression.class)) {
             return null;
         }
         if ((((IntegerConstantExpression)boe.getRightExpression()).getValue() != 0) || (((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticIndex)) {

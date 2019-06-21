@@ -13,6 +13,7 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.util.DefaultList;
@@ -20,72 +21,144 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.HashMap;
 import java.util.ListIterator;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.util.ReflectionUtil.*;
-
 
 public class SwitchStatementMaker {
     protected static final Integer MINUS_ONE = Integer.valueOf(-1);
 
     @SuppressWarnings("unchecked")
-    public static void makeSwitchString(LocalVariableMaker localVariableMaker, Statements statements, SwitchStatement switchStatement) {
+    public static void makeSwitchString(LocalVariableMaker localVariableMaker, Statements<Statement> statements, SwitchStatement switchStatement) {
         int size = statements.size();
         SwitchStatement previousSwitchStatement = (SwitchStatement)statements.get(size - 2);
 
         if ((previousSwitchStatement.getCondition().getLineNumber() == switchStatement.getCondition().getLineNumber()) && (previousSwitchStatement.getCondition().getClass() == MethodInvocationExpression.class)) {
-            AbstractLocalVariable syntheticLV1 = invokeGetters(previousSwitchStatement.getCondition(), getExpression_getLocalVariable, AbstractLocalVariable.class);
+            Expression expression = previousSwitchStatement.getCondition();
 
-            if (ReflectionUtil.equals(syntheticLV1, invokeGetters(statements.get(size - 4), getExpression_getLeftExpression_getLocalVariable))) {
-                BinaryOperatorExpression boe2 = invokeGetter(statements.get(size - 3), getExpression, BinaryOperatorExpression.class);
+            if (expression.getClass() == MethodInvocationExpression.class) {
+                expression = ((MethodInvocationExpression)expression).getExpression();
 
-                if ((boe2 != null) && MINUS_ONE.equals(invokeGetters(boe2, getRightExpression_getValue))) {
-                    AbstractLocalVariable syntheticLV2 = invokeGetter(switchStatement.getCondition(), getLocalVariable, AbstractLocalVariable.class);
+                if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                    AbstractLocalVariable syntheticLV1 = ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable();
+                    Statement statement = statements.get(size - 4);
 
-                    if (ReflectionUtil.equals(syntheticLV2, invokeGetter(boe2.getLeftExpression(), getLocalVariable))) {
-                        MethodInvocationExpression mie = (MethodInvocationExpression) previousSwitchStatement.getCondition();
+                    if (statement.getClass() == ExpressionStatement.class) {
+                        expression = ((ExpressionStatement)statement).getExpression();
 
-                        if (mie.getName().equals("hashCode") && mie.getDescriptor().equals("()I")) {
-                            // Pattern found ==> Parse cases of the synthetic switch statement 'previousSwitchStatement'
-                            HashMap<Integer, String> map = new HashMap<>();
+                        if (expression.getClass() == BinaryOperatorExpression.class) {
+                            expression = ((BinaryOperatorExpression)expression).getLeftExpression();
 
-                            // Create map<synthetic index -> string>
-                            for (SwitchStatement.Block block : previousSwitchStatement.getBlocks()) {
-                                BaseStatement stmts = block.getStatements();
+                            if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                                AbstractLocalVariable lv2 = ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable();
 
-                                assert (stmts != null) && (stmts instanceof Statements) && !((Statements)stmts).isEmpty();
+                                if (syntheticLV1.equals(lv2)) {
+                                    statement = statements.get(size - 3);
 
-                                for (Statement stmt : (Statements<Statement>)stmts) {
-                                    if (stmt.getClass() != IfStatement.class) {
-                                        break;
+                                    if (statement.getClass() == ExpressionStatement.class) {
+                                        expression = ((ExpressionStatement)statement).getExpression();
+
+                                        if (expression.getClass() == BinaryOperatorExpression.class) {
+                                            BinaryOperatorExpression boe2 = (BinaryOperatorExpression) expression;
+
+                                            expression = boe2.getRightExpression();
+
+                                            if ((expression.getClass() == IntegerConstantExpression.class) && MINUS_ONE.equals(((IntegerConstantExpression)expression).getValue())) {
+                                                expression = switchStatement.getCondition();
+
+                                                if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                                                    AbstractLocalVariable syntheticLV2 = ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable();
+
+                                                    if (syntheticLV2.equals(((ClassFileLocalVariableReferenceExpression)boe2.getLeftExpression()).getLocalVariable())) {
+                                                        MethodInvocationExpression mie = (MethodInvocationExpression) previousSwitchStatement.getCondition();
+
+                                                        if (mie.getName().equals("hashCode") && mie.getDescriptor().equals("()I")) {
+                                                            // Pattern found ==> Parse cases of the synthetic switch statement 'previousSwitchStatement'
+                                                            HashMap<Integer, String> map = new HashMap<>();
+
+                                                            // Create map<synthetic index -> string>
+                                                            for (SwitchStatement.Block block : previousSwitchStatement.getBlocks()) {
+                                                                BaseStatement stmts = block.getStatements();
+
+                                                                assert (stmts != null) && (stmts.getClass() == Statements.class) && !((Statements) stmts).isEmpty();
+
+                                                                for (Statement stmt : (Statements<Statement>) stmts) {
+                                                                    if (stmt.getClass() != IfStatement.class) {
+                                                                        break;
+                                                                    }
+
+                                                                    IfStatement is = (IfStatement) stmt;
+
+                                                                    expression = is.getCondition();
+
+                                                                    if (expression.getClass() != MethodInvocationExpression.class) {
+                                                                        break;
+                                                                    }
+
+                                                                    expression = ((MethodInvocationExpression) expression).getParameters().getFirst();
+
+                                                                    if (expression.getClass() != StringConstantExpression.class) {
+                                                                        break;
+                                                                    }
+
+                                                                    String string = ((StringConstantExpression) expression).getString();
+
+                                                                    statement = is.getStatements().getFirst();
+
+                                                                    if (statement.getClass() != ExpressionStatement.class) {
+                                                                        break;
+                                                                    }
+
+                                                                    expression = ((ExpressionStatement) statement).getExpression();
+
+                                                                    if (expression.getClass() != BinaryOperatorExpression.class) {
+                                                                        break;
+                                                                    }
+
+                                                                    expression = ((BinaryOperatorExpression) expression).getRightExpression();
+
+                                                                    if (expression.getClass() != IntegerConstantExpression.class) {
+                                                                        break;
+                                                                    }
+
+                                                                    Integer index = ((IntegerConstantExpression) expression).getValue();
+                                                                    map.put(index, string);
+                                                                }
+                                                            }
+
+                                                            // Replace synthetic index by string
+                                                            for (SwitchStatement.Block block : switchStatement.getBlocks()) {
+                                                                SwitchStatement.LabelBlock lb = (SwitchStatement.LabelBlock) block;
+
+                                                                if (lb.getLabel() != SwitchStatement.DEFAULT_LABEL) {
+                                                                    SwitchStatement.ExpressionLabel el = (SwitchStatement.ExpressionLabel) lb.getLabel();
+                                                                    IntegerConstantExpression nce = (IntegerConstantExpression) el.getExpression();
+                                                                    el.setExpression(new StringConstantExpression(nce.getLineNumber(), map.get(nce.getValue())));
+                                                                }
+                                                            }
+
+                                                            // Replace synthetic key
+                                                            statement = statements.get(size - 4);
+
+                                                            if (statement.getClass() == ExpressionStatement.class) {
+                                                                expression = ((ExpressionStatement) statement).getExpression();
+
+                                                                if (expression.getClass() == BinaryOperatorExpression.class) {
+                                                                    switchStatement.setCondition(((BinaryOperatorExpression)expression).getRightExpression());
+
+                                                                    // Remove next synthetic statements
+                                                                    statements.subList(size - 4, size - 1).clear();
+
+                                                                    // Remove synthetic local variables
+                                                                    localVariableMaker.removeLocalVariable(syntheticLV1);
+                                                                    localVariableMaker.removeLocalVariable(syntheticLV2);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
-
-                                    IfStatement is = (IfStatement) stmt;
-                                    String string = invokeGetters(is.getCondition(), getParameters_getString, String.class);
-                                    Statements sal = (Statements) is.getStatements();
-                                    Integer index = invokeGetters(sal.get(0), getExpression_getRightExpression_getValue, Integer.class);
-                                    map.put(index, string);
                                 }
                             }
-
-                            // Replace synthetic index by string
-                            for (SwitchStatement.Block block : switchStatement.getBlocks()) {
-                                SwitchStatement.LabelBlock lb = (SwitchStatement.LabelBlock) block;
-
-                                if (lb.getLabel() != SwitchStatement.DEFAULT_LABEL) {
-                                    SwitchStatement.ExpressionLabel el = (SwitchStatement.ExpressionLabel) lb.getLabel();
-                                    IntegerConstantExpression nce = (IntegerConstantExpression) el.getExpression();
-                                    el.setExpression(new StringConstantExpression(nce.getLineNumber(), map.get(nce.getValue())));
-                                }
-                            }
-
-                            // Replace synthetic key
-                            switchStatement.setCondition(invokeGetters(statements.get(size - 4), getExpression_getRightExpression, Expression.class));
-
-                            // Remove next synthetic statements
-                            statements.subList(size - 4, size - 1).clear();
-
-                            // Remove synthetic local variables
-                            localVariableMaker.removeLocalVariable(syntheticLV1);
-                            localVariableMaker.removeLocalVariable(syntheticLV2);
                         }
                     }
                 }
@@ -157,8 +230,34 @@ public class SwitchStatementMaker {
             }
 
             BinaryOperatorExpression boe = (BinaryOperatorExpression)expression;
-            Integer index = invokeGetters(boe, getRightExpression_getValue, Integer.class);
-            String name = invokeGetters(boe, getLeftExpression_getIndex_getExpression_getName, String.class);
+
+            expression = boe.getRightExpression();
+
+            if (expression.getClass() != IntegerConstantExpression.class) {
+                break;
+            }
+
+            Integer index = ((IntegerConstantExpression)expression).getValue();
+
+            expression = boe.getLeftExpression();
+
+            if (expression.getClass() != ArrayExpression.class) {
+                break;
+            }
+
+            expression = ((ArrayExpression)expression).getIndex();
+
+            if (expression.getClass() != MethodInvocationExpression.class) {
+                break;
+            }
+
+            expression = ((MethodInvocationExpression)expression).getExpression();
+
+            if (expression.getClass() != FieldReferenceExpression.class) {
+                break;
+            }
+
+            String name = ((FieldReferenceExpression)expression).getName();
 
             map.put(index, name);
         }

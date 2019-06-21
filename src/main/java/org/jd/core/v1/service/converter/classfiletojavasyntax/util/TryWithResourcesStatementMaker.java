@@ -20,12 +20,10 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.List;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.util.ReflectionUtil.*;
-
 
 public class TryWithResourcesStatementMaker {
 
-    public static Statement make(LocalVariableMaker localVariableMaker, Statements statements, Statements tryStatements, DefaultList<TryStatement.CatchClause> catchClauses, Statements<Statement> finallyStatements) {
+    public static Statement make(LocalVariableMaker localVariableMaker, Statements<Statement> statements, Statements tryStatements, DefaultList<TryStatement.CatchClause> catchClauses, Statements<Statement> finallyStatements) {
         int size = statements.size();
 
         if ((size < 2) || (finallyStatements == null) || (finallyStatements.size() != 1) || !checkThrowable(catchClauses)) {
@@ -38,38 +36,132 @@ public class TryWithResourcesStatementMaker {
             return null;
         }
 
-        BinaryOperatorExpression boe = invokeGetter(statements.get(size-2), getExpression, BinaryOperatorExpression.class);
-
-        if (boe == null) {
-            return null;
-        }
-
         IfStatement is = (IfStatement)statement;
-        AbstractLocalVariable lv1 = invokeGetter(boe.getLeftExpression(), getLocalVariable, AbstractLocalVariable.class);
-        AbstractLocalVariable lv2 = invokeGetters(statements.get(size-1), getExpression_getLeftExpression_getLocalVariable, AbstractLocalVariable.class);
-        IfElseStatement ies = invokeGetters(is, getStatements_getFirst, IfElseStatement.class);
 
-        if ((lv1 == null) || (lv2 == null) || (ies == null) || (lv1 != getLocalVariable(is.getCondition()))) {
+        statement = statements.get(size-2);
+
+        if (statement.getClass() != ExpressionStatement.class) {
             return null;
         }
 
-        TryStatement ts = invokeGetters(ies, getStatements_getFirst, TryStatement.class);
-        MethodInvocationExpression mie = invokeGetters(ies, getElseStatements_getFirst_getExpression, MethodInvocationExpression.class);
+        Expression expression = ((ExpressionStatement)statement).getExpression();
 
-        if ((ts == null) || (mie == null) || (is.getCondition().getLineNumber() != mie.getLineNumber()) || (ts.getFinallyStatements() != null) ||
+        if (expression.getClass() != BinaryOperatorExpression.class) {
+            return null;
+        }
+
+        BinaryOperatorExpression boe = (BinaryOperatorExpression)expression;
+
+        expression = boe.getLeftExpression();
+
+        if (expression.getClass() != ClassFileLocalVariableReferenceExpression.class) {
+            return null;
+        }
+
+        AbstractLocalVariable lv1 = ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable();
+
+        statement = statements.get(size-1);
+
+        if (statement.getClass() != ExpressionStatement.class) {
+            return null;
+        }
+
+        expression = ((ExpressionStatement)statement).getExpression();
+
+        if (expression.getClass() != BinaryOperatorExpression.class) {
+            return null;
+        }
+
+        expression = ((BinaryOperatorExpression)expression).getLeftExpression();
+
+        if (expression.getClass() != ClassFileLocalVariableReferenceExpression.class) {
+            return null;
+        }
+
+        AbstractLocalVariable lv2 = ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable();
+
+        statement = is.getStatements().getFirst();
+
+        if (statement.getClass() != IfElseStatement.class) {
+            return null;
+        }
+
+        IfElseStatement ies = (IfElseStatement)statement;
+
+        if (lv1 != getLocalVariable(is.getCondition())) {
+            return null;
+        }
+
+        statement = ies.getStatements().getFirst();
+
+        if (statement.getClass() != ClassFileTryStatement.class) {
+            return null;
+        }
+
+        ClassFileTryStatement ts = (ClassFileTryStatement)statement;
+
+        statement = ies.getElseStatements().getFirst();
+
+        if (statement.getClass() != ExpressionStatement.class) {
+            return null;
+        }
+
+        expression = ((ExpressionStatement)statement).getExpression();
+
+        if (expression.getClass() != MethodInvocationExpression.class) {
+            return null;
+        }
+
+        MethodInvocationExpression mie = (MethodInvocationExpression)expression;
+
+        if ((is.getCondition().getLineNumber() != mie.getLineNumber()) || (ts.getFinallyStatements() != null) ||
             (lv2 != getLocalVariable(ies.getCondition())) || !checkThrowable(ts.getCatchClauses()) || !checkCloseInvocation(mie, lv1)) {
             return null;
         }
 
-        mie = invokeGetters(ts.getTryStatements(), getFirst_getExpression, MethodInvocationExpression.class);
+        statement = ts.getTryStatements().getFirst();
 
-        if ((mie == null) || !checkCloseInvocation(mie, lv1)) {
+        if (statement.getClass() != ExpressionStatement.class) {
             return null;
         }
 
-        mie = invokeGetters(ts.getCatchClauses().get(0).getStatements(), getFirst_getExpression, MethodInvocationExpression.class);
+        expression = ((ExpressionStatement)statement).getExpression();
 
-        if (!mie.getName().equals("addSuppressed") || !mie.getDescriptor().equals("(Ljava/lang/Throwable;)V") || (invokeGetters(mie, getExpression_getLocalVariable) != lv2)) {
+        if (expression.getClass() != MethodInvocationExpression.class) {
+            return null;
+        }
+
+        mie = (MethodInvocationExpression)expression;
+
+        if (!checkCloseInvocation(mie, lv1)) {
+            return null;
+        }
+
+        statement = ts.getCatchClauses().get(0).getStatements().getFirst();
+
+        if (statement.getClass() != ExpressionStatement.class) {
+            return null;
+        }
+
+        expression = ((ExpressionStatement)statement).getExpression();
+
+        if (expression.getClass() != MethodInvocationExpression.class) {
+            return null;
+        }
+
+        mie = (MethodInvocationExpression)expression;
+
+        if (!mie.getName().equals("addSuppressed") || !mie.getDescriptor().equals("(Ljava/lang/Throwable;)V")) {
+            return null;
+        }
+
+        expression = mie.getExpression();
+
+        if (expression.getClass() != ClassFileLocalVariableReferenceExpression.class) {
+            return null;
+        }
+
+        if (((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable() != lv2) {
             return null;
         }
 
@@ -106,6 +198,14 @@ public class TryWithResourcesStatementMaker {
     }
 
     protected static boolean checkCloseInvocation(MethodInvocationExpression mie, AbstractLocalVariable lv) {
-        return mie.getName().equals("close") && mie.getDescriptor().equals("()V") && (invokeGetters(mie, getExpression_getLocalVariable) == lv);
+        if (mie.getName().equals("close") && mie.getDescriptor().equals("()V")) {
+            Expression expression = mie.getExpression();
+
+            if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                return ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable() == lv;
+            }
+        }
+
+        return false;
     }
 }

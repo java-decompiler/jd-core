@@ -13,7 +13,7 @@ import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.BaseTypeDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.util.ReflectionUtil.invokeGetter;
+
 
 public class ControlFlowGraphTest extends TestCase {
     protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
@@ -2663,27 +2663,39 @@ public class ControlFlowGraphTest extends TestCase {
         assertNotNull(compilationUnit);
 
         BaseTypeDeclaration typeDeclarations = compilationUnit.getTypeDeclarations();
-        ClassFileBodyDeclaration bodyDeclaration = invokeGetter(typeDeclarations, "getBodyDeclaration");
+        BodyDeclaration bodyDeclaration = null;
 
-        for (ClassFileMemberDeclaration md : bodyDeclaration.getMethodDeclarations()) {
-            if (md instanceof ClassFileMethodDeclaration) {
-                ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration) md;
-                if (cfmd.getName().equals(methodName)) {
-                    if ((methodDescriptor == null) || cfmd.getDescriptor().equals(methodDescriptor)) {
-                        return cfmd.getMethod();
+        if (typeDeclarations instanceof EnumDeclaration) {
+            bodyDeclaration = ((EnumDeclaration)typeDeclarations).getBodyDeclaration();
+        } else if (typeDeclarations instanceof AnnotationDeclaration) {
+            bodyDeclaration = ((AnnotationDeclaration)typeDeclarations).getBodyDeclaration();
+        } else if (typeDeclarations instanceof InterfaceDeclaration) {
+            bodyDeclaration = ((InterfaceDeclaration)typeDeclarations).getBodyDeclaration();
+        }
+
+        if (bodyDeclaration != null) {
+            ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) bodyDeclaration;
+
+            for (ClassFileMemberDeclaration md : cfbd.getMethodDeclarations()) {
+                if (md instanceof ClassFileMethodDeclaration) {
+                    ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration) md;
+                    if (cfmd.getName().equals(methodName)) {
+                        if ((methodDescriptor == null) || cfmd.getDescriptor().equals(methodDescriptor)) {
+                            return cfmd.getMethod();
+                        }
                     }
-                }
-            } else if (md instanceof ClassFileConstructorDeclaration) {
-                ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration)md;
-                if (cfcd.getMethod().getName().equals(methodName)) {
-                    if ((methodDescriptor == null) || cfcd.getDescriptor().equals(methodDescriptor)) {
-                        return cfcd.getMethod();
+                } else if (md instanceof ClassFileConstructorDeclaration) {
+                    ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration) md;
+                    if (cfcd.getMethod().getName().equals(methodName)) {
+                        if ((methodDescriptor == null) || cfcd.getDescriptor().equals(methodDescriptor)) {
+                            return cfcd.getMethod();
+                        }
                     }
-                }
-            } else if (md instanceof ClassFileStaticInitializerDeclaration) {
-                ClassFileStaticInitializerDeclaration cfsid = (ClassFileStaticInitializerDeclaration)md;
-                if (cfsid.getMethod().getName().equals(methodName)) {
-                    return cfsid.getMethod();
+                } else if (md instanceof ClassFileStaticInitializerDeclaration) {
+                    ClassFileStaticInitializerDeclaration cfsid = (ClassFileStaticInitializerDeclaration) md;
+                    if (cfsid.getMethod().getName().equals(methodName)) {
+                        return cfsid.getMethod();
+                    }
                 }
             }
         }

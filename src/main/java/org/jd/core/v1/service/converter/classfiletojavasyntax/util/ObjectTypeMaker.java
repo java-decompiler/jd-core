@@ -227,14 +227,16 @@ public class ObjectTypeMaker {
             }
         }
 
-        for (String name : superClassAndInterfaceNames) {
-            if (parentInternalName.equals(name))
-                return true;
-        }
+        if (superClassAndInterfaceNames != null) {
+            for (String name : superClassAndInterfaceNames) {
+                if (parentInternalName.equals(name))
+                    return true;
+            }
 
-        for (String name : superClassAndInterfaceNames) {
-            if (recursiveIsAssignable(parentInternalName, name))
-                return true;
+            for (String name : superClassAndInterfaceNames) {
+                if (recursiveIsAssignable(parentInternalName, name))
+                    return true;
+            }
         }
 
         return false;
