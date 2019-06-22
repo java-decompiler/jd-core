@@ -17,6 +17,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.s
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableReferenceVisitor;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -567,7 +568,7 @@ public class LoopStatementMaker {
 
         boe = (BinaryOperatorExpression)es.getExpression();
 
-        if ((boe == null) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+        if (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) {
             return null;
         }
 
@@ -589,15 +590,23 @@ public class LoopStatementMaker {
             return null;
         }
 
+        // Check if 'i$' is not used in sub-statements
+        SearchLocalVariableReferenceVisitor visitor = new SearchLocalVariableReferenceVisitor(syntheticIterator);
+
+        for (int i=1, len=subStatements.size(); i<len; i++) {
+            subStatements.get(i).accept(visitor);
+        }
+
+        if (visitor.containsReference()) {
+            return null;
+        }
+
         // Found
         AbstractLocalVariable item = ((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable();
 
         statements.removeLast();
-
         subStatements.remove(0);
-
         item.setDeclared(true);
-
         localVariableMaker.removeLocalVariable(syntheticIterator);
 
         return new ClassFileForEachStatement(item, list, subStatements);

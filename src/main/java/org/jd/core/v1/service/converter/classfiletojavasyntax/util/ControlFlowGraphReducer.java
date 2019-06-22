@@ -8,6 +8,7 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 
@@ -1260,31 +1261,41 @@ public class ControlFlowGraphReducer {
 
     protected static void createContinueLoop(BitSet visited, BasicBlock basicBlock, BasicBlock subBasicBlock) {
         if (subBasicBlock != null) {
-            if ((subBasicBlock.getPredecessors().size() > 1) && (basicBlock.getFromOffset() < subBasicBlock.getFromOffset()) && (basicBlock.getFirstLineNumber() > subBasicBlock.getFirstLineNumber())) {
-                Set<BasicBlock> predecessors = subBasicBlock.getPredecessors();
-                Iterator<BasicBlock> iterator = predecessors.iterator();
-                BasicBlock lastPredecessor = iterator.next();
+            if ((subBasicBlock.getPredecessors().size() > 1) && (basicBlock.getFromOffset() < subBasicBlock.getFromOffset())) {
+                boolean condition;
 
-                if (lastPredecessor.getType() != TYPE_GOTO_IN_TERNARY_OPERATOR) {
-                    while (iterator.hasNext()) {
-                        BasicBlock predecessor = iterator.next();
-                        if (predecessor.getType() == TYPE_GOTO_IN_TERNARY_OPERATOR) {
-                            lastPredecessor = null;
-                            break;
-                        }
-                        if (lastPredecessor.getFromOffset() < predecessor.getFromOffset()) {
-                            lastPredecessor = predecessor;
-                        }
-                    }
+                if (basicBlock.getFirstLineNumber() == Expression.UNKNOWN_LINE_NUMBER) {
+                    condition = subBasicBlock.matchType(GROUP_SINGLE_SUCCESSOR) && (subBasicBlock.getNext().getType() == TYPE_LOOP_START);
+                } else {
+                    condition = (basicBlock.getFirstLineNumber() > subBasicBlock.getFirstLineNumber());
+                }
 
-                    if (lastPredecessor != null) {
-                        iterator = predecessors.iterator();
+                if (condition) {
+                    Set<BasicBlock> predecessors = subBasicBlock.getPredecessors();
+                    Iterator<BasicBlock> iterator = predecessors.iterator();
+                    BasicBlock lastPredecessor = iterator.next();
 
+                    if (lastPredecessor.getType() != TYPE_GOTO_IN_TERNARY_OPERATOR) {
                         while (iterator.hasNext()) {
                             BasicBlock predecessor = iterator.next();
-                            if (predecessor != lastPredecessor) {
-                                iterator.remove();
-                                predecessor.replace(subBasicBlock, LOOP_CONTINUE);
+                            if (predecessor.getType() == TYPE_GOTO_IN_TERNARY_OPERATOR) {
+                                lastPredecessor = null;
+                                break;
+                            }
+                            if (lastPredecessor.getFromOffset() < predecessor.getFromOffset()) {
+                                lastPredecessor = predecessor;
+                            }
+                        }
+
+                        if (lastPredecessor != null) {
+                            iterator = predecessors.iterator();
+
+                            while (iterator.hasNext()) {
+                                BasicBlock predecessor = iterator.next();
+                                if (predecessor != lastPredecessor) {
+                                    iterator.remove();
+                                    predecessor.replace(subBasicBlock, LOOP_CONTINUE);
+                                }
                             }
                         }
                     }
