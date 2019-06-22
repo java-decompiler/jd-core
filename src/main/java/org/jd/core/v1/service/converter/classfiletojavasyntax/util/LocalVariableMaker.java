@@ -313,8 +313,10 @@ public class LocalVariableMaker {
         } else if (lv.getFrame() != currentFrame) {
             Frame frame = searchCommonParentFrame(lv.getFrame(), currentFrame);
             frame.mergeLocalVariable(lv);
-            lv.setNext(null);
-            frame.addLocalVariable(lv);
+            if (lv.getFrame() != frame) {
+                lv.getFrame().removeLocalVariable(lv);
+                frame.addLocalVariable(lv);
+            }
         }
 
         lv.setToOffset(offset);

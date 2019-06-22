@@ -40,7 +40,7 @@ public class Frame {
     }
 
     public void addLocalVariable(AbstractLocalVariable lv) {
-        assert lv.next == null;
+        assert lv.getNext() == null;
 
         int index = lv.getIndex();
 
@@ -54,7 +54,7 @@ public class Frame {
 
         if (next != lv) {
             localVariableArray[index] = lv;
-            lv.next = next;
+            lv.setNext(next);
             lv.setFrame(this);
         }
     }
@@ -177,8 +177,8 @@ public class Frame {
                 } else {
                     names.add(lv.name);
                 }
-                assert lv != lv.next;
-                lv = lv.next;
+                assert lv != lv.getNext();
+                lv = lv.getNext();
             }
         }
 
@@ -203,7 +203,7 @@ public class Frame {
                         lv.getType().accept(visitor);
                         lv.name = visitor.getName();
                     }
-                    lv = lv.next;
+                    lv = lv.getNext();
                 }
             }
 
@@ -338,7 +338,7 @@ public class Frame {
                         variablesToDeclare.add(lv);
                     }
                 }
-                lv = lv.next;
+                lv = lv.getNext();
             }
         }
 
@@ -567,7 +567,7 @@ public class Frame {
                     lv.setDeclared(true);
                 }
 
-                lv = lv.next;
+                lv = lv.getNext();
             }
         }
     }

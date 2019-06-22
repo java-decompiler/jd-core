@@ -114,7 +114,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("NaND") == -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -160,7 +160,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("NaND") == -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -197,7 +197,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 39]", "this.short123 = 3;")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -256,7 +256,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 184: 184]", "if ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4))")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -285,7 +285,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("public interface Interface", "extends Serializable")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -330,7 +330,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 431: 431]", "System.out.println(\"a\");")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -375,7 +375,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 431: 431]", "System.out.println(\"a\");")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -420,7 +420,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 431: 431]", "System.out.println(\"a\");")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -460,7 +460,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));") != -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -500,7 +500,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));") != -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -540,7 +540,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));") != -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -599,7 +599,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 162:   0]", "break label16;")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -628,56 +628,56 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         printSource(source);
 
-        assertTrue(source.matches(PatternMaker.make(":  16]", "for (int i = 0; i < 10; i++)")));
-        assertTrue(source.matches(PatternMaker.make(":  38]", "int i = 0;")));
-        assertTrue(source.matches(PatternMaker.make(":  40]", "for (; i < 10; i++)")));
-        assertTrue(source.matches(PatternMaker.make(":  50]", "for (; i < 10; i++)")));
-        assertTrue(source.matches(PatternMaker.make(":  60]", "for (int i = 0;; i++)")));
-        assertTrue(source.matches(PatternMaker.make(":  68]", "for (;; i++)")));
-        assertTrue(source.matches(PatternMaker.make(":  76]", "for (int i = 0; i < 10;)")));
-        assertTrue(source.matches(PatternMaker.make(":  84]", "while (i < 10)")));
-        assertTrue(source.matches(PatternMaker.make(":  92]", "int i = 0;")));
-        assertTrue(source.matches(PatternMaker.make("[ 100:   0]", "while (true)")));
-        assertTrue(source.matches(PatternMaker.make(": 108]", "for (int i = 0, j = i, size = 10; i < size; j += ++i)")));
-        assertTrue(source.matches(PatternMaker.make(": 118]", "int i = 0, j = i, size = 10;")));
-        assertTrue(source.matches(PatternMaker.make(": 119]", "for (; i < size;")));
-        assertTrue(source.matches(PatternMaker.make(": 120]", "j += ++i)")));
-        assertTrue(source.matches(PatternMaker.make(": 130]", "int i = 0;")));
-        assertTrue(source.matches(PatternMaker.make(": 131]", "int j = i;")));
-        assertTrue(source.matches(PatternMaker.make(": 132]", "int size = 10;")));
-        assertTrue(source.matches(PatternMaker.make(": 133]", "for (; i < size;")));
-        assertTrue(source.matches(PatternMaker.make(": 134]", "i++,")));
-        assertTrue(source.matches(PatternMaker.make(": 135]", "j += i)")));
-        assertTrue(source.matches(PatternMaker.make(": 145]", "int i = 0;")));
-        assertTrue(source.matches(PatternMaker.make(": 147]", "int j = i;")));
-        assertTrue(source.matches(PatternMaker.make(": 149]", "int size = 10;")));
-        assertTrue(source.matches(PatternMaker.make(": 151]", "for (; i < size;")));
-        assertTrue(source.matches(PatternMaker.make(": 153]", "i++,")));
-        assertTrue(source.matches(PatternMaker.make(": 155]", "j += i)")));
-        assertTrue(source.matches(PatternMaker.make(": 165]", "for (int i = 0; i < 10; i++);")));
-        assertTrue(source.matches(PatternMaker.make(": 173]", "for (; i < 10; i++);")));
-        assertTrue(source.matches(PatternMaker.make(": 181]", "for (int i = 0;; i++);")));
-        assertTrue(source.matches(PatternMaker.make("[ 186:   0]", "while (true)")));
-        assertTrue(source.matches(PatternMaker.make(": 187]", "i++;")));
-        assertTrue(source.matches(PatternMaker.make(": 193]", "for (int i = 0; i < 10;);")));
-        assertTrue(source.matches(PatternMaker.make(": 199]", "for (int[] i = { 0 }; i.length < 10;);")));
-        assertTrue(source.matches(PatternMaker.make(": 205]", "for (int i = 0, j = i, k = i; i < 10;);")));
-        assertTrue(source.matches(PatternMaker.make(": 211]", "for (int[] i = { 0 }, j = i, k = j; i.length < 10;);")));
-        assertTrue(source.matches(PatternMaker.make(": 217]", "for (int i = 0, j[] = { 1 }; i < 10;);")));
-        assertTrue(source.matches(PatternMaker.make(": 223]", "while (i < 10);")));
-        assertTrue(source.matches(PatternMaker.make(": 229]", "int i = 0;")));
-        assertTrue(source.matches(PatternMaker.make("[ 230:   0]", "while (true);")));
-        assertTrue(source.matches(PatternMaker.make(": 241]", "for (int i = 0, j = i, size = 10; i < size; j += ++i);")));
-        assertTrue(source.matches(PatternMaker.make("[ 249:   0]", "while (true) {")));
-        assertTrue(source.matches(PatternMaker.make(": 260]", "for (String s : list)")));
-        assertTrue(source.matches(PatternMaker.make(": 306]", "for (int i : new int[] { 4 })")));
-        assertTrue(source.matches(PatternMaker.make(": 385]", "for (String s : array)")));
-        assertTrue(source.matches(PatternMaker.make(": 399]", "for (String s : list)")));
-        assertTrue(source.matches(PatternMaker.make(": 407]", "Iterator<Class> iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
+        assertTrue(source.matches(PatternMaker.make(":  20]", "for (int i = 0; i < 10; i++)")));
+        assertTrue(source.matches(PatternMaker.make(":  42]", "int i = 0;")));
+        assertTrue(source.matches(PatternMaker.make(":  44]", "for (; i < 10; i++)")));
+        assertTrue(source.matches(PatternMaker.make(":  54]", "for (; i < 10; i++)")));
+        assertTrue(source.matches(PatternMaker.make(":  64]", "for (int i = 0;; i++)")));
+        assertTrue(source.matches(PatternMaker.make(":  72]", "for (;; i++)")));
+        assertTrue(source.matches(PatternMaker.make(":  80]", "for (int i = 0; i < 10;)")));
+        assertTrue(source.matches(PatternMaker.make(":  88]", "while (i < 10)")));
+        assertTrue(source.matches(PatternMaker.make(":  96]", "int i = 0;")));
+        assertTrue(source.matches(PatternMaker.make("[ 104:   0]", "while (true)")));
+        assertTrue(source.matches(PatternMaker.make(": 112]", "for (int i = 0, j = i, size = 10; i < size; j += ++i)")));
+        assertTrue(source.matches(PatternMaker.make(": 122]", "int i = 0, j = i, size = 10;")));
+        assertTrue(source.matches(PatternMaker.make(": 123]", "for (; i < size;")));
+        assertTrue(source.matches(PatternMaker.make(": 124]", "j += ++i)")));
+        assertTrue(source.matches(PatternMaker.make(": 134]", "int i = 0;")));
+        assertTrue(source.matches(PatternMaker.make(": 135]", "int j = i;")));
+        assertTrue(source.matches(PatternMaker.make(": 136]", "int size = 10;")));
+        assertTrue(source.matches(PatternMaker.make(": 137]", "for (; i < size;")));
+        assertTrue(source.matches(PatternMaker.make(": 138]", "i++,")));
+        assertTrue(source.matches(PatternMaker.make(": 139]", "j += i)")));
+        assertTrue(source.matches(PatternMaker.make(": 149]", "int i = 0;")));
+        assertTrue(source.matches(PatternMaker.make(": 151]", "int j = i;")));
+        assertTrue(source.matches(PatternMaker.make(": 153]", "int size = 10;")));
+        assertTrue(source.matches(PatternMaker.make(": 155]", "for (; i < size;")));
+        assertTrue(source.matches(PatternMaker.make(": 157]", "i++,")));
+        assertTrue(source.matches(PatternMaker.make(": 159]", "j += i)")));
+        assertTrue(source.matches(PatternMaker.make(": 169]", "for (int i = 0; i < 10; i++);")));
+        assertTrue(source.matches(PatternMaker.make(": 177]", "for (; i < 10; i++);")));
+        assertTrue(source.matches(PatternMaker.make(": 185]", "for (int i = 0;; i++);")));
+        assertTrue(source.matches(PatternMaker.make("[ 190:   0]", "while (true)")));
+        assertTrue(source.matches(PatternMaker.make(": 191]", "i++;")));
+        assertTrue(source.matches(PatternMaker.make(": 197]", "for (int i = 0; i < 10;);")));
+        assertTrue(source.matches(PatternMaker.make(": 203]", "for (int[] i = { 0 }; i.length < 10;);")));
+        assertTrue(source.matches(PatternMaker.make(": 209]", "for (int i = 0, j = i, k = i; i < 10;);")));
+        assertTrue(source.matches(PatternMaker.make(": 215]", "for (int[] i = { 0 }, j = i, k = j; i.length < 10;);")));
+        assertTrue(source.matches(PatternMaker.make(": 221]", "for (int i = 0, j[] = { 1 }; i < 10;);")));
+        assertTrue(source.matches(PatternMaker.make(": 227]", "while (i < 10);")));
+        assertTrue(source.matches(PatternMaker.make(": 233]", "int i = 0;")));
+        assertTrue(source.matches(PatternMaker.make("[ 234:   0]", "while (true);")));
+        assertTrue(source.matches(PatternMaker.make(": 245]", "for (int i = 0, j = i, size = 10; i < size; j += ++i);")));
+        assertTrue(source.matches(PatternMaker.make("[ 253:   0]", "while (true) {")));
+        assertTrue(source.matches(PatternMaker.make(": 264]", "for (String s : list)")));
+        assertTrue(source.matches(PatternMaker.make(": 310]", "for (int i : new int[] { 4 })")));
+        assertTrue(source.matches(PatternMaker.make(": 389]", "for (String s : array)")));
+        assertTrue(source.matches(PatternMaker.make(": 403]", "for (String s : list)")));
+        assertTrue(source.matches(PatternMaker.make(": 411]", "Iterator<Class> iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
 
-        assertTrue(source.indexOf("[ 448: 448]") != -1);
+        assertTrue(source.indexOf("[ 489: 489]") != -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -714,7 +714,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("for (String str : paramList)")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -755,7 +755,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 423]", "for (byte b = 0; b < 3; b++)")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -796,7 +796,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 423]", "for (int i = 0; i < 3; i++)")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -836,7 +836,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 423]", "for (int i = 0; i < 3; i++)")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -882,7 +882,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 73]", "testInt2(new int[][]", "{ { 1 } ,")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -924,7 +924,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 75]", "testInt3(new int[][][] { { { 0, 1")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -962,7 +962,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 41: 41]", "assert check() : \"boom\";")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1000,7 +1000,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 41: 41]", "assert check() : \"boom\";")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1045,7 +1045,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 104]", "System.out.println(\"end\");")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1108,7 +1108,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 288:   0]", "default:")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1149,7 +1149,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 40: 40]", "System.out.println(1);")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1180,7 +1180,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("[ 239: 239]") != -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1211,7 +1211,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("[ 239: 239]") != -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1254,7 +1254,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 157]", "return Short.toString((short)((this == null) ? 1 : 2));")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1294,7 +1294,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 157]", "return Short.toString((short)((this == null) ? 1 : 2));")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1345,7 +1345,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("[ 162: 162]") != -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1396,7 +1396,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("[ 162: 162]") != -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1443,7 +1443,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(":  97]", "return subContentEquals(s);")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1487,7 +1487,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1545,7 +1545,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1602,7 +1602,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1659,7 +1659,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1712,7 +1712,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1772,7 +1772,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1814,7 +1814,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("public void ping(@Deprecated Writer writer, @Deprecated @Value(str = \"localhost\") String host, long timeout)") != -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1867,7 +1867,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("} ;") == -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1914,7 +1914,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("[ 104: 104]") != -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1946,7 +1946,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[   6:   0]", "Name[] contributors() default {};")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -1982,7 +1982,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[  27:   0]", "Class clazz() default Object.class;")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2065,7 +2065,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("public class InnerInnerClass", "{", "}")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2111,7 +2111,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("public static final enum") == -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2157,7 +2157,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("public static final enum") == -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2203,7 +2203,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("public static final enum") == -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2240,7 +2240,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 174: 174]", "return str;")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2279,7 +2279,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2318,7 +2318,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2357,7 +2357,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2402,7 +2402,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 67]", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class[]", "{ String.class")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 
@@ -2441,7 +2441,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 40]", "private ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId) { return ZonedDateTime.of(localDateTime, zoneId); }")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
-        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1);
+        assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("/* ") == -1);
     }
 

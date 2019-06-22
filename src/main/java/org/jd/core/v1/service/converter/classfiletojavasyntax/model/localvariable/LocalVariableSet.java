@@ -29,23 +29,23 @@ public class LocalVariableSet {
                 array[index] = newLV;
             } else if (lv.fromOffset < newLV.fromOffset) {
                 assert newLV != lv;
-                newLV.next = lv;
+                newLV.setNext(lv);
                 array[index] = newLV;
             } else {
                 AbstractLocalVariable previous = lv;
 
-                lv = lv.next;
+                lv = lv.getNext();
 
                 while ((lv != null) && (lv.fromOffset > newLV.fromOffset)) {
                     previous = lv;
-                    lv = lv.next;
+                    lv = lv.getNext();
                 }
 
                 assert previous != newLV;
-                previous.next = newLV;
+                previous.setNext(newLV);
 
                 assert newLV != lv;
-                newLV.next = lv;
+                newLV.setNext(lv);
             }
         }
 
@@ -57,9 +57,9 @@ public class LocalVariableSet {
             AbstractLocalVariable lv = array[index];
 
             if (lv != null) {
-                while (lv.next != null) {
-                    assert lv != lv.next;
-                    lv = lv.next;
+                while (lv.getNext() != null) {
+                    assert lv != lv.getNext();
+                    lv = lv.getNext();
                 }
                 return lv;
             }
@@ -76,19 +76,19 @@ public class LocalVariableSet {
             while (lv != null) {
                 if (lv.fromOffset <= offset) {
                     if (previous == null) {
-                        array[index] = lv.next;
+                        array[index] = lv.getNext();
                     } else {
-                        previous.next = lv.next;
+                        previous.setNext(lv.getNext());
                     }
 
                     size--;
-                    lv.next = null;
+                    lv.setNext(null);
                     return lv;
                 }
 
                 previous = lv;
-                assert lv != lv.next;
-                lv = lv.next;
+                assert lv != lv.getNext();
+                lv = lv.getNext();
             }
         }
 
@@ -110,8 +110,8 @@ public class LocalVariableSet {
                     break;
                 }
 
-                assert lv != lv.next;
-                lv = lv.next;
+                assert lv != lv.getNext();
+                lv = lv.getNext();
             }
         }
     }
@@ -124,21 +124,21 @@ public class LocalVariableSet {
             while (lv != null) {
                 if (lv.fromOffset == offset) {
                     GenericLocalVariable glv = new GenericLocalVariable(index, lv.fromOffset, type, lv.name);
-                    glv.next = lv.next;
+                    glv.setNext(lv.getNext());
 
                     if (previous == null) {
                         array[index] = glv;
                     } else {
                         assert previous != glv;
-                        previous.next = glv;
+                        previous.setNext(glv);
                     }
 
                     break;
                 }
 
                 previous = lv;
-                assert lv != lv.next;
-                lv = lv.next;
+                assert lv != lv.getNext();
+                lv = lv.getNext();
             }
         }
     }
@@ -152,21 +152,21 @@ public class LocalVariableSet {
             if (lv != null) {
                 AbstractLocalVariable previous = null;
 
-                while (lv.next != null) {
+                while (lv.getNext() != null) {
                     previous = lv;
-                    assert lv != lv.next;
-                    lv = lv.next;
+                    assert lv != lv.getNext();
+                    lv = lv.getNext();
                 }
 
                 if (lv.fromOffset == 0) {
                     if (previous == null) {
-                        array[index] = lv.next;
+                        array[index] = lv.getNext();
                     } else {
-                        previous.next = lv.next;
+                        previous.setNext(lv.getNext());
                     }
 
                     size--;
-                    lv.next = null;
+                    lv.setNext(null);
                     rootFrame.addLocalVariable(lv);
                     cache[index] = lv;
                 }
