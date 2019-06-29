@@ -1031,13 +1031,25 @@ public class ControlFlowGraphReducer {
     }
 
     protected static boolean reduceLoop(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+        Object clone = visited.clone();
         boolean reduced = reduce(visited, basicBlock.getSub1(), jsrTargets);
 
         if (reduced == false) {
             BitSet visitedMembers = new BitSet();
-            createContinueLoop(visitedMembers, basicBlock.getSub1());
-            visited.andNot(visitedMembers);
+            BasicBlock updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visitedMembers, basicBlock.getSub1());
+
+            visited = (BitSet)((BitSet)clone).clone();
             reduced = reduce(visited, basicBlock.getSub1(), jsrTargets);
+
+            if (updateBasicBlock != null) {
+                BasicBlock ifBasicBlock = basicBlock.getControlFlowGraph().newBasicBlock(TYPE_IF, basicBlock.getSub1().getFromOffset(), basicBlock.getToOffset());
+
+                ifBasicBlock.setCondition(END);
+                ifBasicBlock.setSub1(basicBlock.getSub1());
+                ifBasicBlock.setNext(updateBasicBlock);
+                updateBasicBlock.getPredecessors().add(ifBasicBlock);
+                basicBlock.setSub1(ifBasicBlock);
+            }
 
             if (reduced == false) {
                 visitedMembers.clear();
@@ -1209,7 +1221,9 @@ public class ControlFlowGraphReducer {
         }
     }
 
-    protected static void createContinueLoop(BitSet visited, BasicBlock basicBlock) {
+    protected static BasicBlock searchUpdateBlockAndCreateContinueLoop(BitSet visited, BasicBlock basicBlock) {
+        BasicBlock updateBasicBlock = null;
+
         if (!basicBlock.matchType(GROUP_END) && (visited.get(basicBlock.getIndex()) == false)) {
             visited.set(basicBlock.getIndex());
 
@@ -1218,92 +1232,103 @@ public class ControlFlowGraphReducer {
                 case TYPE_JSR:
                 case TYPE_CONDITION:
                 case TYPE_CONDITION_TERNARY_OPERATOR:
-                    createContinueLoop(visited, basicBlock, basicBlock.getBranch());
+                    updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getBranch());
                 case TYPE_START:
                 case TYPE_STATEMENTS:
                 case TYPE_GOTO:
                 case TYPE_GOTO_IN_TERNARY_OPERATOR:
                 case TYPE_LOOP:
-                    createContinueLoop(visited, basicBlock, basicBlock.getNext());
+                    if (updateBasicBlock == null) {
+                        updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getNext());
+                    }
                     break;
                 case TYPE_TRY:
                 case TYPE_TRY_JSR:
                 case TYPE_TRY_ECLIPSE:
-                    createContinueLoop(visited, basicBlock, basicBlock.getSub1());
+                    updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub1());
                 case TYPE_TRY_DECLARATION:
                     for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
-                        createContinueLoop(visited, basicBlock, exceptionHandler.getBasicBlock());
+                        if (updateBasicBlock == null) {
+                            updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, exceptionHandler.getBasicBlock());
+                        }
                     }
-                    createContinueLoop(visited, basicBlock, basicBlock.getNext());
+                    if (updateBasicBlock == null) {
+                        updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getNext());
+                    }
                     break;
                 case TYPE_IF_ELSE:
                 case TYPE_TERNARY_OPERATOR:
-                    createContinueLoop(visited, basicBlock, basicBlock.getSub2());
+                    updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub2());
                 case TYPE_IF:
-                    createContinueLoop(visited, basicBlock, basicBlock.getSub1());
-                    createContinueLoop(visited, basicBlock, basicBlock.getNext());
+                    if (updateBasicBlock == null) {
+                        updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub1());
+                    }
+                    if (updateBasicBlock == null) {
+                        updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getNext());
+                    }
                     break;
                 case TYPE_CONDITION_OR:
                 case TYPE_CONDITION_AND:
-                    createContinueLoop(visited, basicBlock, basicBlock.getSub1());
-                    createContinueLoop(visited, basicBlock, basicBlock.getSub2());
+                    updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub1());
+                    if (updateBasicBlock == null) {
+                        updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getSub2());
+                    }
                     break;
                 case TYPE_SWITCH:
-                    createContinueLoop(visited, basicBlock, basicBlock.getNext());
+                    updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, basicBlock.getNext());
                 case TYPE_SWITCH_DECLARATION:
                     for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
-                        createContinueLoop(visited, basicBlock, switchCase.getBasicBlock());
+                        if (updateBasicBlock == null) {
+                            updateBasicBlock = searchUpdateBlockAndCreateContinueLoop(visited, basicBlock, switchCase.getBasicBlock());
+                        }
                     }
                     break;
             }
         }
+
+        return updateBasicBlock;
     }
 
-    protected static void createContinueLoop(BitSet visited, BasicBlock basicBlock, BasicBlock subBasicBlock) {
+    protected static BasicBlock searchUpdateBlockAndCreateContinueLoop(BitSet visited, BasicBlock basicBlock, BasicBlock subBasicBlock) {
         if (subBasicBlock != null) {
-            if ((subBasicBlock.getPredecessors().size() > 1) && (basicBlock.getFromOffset() < subBasicBlock.getFromOffset())) {
-                boolean condition;
+            if (basicBlock.getFromOffset() < subBasicBlock.getFromOffset()) {
 
                 if (basicBlock.getFirstLineNumber() == Expression.UNKNOWN_LINE_NUMBER) {
-                    condition = subBasicBlock.matchType(GROUP_SINGLE_SUCCESSOR) && (subBasicBlock.getNext().getType() == TYPE_LOOP_START);
-                } else {
-                    condition = (basicBlock.getFirstLineNumber() > subBasicBlock.getFirstLineNumber());
-                }
+                    if (subBasicBlock.matchType(GROUP_SINGLE_SUCCESSOR) && (subBasicBlock.getNext().getType() == TYPE_LOOP_START)) {
+                        int stackDepth = ByteCodeParser.evalStackDepth(subBasicBlock);
 
-                if (condition) {
-                    Set<BasicBlock> predecessors = subBasicBlock.getPredecessors();
-                    Iterator<BasicBlock> iterator = predecessors.iterator();
-                    BasicBlock lastPredecessor = iterator.next();
-
-                    if (lastPredecessor.getType() != TYPE_GOTO_IN_TERNARY_OPERATOR) {
-                        while (iterator.hasNext()) {
-                            BasicBlock predecessor = iterator.next();
-                            if (predecessor.getType() == TYPE_GOTO_IN_TERNARY_OPERATOR) {
-                                lastPredecessor = null;
+                        while (stackDepth != 0) {
+                            Set<BasicBlock> predecessors = basicBlock.getPredecessors();
+                            if (predecessors.size() != 1) {
                                 break;
                             }
-                            if (lastPredecessor.getFromOffset() < predecessor.getFromOffset()) {
-                                lastPredecessor = predecessor;
-                            }
+                            stackDepth += ByteCodeParser.evalStackDepth(subBasicBlock = predecessors.iterator().next());
                         }
 
-                        if (lastPredecessor != null) {
-                            iterator = predecessors.iterator();
-
-                            while (iterator.hasNext()) {
-                                BasicBlock predecessor = iterator.next();
-                                if (predecessor != lastPredecessor) {
-                                    iterator.remove();
-                                    predecessor.replace(subBasicBlock, LOOP_CONTINUE);
-                                }
-                            }
-                        }
+                        removePredecessors(subBasicBlock);
+                        return subBasicBlock;
                     }
+                } else if (basicBlock.getFirstLineNumber() > subBasicBlock.getFirstLineNumber()) {
+                    removePredecessors(subBasicBlock);
+                    return subBasicBlock;
                 }
             }
 
-            createContinueLoop(visited, subBasicBlock);
+            return searchUpdateBlockAndCreateContinueLoop(visited, subBasicBlock);
         }
+
+        return null;
+    }
+
+    protected static void removePredecessors(BasicBlock basicBlock) {
+        Set<BasicBlock> predecessors = basicBlock.getPredecessors();
+        Iterator<BasicBlock> iterator = predecessors.iterator();
+
+        while (iterator.hasNext()) {
+            iterator.next().replace(basicBlock, LOOP_CONTINUE);
+        }
+
+        predecessors.clear();
     }
 
     protected static void changeEndLoopToJump(BitSet visited, BasicBlock target, BasicBlock basicBlock) {

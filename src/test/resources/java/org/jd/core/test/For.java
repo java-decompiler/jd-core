@@ -490,4 +490,25 @@ public class For {
             }
         }
     }
+
+    public void forBreak(Object[] array) {
+        System.out.println("start");
+
+        for (int i=0; i<array.length; i++) {
+            Object o = array[i];
+
+            if (o == null) {
+                System.out.println("array[" + i + "] = null");
+                if (i > 0) {
+                    array[i] = "null";
+                    continue;
+                }
+            }
+
+            System.out.println("array[" + i + "] = " + o);
+            break;
+        }
+
+        System.out.println("end");
+    }
 }

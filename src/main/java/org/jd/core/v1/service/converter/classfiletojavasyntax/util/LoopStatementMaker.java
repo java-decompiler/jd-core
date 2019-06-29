@@ -55,7 +55,7 @@ public class LoopStatementMaker {
             return statement;
         }
 
-        int lineNumber = condition.getLineNumber();
+        int lineNumber = (condition == null) ? Expression.UNKNOWN_LINE_NUMBER : condition.getLineNumber();
         int subStatementsSize = subStatements.size();
 
         switch (subStatementsSize) {
@@ -279,8 +279,9 @@ public class LoopStatementMaker {
             update.add(expression);
         }
 
-        if (update.size() > 1)
+        if (update.size() > 1) {
             Collections.reverse(update);
+        }
 
         return update;
     }
@@ -337,6 +338,10 @@ public class LoopStatementMaker {
     }
 
     protected static Statement makeForEachArray(LocalVariableMaker localVariableMaker, Statements<Statement> statements, Expression condition, Statements<Statement> subStatements) {
+        if (condition == null) {
+            return null;
+        }
+
         int statementsSize = statements.size();
 
         if ((statementsSize < 3) || (subStatements.size() < 2)) {
@@ -502,6 +507,10 @@ public class LoopStatementMaker {
     }
 
     protected static Statement makeForEachList(LocalVariableMaker localVariableMaker, Statements<Statement> statements, Expression condition, Statements<Statement> subStatements) {
+        if (condition == null) {
+            return null;
+        }
+
         if ((statements.size() < 1) || (subStatements.size() < 1)) {
             return null;
         }

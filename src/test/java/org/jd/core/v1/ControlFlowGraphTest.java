@@ -768,6 +768,11 @@ public class ControlFlowGraphTest extends TestCase {
         checkCFGReduction(searchMethod(getResource("zip/data-java-jdk-1.7.0.zip"), "org/jd/core/test/For", "forMultipleVariables2"));
     }
 
+    @Test
+    public void testJdk170ForBreak() throws Exception {
+        checkCFGReduction(searchMethod(getResource("zip/data-java-jdk-1.7.0.zip"), "org/jd/core/test/For", "forBreak"));
+    }
+
 
     // --- Test 'break' and 'continue' ------------------------------------------------------------------------------ //
     @Test

@@ -33,10 +33,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.DefaultStack;
 
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
@@ -261,6 +258,16 @@ public class StatementMaker {
                 assert false : "Unexpected basic block: " + basicBlock.getTypeName() + ':' + basicBlock.getIndex();
                 break;
         }
+    }
+
+    protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps, Statements<Statement> updateStatements) {
+        Statements<Statement> subStatements = makeSubStatements(watchdog, basicBlock, statements, jumps);
+
+        if (updateStatements != null) {
+            subStatements.addAll(updateStatements);
+        }
+
+        return subStatements;
     }
 
     protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps) {
@@ -598,6 +605,12 @@ public class StatementMaker {
     @SuppressWarnings("unchecked")
     protected void parseLoop(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         BasicBlock sub1 = basicBlock.getSub1();
+        Statements<Statement> updateStatements = null;
+
+        if ((sub1.getType() == TYPE_IF) && (sub1.getCondition() == END)) {
+            updateStatements = makeSubStatements(watchdog, sub1.getNext(), statements, jumps);
+            sub1 = sub1.getSub1();
+        }
 
         if (sub1.getType() == TYPE_IF) {
             BasicBlock ifBB = sub1;
@@ -605,7 +618,7 @@ public class StatementMaker {
             if (ifBB.getNext() == LOOP_END) {
                 // 'while' or 'for' loop
                 makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
-                statements.add(LoopStatementMaker.makeLoop(localVariableMaker, basicBlock, statements, stack.pop(), makeSubStatements(watchdog, ifBB.getSub1(), statements, jumps), jumps));
+                statements.add(LoopStatementMaker.makeLoop(localVariableMaker, basicBlock, statements, stack.pop(), makeSubStatements(watchdog, ifBB.getSub1(), statements, jumps, updateStatements), jumps));
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
                 return;
             }
@@ -624,7 +637,7 @@ public class StatementMaker {
                     // 'while' or 'for' loop
                     ifBB.getCondition().inverseCondition();
                     makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
-                    statements.add(LoopStatementMaker.makeLoop(localVariableMaker, basicBlock, statements, stack.pop(), makeSubStatements(watchdog, ifBB.getNext(), statements, jumps), jumps));
+                    statements.add(LoopStatementMaker.makeLoop(localVariableMaker, basicBlock, statements, stack.pop(), makeSubStatements(watchdog, ifBB.getNext(), statements, jumps, updateStatements), jumps));
                 }
 
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
@@ -649,21 +662,21 @@ public class StatementMaker {
 
             if ((sub1.getType() == TYPE_LOOP) && (sub1.getNext() == last) && (countStartLoop(sub1.getSub1()) == 0)) {
                 changeEndLoopToStartLoop(new BitSet(), sub1.getSub1());
-                subStatements = makeSubStatements(watchdog, sub1.getSub1(), statements, jumps);
+                subStatements = makeSubStatements(watchdog, sub1.getSub1(), statements, jumps, updateStatements);
 
                 assert subStatements.getLast() == ContinueStatement.CONTINUE;
 
                 subStatements.removeLast();
             } else {
                 createDoWhileContinue(last);
-                subStatements = makeSubStatements(watchdog, sub1, statements, jumps);
+                subStatements = makeSubStatements(watchdog, sub1, statements, jumps, updateStatements);
             }
 
             makeStatements(watchdog, last.getCondition(), subStatements, jumps);
             statements.add(LoopStatementMaker.makeDoWhileLoop(basicBlock, last, stack.pop(), subStatements, jumps));
         } else {
             // Infinite loop
-            statements.add(LoopStatementMaker.makeLoop(basicBlock, statements, makeSubStatements(watchdog, sub1, statements, jumps), jumps));
+            statements.add(LoopStatementMaker.makeLoop(basicBlock, statements, makeSubStatements(watchdog, sub1, statements, jumps, updateStatements), jumps));
         }
 
         makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
