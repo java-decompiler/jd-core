@@ -495,10 +495,8 @@ public class ControlFlowGraphReducer {
         int maxOffset = -1;
 
         for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
-            BasicBlock bb = switchCase.getBasicBlock();
-
-            if (maxOffset < bb.getFromOffset()) {
-                maxOffset = bb.getFromOffset();
+            if (maxOffset < switchCase.getOffset()) {
+                maxOffset = switchCase.getOffset();
             }
 
             if (switchCase.isDefaultCase()) {
@@ -519,7 +517,7 @@ public class ControlFlowGraphReducer {
         for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
             BasicBlock bb = switchCase.getBasicBlock();
 
-            if (bb.getFromOffset() == maxOffset) {
+            if (switchCase.getOffset() == maxOffset) {
                 lastSwitchCaseBasicBlock = bb;
             } else {
                 visit(v, bb, maxOffset, ends);
