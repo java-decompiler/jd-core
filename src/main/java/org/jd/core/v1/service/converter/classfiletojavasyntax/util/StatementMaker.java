@@ -260,7 +260,7 @@ public class StatementMaker {
         }
     }
 
-    protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps, Statements<Statement> updateStatements) {
+    protected Statements<Statement> makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps, Statements<Statement> updateStatements) {
         Statements<Statement> subStatements = makeSubStatements(watchdog, basicBlock, statements, jumps);
 
         if (updateStatements != null) {
@@ -270,7 +270,7 @@ public class StatementMaker {
         return subStatements;
     }
 
-    protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps) {
+    protected Statements<Statement> makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps) {
         Statements<Statement> subStatements = new Statements<>();
 
         if (!statements.isEmpty() && (statements.getLast().getClass() == ClassFileMonitorEnterStatement.class)) {
