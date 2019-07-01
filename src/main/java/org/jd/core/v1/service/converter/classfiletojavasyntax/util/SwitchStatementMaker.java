@@ -125,12 +125,24 @@ public class SwitchStatementMaker {
 
                                                             // Replace synthetic index by string
                                                             for (SwitchStatement.Block block : switchStatement.getBlocks()) {
-                                                                SwitchStatement.LabelBlock lb = (SwitchStatement.LabelBlock) block;
+                                                                if (block.getClass() == SwitchStatement.LabelBlock.class) {
+                                                                    SwitchStatement.LabelBlock lb = (SwitchStatement.LabelBlock) block;
 
-                                                                if (lb.getLabel() != SwitchStatement.DEFAULT_LABEL) {
-                                                                    SwitchStatement.ExpressionLabel el = (SwitchStatement.ExpressionLabel) lb.getLabel();
-                                                                    IntegerConstantExpression nce = (IntegerConstantExpression) el.getExpression();
-                                                                    el.setExpression(new StringConstantExpression(nce.getLineNumber(), map.get(nce.getValue())));
+                                                                    if (lb.getLabel() != SwitchStatement.DEFAULT_LABEL) {
+                                                                        SwitchStatement.ExpressionLabel el = (SwitchStatement.ExpressionLabel) lb.getLabel();
+                                                                        IntegerConstantExpression nce = (IntegerConstantExpression) el.getExpression();
+                                                                        el.setExpression(new StringConstantExpression(nce.getLineNumber(), map.get(nce.getValue())));
+                                                                    }
+                                                                } else if (block.getClass() == SwitchStatement.MultiLabelsBlock.class) {
+                                                                    SwitchStatement.MultiLabelsBlock lmb = (SwitchStatement.MultiLabelsBlock) block;
+
+                                                                    for (SwitchStatement.Label label : lmb.getLabels()) {
+                                                                        if (label != SwitchStatement.DEFAULT_LABEL) {
+                                                                            SwitchStatement.ExpressionLabel el = (SwitchStatement.ExpressionLabel) label;
+                                                                            IntegerConstantExpression nce = (IntegerConstantExpression) el.getExpression();
+                                                                            el.setExpression(new StringConstantExpression(nce.getLineNumber(), map.get(nce.getValue())));
+                                                                        }
+                                                                    }
                                                                 }
                                                             }
 

@@ -1144,9 +1144,17 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 22:  0]", "case B:")));
         assertTrue(source.matches(PatternMaker.make("[ 25:  0]", "case C:")));
 
-        assertTrue(source.matches(PatternMaker.make("[ 38: 38]", "switch (str)")));
-        assertTrue(source.matches(PatternMaker.make("[ 39:  0]", "case \"One\":")));
-        assertTrue(source.matches(PatternMaker.make("[ 40: 40]", "System.out.println(1);")));
+        assertTrue(source.matches(PatternMaker.make("[ 39:  0]", "case A:")));
+        assertTrue(source.matches(PatternMaker.make("[ 40:  0]", "case B:")));
+        assertTrue(source.matches(PatternMaker.make("[ 41: 41]", "System.out.println(\"A or B\");")));
+
+        assertTrue(source.matches(PatternMaker.make("[ 56: 56]", "switch (str)")));
+        assertTrue(source.matches(PatternMaker.make("[ 57:  0]", "case \"One\":")));
+        assertTrue(source.matches(PatternMaker.make("[ 58: 58]", "System.out.println(1);")));
+
+        assertTrue(source.matches(PatternMaker.make("[ 78:  0]", "case \"One\":")));
+        assertTrue(source.matches(PatternMaker.make("[ 79:  0]", "case \"POe\":")));
+        assertTrue(source.matches(PatternMaker.make("[ 80: 80]", "System.out.println(\"'One' or 'POe'\");")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
         assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
