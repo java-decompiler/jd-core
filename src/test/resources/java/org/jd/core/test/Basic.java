@@ -182,4 +182,6 @@ public class Basic implements Serializable {
     public int getInt78(Object[] objects, short index) {
         return ((Basic)objects[index]).int78;
     }
+
+    protected final static Integer INTEGER_255 = new Integer(255);
 }

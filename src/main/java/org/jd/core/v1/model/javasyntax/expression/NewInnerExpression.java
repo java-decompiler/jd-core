@@ -14,8 +14,8 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 public class NewInnerExpression extends NewExpression {
     protected Expression expression;
 
-    public NewInnerExpression(int lineNumber, BaseTypeArgument nonWildcardTypeArguments, ObjectType type, BaseExpression parameters, BodyDeclaration bodyDeclaration, Expression expression) {
-        super(lineNumber, nonWildcardTypeArguments, type, parameters, bodyDeclaration);
+    public NewInnerExpression(int lineNumber, BaseTypeArgument nonWildcardTypeArguments, ObjectType type, String descriptor, BaseExpression parameters, BodyDeclaration bodyDeclaration, Expression expression) {
+        super(lineNumber, nonWildcardTypeArguments, type, descriptor, parameters, bodyDeclaration);
         this.expression = expression;
     }
 

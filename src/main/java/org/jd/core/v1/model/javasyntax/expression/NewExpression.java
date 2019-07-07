@@ -15,6 +15,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 public class NewExpression extends AbstractLineNumberExpression {
     protected BaseTypeArgument nonWildcardTypeArguments;
     protected ObjectType type;
+    protected String descriptor;
     protected BaseExpression parameters;
     protected BodyDeclaration bodyDeclaration;
 
@@ -29,10 +30,11 @@ public class NewExpression extends AbstractLineNumberExpression {
         this.bodyDeclaration = bodyDeclaration;
     }
 
-    public NewExpression(int lineNumber, BaseTypeArgument nonWildcardTypeArguments, ObjectType type, BaseExpression parameters, BodyDeclaration bodyDeclaration) {
+    public NewExpression(int lineNumber, BaseTypeArgument nonWildcardTypeArguments, ObjectType type, String descriptor, BaseExpression parameters, BodyDeclaration bodyDeclaration) {
         super(lineNumber);
         this.nonWildcardTypeArguments = nonWildcardTypeArguments;
         this.type = type;
+        this.descriptor = descriptor;
         this.parameters = parameters;
         this.bodyDeclaration = bodyDeclaration;
     }
@@ -59,11 +61,20 @@ public class NewExpression extends AbstractLineNumberExpression {
         return 3;
     }
 
+    public String getDescriptor() {
+        return descriptor;
+    }
+
     public BaseExpression getParameters() {
         return parameters;
     }
 
     public void setParameters(BaseExpression parameters) {
+        this.parameters = parameters;
+    }
+
+    public void setDescriptorAndParameters(String descriptor, BaseExpression parameters) {
+        this.descriptor = descriptor;
         this.parameters = parameters;
     }
 

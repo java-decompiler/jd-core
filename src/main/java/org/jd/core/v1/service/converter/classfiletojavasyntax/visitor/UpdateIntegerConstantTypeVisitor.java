@@ -206,6 +206,23 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     }
 
     @Override
+    public void visit(NewExpression expression) {
+        BaseExpression parameters = expression.getParameters();
+
+        if (parameters != null) {
+            String internalTypeName = expression.getObjectType().getInternalName();
+            String descriptor = expression.getDescriptor();
+            List<Type> types = TYPES.get(internalTypeName + ":<init>" + descriptor);
+
+            if (types == null) {
+                types = signatureParser.parseParameterTypes(descriptor);
+            }
+
+            expression.setParameters(updateExpressions(types, parameters));
+        }
+    }
+
+    @Override
     public void visit(NewArray expression) {
         BaseExpression dimensions = expression.getDimensionExpressionList();
 

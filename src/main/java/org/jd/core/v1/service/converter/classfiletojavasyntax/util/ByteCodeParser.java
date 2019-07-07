@@ -763,7 +763,7 @@ public class ByteCodeParser {
                                 "<init>".equals(name)) {
 
                                 if (expression1.getClass() == NewExpression.class) {
-                                    ((NewExpression) expression1).setParameters(parameters);
+                                    ((NewExpression)expression1).setDescriptorAndParameters(descriptor, parameters);
                                 } else if (expression1.getType().equals(ot)) {
                                     statements.add(new ExpressionStatement(new ConstructorInvocationExpression(lineNumber, ot, descriptor, parameters)));
                                 } else {

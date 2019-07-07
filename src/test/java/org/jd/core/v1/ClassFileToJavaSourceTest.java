@@ -110,6 +110,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
 
+        assertTrue(source.matches(PatternMaker.make("[ 186: 186]", "protected static final Integer INTEGER_255 = new Integer(255);")));
+
         assertTrue(source.indexOf("<init>()") == -1);
         assertTrue(source.indexOf("null = ") == -1);
         assertTrue(source.indexOf("NaND") == -1);
@@ -144,7 +146,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("System.out.println(\"hello\");")));
 
         assertTrue(source.matches(PatternMaker.make("String str1 = \"3 == \" + (paramInt + 1) + \" ?\";")));
-        assertTrue(source.matches(PatternMaker.make("String str2 = \"abc \\\\b \\\\f \\\\n \\\\r \\\\t \\\\\\\" \\\\007 def\";")));
+        assertTrue(source.indexOf("String str2 = str1.valueOf(\"abc \\b \\f \\n \\r \\t \\\" \\007 def\");") != -1);
         assertTrue(source.matches(PatternMaker.make("char c2 = '€';")));
         assertTrue(source.matches(PatternMaker.make("char c4 = c3 = c2 = c1 = Character.toUpperCase('x');")));
         assertTrue(source.matches(PatternMaker.make("Class clazz3 = String.class;")));
@@ -155,6 +157,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("if (this instanceof Object)")));
 
         assertTrue(source.matches(PatternMaker.make("this.int78 = 50 / (25 + (this.int78 = 789));")));
+
+        assertTrue(source.indexOf("protected static final Integer INTEGER_255 = new Integer(255);") != -1);
 
         assertTrue(source.indexOf("<init>()") == -1);
         assertTrue(source.indexOf("null = ") == -1);
@@ -2285,6 +2289,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 171: 171]", "return str + str;")));
         assertTrue(source.matches(PatternMaker.make("[ 174: 174]", "return str;")));
         assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
+        assertTrue(source.matches(PatternMaker.make("[ 186: 186]", "protected static final Integer INTEGER_255 = new Integer(255);")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
         assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
@@ -2324,6 +2329,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 171: 171]", "return str + str;")));
         assertTrue(source.matches(PatternMaker.make("[ 174: 174]", "return str;")));
         assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
+        assertTrue(source.matches(PatternMaker.make("[ 186: 186]", "protected static final Integer INTEGER_255 = new Integer(255);")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
         assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
@@ -2363,6 +2369,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("[ 171: 171]", "return str + str;")));
         assertTrue(source.matches(PatternMaker.make("[ 174: 174]", "return str;")));
         assertTrue(source.matches(PatternMaker.make("[ 183: 183]", "return ((Basic)objects[index]).int78;")));
+        assertTrue(source.matches(PatternMaker.make("[ 186: 186]", "protected static final Integer INTEGER_255 = new Integer(255);")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
         assertTrue(source.indexOf(".null.") == -1 && source.indexOf(".null ") == -1 && source.indexOf("null = ") == -1);
