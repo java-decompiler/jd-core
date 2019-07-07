@@ -1732,7 +1732,9 @@ public class ByteCodeParser {
         if ((objectType.getQualifiedName() == null) && (objectType.getName() == null)) {
             ClassFileClassDeclaration declaration = (ClassFileClassDeclaration)bodyDeclaration.getInnerTypeDeclaration(internalName);
 
-            if (declaration.getInterfaces() != null) {
+            if (declaration == null) {
+                return new NewExpression(lineNumber, ObjectType.TYPE_OBJECT);
+            } else if (declaration.getInterfaces() != null) {
                 return new NewExpression(lineNumber, (ObjectType)declaration.getInterfaces(), declaration.getBodyDeclaration());
             } else if (declaration.getSuperType() != null) {
                 return new NewExpression(lineNumber, (ObjectType)declaration.getSuperType(), declaration.getBodyDeclaration());
