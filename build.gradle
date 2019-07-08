@@ -8,7 +8,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version='1.0.6'
+version='1.0.7'
 
 tasks.withType(JavaCompile) {
     sourceCompatibility = targetCompatibility = '1.8'
@@ -36,7 +36,7 @@ jar {
     }
 }
 
-// Publication to JFrog Bintray Maven repository
+// Publication to JCenter Maven repository
 task sourceJar(type: Jar) {
     classifier 'sources'
     from sourceSets.main.allJava
