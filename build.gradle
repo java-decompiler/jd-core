@@ -1,6 +1,8 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 dependencies {
     testCompile 'junit:junit:4.12'
@@ -15,13 +17,68 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'    
 }
 
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+    }
+}
+
 repositories {
-    mavenCentral()
+    jcenter()
 }
 
 jar {
     manifest {
         attributes 'JD-Core-Version': version
+    }
+}
+
+// Publication to JFrog Bintray Maven repository
+task sourceJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allJava
+}
+
+publishing {
+    publications {
+        publicationJdCore(MavenPublication) {
+            groupId 'org.jd'
+            artifactId 'jd-core'
+            version project.version
+            from components.java
+            artifact tasks.sourceJar
+        }
+    }
+}
+
+bintray {
+    user = System.getProperty('bintray.user')
+    key = System.getProperty('bintray.key')
+    publications = ['publicationJdCore']
+
+    dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
+    publish = true //[Default: false] Whether version should be auto published after an upload
+    override = false //[Default: false] Whether to override version artifacts already published
+
+    pkg {
+        userOrg = 'java-decompiler'
+        repo = 'maven'
+        name = 'org.jd:jd-core'
+        description = 'JD-Core is a JAVA decompiler written in JAVA.'
+        licenses = ['GPL-3.0']
+
+        websiteUrl = 'https://github.com/java-decompiler/jd-core'
+        issueTrackerUrl = 'https://github.com/java-decompiler/jd-core/issues'
+        vcsUrl = 'https://github.com/java-decompiler/jd-core.git'
+
+        publicDownloadNumbers = true
+        version {
+            name = project.version
+            released = new Date()
+        }
     }
 }
 
