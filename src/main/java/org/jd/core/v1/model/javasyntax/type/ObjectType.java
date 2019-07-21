@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -15,6 +15,7 @@ public class ObjectType implements Type {
     public static final ObjectType TYPE_DOUBLE           = new ObjectType("java/lang/Double", "java.lang.Double", "Double");
     public static final ObjectType TYPE_FLOAT            = new ObjectType("java/lang/Float", "java.lang.Float", "Float");
     public static final ObjectType TYPE_INTEGER          = new ObjectType("java/lang/Integer", "java.lang.Integer", "Integer");
+    public static final ObjectType TYPE_LONG             = new ObjectType("java/lang/Long", "java.lang.Long", "Long");
     public static final ObjectType TYPE_MATH             = new ObjectType("java/lang/Math", "java.lang.Math", "Math");
     public static final ObjectType TYPE_OBJECT           = new ObjectType("java/lang/Object", "java.lang.Object", "Object");
     public static final ObjectType TYPE_SHORT            = new ObjectType("java/lang/Short", "java.lang.Short", "Short");
