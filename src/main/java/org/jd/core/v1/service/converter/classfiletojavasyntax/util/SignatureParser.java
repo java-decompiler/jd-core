@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -124,6 +124,7 @@ public class SignatureParser {
         if (attributeSignature == null) {
             return parseMethodSignature(method.getDescriptor(), method);
         } else {
+            // Signature does not contain synthetic parameters like outer type name, for example.
             MethodTypes mt1 = parseMethodSignature(attributeSignature.getSignature(), method);
             MethodTypes mt2 = parseMethodSignature(method.getDescriptor(), method);
 
@@ -201,7 +202,17 @@ public class SignatureParser {
      */
     @SuppressWarnings("unchecked")
     protected MethodTypes parseMethodSignature(String signature, Method method) {
-        MethodTypes methodTypes = methodTypesCache.get(signature);
+        String cacheKey = signature;
+
+        if (method != null) {
+            AttributeExceptions attributeExceptions = method.getAttribute("Exceptions");
+
+            if (attributeExceptions != null) {
+                cacheKey += attributeExceptions.getExceptionTypeNames().hashCode();
+            }
+        }
+
+        MethodTypes methodTypes = methodTypesCache.get(cacheKey);
 
         if (methodTypes == null) {
             SignatureReader reader = new SignatureReader(signature);
