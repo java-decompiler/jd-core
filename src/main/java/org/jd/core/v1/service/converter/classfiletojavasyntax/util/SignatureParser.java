@@ -203,12 +203,19 @@ public class SignatureParser {
     @SuppressWarnings("unchecked")
     protected MethodTypes parseMethodSignature(String signature, Method method) {
         String cacheKey = signature;
+        boolean containsThrowsSignature = (signature.indexOf('^') != -1);
 
-        if (method != null) {
+        if (!containsThrowsSignature && (method != null)) {
             AttributeExceptions attributeExceptions = method.getAttribute("Exceptions");
 
             if (attributeExceptions != null) {
-                cacheKey += attributeExceptions.getExceptionTypeNames().hashCode();
+                StringBuilder sb = new StringBuilder(signature);
+
+                for (String exceptionTypeName : attributeExceptions.getExceptionTypeNames()) {
+                    sb.append("^L").append(exceptionTypeName).append(';');
+                }
+
+                cacheKey = sb.toString();
             }
         }
 
@@ -297,7 +304,7 @@ public class SignatureParser {
                 }
             }
 
-            methodTypesCache.put(signature, methodTypes);
+            methodTypesCache.put(cacheKey, methodTypes);
         }
 
         return methodTypes;
