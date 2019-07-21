@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -182,9 +182,11 @@ public class LocalVariableMaker {
             AttributeLocalVariableTable localVariableTable = code.getAttribute("LocalVariableTable");
 
             if (localVariableTable != null) {
+                boolean staticFlag = (method.getAccessFlags() & FLAG_STATIC) != 0;
+
                 for (org.jd.core.v1.model.classfile.attribute.LocalVariable localVariable : localVariableTable.getLocalVariableTable()) {
                     int index = localVariable.getIndex();
-                    int startPc = (index==0) ? 0 : localVariable.getStartPc();
+                    int startPc = (!staticFlag && index==0) ? 0 : localVariable.getStartPc();
                     String descriptor = localVariable.getDescriptor();
                     String name = localVariable.getName();
                     AbstractLocalVariable lv;
