@@ -272,7 +272,11 @@ public class ByteCodeParser {
                     statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_SHORT, new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
                     break;
                 case 87: case 88: // POP, POP2
-                    statements.add(new ExpressionStatement(stack.pop()));
+                    expression1 = stack.pop();
+                    Class clazz = expression1.getClass();
+                    if ((clazz != ClassFileLocalVariableReferenceExpression.class) && (clazz != FieldReferenceExpression.class)) {
+                        statements.add(new ExpressionStatement(expression1));
+                    }
                     break;
                 case 89: // DUP : ..., value => ..., value, value
                     expression1 = stack.pop();
