@@ -54,8 +54,8 @@ public class ExpressionVisitor extends TypeVisitor {
     protected String currentTypeName;
     protected HexaExpressionVisitor hexaExpressionVisitor = new HexaExpressionVisitor();
 
-    public ExpressionVisitor(Loader loader, String mainInternalTypeName, ImportsFragment importsFragment) {
-        super(loader, mainInternalTypeName, importsFragment);
+    public ExpressionVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
+        super(loader, mainInternalTypeName, majorVersion, importsFragment);
     }
 
     public DefaultList<Fragment> getFragments() {

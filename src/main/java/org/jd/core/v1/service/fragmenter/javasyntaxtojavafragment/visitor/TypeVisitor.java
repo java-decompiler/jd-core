@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -21,6 +21,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
 public class TypeVisitor extends AbstractJavaSyntaxVisitor {
@@ -50,14 +51,16 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     protected Loader loader;
     protected String internalPackageName;
+    protected int majorVersion;
     protected ImportsFragment importsFragment;
     protected Tokens tokens;
     protected int maxLineNumber = 0;
     protected String currentInternalTypeName;
     protected HashMap<String, TextToken> textTokenCache = new HashMap<>();
 
-    public TypeVisitor(Loader loader, String mainInternalTypeName, ImportsFragment importsFragment) {
+    public TypeVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         this.loader = loader;
+        this.majorVersion = majorVersion;
         this.importsFragment = importsFragment;
 
         int index = mainInternalTypeName.lastIndexOf('/');
@@ -104,7 +107,17 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         tokens.add(newTypeReferenceToken(type, currentInternalTypeName));
 
         // Build token for type arguments
-        visitTypeArgumentList(type.getTypeArguments());
+        BaseTypeArgument typeArguments = type.getTypeArguments();
+
+        if (majorVersion >= 49) { // (majorVersion >= Java 5)
+            if (typeArguments != null) {
+                visitTypeArgumentList(typeArguments);
+            } else if (type.equals(TYPE_CLASS)) {
+                tokens.add(TextToken.LEFTANGLEBRACKET);
+                tokens.add(TextToken.QUESTIONMARK);
+                tokens.add(TextToken.RIGHTANGLEBRACKET);
+            }
+        }
 
         // Build token for dimension
         visitDimension(type.getDimension());

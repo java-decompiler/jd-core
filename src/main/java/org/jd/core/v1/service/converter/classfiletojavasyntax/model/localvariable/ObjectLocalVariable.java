@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -156,7 +156,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
             } else if ((dimension == 0) && (otherType.getDimension() == 0) && otherType.isObject()) {
                 ObjectType otherObjectType = (ObjectType) otherType;
 
-                if (!toType.getInternalName().equals(otherObjectType.getInternalName()) && objectTypeMaker.isAssignable(otherObjectType, toType)) {
+                if (toType.getInternalName().equals(otherObjectType.getInternalName()) || objectTypeMaker.isAssignable(otherObjectType, toType)) {
                     if (toType.getTypeArguments() == null) {
                         toType = otherObjectType;
                     } else if (otherObjectType.getTypeArguments() == null) {

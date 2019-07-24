@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -43,8 +43,8 @@ public class StatementVisitor extends ExpressionVisitor {
     public static final KeywordToken TRY = new KeywordToken("try");
     public static final KeywordToken WHILE = new KeywordToken("while");
 
-    public StatementVisitor(Loader loader, String mainInternalTypeName, ImportsFragment importsFragment) {
-        super(loader, mainInternalTypeName, importsFragment);
+    public StatementVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
+        super(loader, mainInternalTypeName, majorVersion, importsFragment);
     }
 
     @Override

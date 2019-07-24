@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -49,8 +49,8 @@ public class CompilationUnitVisitor extends StatementVisitor {
     protected SingleLineStatementVisitor singleLineStatementVisitor = new SingleLineStatementVisitor();
     protected String mainInternalName;
 
-    public CompilationUnitVisitor(Loader loader, String mainInternalTypeName, ImportsFragment importsFragment) {
-        super(loader, mainInternalTypeName, importsFragment);
+    public CompilationUnitVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
+        super(loader, mainInternalTypeName, majorVersion, importsFragment);
         this.mainInternalName = mainInternalTypeName;
     }
 
