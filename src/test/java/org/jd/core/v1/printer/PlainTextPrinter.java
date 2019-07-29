@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -11,10 +11,10 @@ package org.jd.core.v1.printer;
 import org.jd.core.v1.api.printer.Printer;
 
 public class PlainTextPrinter implements Printer {
-	protected static final String TAB = "  ";
-	protected static final String NEWLINE = "\n";
+    protected static final String TAB = "  ";
+    protected static final String NEWLINE = "\n";
 
-	protected int indentationCount;
+    protected int indentationCount;
     protected StringBuilder sb = new StringBuilder();
     protected int realLineNumber = 0;
     protected String format;
@@ -117,10 +117,10 @@ public class PlainTextPrinter implements Printer {
     public void endMarker(int type) {}
 
     protected void printLineNumber(int lineNumber) {
-        sb.append('[');
+        sb.append("/*");
         sb.append(String.format(format, ++realLineNumber));
         sb.append(':');
         sb.append(String.format(format, lineNumber));
-        sb.append("] ");
+        sb.append(" */ ");
     }
 }

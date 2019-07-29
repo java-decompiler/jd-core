@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -18,7 +18,7 @@ import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.services.tokenizer.javafragmenttotoken.TestTokenizeJavaFragmentProcessor;
-import org.jd.core.v1.util.PatternMaker;
+import org.jd.core.v1.regex.PatternMaker;
 import org.junit.Assert;
 import org.junit.Test;
 
