@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -98,12 +98,34 @@ public class Frame {
                 }
             }
         } else if (lv != alvToMerge) {
-            for (ClassFileLocalVariableReferenceExpression reference : alvToMerge.getReferences()) {
+            for (LocalVariableReference reference : alvToMerge.getReferences()) {
                 reference.setLocalVariable(lv);
             }
 
             lv.getReferences().addAll(alvToMerge.getReferences());
             lv.setFromOffset(alvToMerge.getFromOffset());
+
+            if (!lv.isAssignable(alvToMerge)) {
+                Type type = lv.getType();
+                Type alvToMergeType = alvToMerge.getType();
+
+                assert (type.isPrimitive() == alvToMergeType.isPrimitive()) && (type.isObject() == alvToMergeType.isObject()) && (type.isGeneric() == alvToMergeType.isGeneric());
+
+                if (type.isPrimitive()) {
+                    if (alvToMerge.isAssignable(lv)) {
+                        ((PrimitiveLocalVariable)lv).setPrimitiveType((PrimitiveType)type);
+                    } else {
+                        ((PrimitiveLocalVariable)lv).setPrimitiveType(PrimitiveType.TYPE_INT);
+                    }
+                } else if (type.isObject()) {
+                    if (alvToMerge.isAssignable(lv)) {
+                        ((ObjectLocalVariable)lv).setObjectType((ObjectType)type);
+                    } else {
+                        ((ObjectLocalVariable)lv).setObjectType(ObjectType.TYPE_OBJECT);
+                    }
+                }
+            }
+
             localVariableArray[index] = alvToMerge.getNext();
         }
     }
@@ -474,8 +496,7 @@ public class Frame {
     }
 
     @SuppressWarnings("unchecked")
-    protected void updateForStatement(
-            HashSet<AbstractLocalVariable> variablesToDeclare, HashSet<AbstractLocalVariable> foundVariables, ClassFileForStatement forStatement, Expressions init) {
+    protected void updateForStatement(HashSet<AbstractLocalVariable> variablesToDeclare, HashSet<AbstractLocalVariable> foundVariables, ClassFileForStatement forStatement, Expressions init) {
 
         DefaultList<BinaryOperatorExpression> boes = new DefaultList<>();
         DefaultList<AbstractLocalVariable> localVariables = new DefaultList<>();

@@ -76,6 +76,16 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
         return (dimension == 0) ? toType : arrayType;
     }
 
+    public void setObjectType(ObjectType type) {
+        dimension = type.getDimension();
+
+        if (dimension == 0) {
+            this.fromType = this.toType = (ObjectType)type;
+        } else {
+            this.arrayType = type;
+        }
+    }
+
     @Override
     public boolean isAssignable(AbstractLocalVariable other) {
         if (other.getClass() == ObjectLocalVariable.class) {

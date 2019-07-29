@@ -57,6 +57,11 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         return PrimitiveTypeUtil.getPrimitiveType(flags, dimension);
     }
 
+    public void setPrimitiveType(PrimitiveType type) {
+        assert type.getDimension() == 0;
+        this.flags = type.getFlags();
+    }
+
     @Override
     public boolean isAssignable(AbstractLocalVariable other) {
         if ((other.getDimension() == 0) && (other.getClass() == PrimitiveLocalVariable.class)) {

@@ -658,25 +658,25 @@ public class ByteCodeParser {
                 case 161: // IF_ICMPLT
                     expression2 = stack.pop();
                     expression1 = stack.pop();
-                    stack.push(newComparisonOperatorExpression(lineNumber, expression1, basicBlock.mustInverseCondition() ? ">=" : "<", expression2, 8));
+                    stack.push(newNumericComparisonOperatorExpression(lineNumber, expression1, basicBlock.mustInverseCondition() ? ">=" : "<", expression2, 8));
                     offset += 2; // Skip branch offset
                     break;
                 case 162: // IF_ICMPGE
                     expression2 = stack.pop();
                     expression1 = stack.pop();
-                    stack.push(newComparisonOperatorExpression(lineNumber, expression1, basicBlock.mustInverseCondition() ? "<" : ">=", expression2, 8));
+                    stack.push(newNumericComparisonOperatorExpression(lineNumber, expression1, basicBlock.mustInverseCondition() ? "<" : ">=", expression2, 8));
                     offset += 2; // Skip branch offset
                     break;
                 case 163: // IF_ICMPGT
                     expression2 = stack.pop();
                     expression1 = stack.pop();
-                    stack.push(newComparisonOperatorExpression(lineNumber, expression1, basicBlock.mustInverseCondition() ? "<=" : ">", expression2, 8));
+                    stack.push(newNumericComparisonOperatorExpression(lineNumber, expression1, basicBlock.mustInverseCondition() ? "<=" : ">", expression2, 8));
                     offset += 2; // Skip branch offset
                     break;
                 case 164: // IF_ICMPLE
                     expression2 = stack.pop();
                     expression1 = stack.pop();
-                    stack.push(newComparisonOperatorExpression(lineNumber, expression1, basicBlock.mustInverseCondition() ? ">" : "<=", expression2, 8));
+                    stack.push(newNumericComparisonOperatorExpression(lineNumber, expression1, basicBlock.mustInverseCondition() ? ">" : "<=", expression2, 8));
                     offset += 2; // Skip branch offset
                     break;
                 case 168: // JSR
@@ -736,19 +736,19 @@ public class ByteCodeParser {
                     BaseExpression parameters = getParameters(statements, stack, descriptor);
                     Type returnedType = signatureParser.parseReturnedType(descriptor);
 
-                    if (!statements.isEmpty() && (opcode == 184)) { // INVOKESTATIC
-                        Statement last = statements.getLast();
-
-                        if (last.getClass() == ExpressionStatement.class) {
-                            Expression expression = ((ExpressionStatement)last).getExpression();
-
-                            if ((expression.getLineNumber() == lineNumber) && (expression.getType().equals(ot))) {
-                                statements.removeLast();
-                                stack.push(expression);
-                                opcode = 0;
-                            }
-                        }
-                    }
+//                    if (!statements.isEmpty() && (opcode == 184)) { // INVOKESTATIC
+//                        Statement last = statements.getLast();
+//
+//                        if (last.getClass() == ExpressionStatement.class) {
+//                            Expression expression = ((ExpressionStatement)last).getExpression();
+//
+//                            if ((expression.getLineNumber() == lineNumber) && (expression.getType().equals(ot))) {
+//                                statements.removeLast();
+//                                stack.push(expression);
+//                                opcode = 0;
+//                            }
+//                        }
+//                    }
 
                     if (opcode == 184) { // INVOKESTATIC
                         expression1 = new MethodInvocationExpression(lineNumber, returnedType, new ObjectTypeReferenceExpression(lineNumber, ot), typeName, name, descriptor, parameters);
@@ -1794,6 +1794,42 @@ public class ByteCodeParser {
     }
 
     private static Expression newComparisonOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
+        return new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, leftExpression, operator, rightExpression, priority);
+    }
+
+    private static Expression newNumericComparisonOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
+        Type leftType = leftExpression.getType();
+        Type rightType = rightExpression.getType();
+        Type type;
+
+        if (leftType == rightType) {
+            type = leftType;
+        } else {
+            type = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType)leftType, (PrimitiveType)rightType);
+            if (type == null) {
+                type = leftType;
+            }
+        }
+
+        if ((((PrimitiveType)type).getFlags() & (FLAG_CHAR|FLAG_BYTE|FLAG_SHORT|FLAG_INT)) != 0) {
+            if (leftExpression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                ClassFileLocalVariableReferenceExpression lvre = (ClassFileLocalVariableReferenceExpression) leftExpression;
+
+                if (lvre.getLocalVariable().getClass() == PrimitiveLocalVariable.class) {
+                    PrimitiveLocalVariable plv = (PrimitiveLocalVariable) lvre.getLocalVariable();
+                    plv.leftReduce(type);
+                }
+            }
+            if (rightExpression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                ClassFileLocalVariableReferenceExpression lvre = (ClassFileLocalVariableReferenceExpression) rightExpression;
+
+                if (lvre.getLocalVariable().getClass() == PrimitiveLocalVariable.class) {
+                    PrimitiveLocalVariable plv = (PrimitiveLocalVariable) lvre.getLocalVariable();
+                    plv.leftReduce(type);
+                }
+            }
+        }
+
         return new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, leftExpression, operator, rightExpression, priority);
     }
 

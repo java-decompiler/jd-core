@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -134,7 +134,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     int size = list.size();
                     list.subList(size - count, size).clear();
                 }
-            } else {
+            } else if (outerType != null) {
                 cfcd.setFormalParameters(null);
             }
         }
@@ -510,10 +510,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             @Override
             public void visit(LocalVariableDeclarator declarator) {
                 if (finalLocalVariableNameMap.containsKey(declarator.getName())) {
-                    LocalVariableDeclarator cflvd = (LocalVariableDeclarator)declarator;
-
                     fina1 = true;
-                    cflvd.setName(finalLocalVariableNameMap.get(declarator.getName()));
+                    declarator.setName(finalLocalVariableNameMap.get(declarator.getName()));
                 }
             }
         }

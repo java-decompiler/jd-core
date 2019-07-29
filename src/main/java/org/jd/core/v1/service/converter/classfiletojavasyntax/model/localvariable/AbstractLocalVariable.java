@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -20,7 +20,7 @@ public abstract class AbstractLocalVariable implements LocalVariable {
     protected int toOffset;
     protected String name;
     protected int dimension;
-    protected DefaultList<ClassFileLocalVariableReferenceExpression> references = new DefaultList<>();
+    protected DefaultList<LocalVariableReference> references = new DefaultList<>();
 
     public AbstractLocalVariable(int index, int offset, int dimension) {
         this.declared = (offset == 0);
@@ -106,9 +106,13 @@ public abstract class AbstractLocalVariable implements LocalVariable {
 
     @Override public String getName() { return name; }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public int getDimension() { return dimension; }
 
-    public DefaultList<ClassFileLocalVariableReferenceExpression> getReferences() {
+    public DefaultList<LocalVariableReference> getReferences() {
         return references;
     }
 
@@ -121,8 +125,7 @@ public abstract class AbstractLocalVariable implements LocalVariable {
     public abstract void rightReduce(Type otherType);
     public abstract void rightReduce(AbstractLocalVariable other);
 
-    @Override
-    public void addReference(ClassFileLocalVariableReferenceExpression reference) {
+    public void addReference(LocalVariableReference reference) {
         references.add(reference);
     }
 }

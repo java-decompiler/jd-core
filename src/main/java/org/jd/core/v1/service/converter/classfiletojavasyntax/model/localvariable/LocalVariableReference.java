@@ -7,13 +7,9 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
-import org.jd.core.v1.model.javasyntax.type.Type;
 
+public interface LocalVariableReference {
+    AbstractLocalVariable getLocalVariable();
 
-public interface LocalVariable {
-    Type getType();
-
-    String getName();
-
-    void accept(LocalVariableVisitor visitor);
+    void setLocalVariable(AbstractLocalVariable localVariable);
 }

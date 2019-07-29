@@ -22,6 +22,7 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFormalParameter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
@@ -143,7 +144,7 @@ public class LocalVariableMaker {
                 for (int parameterIndex=0, variableIndex=firstVariableIndex; parameterIndex<=lastParameterIndex; parameterIndex++, variableIndex++) {
                     AbstractLocalVariable lv = localVariableSet.root(variableIndex);
 
-                    formalParameters.add(new FormalParameter(lv.getType(), varargs && (parameterIndex==lastParameterIndex), lv.getName()));
+                    formalParameters.add(new ClassFileFormalParameter(lv, varargs && (parameterIndex==lastParameterIndex)));
 
                     if (PrimitiveType.TYPE_LONG.equals(lv.getType()) || PrimitiveType.TYPE_DOUBLE.equals(lv.getType())) {
                         variableIndex++;
@@ -161,7 +162,7 @@ public class LocalVariableMaker {
                     Annotations invisibles = ((invisiblesArray == null) || (invisiblesArray.length <= parameterIndex)) ? null : invisiblesArray[parameterIndex];
                     BaseAnnotationReference annotationReferences = annotationConverter.convert(visibles, invisibles);
 
-                    formalParameters.add(new FormalParameter(annotationReferences, lv.getType(), varargs && (parameterIndex==lastParameterIndex), lv.getName()));
+                    formalParameters.add(new ClassFileFormalParameter(annotationReferences, lv, varargs && (parameterIndex==lastParameterIndex)));
 
                     if (PrimitiveType.TYPE_LONG.equals(lv.getType()) || PrimitiveType.TYPE_DOUBLE.equals(lv.getType())) {
                         variableIndex++;
@@ -327,10 +328,18 @@ public class LocalVariableMaker {
     }
 
     public AbstractLocalVariable getPrimitiveLocalVariableInAssignment(int index, int offset, Expression value) {
-        AbstractLocalVariable lv = localVariableSet.remove(index, offset);
+        AbstractLocalVariable lv = localVariableSet.get(index, offset);
 
         if (lv == null) {
             lv = currentFrame.getLocalVariable(index);
+        } else {
+            AbstractLocalVariable lv2 = currentFrame.getLocalVariable(index);
+
+            if ((lv2 != null) && (lv.getFromOffset() < lv2.getFromOffset())) {
+                lv = lv2;
+            } else {
+                localVariableSet.remove(index, offset);
+            }
         }
 
         if (lv == null) {
@@ -379,11 +388,19 @@ public class LocalVariableMaker {
     }
 
     public AbstractLocalVariable getObjectLocalVariableInAssignment(int index, int offset, Expression value) {
-        AbstractLocalVariable lv = localVariableSet.remove(index, offset);
+        AbstractLocalVariable lv = localVariableSet.get(index, offset);
         Class valueClass = value.getClass();
 
         if (lv == null) {
             lv = currentFrame.getLocalVariable(index);
+        } else {
+            AbstractLocalVariable lv2 = currentFrame.getLocalVariable(index);
+
+            if ((lv2 != null) && (lv.getFromOffset() < lv2.getFromOffset())) {
+                lv = lv2;
+            } else {
+                localVariableSet.remove(index, offset);
+            }
         }
 
         if (lv == null) {
@@ -453,21 +470,15 @@ public class LocalVariableMaker {
         if (index == -1) {
             currentFrame.setExceptionLocalVariable(lv = new ObjectLocalVariable(objectTypeMaker, index, offset, type, null, true));
         } else {
-            lv = currentFrame.getLocalVariable(index);
+            lv = localVariableSet.remove(index, offset);
 
             if (lv == null) {
-                lv = localVariableSet.remove(index, offset);
-
-                if (lv == null) {
-                    lv = new ObjectLocalVariable(objectTypeMaker, index, offset, type, null, true);
-                } else {
-                    lv.setDeclared(true);
-                }
-
-                currentFrame.addLocalVariable(lv);
+                lv = new ObjectLocalVariable(objectTypeMaker, index, offset, type, null, true);
             } else {
                 lv.setDeclared(true);
             }
+
+            currentFrame.addLocalVariable(lv);
         }
 
         return lv;
