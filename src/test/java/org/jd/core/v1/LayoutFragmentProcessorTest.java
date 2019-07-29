@@ -60,7 +60,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         printSource(source);
 
-        assertTrue(source.indexOf("[ 183: 183]") != -1);
+        assertTrue(source.indexOf("/* 183: 183 */") != -1);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         printSource(source);
 
-        assertTrue(source.indexOf("[ 902: 902]") != -1);
+        assertTrue(source.indexOf("/* 902: 902 */") != -1);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         printSource(source);
 
-        assertTrue(source.indexOf("[ 902: 902]") != -1);
+        assertTrue(source.indexOf("/* 902: 902 */") != -1);
     }
 
     @Test
@@ -144,7 +144,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         printSource(source);
 
-        assertTrue(source.indexOf("[ 111: 111]") != -1);
+        assertTrue(source.indexOf("/* 111: 111 */") != -1);
 
         assertTrue(source.indexOf("} ;") == -1);
     }
@@ -174,7 +174,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         printSource(source);
 
-        assertTrue(source.indexOf("[ 182: 182]") != -1);
+        assertTrue(source.indexOf("/* 182: 182 */") != -1);
     }
 
     @Test
@@ -233,7 +233,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         printSource(source);
 
-        assertTrue(source.indexOf("[ 9: 0]   }") != -1);
+        assertTrue(source.indexOf("/* 9: 0 */   }") != -1);
     }
 
     @Test
@@ -263,9 +263,9 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 30: 30]", "int[][] ia", "0, 1, 2")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 30: 30 */", "int[][] ia", "0, 1, 2")));
 
-        assertTrue(source.indexOf("[ 75: 75]") != -1);
+        assertTrue(source.indexOf("/* 75: 75 */") != -1);
     }
 
     protected void printSource(String source) {

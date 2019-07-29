@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -160,7 +160,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         System.out.print(source);
         System.out.println("- - - - - - - - ");
 
-        Assert.assertTrue(source.indexOf("[ 22: 22]") != -1);
+        Assert.assertTrue(source.indexOf("/* 22: 22 */") != -1);
         Assert.assertTrue(source.indexOf("java.lang.System") == -1);
     }
 
@@ -186,7 +186,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         message.setHeader("loader", new NopLoader());
         message.setHeader("printer", printer);
         message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
+        message.setHeader("majorVersion", 49);
         message.setHeader("minorVersion", 0);
 
         fragmenter.process(message);
@@ -200,7 +200,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         System.out.print(source);
         System.out.println("- - - - - - - - ");
 
-        Assert.assertTrue(source.indexOf("[   1:   0] package org.jd.core.v1.service.test;") != -1);
+        Assert.assertTrue(source.indexOf("/*   1:   0 */ package org.jd.core.v1.service.test;") != -1);
         Assert.assertTrue(source.indexOf("interface InterfaceTest") != -1);
         Assert.assertTrue(source.indexOf("extends List") != -1);
         Assert.assertTrue(source.indexOf("<String") != -1);

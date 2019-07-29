@@ -70,7 +70,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[   4:   0]", "i = 1;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*   4:   0 */", "i = 1;")));
     }
 
     @Test
@@ -93,9 +93,9 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 1: 1]", "if (args == null)")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 2: 0]", "return;")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 3]", "int i = 1;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 1: 1 */", "if (args == null)")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "return;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "int i = 1;")));
     }
 
     @Test
@@ -118,9 +118,9 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 1: 1]", "if (args == null)")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 2: 0]", "return;")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 4: 4]", "int i = 1;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 1: 1 */", "if (args == null)")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "return;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 4 */", "int i = 1;")));
     }
 
     @Test
@@ -141,7 +141,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[   4:   0]", "i = 1;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*   4:   0 */", "i = 1;")));
     }
 
     @Test
@@ -164,9 +164,9 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 1: 1]", "if (args == null)")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 2: 2]", "i = 0;")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 3]", "i = 1;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 1: 1 */", "if (args == null)")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 2 */", "i = 0;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "i = 1;")));
         Assert.assertTrue(source.indexOf('{') == -1);
     }
 
@@ -190,10 +190,10 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 1: 1]", "if (args == null)")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 2: 0]", "{")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 3]", "i = 0;")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 5: 5]", "i = 1;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 1: 1 */", "if (args == null)")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "{")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "i = 0;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 5: 5 */", "i = 1;")));
     }
 
     @Test
@@ -214,7 +214,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[   4:   0]", "protected int a")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*   4:   0 */", "protected int a")));
     }
 
     @Test
@@ -235,7 +235,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[   7:   0]", "protected int a")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*   7:   0 */", "protected int a")));
     }
 
     @Test
@@ -258,8 +258,8 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 1] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.indexOf("[ 2: 0]  -->") != -1);
+        Assert.assertTrue(source.indexOf("/* 1: 1 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.indexOf("/* 2: 0 */  -->") != -1);
     }
 
     @Test
@@ -282,8 +282,8 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 2: 2]", "protected int a")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 2 */", "protected int a")));
     }
 
     @Test
@@ -306,10 +306,10 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 2: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 3]", "protected int a")));
-        Assert.assertTrue(source.indexOf("[ 4: 0] } -->") != -1);
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "protected int a")));
+        Assert.assertTrue(source.indexOf("/* 4: 0 */ } -->") != -1);
     }
 
     @Test
@@ -332,10 +332,10 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 4: 4]", "protected int a")));
-        Assert.assertTrue(source.indexOf("[ 5: 0] } -->") != -1);
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 4 */", "protected int a")));
+        Assert.assertTrue(source.indexOf("/* 5: 0 */ } -->") != -1);
     }
 
     @Test
@@ -358,9 +358,9 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 4: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 5: 5]", "protected int a")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 5: 5 */", "protected int a")));
     }
 
     @Test
@@ -383,10 +383,10 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 5: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 6: 6]", "protected int a")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 5: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 6 */", "protected int a")));
     }
 
     @Test
@@ -407,11 +407,11 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 4: 0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 6: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 7: 7]", "protected int a")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 7: 7 */", "protected int a")));
     }
 
     @Test
@@ -434,11 +434,11 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 4: 0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 6: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 8: 8]", "protected int a")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 8: 8 */", "protected int a")));
     }
 
     @Test
@@ -461,11 +461,11 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 4: 0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 6: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 9: 9]", "protected int a")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 9: 9 */", "protected int a")));
     }
 
     @Test
@@ -489,11 +489,11 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[  1:  0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[  3:  0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  4:  0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  6:  0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 10: 10]", "protected int a")));
+        Assert.assertTrue(source.indexOf("/*  1:  0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  3:  0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  4:  0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  6:  0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 10: 10 */", "protected int a")));
     }
 
     @Test
@@ -516,9 +516,9 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 2: 0]", "public TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 3]", "super(i);")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "super(i);")));
     }
 
     @Test
@@ -541,9 +541,9 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 2: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 0]", "public TokenWriterTest", "(int i)")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "public TokenWriterTest", "(int i)")));
     }
 
     @Test
@@ -564,11 +564,11 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 4: 0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 6: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 7: 0]", "public TokenWriterTest", "(int i)")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 7: 0 */", "public TokenWriterTest", "(int i)")));
     }
 
     @Test
@@ -591,11 +591,11 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 1: 0] package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 3: 0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 4: 0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 6: 0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 8: 0]", "public TokenWriterTest", "(int i)")));
+        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 8: 0 */", "public TokenWriterTest", "(int i)")));
     }
 
     @Test
@@ -619,14 +619,14 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[  1:  0]", "package org.jd.core.v1.service.writer;")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  3:  0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  4:  0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  6:  0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  7:  0]", "extends Test")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  8:  0]", "implements Serializable")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  9:  0]", "public TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 10: 10]", "super")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  1:  0 */", "package org.jd.core.v1.service.writer;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  3:  0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  4:  0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  6:  0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  7:  0 */", "extends Test")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  8:  0 */", "implements Serializable")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  9:  0 */", "public TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 10: 10 */", "super")));
     }
 
     @Test
@@ -650,14 +650,14 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[  1:  0]", "package org.jd.core.v1.service.writer;")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  3:  0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  4:  0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  6:  0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  7:  0]", "extends Test")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  8:  0]", "implements Serializable")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 10:  0]", "public TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 11: 11]", "super")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  1:  0 */", "package org.jd.core.v1.service.writer;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  3:  0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  4:  0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  6:  0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  7:  0 */", "extends Test")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  8:  0 */", "implements Serializable")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 10:  0 */", "public TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 11: 11 */", "super")));
     }
 
     @Test
@@ -681,14 +681,14 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[  1:  0]", "package org.jd.core.v1.service.writer;")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  3:  0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  4:  0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  7:  0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  8:  0]", "extends Test")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  9:  0]", "implements Serializable")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 11:  0]", "public TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 12: 12]", "super")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  1:  0 */", "package org.jd.core.v1.service.writer;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  3:  0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  4:  0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  7:  0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  8:  0 */", "extends Test")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  9:  0 */", "implements Serializable")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 11:  0 */", "public TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 12: 12 */", "super")));
     }
 
     @Test
@@ -712,14 +712,14 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[  1:  0]", "package org.jd.core.v1.service.writer;")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  3:  0]", "import java.util.ArrayList")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  4:  0]", "import org.junit.Assert")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[  9:  0]", "public class TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 10:  0]", "extends Test")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 11:  0]", "implements Serializable")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 13:  0]", "public TokenWriterTest")));
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 14: 14]", "super")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  1:  0 */", "package org.jd.core.v1.service.writer;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  3:  0 */", "import java.util.ArrayList")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  4:  0 */", "import org.junit.Assert")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  9:  0 */", "public class TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 10:  0 */", "extends Test")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 11:  0 */", "implements Serializable")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 13:  0 */", "public TokenWriterTest")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 14: 14 */", "super")));
     }
 
     @Test
@@ -740,7 +740,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 22: 22]", "System", "println", "(i);")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 22: 22 */", "System", "println", "(i);")));
     }
 
     @Test
@@ -761,7 +761,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[  15:   0]", "public Object", "nextElement")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/*  15:   0 */", "public Object", "nextElement")));
     }
 
     @Test
@@ -784,7 +784,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 44: 44]") != -1);
+        Assert.assertTrue(source.indexOf("/* 44: 44 */") != -1);
     }
 
     @Test
@@ -807,7 +807,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("[ 66: 66]") != -1);
+        Assert.assertTrue(source.indexOf("/* 66: 66 */") != -1);
     }
 
     @Test
@@ -830,7 +830,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 7: 0]", "public static void main")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 7: 0 */", "public static void main")));
     }
 
     @Test
@@ -853,7 +853,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 16: 16]", "i = 4;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 16: 16 */", "i = 4;")));
     }
 
     @Test
@@ -876,7 +876,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("[ 22: 22]", "i = 4;")));
+        Assert.assertTrue(source.matches(PatternMaker.make("/* 22: 22 */", "i = 4;")));
     }
 
     /**
@@ -1362,7 +1362,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
                 new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
-                new TextToken("[] args)")
+                new TextToken("/*] args)")
         ));
 
         StartBodyFragment startMainMethodBody = JavaFragmentFactory.addStartMethodBody(fragments);
@@ -1637,7 +1637,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
                 new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
-                new TextToken("[] args)")
+                new TextToken("/*] args)")
         ));
 
         StartBodyFragment startMainMethodBody = JavaFragmentFactory.addStartMethodBody(fragments);
@@ -1737,7 +1737,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
                 new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
-                new TextToken("[] args)")
+                new TextToken("/*] args)")
         ));
 
         StartBodyFragment startMainMethodBody = JavaFragmentFactory.addStartMethodBody(fragments);

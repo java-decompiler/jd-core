@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -214,30 +214,30 @@ public class WriteTokenTest {
         System.out.println("- - - - - - - - ");
 
         String expected =
-            "[  1:  0] package org.jd.core.v1.service.test;\n" +
-            "[  2:  0] \n" +
-            "[  3:  0] import java.util.ArrayList<META-REFERENCE type='TYPE' internalName='java/util/ArrayList' descriptor='null' ownerInternalName='null'/>;\n" +
-            "[  4:  0] import static org.junit.Assert.*<META-REFERENCE type='TYPE' internalName='org/junit/Assert/*' descriptor='null' ownerInternalName='null'/>;\n" +
-            "[  5:  0] \n" +
-            "[  6:  0] public class WriteTokenTest<META-DECLARATION type='TYPE' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='null'/> {\n" +
-            "[  7:  0]   public static void main<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='([Ljava/lang/String;)V'/>(String<META-REFERENCE type='TYPE' internalName='java/lang/String' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>[] args) {\n" +
-            "[  8:  8]     if (args == null)\n" +
-            "[  9:  0]       return;\n" +
-            "[ 10: 10]     int i = call<META-REFERENCE type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='(IILjava/util/Enumeration;I)V' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>(\n" +
-            "[ 11: 11]       \"aaaa\"<META-STRING ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>,\n" +
-            "[ 12: 12]       b,\n" +
-            "[ 13: 13]       new Enumeration<META-REFERENCE type='TYPE' internalName='java/util/Enumeration' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>() {\n" +
-            "[ 14:  0]         public boolean hasMoreElements<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest$1' descriptor='()Z'/>() {\n" +
-            "[ 15: 15]           return false;\n" +
-            "[ 16:  0]         }\n" +
-            "[ 17:  0]         public Object<META-REFERENCE type='TYPE' internalName='java/lang/Object' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/> nextElement<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest$1' descriptor='()Ljava/lang/Object;'/>() {\n" +
-            "[ 18: 18]           return null;\n" +
-            "[ 19:  0]         }\n" +
-            "[ 20:  0]       },\n" +
-            "[ 21: 21]       c);\n" +
-            "[ 22: 22]     System<META-REFERENCE type='TYPE' internalName='java/lang/System' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>.out<META-REFERENCE type='FIELD' internalName='java/lang/System' descriptor='java/io/PrintStream' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>.println<META-REFERENCE type='METHOD' internalName='java/io/PrintStream' descriptor='(I)V' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>(i);\n" +
-            "[ 23:  0]   }\n" +
-            "[ 24:  0] }\n";
+            "/*  1:  0 */ package org.jd.core.v1.service.test;\n" +
+            "/*  2:  0 */ \n" +
+            "/*  3:  0 */ import java.util.ArrayList<META-REFERENCE type='TYPE' internalName='java/util/ArrayList' descriptor='null' ownerInternalName='null'/>;\n" +
+            "/*  4:  0 */ import static org.junit.Assert.*<META-REFERENCE type='TYPE' internalName='org/junit/Assert/*' descriptor='null' ownerInternalName='null'/>;\n" +
+            "/*  5:  0 */ \n" +
+            "/*  6:  0 */ public class WriteTokenTest<META-DECLARATION type='TYPE' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='null'/> {\n" +
+            "/*  7:  0 */   public static void main<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='([Ljava/lang/String;)V'/>(String<META-REFERENCE type='TYPE' internalName='java/lang/String' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>[] args) {\n" +
+            "/*  8:  8 */     if (args == null)\n" +
+            "/*  9:  0 */       return;\n" +
+            "/* 10: 10 */     int i = call<META-REFERENCE type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest' descriptor='(IILjava/util/Enumeration;I)V' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>(\n" +
+            "/* 11: 11 */       \"aaaa\"<META-STRING ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>,\n" +
+            "/* 12: 12 */       b,\n" +
+            "/* 13: 13 */       new Enumeration<META-REFERENCE type='TYPE' internalName='java/util/Enumeration' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>() {\n" +
+            "/* 14:  0 */         public boolean hasMoreElements<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest$1' descriptor='()Z'/>() {\n" +
+            "/* 15: 15 */           return false;\n" +
+            "/* 16:  0 */         }\n" +
+            "/* 17:  0 */         public Object<META-REFERENCE type='TYPE' internalName='java/lang/Object' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/> nextElement<META-DECLARATION type='METHOD' internalName='org/jd/core/v1/service/test/WriteTokenTest$1' descriptor='()Ljava/lang/Object;'/>() {\n" +
+            "/* 18: 18 */           return null;\n" +
+            "/* 19:  0 */         }\n" +
+            "/* 20:  0 */       },\n" +
+            "/* 21: 21 */       c);\n" +
+            "/* 22: 22 */     System<META-REFERENCE type='TYPE' internalName='java/lang/System' descriptor='null' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>.out<META-REFERENCE type='FIELD' internalName='java/lang/System' descriptor='java/io/PrintStream' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>.println<META-REFERENCE type='METHOD' internalName='java/io/PrintStream' descriptor='(I)V' ownerInternalName='org/jd/core/v1/service/test/WriteTokenTest'/>(i);\n" +
+            "/* 23:  0 */   }\n" +
+            "/* 24:  0 */ }\n";
 
         Assert.assertEquals(expected, source);
     }
