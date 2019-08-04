@@ -205,7 +205,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(GenericType type) {
-        tokens.add(newTextToken(type.getIdentifier()));
+        tokens.add(newTextToken(type.getName()));
         visitDimension(type.getDimension());
     }
 

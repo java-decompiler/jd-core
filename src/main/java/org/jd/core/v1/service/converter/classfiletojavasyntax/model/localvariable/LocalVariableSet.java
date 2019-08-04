@@ -123,7 +123,7 @@ public class LocalVariableSet {
             while (lv != null) {
                 if (lv.fromOffset == offset) {
                     ObjectLocalVariable olv = (ObjectLocalVariable)lv;
-                    olv.fromType = olv.toType = type;
+                    olv.type = type;
                     break;
                 }
 

@@ -8,10 +8,11 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
 import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.util.DefaultList;
 
-public abstract class AbstractLocalVariable implements LocalVariable {
+import java.util.HashSet;
+
+public abstract class AbstractLocalVariable {
     protected Frame frame;
     protected AbstractLocalVariable next;
     protected boolean declared;
@@ -19,83 +20,41 @@ public abstract class AbstractLocalVariable implements LocalVariable {
     protected int fromOffset;
     protected int toOffset;
     protected String name;
-    protected int dimension;
     protected DefaultList<LocalVariableReference> references = new DefaultList<>();
+    protected HashSet<AbstractLocalVariable> variablesOnRight = null;
+    protected HashSet<AbstractLocalVariable> variablesOnLeft = null;
 
-    public AbstractLocalVariable(int index, int offset, int dimension) {
-        this.declared = (offset == 0);
-        this.index = index;
-        this.fromOffset = offset;
-        this.toOffset = offset;
-        this.dimension = dimension;
+    public AbstractLocalVariable(int index, int offset, String name) {
+        this(index, offset, name, (offset == 0));
     }
 
-    public AbstractLocalVariable(int index, int offset, int dimension, boolean declared) {
-        this.declared = declared;
-        this.index = index;
-        this.fromOffset = offset;
-        this.toOffset = offset;
-        this.dimension = dimension;
-    }
-
-    public AbstractLocalVariable(int index, int offset, String name, int dimension) {
-        this.declared = (offset == 0);
-        this.index = index;
-        this.fromOffset = offset;
-        this.toOffset = offset;
-        this.name = name;
-        this.dimension = dimension;
-    }
-
-    public AbstractLocalVariable(int index, int offset, String name, int dimension, boolean declared) {
+    public AbstractLocalVariable(int index, int offset, String name, boolean declared) {
         this.declared = declared;
         this.index = index;
         this.fromOffset = offset;
         this.toOffset = offset;
         this.name = name;
-        this.dimension = dimension;
     }
 
-    public Frame getFrame() {
-        return frame;
-    }
+    public Frame getFrame() { return frame; }
+    public void setFrame(Frame frame) { this.frame = frame; }
 
-    public void setFrame(Frame frame) {
-        this.frame = frame;
-    }
+    public AbstractLocalVariable getNext() { return next; }
+    public void setNext(AbstractLocalVariable next) { this.next = next; }
 
-    public AbstractLocalVariable getNext() {
-        return next;
-    }
+    public boolean isDeclared() { return declared; }
+    public void setDeclared(boolean declared) { this.declared = declared; }
 
-    public void setNext(AbstractLocalVariable next) {
-        this.next = next;
-    }
+    public int getIndex() { return index; }
 
-    public boolean isDeclared() {
-        return declared;
-    }
-
-    public void setDeclared(boolean declared) {
-        this.declared = declared;
-    }
-
-    public int getIndex() {
-        return index;
-    }
-
-    public int getFromOffset() {
-        return fromOffset;
-    }
+    public int getFromOffset() { return fromOffset; }
 
     public void setFromOffset(int fromOffset) {
         assert fromOffset <= toOffset;
         this.fromOffset = fromOffset;
     }
 
-    public int getToOffset() {
-        return toOffset;
-    }
+    public int getToOffset() { return toOffset; }
 
     public void setToOffset(int offset) {
         if (this.fromOffset > offset)
@@ -104,28 +63,62 @@ public abstract class AbstractLocalVariable implements LocalVariable {
             this.toOffset = offset;
     }
 
-    @Override public String getName() { return name; }
+    public abstract Type getType();
 
-    public void setName(String name) {
-        this.name = name;
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public abstract int getDimension();
+
+    public abstract void accept(LocalVariableVisitor visitor);
+
+    public DefaultList<LocalVariableReference> getReferences() { return references; }
+    public void addReference(LocalVariableReference reference) { references.add(reference); }
+
+    /**
+     * Determines if the local variable represented by this object is either the same as, or is a super type variable
+     * of, the local variable represented by the specified parameter.
+     */
+    public abstract boolean isAssignableFrom(Type type);
+    public abstract void typeOnRight(Type type);
+    public abstract void typeOnLeft(Type type);
+
+    public abstract boolean isAssignableFrom(AbstractLocalVariable variable);
+    public abstract void variableOnRight(AbstractLocalVariable variable);
+    public abstract void variableOnLeft(AbstractLocalVariable variable);
+
+    protected void fireChangeEvent() {
+        if (variablesOnLeft != null) {
+            for (AbstractLocalVariable v : variablesOnLeft) {
+                v.variableOnRight(this);
+            }
+        }
+        if (variablesOnRight != null) {
+            for (AbstractLocalVariable v : variablesOnRight) {
+                v.variableOnLeft(this);
+            }
+        }
     }
 
-    public int getDimension() { return dimension; }
-
-    public DefaultList<LocalVariableReference> getReferences() {
-        return references;
+    protected void addVariableOnLeft(AbstractLocalVariable variable) {
+        if (variablesOnLeft == null) {
+            variablesOnLeft = new HashSet<>();
+            variablesOnLeft.add(variable);
+            variable.addVariableOnRight(this);
+        } else if (!variablesOnLeft.contains(variable)) {
+            variablesOnLeft.add(variable);
+            variable.addVariableOnRight(this);
+        }
     }
 
-    public abstract boolean isAssignable(Type otherType);
-    public abstract boolean isAssignable(AbstractLocalVariable other);
-
-    public abstract void leftReduce(Type otherType);
-    public abstract void leftReduce(AbstractLocalVariable other);
-
-    public abstract void rightReduce(Type otherType);
-    public abstract void rightReduce(AbstractLocalVariable other);
-
-    public void addReference(LocalVariableReference reference) {
-        references.add(reference);
+    protected void addVariableOnRight(AbstractLocalVariable variable) {
+        if (variablesOnRight == null) {
+            variablesOnRight = new HashSet<>();
+            variablesOnRight.add(variable);
+            variable.addVariableOnLeft(this);
+        } else if (!variablesOnRight.contains(variable)) {
+            variablesOnRight.add(variable);
+            variable.addVariableOnLeft(this);
+        }
     }
 }

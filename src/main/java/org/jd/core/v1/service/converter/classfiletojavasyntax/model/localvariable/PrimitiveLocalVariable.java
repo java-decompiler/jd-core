@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -9,33 +9,22 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariab
 
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
+
+import java.util.HashSet;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
 public class PrimitiveLocalVariable extends AbstractLocalVariable {
     protected int flags;
 
-    public PrimitiveLocalVariable(int index, int offset, String descriptor, String name) {
-        super(index, offset, name, 0);
-        assert descriptor.charAt(0) != '[';
-        this.flags = PrimitiveTypeUtil.getPrimitiveTypeFromDescriptor(descriptor).getFlags();
-    }
-
     public PrimitiveLocalVariable(int index, int offset, PrimitiveType type, String name) {
-        super(index, offset, name, 0);
-        assert type.getDimension() == 0;
-        this.flags = type.getFlags();
-    }
-
-    public PrimitiveLocalVariable(int index, int offset, PrimitiveType type) {
-        super(index, offset, 0);
+        super(index, offset, name);
         assert type.getDimension() == 0;
         this.flags = type.getFlags();
     }
 
     public PrimitiveLocalVariable(int index, int offset, PrimitiveLocalVariable primitiveLocalVariable) {
-        super(index, offset, 0);
+        super(index, offset, null);
         assert primitiveLocalVariable.getDimension() == 0;
         int valueFlags = primitiveLocalVariable.flags;
 
@@ -54,95 +43,53 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
 
     @Override
     public Type getType() {
-        return PrimitiveTypeUtil.getPrimitiveType(flags, dimension);
+        switch (flags) {
+            case FLAG_BOOLEAN:
+                return TYPE_BOOLEAN;
+            case FLAG_CHAR:
+                return TYPE_CHAR;
+            case FLAG_FLOAT:
+                return TYPE_FLOAT;
+            case FLAG_DOUBLE:
+                return TYPE_DOUBLE;
+            case FLAG_BYTE:
+                return TYPE_BYTE;
+            case FLAG_SHORT:
+                return TYPE_SHORT;
+            case FLAG_INT:
+                return TYPE_INT;
+            case FLAG_LONG:
+                return TYPE_LONG;
+            case FLAG_VOID:
+                return TYPE_VOID;
+        }
+
+        if (flags == (FLAG_CHAR|FLAG_INT))
+            return MAYBE_CHAR_TYPE;
+        if (flags == (FLAG_CHAR|FLAG_SHORT|FLAG_INT))
+            return MAYBE_SHORT_TYPE;
+        if (flags == (FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT))
+            return MAYBE_BYTE_TYPE;
+        if (flags == (FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT))
+            return MAYBE_BOOLEAN_TYPE;
+        if (flags == (FLAG_BYTE|FLAG_SHORT|FLAG_INT))
+            return MAYBE_NEGATIVE_BYTE_TYPE;
+        if (flags == (FLAG_SHORT|FLAG_INT))
+            return MAYBE_NEGATIVE_SHORT_TYPE;
+        if (flags == (FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT))
+            return MAYBE_NEGATIVE_BOOLEAN_TYPE;
+
+        return TYPE_INT;
+    }
+
+    @Override
+    public int getDimension() {
+        return 0;
     }
 
     public void setPrimitiveType(PrimitiveType type) {
         assert type.getDimension() == 0;
         this.flags = type.getFlags();
-    }
-
-    @Override
-    public boolean isAssignable(AbstractLocalVariable other) {
-        if ((other.getDimension() == 0) && (other.getClass() == PrimitiveLocalVariable.class)) {
-            if (dimension == 0) {
-                return (flags & ((PrimitiveLocalVariable)other).flags) != 0;
-            } else {
-                return flags == ((PrimitiveLocalVariable)other).flags;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean isAssignable(Type otherType) {
-        if ((otherType.getDimension() == 0) && otherType.isPrimitive()) {
-            return (flags & ((PrimitiveType)otherType).getRightFlags()) != 0;
-        }
-
-        return false;
-    }
-
-    @Override
-    public void leftReduce(AbstractLocalVariable other) {
-        assert other.getDimension() == 0;
-
-        int otherFlags = ((PrimitiveLocalVariable)other).flags;
-        int newFalgs = 0;
-
-        if ((otherFlags & FLAG_BYTE) != 0) {
-            newFalgs |= FLAG_BYTE|FLAG_SHORT|FLAG_INT;
-        }
-        if ((otherFlags & FLAG_CHAR) != 0) {
-            newFalgs |= FLAG_CHAR|FLAG_INT;
-        }
-        if ((otherFlags & FLAG_SHORT) != 0) {
-            newFalgs |= FLAG_SHORT|FLAG_INT;
-        }
-        if ((otherFlags & FLAG_INT) != 0) {
-            newFalgs |= FLAG_INT;
-        }
-
-        if ((flags & newFalgs) != 0) {
-            flags &= newFalgs;
-        }
-    }
-
-    @Override
-    public void rightReduce(AbstractLocalVariable other) {
-        assert other.getDimension() == 0;
-
-        int otherFlags = ((PrimitiveLocalVariable)other).flags;
-        int newFalgs = 0;
-
-        if ((otherFlags & FLAG_INT) != 0) {
-            newFalgs |= FLAG_INT;
-        }
-        if ((otherFlags & FLAG_SHORT) != 0) {
-            newFalgs |= FLAG_SHORT|FLAG_BYTE;
-        }
-        if ((otherFlags & FLAG_CHAR) != 0) {
-            newFalgs |= FLAG_CHAR;
-        }
-        if ((otherFlags & FLAG_BYTE) != 0) {
-            newFalgs |= FLAG_BYTE;
-        }
-
-        if ((flags & newFalgs) != 0) {
-            flags &= newFalgs;
-        }
-    }
-
-    @Override
-    public void leftReduce(Type otherType) {
-        this.flags &= ((PrimitiveType)otherType).getRightFlags();
-        assert (otherType.getDimension() == 0) && (this.flags != 0);
-    }
-
-    public void rightReduce(Type otherType) {
-        this.flags &= ((PrimitiveType)otherType).getLeftFlags();
-        assert (otherType.getDimension() == 0) && (this.flags != 0) : "rightReduce : incompatible types";
     }
 
     @Override
@@ -173,5 +120,89 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         }
 
         return sb.append("}").toString();
+    }
+
+    @Override
+    public boolean isAssignableFrom(Type type) {
+        if ((type.getDimension() == 0) && type.isPrimitive()) {
+            return (flags & ((PrimitiveType)type).getRightFlags()) != 0;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void typeOnRight(Type type) {
+        assert (type.getDimension() == 0);
+
+        int f = ((PrimitiveType)type).getRightFlags();
+
+        if ((flags & f) != 0) {
+            int old = flags;
+
+            flags &= f;
+
+            if (old != flags) {
+                fireChangeEvent();
+            }
+        }
+    }
+
+    @Override
+    public void typeOnLeft(Type type) {
+        assert (type.getDimension() == 0);
+
+        int f = ((PrimitiveType)type).getLeftFlags();
+
+        if ((flags & f) != 0) {
+            int old = flags;
+
+            flags &= f;
+
+            if (old != flags) {
+                fireChangeEvent();
+            }
+        }
+    }
+
+    @Override
+    public boolean isAssignableFrom(AbstractLocalVariable variable) {
+        if (variable.getClass() == PrimitiveLocalVariable.class) {
+            return (flags & ((PrimitiveLocalVariable)variable).flags) != 0;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void variableOnRight(AbstractLocalVariable variable) {
+        assert variable.getDimension() == 0;
+
+        addVariableOnRight(variable);
+
+        int old = flags;
+
+        flags &= ((PrimitiveLocalVariable)variable).flags;
+        assert flags != 0;
+
+        if (old != flags) {
+            fireChangeEvent();
+        }
+    }
+
+    @Override
+    public void variableOnLeft(AbstractLocalVariable variable) {
+        assert variable.getDimension() == 0;
+
+        addVariableOnLeft(variable);
+
+        int old = flags;
+
+        flags &= ((PrimitiveLocalVariable)variable).flags;
+        assert flags != 0;
+
+        if (old != flags) {
+            fireChangeEvent();
+        }
     }
 }

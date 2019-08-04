@@ -8,243 +8,49 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
+
+import java.util.HashSet;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class ObjectLocalVariable extends AbstractLocalVariable {
     protected ObjectTypeMaker objectTypeMaker;
-    protected ObjectType fromType;
-    protected ObjectType toType;
-    protected Type       arrayType;
-
-    public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, ObjectType type, String name) {
-        super(index, offset, name, type.getDimension());
-        this.objectTypeMaker = objectTypeMaker;
-
-        if (dimension == 0) {
-            this.fromType = this.toType = type;
-        } else {
-            this.arrayType = type;
-        }
-    }
+    protected Type type;
 
     public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, Type type, String name) {
-        super(index, offset, name, type.getDimension());
+        super(index, offset, name);
         this.objectTypeMaker = objectTypeMaker;
-
-        if (dimension == 0) {
-            this.fromType = this.toType = (ObjectType)type;
-        } else {
-            this.arrayType = type;
-        }
+        this.type = type;
     }
 
-    public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, ObjectType type, String name, boolean declared) {
-        super(index, offset, name, type.getDimension(), declared);
-        this.objectTypeMaker = objectTypeMaker;
-
-        if (dimension == 0) {
-            this.fromType = this.toType = type;
-        } else {
-            this.arrayType = type;
-        }
-    }
-
-    public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, Type type) {
-        super(index, offset, type.getDimension());
-        this.objectTypeMaker = objectTypeMaker;
-
-        if (dimension == 0) {
-            this.fromType = this.toType = (ObjectType)type;
-        } else {
-            this.arrayType = type;
-        }
+    public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, Type type, String name, boolean declared) {
+        this(objectTypeMaker, index, offset, type, name);
+        this.declared = declared;
     }
 
     public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, ObjectLocalVariable objectLocalVariable) {
-        super(index, offset, objectLocalVariable.getDimension());
+        super(index, offset, null);
         this.objectTypeMaker = objectTypeMaker;
-        this.toType = objectLocalVariable.toType;
-        this.arrayType = objectLocalVariable.arrayType;
+        this.type = objectLocalVariable.type;
     }
 
     @Override
     public Type getType() {
-        return (dimension == 0) ? toType : arrayType;
+        return type;
     }
 
     public void setObjectType(ObjectType type) {
-        dimension = type.getDimension();
-
-        if (dimension == 0) {
-            this.fromType = this.toType = (ObjectType)type;
-        } else {
-            this.arrayType = type;
+        if (!this.type.equals(type)) {
+            this.type = type;
+            fireChangeEvent();
         }
     }
 
     @Override
-    public boolean isAssignable(AbstractLocalVariable other) {
-        if (other.getClass() == ObjectLocalVariable.class) {
-            if (toType == TYPE_UNDEFINED_OBJECT) {
-                return true;
-            } else if (dimension == other.getDimension()) {
-                ObjectLocalVariable olv = (ObjectLocalVariable) other;
-
-                if (dimension == 0) {
-                    if (olv.fromType == null) {
-                        return isAssignable(olv.toType);
-                    } else {
-                        return isAssignable(olv.fromType);
-                    }
-                } else {
-                    return arrayType.equals(olv.arrayType);
-                }
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean isAssignable(Type otherType) {
-        if (otherType == TYPE_UNDEFINED_OBJECT) {
-            return true;
-        }
-
-        if (toType == TYPE_UNDEFINED_OBJECT) {
-            return true;
-        } else if (dimension == otherType.getDimension()) {
-            if (dimension == 0) {
-                if (otherType.isObject()) {
-                    return objectTypeMaker.isAssignable(toType, (ObjectType)otherType);
-                }
-            } else {
-                return arrayType.equals(otherType);
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public void leftReduce(AbstractLocalVariable other) {
-        if (other.getClass() == ObjectLocalVariable.class) {
-            Type otherToType = ((ObjectLocalVariable) other).toType;
-
-            if ((otherToType != null) && (otherToType != TYPE_UNDEFINED_OBJECT)) {
-                Type otherType = ((ObjectLocalVariable) other).fromType;
-
-                if (otherType == null) {
-                    otherType = otherToType;
-                }
-
-                if (toType == TYPE_UNDEFINED_OBJECT) {
-                    leftReduce(otherType);
-                } else if ((dimension == 0) && (dimension == other.getDimension())) {
-                    leftReduce(otherType);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void leftReduce(Type otherType) {
-        if (otherType != TYPE_UNDEFINED_OBJECT) {
-            if (toType == TYPE_UNDEFINED_OBJECT) {
-                if (otherType.getDimension() == 0) {
-                    if (otherType.isObject()) {
-                        fromType = toType = (ObjectType)otherType;
-                    }
-                } else {
-                    dimension = otherType.getDimension();
-                    arrayType = otherType;
-                }
-            } else if ((dimension == 0) && (otherType.getDimension() == 0) && otherType.isObject()) {
-                ObjectType otherObjectType = (ObjectType) otherType;
-
-                if (toType.getInternalName().equals(otherObjectType.getInternalName()) || objectTypeMaker.isAssignable(otherObjectType, toType)) {
-                    if (toType.getTypeArguments() == null) {
-                        toType = otherObjectType;
-                    } else if (otherObjectType.getTypeArguments() == null) {
-                        toType = otherObjectType.createType(toType.getTypeArguments());
-                    } else if (toType.getTypeArguments().equals(otherObjectType.getTypeArguments())) {
-                        toType = otherObjectType;
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void rightReduce(AbstractLocalVariable other) {
-        if ((dimension == 0) && (other.getClass() == ObjectLocalVariable.class)) {
-            ObjectLocalVariable olv = (ObjectLocalVariable)other;
-
-            if (toType == TYPE_UNDEFINED_OBJECT) {
-                dimension = olv.dimension;
-                fromType = olv.fromType;
-                toType = olv.toType;
-            } else {
-                assert (olv.getDimension() == 0);
-
-                rightReduce(olv.toType);
-            }
-        }
-    }
-
-    @Override
-    public void rightReduce(Type otherType) {
-        if (dimension == 0) {
-            if (otherType.isObject()) {
-                if ((otherType != ObjectType.TYPE_OBJECT) && (otherType != TYPE_UNDEFINED_OBJECT)) {
-                    if (toType == TYPE_UNDEFINED_OBJECT) {
-                        dimension = otherType.getDimension();
-
-                        if (dimension == 0) {
-                            fromType = null;
-                            toType = (ObjectType) otherType;
-                        } else {
-                            arrayType = otherType;
-                        }
-                    } else if (!otherType.equals(ObjectType.TYPE_OBJECT)) {
-                        assert (otherType.getDimension() == 0) && otherType.isObject();
-
-                        ObjectType otherObjectType = (ObjectType) otherType;
-
-                        if (fromType == null) {
-                            if (toType.getTypeArguments() == null) {
-                                fromType = otherObjectType;
-                            } else if (otherObjectType.getTypeArguments() == null) {
-                                fromType = otherObjectType.createType(toType.getTypeArguments());
-                            } else if (toType.getTypeArguments().equals(otherObjectType.getTypeArguments())) {
-                                fromType = otherObjectType;
-                            }
-                        } else if (!fromType.getInternalName().equals(otherObjectType.getInternalName()) && objectTypeMaker.isAssignable(fromType, otherObjectType)) {
-                            if (fromType.getTypeArguments() == null) {
-                                fromType = otherObjectType;
-                            } else if (otherObjectType.getTypeArguments() == null) {
-                                fromType = otherObjectType.createType(fromType.getTypeArguments());
-                            } else if (fromType.getTypeArguments().equals(otherObjectType.getTypeArguments())) {
-                                fromType = otherObjectType;
-                            }
-                        }
-                    }
-                }
-            } else if (otherType.isPrimitive()) {
-                if (toType == TYPE_UNDEFINED_OBJECT) {
-                    dimension = otherType.getDimension();
-
-                    if (dimension > 0) {
-                        arrayType = otherType;
-                        dimension = otherType.getDimension();
-                    }
-                }
-            }
-        }
+    public int getDimension() {
+        return type.getDimension();
     }
 
     @Override
@@ -257,26 +63,10 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
         StringBuilder sb = new StringBuilder();
 
         sb.append("ObjectLocalVariable{");
+        sb.append(type.getName());
 
-        if (dimension == 0) {
-            if (fromType == null) {
-                sb.append('?');
-            } else if (fromType.getQualifiedName() == null) {
-                sb.append(fromType.getName());
-            } else {
-                sb.append(fromType.getQualifiedName());
-            }
-
-            if (!toType.equals(fromType)) {
-                sb.append(" ... ");
-                sb.append(toType.getQualifiedName()==null ? toType.getName() : toType.getQualifiedName());
-            }
-        } else if (arrayType.isObject()){
-            sb.append(((ObjectType)arrayType).getInternalName());
-            sb.append(new String(new char[dimension]).replaceAll("\0", "[]"));
-        } else {
-            sb.append(((PrimitiveType)arrayType).getName());
-            sb.append(new String(new char[dimension]).replaceAll("\0", "[]"));
+        if (type.getDimension() > 0) {
+            sb.append(new String(new char[type.getDimension()]).replaceAll("\0", "[]"));
         }
 
         sb.append(' ').append(name).append(", index=").append(index);
@@ -286,5 +76,93 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
         }
 
         return sb.append("}").toString();
+    }
+
+    @Override
+    public boolean isAssignableFrom(Type type) {
+        if ((type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_UNDEFINED_OBJECT) || this.type.equals(type)) {
+            return true;
+        } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0) && this.type.isObject() && type.isObject()) {
+            return objectTypeMaker.isAssignable((ObjectType)this.type, (ObjectType)type);
+        }
+
+        return false;
+    }
+
+    public void typeOnRight(Type type) {
+        if (type != TYPE_UNDEFINED_OBJECT) {
+            if (this.type == TYPE_UNDEFINED_OBJECT) {
+                this.type = type;
+                fireChangeEvent();
+            } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
+                assert !this.type.isPrimitive() && !type.isPrimitive();
+
+                if (this.type.isObject() && type.isObject()) {
+                    ObjectType thisObjectType = (ObjectType)this.type;
+                    ObjectType otherObjectType = (ObjectType)type;
+
+                    if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
+                        if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                            // Keep type, update type arguments
+                            this.type = otherObjectType;
+                            fireChangeEvent();
+                        }
+                    } else if (objectTypeMaker.isAssignable(thisObjectType, otherObjectType)) {
+                        // Assignable types
+                        if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                            // Keep type, update type arguments
+                            this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
+                            fireChangeEvent();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void typeOnLeft(Type type) {
+        if (type != TYPE_UNDEFINED_OBJECT) {
+            if (this.type == TYPE_UNDEFINED_OBJECT) {
+                this.type = type;
+                fireChangeEvent();
+            } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
+                assert !this.type.isPrimitive() && !type.isPrimitive();
+
+                if (this.type.isObject() && type.isObject()) {
+                    ObjectType thisObjectType = (ObjectType)this.type;
+                    ObjectType otherObjectType = (ObjectType)type;
+
+                    if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
+                        if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                            // Keep type, update type arguments
+                            this.type = otherObjectType;
+                            fireChangeEvent();
+                        }
+                    } else if (objectTypeMaker.isAssignable(otherObjectType, thisObjectType)) {
+                        // Assignable types
+                        if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                            // Keep type, update type arguments
+                            this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
+                            fireChangeEvent();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean isAssignableFrom(AbstractLocalVariable variable) {
+        return isAssignableFrom(variable.getType());
+    }
+
+    public void variableOnRight(AbstractLocalVariable variable) {
+        addVariableOnRight(variable);
+        typeOnRight(variable.getType());
+    }
+
+    public void variableOnLeft(AbstractLocalVariable variable) {
+        addVariableOnLeft(variable);
+        typeOnLeft(variable.getType());
     }
 }

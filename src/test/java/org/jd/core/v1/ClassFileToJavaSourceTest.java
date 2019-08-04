@@ -762,7 +762,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
-        // TODO: fix error on line 168. assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+        //assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
 
     @Test
@@ -806,7 +806,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
-        // TODO: fix error on line 205. assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+        assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -10,7 +10,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.TryStatement;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 
 import java.util.List;
 
@@ -49,14 +49,14 @@ public class ClassFileTryStatement extends TryStatement {
     }
 
     public static class CatchClause extends TryStatement.CatchClause {
-        protected LocalVariable localVariable;
+        protected AbstractLocalVariable localVariable;
 
-        public CatchClause(int lineNumber, ObjectType type, LocalVariable localVariable, BaseStatement statements) {
+        public CatchClause(int lineNumber, ObjectType type, AbstractLocalVariable localVariable, BaseStatement statements) {
             super(lineNumber, type, null, statements);
             this.localVariable = localVariable;
         }
 
-        public LocalVariable getLocalVariable() {
+        public AbstractLocalVariable getLocalVariable() {
             return localVariable;
         }
 

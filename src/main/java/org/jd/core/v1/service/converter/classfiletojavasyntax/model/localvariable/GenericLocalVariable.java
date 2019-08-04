@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -13,13 +13,13 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 public class GenericLocalVariable extends AbstractLocalVariable {
     protected GenericType type;
 
-    public GenericLocalVariable(int index, int offset, GenericType type, String name) {
-        super(index, offset, name, type.getDimension());
+    public GenericLocalVariable(int index, int offset, GenericType type) {
+        super(index, offset, null);
         this.type = type;
     }
 
-    public GenericLocalVariable(int index, int offset, GenericType type) {
-        super(index, offset, type.getDimension());
+    public GenericLocalVariable(int index, int offset, GenericType type, String name) {
+        super(index, offset, name);
         this.type = type;
     }
 
@@ -28,19 +28,9 @@ public class GenericLocalVariable extends AbstractLocalVariable {
         return type;
     }
 
-    @Override public void rightReduce(AbstractLocalVariable other) {}
-    @Override public void rightReduce(Type otherType) {}
-    @Override public void leftReduce(AbstractLocalVariable other) {}
-    @Override public void leftReduce(Type otherType) {}
-
     @Override
-    public boolean isAssignable(AbstractLocalVariable other) {
-        return true;
-    }
-
-    @Override
-    public boolean isAssignable(Type otherType) {
-        return true;
+    public int getDimension() {
+        return type.getDimension();
     }
 
     @Override
@@ -52,4 +42,12 @@ public class GenericLocalVariable extends AbstractLocalVariable {
     public String toString() {
         return "GenericLocalVariable{" + type + ", index=" + index + "}";
     }
+
+    @Override public boolean isAssignableFrom(Type otherType) { return true; }
+    @Override public void typeOnRight(Type type) {}
+    @Override public void typeOnLeft(Type type) {}
+
+    @Override public boolean isAssignableFrom(AbstractLocalVariable variable) { return true; }
+    @Override public void variableOnRight(AbstractLocalVariable variable) {}
+    @Override public void variableOnLeft(AbstractLocalVariable variable) {}
 }

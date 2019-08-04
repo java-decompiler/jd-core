@@ -88,6 +88,7 @@ public class ObjectType implements Type {
         return qualifiedName;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -97,13 +98,13 @@ public class ObjectType implements Type {
     }
 
     @Override
-    public int getDimension() {
-        return dimension;
+    public String getDescriptor() {
+        return descriptor;
     }
 
     @Override
-    public String getDescriptor() {
-        return descriptor;
+    public int getDimension() {
+        return dimension;
     }
 
     @Override
