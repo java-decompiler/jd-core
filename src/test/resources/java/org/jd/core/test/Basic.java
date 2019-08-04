@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -27,7 +27,7 @@ public class Basic implements Serializable {
         System.out.println("world");
     }
 
-    public void declarations(int i) {
+    public void declarations(int i, long long12) {
         String str1 = "3 == " + (i+1) + " ?";
         String str2 = str1.valueOf("abc \b \f \n \r \t \" \007 def");
 
@@ -52,6 +52,8 @@ public class Basic implements Serializable {
 
         int j = 1, k[] = { 1 }, l[][] = {{ 1 }, { 2 }, {}};
         String stringNull = null;
+
+        System.out.println("static long12 = " + Basic.long12);
     }
 
     public String[] createStringArray(String s) {

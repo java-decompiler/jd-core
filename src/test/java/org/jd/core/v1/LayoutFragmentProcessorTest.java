@@ -60,7 +60,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         printSource(source);
 
-        assertTrue(source.indexOf("/* 183: 183 */") != -1);
+        assertTrue(source.indexOf("/* 188: 188 */") != -1);
     }
 
     @Test
