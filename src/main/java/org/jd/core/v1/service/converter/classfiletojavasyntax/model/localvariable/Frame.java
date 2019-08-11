@@ -16,7 +16,6 @@ import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
 
@@ -40,7 +39,7 @@ public class Frame {
     }
 
     public void addLocalVariable(AbstractLocalVariable lv) {
-        assert lv.getNext() == null;
+        assert lv.getNext() == null : "Frame.addLocalVariable(lv) : add local variable failed";
 
         int index = lv.getIndex();
 
@@ -109,19 +108,20 @@ public class Frame {
                 Type type = lv.getType();
                 Type alvToMergeType = alvToMerge.getType();
 
-                assert (type.isPrimitive() == alvToMergeType.isPrimitive()) && (type.isObject() == alvToMergeType.isObject()) && (type.isGeneric() == alvToMergeType.isGeneric());
+                assert (type.isPrimitive() == alvToMergeType.isPrimitive()) && (type.isObject() == alvToMergeType.isObject()) && (type.isGeneric() == alvToMergeType.isGeneric()) : "Frame.mergeLocalVariable(lv) : merge local variable failed";
 
                 if (type.isPrimitive()) {
                     if (alvToMerge.isAssignableFrom(lv)) {
-                        ((PrimitiveLocalVariable)lv).setPrimitiveType((PrimitiveType)type);
-                    } else {
-                        ((PrimitiveLocalVariable)lv).setPrimitiveType(PrimitiveType.TYPE_INT);
+                        ((PrimitiveLocalVariable)lv).setType((PrimitiveType)alvToMergeType);
+                    } else if (!lv.isAssignableFrom(alvToMerge)) {
+                        ((PrimitiveLocalVariable)lv).setType(PrimitiveType.TYPE_INT);
                     }
                 } else if (type.isObject()) {
                     if (alvToMerge.isAssignableFrom(lv)) {
-                        ((ObjectLocalVariable)lv).setObjectType((ObjectType)type);
-                    } else {
-                        ((ObjectLocalVariable)lv).setObjectType(ObjectType.TYPE_OBJECT);
+                        ((ObjectLocalVariable)lv).setType(alvToMergeType);
+                    } else if (!lv.isAssignableFrom(alvToMerge)) {
+                        int dimension = Math.max(lv.getDimension(), alvToMerge.getDimension());
+                        ((ObjectLocalVariable)lv).setType(ObjectType.TYPE_OBJECT.createType(dimension));
                     }
                 }
             }
@@ -148,6 +148,7 @@ public class Frame {
             }
         } else {
             localVariableArray[index] = alvToRemove.getNext();
+            alvToRemove.setNext(null);
         }
     }
 
@@ -724,45 +725,23 @@ public class Frame {
         public void visit(PrimitiveType type) {
             sb.setLength(0);
 
-            switch (type.getDimension()) {
-                case 0:
-                    switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(type.getFlags())) {
-                        case FLAG_BYTE : sb.append("b"); break;
-                        case FLAG_CHAR : sb.append("c"); break;
-                        case FLAG_DOUBLE : sb.append("d"); break;
-                        case FLAG_FLOAT : sb.append("f"); break;
-                        case FLAG_INT :
-                            for (String in : INTEGER_NAMES) {
-                                if (!blackListNames.contains(in)) {
-                                    blackListNames.add(name = in);
-                                    return;
-                                }
-                            }
-                            sb.append("i");
-                            break;
-                        case FLAG_LONG : sb.append("l"); break;
-                        case FLAG_SHORT : sb.append("s"); break;
-                        case FLAG_BOOLEAN : sb.append("bool"); break;
+            switch (type.getJavaPrimitiveFlags()) {
+                case FLAG_BYTE : sb.append("b"); break;
+                case FLAG_CHAR : sb.append("c"); break;
+                case FLAG_DOUBLE : sb.append("d"); break;
+                case FLAG_FLOAT : sb.append("f"); break;
+                case FLAG_INT :
+                    for (String in : INTEGER_NAMES) {
+                        if (!blackListNames.contains(in)) {
+                            blackListNames.add(name = in);
+                            return;
+                        }
                     }
+                    sb.append("i");
                     break;
-                default:
-//                case 1:
-                    sb.append("arrayOf");
-
-                    switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(type.getFlags())) {
-                        case FLAG_BYTE : sb.append("Byte"); break;
-                        case FLAG_CHAR : sb.append("Char"); break;
-                        case FLAG_DOUBLE : sb.append("Double"); break;
-                        case FLAG_FLOAT : sb.append("Float"); break;
-                        case FLAG_INT : sb.append("Int"); break;
-                        case FLAG_LONG : sb.append("Long"); break;
-                        case FLAG_SHORT : sb.append("Short"); break;
-                        case FLAG_BOOLEAN : sb.append("Boolean"); break;
-                    }
-                    break;
-//                default:
-//                    sb.append("arrayOfArray");
-//                    break;
+                case FLAG_LONG : sb.append("l"); break;
+                case FLAG_SHORT : sb.append("s"); break;
+                case FLAG_BOOLEAN : sb.append("bool"); break;
             }
 
             generate(type);
@@ -800,7 +779,8 @@ public class Frame {
                     break;
                 default:
 //                case 1:
-                    sb.append("arrayOf").append(str);
+                    sb.append("arrayOf");
+                    capitalize(str);
                     break;
 //                default:
 //                    sb.append("arrayOfArray");
@@ -810,14 +790,39 @@ public class Frame {
             generate(type);
         }
 
+        protected void capitalize(String str) {
+            if (str != null) {
+                int length = str.length();
+
+                if (length > 0) {
+                    char firstChar = str.charAt(0);
+
+                    if (Character.isUpperCase(firstChar)) {
+                        sb.append(str);
+                    } else {
+                        sb.append(Character.toUpperCase(firstChar));
+                        if (length > 1) {
+                            sb.append(str.substring(1));
+                        }
+                    }
+                }
+            }
+        }
+
         protected void uncapitalize(String str) {
             if (str != null) {
                 int length = str.length();
 
                 if (length > 0) {
-                    sb.append(Character.toLowerCase(str.charAt(0)));
-                    if (length > 1) {
-                        sb.append(str.substring(1));
+                    char firstChar = str.charAt(0);
+
+                    if (Character.isLowerCase(firstChar)) {
+                        sb.append(str);
+                    } else {
+                        sb.append(Character.toLowerCase(firstChar));
+                        if (length > 1) {
+                            sb.append(str.substring(1));
+                        }
                     }
                 }
             }

@@ -15,7 +15,6 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.model.token.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
@@ -85,7 +84,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(PrimitiveType type) {
-        switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(type.getFlags())) {
+        switch (type.getJavaPrimitiveFlags()) {
             case FLAG_BOOLEAN: tokens.add(BOOLEAN); break;
             case FLAG_CHAR:    tokens.add(CHAR);    break;
             case FLAG_FLOAT:   tokens.add(FLOAT);   break;

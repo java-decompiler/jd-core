@@ -38,36 +38,37 @@ public class PrimitiveType implements Type {
     public static final PrimitiveType MAYBE_INT_TYPE              = new PrimitiveType("maybe_int",              FLAG_INT,                                             FLAG_INT,                                             FLAG_INT);                                             // Otherwise
     public static final PrimitiveType MAYBE_NEGATIVE_BOOLEAN_TYPE = new PrimitiveType("maybe_negative_boolean", FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT,           FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT,           FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT);           // Boolean or negative
 
-    protected String name;
-    protected int dimension;
-    protected int flags;
-    protected int leftFlags;
-    protected int rightFlags;
-    protected String descriptor;
+    protected static final PrimitiveType[] descriptorToType = new PrimitiveType['Z' - 'B' + 1];
+
+    static {
+        descriptorToType['B' - 'B'] = TYPE_BYTE;
+        descriptorToType['C' - 'B'] = TYPE_CHAR;
+        descriptorToType['D' - 'B'] = TYPE_DOUBLE;
+        descriptorToType['F' - 'B'] = TYPE_FLOAT;
+        descriptorToType['I' - 'B'] = TYPE_INT;
+        descriptorToType['J' - 'B'] = TYPE_LONG;
+        descriptorToType['S' - 'B'] = TYPE_SHORT;
+        descriptorToType['V' - 'B'] = TYPE_VOID;
+        descriptorToType['Z' - 'B'] = TYPE_BOOLEAN;
+    }
+
+    protected final String name;
+    protected final int flags;
+    protected final int leftFlags;
+    protected final int rightFlags;
+    protected final String descriptor;
+
+    protected PrimitiveType(PrimitiveType primitiveType) {
+        this(primitiveType.name, primitiveType.flags, primitiveType.leftFlags, primitiveType.rightFlags);
+    }
 
     protected PrimitiveType(String name, int flags, int leftFlags, int rightFlags) {
-        this(name, flags, leftFlags, rightFlags, 0);
-    }
-
-    protected PrimitiveType(PrimitiveType primitiveType, int dimension) {
-        this(primitiveType.name, primitiveType.flags, primitiveType.leftFlags, primitiveType.rightFlags, dimension);
-    }
-
-    protected PrimitiveType(String name, int flags, int leftFlags, int rightFlags, int dimension) {
         this.name = name;
-        this.dimension = dimension;
         this.flags = flags;
         this.leftFlags = leftFlags;
         this.rightFlags = rightFlags;
 
         StringBuilder sb = new StringBuilder();
-
-        switch (dimension) {
-            case 0: break;
-            case 1: sb.append('['); break;
-            case 2: sb.append("[["); break;
-            default: for (int i=0; i<dimension; i++) sb.append('['); break;
-        }
 
         if ((flags & FLAG_DOUBLE) != 0)
             sb.append('D');
@@ -89,6 +90,10 @@ public class PrimitiveType implements Type {
         this.descriptor = sb.toString();
     }
 
+    public static PrimitiveType getPrimitiveType(char primitiveDescriptor) {
+        return descriptorToType[primitiveDescriptor - 'B'];
+    }
+
     @Override
     public String getName() {
         return name;
@@ -101,7 +106,7 @@ public class PrimitiveType implements Type {
 
     @Override
     public int getDimension() {
-        return dimension;
+        return 0;
     }
 
     public int getFlags() {
@@ -117,12 +122,13 @@ public class PrimitiveType implements Type {
     }
 
     @Override
-    public PrimitiveType createType(int dimension) {
-        assert dimension >= 0;
-        if (this.dimension == dimension)
+    public Type createType(int dimension) {
+        assert dimension >= 0 : "PrimitiveType.createType(dim) : create type with zero or negative dimension";
+        if (dimension == 0) {
             return this;
-        else
-            return new PrimitiveType(this, dimension);
+        } else {
+            return new ObjectType(descriptor, dimension);
+        }
     }
 
     @Override
@@ -132,7 +138,6 @@ public class PrimitiveType implements Type {
 
         PrimitiveType that = (PrimitiveType) o;
 
-        if (dimension != that.dimension) return false;
         if (flags != that.flags) return false;
 
         return true;
@@ -140,7 +145,7 @@ public class PrimitiveType implements Type {
 
     @Override
     public int hashCode() {
-        return 31 * dimension + flags;
+        return flags;
     }
 
     @Override
@@ -155,9 +160,19 @@ public class PrimitiveType implements Type {
 
     @Override
     public String toString() {
-        if (dimension == 0)
-            return "PrimitiveType{primitive=" + name + "}";
-        else
-            return "PrimitiveType{primitive=" + name + ", dimension=" + dimension + "}";
+        return "PrimitiveType{primitive=" + name + "}";
+    }
+
+    public int getJavaPrimitiveFlags() {
+        if ((flags & FLAG_BOOLEAN) != 0)
+            return FLAG_BOOLEAN;
+        else if ((flags & FLAG_BYTE) != 0)
+            return FLAG_BYTE;
+        else if ((flags & FLAG_CHAR) != 0)
+            return FLAG_CHAR;
+        else if ((flags & FLAG_SHORT) != 0)
+            return FLAG_SHORT;
+
+        return flags;
     }
 }

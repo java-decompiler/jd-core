@@ -8,19 +8,35 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 public class ObjectType implements Type {
-    public static final ObjectType TYPE_BOOLEAN          = new ObjectType("java/lang/Boolean", "java.lang.Boolean", "Boolean");
-    public static final ObjectType TYPE_BYTE             = new ObjectType("java/lang/Byte", "java.lang.Byte", "Byte");
-    public static final ObjectType TYPE_CHARACTER        = new ObjectType("java/lang/Character", "java.lang.Character", "Character");
-    public static final ObjectType TYPE_CLASS            = new ObjectType("java/lang/Class", "java.lang.Class", "Class");
-    public static final ObjectType TYPE_DOUBLE           = new ObjectType("java/lang/Double", "java.lang.Double", "Double");
-    public static final ObjectType TYPE_FLOAT            = new ObjectType("java/lang/Float", "java.lang.Float", "Float");
-    public static final ObjectType TYPE_INTEGER          = new ObjectType("java/lang/Integer", "java.lang.Integer", "Integer");
-    public static final ObjectType TYPE_LONG             = new ObjectType("java/lang/Long", "java.lang.Long", "Long");
-    public static final ObjectType TYPE_MATH             = new ObjectType("java/lang/Math", "java.lang.Math", "Math");
-    public static final ObjectType TYPE_OBJECT           = new ObjectType("java/lang/Object", "java.lang.Object", "Object");
-    public static final ObjectType TYPE_SHORT            = new ObjectType("java/lang/Short", "java.lang.Short", "Short");
-    public static final ObjectType TYPE_STRING           = new ObjectType("java/lang/String", "java.lang.String", "String");
-    public static final ObjectType TYPE_THROWABLE        = new ObjectType("java/lang/Throwable", "java.lang.Throwable", "Throwable");
+    public static final ObjectType TYPE_BOOLEAN           = new ObjectType("java/lang/Boolean", "java.lang.Boolean", "Boolean");
+    public static final ObjectType TYPE_BYTE              = new ObjectType("java/lang/Byte", "java.lang.Byte", "Byte");
+    public static final ObjectType TYPE_CHARACTER         = new ObjectType("java/lang/Character", "java.lang.Character", "Character");
+    public static final ObjectType TYPE_CLASS             = new ObjectType("java/lang/Class", "java.lang.Class", "Class");
+    public static final ObjectType TYPE_DOUBLE            = new ObjectType("java/lang/Double", "java.lang.Double", "Double");
+    public static final ObjectType TYPE_EXCEPTION         = new ObjectType("java/lang/Exception", "java.lang.Exception", "Exception");
+    public static final ObjectType TYPE_FLOAT             = new ObjectType("java/lang/Float", "java.lang.Float", "Float");
+    public static final ObjectType TYPE_INTEGER           = new ObjectType("java/lang/Integer", "java.lang.Integer", "Integer");
+    public static final ObjectType TYPE_LONG              = new ObjectType("java/lang/Long", "java.lang.Long", "Long");
+    public static final ObjectType TYPE_MATH              = new ObjectType("java/lang/Math", "java.lang.Math", "Math");
+    public static final ObjectType TYPE_OBJECT            = new ObjectType("java/lang/Object", "java.lang.Object", "Object");
+    public static final ObjectType TYPE_RUNTIME_EXCEPTION = new ObjectType("java/lang/RuntimeException", "java.lang.RuntimeException", "RuntimeException");
+    public static final ObjectType TYPE_SHORT             = new ObjectType("java/lang/Short", "java.lang.Short", "Short");
+    public static final ObjectType TYPE_STRING            = new ObjectType("java/lang/String", "java.lang.String", "String");
+    public static final ObjectType TYPE_STRING_BUFFER     = new ObjectType("java/lang/StringBuffer", "java.lang.StringBuffer", "StringBuffer");
+    public static final ObjectType TYPE_STRING_BUILDER    = new ObjectType("java/lang/StringBuilder", "java.lang.StringBuilder", "StringBuilder");
+    public static final ObjectType TYPE_SYSTEM            = new ObjectType("java/lang/System", "java.lang.System", "System");
+    public static final ObjectType TYPE_THREAD            = new ObjectType("java/lang/Thread", "java.lang.Thread", "Thread");
+    public static final ObjectType TYPE_THROWABLE         = new ObjectType("java/lang/Throwable", "java.lang.Throwable", "Throwable");
+
+    public static final ObjectType TYPE_PRIMITIVE_BOOLEAN = new ObjectType("Z");
+    public static final ObjectType TYPE_PRIMITIVE_BYTE    = new ObjectType("B");
+    public static final ObjectType TYPE_PRIMITIVE_CHAR    = new ObjectType("C");
+    public static final ObjectType TYPE_PRIMITIVE_DOUBLE  = new ObjectType("D");
+    public static final ObjectType TYPE_PRIMITIVE_FLOAT   = new ObjectType("F");
+    public static final ObjectType TYPE_PRIMITIVE_INT     = new ObjectType("I");
+    public static final ObjectType TYPE_PRIMITIVE_LONG    = new ObjectType("J");
+    public static final ObjectType TYPE_PRIMITIVE_SHORT   = new ObjectType("S");
+    public static final ObjectType TYPE_PRIMITIVE_VOID    = new ObjectType("V");
 
     public static final ObjectType TYPE_UNDEFINED_OBJECT = new ObjectType("java/lang/Object", "java.lang.Object", "Object") {
         @Override public String toString() { return "UndefinedObjectType"; }
@@ -52,22 +68,32 @@ public class ObjectType implements Type {
         this.name = name;
         this.typeArguments = typeArguments;
         this.dimension = dimension;
+        this.descriptor = createDescriptor("L" + internalName + ';', dimension);
 
         assert (internalName != null) && !internalName.endsWith(";");
+    }
 
+    public ObjectType(String primitiveDescriptor) {
+        this(primitiveDescriptor, 0);
+    }
+
+    public ObjectType(String primitiveDescriptor, int dimension) {
+        this.internalName = primitiveDescriptor;
+        this.qualifiedName = this.name = PrimitiveType.getPrimitiveType(primitiveDescriptor.charAt(0)).getName();
+        this.dimension = dimension;
+        this.descriptor = createDescriptor(primitiveDescriptor, dimension);
+    }
+
+    protected static String createDescriptor(String descriptor, int dimension) {
         switch (dimension) {
             case 0:
-                this.descriptor = "L" + internalName + ';';
-                break;
+                return descriptor;
             case 1:
-                this.descriptor = "[L" + internalName + ';';
-                break;
+                return "[" + descriptor;
             case 2:
-                this.descriptor = "[[L" + internalName + ';';
-                break;
+                return "[[" + descriptor;
             default:
-                this.descriptor = new String(new char[dimension]).replaceAll("\0", "[") + 'L' + internalName + ';';
-                break;
+                return new String(new char[dimension]).replaceAll("\0", "[") + descriptor;
         }
     }
 
@@ -109,11 +135,21 @@ public class ObjectType implements Type {
 
     @Override
     public Type createType(int dimension) {
-        assert dimension >= 0;
-        if (this.dimension == dimension)
+        assert dimension >= 0 : "ObjectType.createType(dim) : create type with zero or negative dimension";
+
+        if (this.dimension == dimension) {
             return this;
-        else
+        } else if (descriptor.charAt(descriptor.length()-1) != ';') {
+            // Array of primitive types
+            if (dimension == 0) {
+                return PrimitiveType.getPrimitiveType(descriptor.charAt(this.dimension));
+            } else {
+                return new ObjectType(internalName, dimension);
+            }
+        } else {
+            // Object type or array of object types
             return new ObjectType(internalName, qualifiedName, name, typeArguments, dimension);
+        }
     }
 
     public ObjectType createType(BaseTypeArgument typeArguments) {

@@ -47,7 +47,7 @@ public class PrintTypeVisitor implements TypeVisitor {
 
     @Override
     public void visit(PrimitiveType type) {
-        switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(type.getFlags())) {
+        switch (type.getJavaPrimitiveFlags()) {
             case FLAG_BOOLEAN: sb.append("boolean"); break;
             case FLAG_CHAR: sb.append("char");    break;
             case FLAG_FLOAT: sb.append("float");   break;

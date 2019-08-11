@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -23,7 +23,7 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("org/jd/core/test/OuterClass");
+        ObjectType ot = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass");
 
         assertEquals("org/jd/core/test/OuterClass", ot.getInternalName());
         assertEquals("org.jd.core.test.OuterClass", ot.getQualifiedName());
@@ -35,7 +35,7 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("org/jd/core/test/OuterClass$InnerClass");
+        ObjectType ot = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass$InnerClass");
 
         assertEquals("org/jd/core/test/OuterClass$InnerClass", ot.getInternalName());
         assertEquals("org.jd.core.test.OuterClass.InnerClass", ot.getQualifiedName());
@@ -47,7 +47,7 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("org/jd/core/test/OuterClass$StaticInnerClass");
+        ObjectType ot = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass$StaticInnerClass");
 
         assertEquals("org/jd/core/test/OuterClass$StaticInnerClass", ot.getInternalName());
         assertEquals("org.jd.core.test.OuterClass.StaticInnerClass", ot.getQualifiedName());
@@ -59,7 +59,7 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("org/jd/core/test/OuterClass$1");
+        ObjectType ot = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass$1");
 
         assertEquals("org/jd/core/test/OuterClass$1", ot.getInternalName());
         assertNull(ot.getQualifiedName());
@@ -71,7 +71,7 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("org/jd/core/test/OuterClass$1LocalClass");
+        ObjectType ot = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass$1LocalClass");
 
         assertEquals("org/jd/core/test/OuterClass$1LocalClass", ot.getInternalName());
         assertNull(ot.getQualifiedName());
@@ -82,7 +82,7 @@ public class ObjectTypeMakerTest extends TestCase {
     public void testThread() throws Exception {
         ClassPathLoader loader = new ClassPathLoader();
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("java/lang/Thread");
+        ObjectType ot = maker.makeFromInternalTypeName("java/lang/Thread");
 
         assertEquals("java/lang/Thread", ot.getInternalName());
         assertEquals("java.lang.Thread", ot.getQualifiedName());
@@ -93,7 +93,7 @@ public class ObjectTypeMakerTest extends TestCase {
     public void testThreadState() throws Exception {
         ClassPathLoader loader = new ClassPathLoader();
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("java/lang/Thread$State");
+        ObjectType ot = maker.makeFromInternalTypeName("java/lang/Thread$State");
 
         assertEquals("java/lang/Thread$State", ot.getInternalName());
         assertEquals("java.lang.Thread.State", ot.getQualifiedName());
@@ -104,7 +104,7 @@ public class ObjectTypeMakerTest extends TestCase {
     public void testUnknownClass() throws Exception {
         ClassPathLoader loader = new ClassPathLoader();
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("org/unknown/Class");
+        ObjectType ot = maker.makeFromInternalTypeName("org/unknown/Class");
 
         assertEquals("org/unknown/Class", ot.getInternalName());
         assertEquals("org.unknown.Class", ot.getQualifiedName());
@@ -115,7 +115,7 @@ public class ObjectTypeMakerTest extends TestCase {
     public void testUnknownInnerClass() throws Exception {
         ClassPathLoader loader = new ClassPathLoader();
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType ot = maker.make("org/unknown/Class$InnerClass");
+        ObjectType ot = maker.makeFromInternalTypeName("org/unknown/Class$InnerClass");
 
         assertEquals("org/unknown/Class$InnerClass", ot.getInternalName());
         assertEquals("org.unknown.Class.InnerClass", ot.getQualifiedName());
@@ -126,8 +126,8 @@ public class ObjectTypeMakerTest extends TestCase {
     public void testListIsAssignableFromArrayList() throws Exception {
         ClassPathLoader loader = new ClassPathLoader();
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType parent = maker.make("java/util/List");
-        ObjectType child = maker.make("java/util/ArrayList");
+        ObjectType parent = maker.makeFromInternalTypeName("java/util/List");
+        ObjectType child = maker.makeFromInternalTypeName("java/util/ArrayList");
 
         assertNotNull(parent);
         assertNotNull(child);
@@ -138,8 +138,8 @@ public class ObjectTypeMakerTest extends TestCase {
     public void testClassIsAssignableFromObject() throws Exception {
         ClassPathLoader loader = new ClassPathLoader();
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType parent = maker.make("java/lang/Class");
-        ObjectType child = maker.make("java/lang/Object");
+        ObjectType parent = maker.makeFromInternalTypeName("java/lang/Class");
+        ObjectType child = maker.makeFromInternalTypeName("java/lang/Object");
 
         assertNotNull(parent);
         assertNotNull(child);
@@ -151,8 +151,8 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType parent = maker.make("java/lang/Object");
-        ObjectType child = maker.make("org/jd/core/test/OuterClass$SafeNumberComparator");
+        ObjectType parent = maker.makeFromInternalTypeName("java/lang/Object");
+        ObjectType child = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass$SafeNumberComparator");
 
         assertNotNull(parent);
         assertNotNull(child);
@@ -164,8 +164,8 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType parent = maker.make("java/util/Comparator");
-        ObjectType child = maker.make("org/jd/core/test/OuterClass$SafeNumberComparator");
+        ObjectType parent = maker.makeFromInternalTypeName("java/util/Comparator");
+        ObjectType child = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass$SafeNumberComparator");
 
         assertNotNull(parent);
         assertNotNull(child);
@@ -177,8 +177,8 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType parent = maker.make("org/jd/core/test/OuterClass$NumberComparator");
-        ObjectType child = maker.make("org/jd/core/test/OuterClass$SafeNumberComparator");
+        ObjectType parent = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass$NumberComparator");
+        ObjectType child = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass$SafeNumberComparator");
 
         assertNotNull(parent);
         assertNotNull(child);
@@ -190,8 +190,8 @@ public class ObjectTypeMakerTest extends TestCase {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
         ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        ObjectType parent = maker.make("org/jd/core/test/OuterClass");
-        ObjectType child = maker.make("org/jd/core/test/SimpleClass");
+        ObjectType parent = maker.makeFromInternalTypeName("org/jd/core/test/OuterClass");
+        ObjectType child = maker.makeFromInternalTypeName("org/jd/core/test/SimpleClass");
 
         assertNotNull(parent);
         assertNotNull(child);

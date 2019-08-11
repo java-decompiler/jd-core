@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -14,59 +14,86 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileFormatException;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileReader;
 
-import java.io.UTFDataFormatException;
 import java.util.HashMap;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class ObjectTypeMaker {
-    protected HashMap<String, ObjectType> objectTypeCache = new HashMap<>(1024);
+    protected static final HashMap<String, ObjectType> OBJECT_TYPE_CACHE = new HashMap<>();
+    protected static final HashMap<String, ObjectType> OBJECT_PRIMITIVE_TYPE_CACHE = new HashMap<>();
+
+    static {
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_CLASS.getInternalName(),             ObjectType.TYPE_CLASS);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_OBJECT.getInternalName(),            ObjectType.TYPE_OBJECT);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_STRING.getInternalName(),            ObjectType.TYPE_STRING);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_THROWABLE.getInternalName(),         ObjectType.TYPE_THROWABLE);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_EXCEPTION.getInternalName(),         ObjectType.TYPE_EXCEPTION);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_RUNTIME_EXCEPTION.getInternalName(), ObjectType.TYPE_RUNTIME_EXCEPTION);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_SYSTEM.getInternalName(),            ObjectType.TYPE_SYSTEM);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_STRING_BUILDER.getInternalName(),    ObjectType.TYPE_STRING_BUILDER);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_STRING_BUFFER.getInternalName(),     ObjectType.TYPE_STRING_BUFFER);
+        OBJECT_TYPE_CACHE.put(ObjectType.TYPE_THREAD.getInternalName(),            ObjectType.TYPE_THREAD);
+
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_BOOLEAN.getInternalName(), ObjectType.TYPE_PRIMITIVE_BOOLEAN);
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_BYTE.getInternalName(),    ObjectType.TYPE_PRIMITIVE_BYTE);
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_CHAR.getInternalName(),    ObjectType.TYPE_PRIMITIVE_CHAR);
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_DOUBLE.getInternalName(),  ObjectType.TYPE_PRIMITIVE_DOUBLE);
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_FLOAT.getInternalName(),   ObjectType.TYPE_PRIMITIVE_FLOAT);
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_INT.getInternalName(),     ObjectType.TYPE_PRIMITIVE_INT);
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_LONG.getInternalName(),    ObjectType.TYPE_PRIMITIVE_LONG);
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_SHORT.getInternalName(),   ObjectType.TYPE_PRIMITIVE_SHORT);
+        OBJECT_PRIMITIVE_TYPE_CACHE.put(ObjectType.TYPE_PRIMITIVE_VOID.getInternalName(),    ObjectType.TYPE_PRIMITIVE_VOID);
+    }
+
+    protected HashMap<String, ObjectType> descriptorToObjectTypeCache = new HashMap<>(1024);
+    protected HashMap<String, ObjectType> internalTypeNameToObjectTypeCache = new HashMap<>(1024);
     protected HashMap<String, String[]> hierarchy = new HashMap<>(1024);
     protected Loader loader;
 
     public ObjectTypeMaker(Loader loader) {
         this.loader = loader;
-
-        objectTypeCache.put("java/lang/Class", ObjectType.TYPE_CLASS);
-        objectTypeCache.put("java/lang/Object", ObjectType.TYPE_OBJECT);
-        objectTypeCache.put("java/lang/String", ObjectType.TYPE_STRING);
     }
 
-    public ObjectType make(String descriptor) {
-        try {
+    public ObjectType makeFromDescriptor(String descriptor) {
+        ObjectType ot = descriptorToObjectTypeCache.get(descriptor);
+
+        if (ot == null) {
             if (descriptor.charAt(0) == '[') {
-                ObjectType ot = objectTypeCache.get(descriptor);
+                int dimension = 1;
 
-                if (ot == null) {
-                    int dimension = 1;
-
-                    while (descriptor.charAt(dimension) == '[') {
-                        dimension++;
-                    }
-
-                    if ((descriptor.charAt(dimension) == 'L') && descriptor.endsWith(";")) {
-                        ot = unsafeMake(descriptor.substring(dimension + 1, descriptor.length() - 1));
-                        ot = new ObjectType(ot.getInternalName(), ot.getQualifiedName(), ot.getName(), dimension);
-                        objectTypeCache.put(descriptor, ot);
-                    }
+                while (descriptor.charAt(dimension) == '[') {
+                    dimension++;
                 }
 
-                return ot;
-            } else if ((descriptor.charAt(0) == 'L') && (descriptor.charAt(descriptor.length()-1) == ';')) {
-                return unsafeMake(descriptor.substring(1, descriptor.length()-1));
+                ot = (ObjectType)makeFromDescriptorWithoutBracket(descriptor.substring(dimension)).createType(dimension);
             } else {
-                return unsafeMake(descriptor);
+                ot = makeFromDescriptorWithoutBracket(descriptor);
             }
-        } catch (Exception ignore) {
-            // Class file not found by the system class loader, or invalid class file
-            return null;
+
+            descriptorToObjectTypeCache.put(descriptor, ot);
         }
+
+        return ot;
     }
 
-    private ObjectType unsafeMake(String internalTypeName) throws Exception {
-        assert (internalTypeName != null) && !internalTypeName.endsWith(";");
+    private ObjectType makeFromDescriptorWithoutBracket(String descriptor) {
+        ObjectType ot = OBJECT_PRIMITIVE_TYPE_CACHE.get(descriptor);
 
-        ObjectType ot = objectTypeCache.get(internalTypeName);
+        if (ot == null) {
+            ot = makeFromInternalTypeName(descriptor.substring(1, descriptor.length()-1));
+        }
+
+        return ot;
+    }
+
+    public ObjectType makeFromInternalTypeName(String internalTypeName) {
+        assert (internalTypeName != null) && !internalTypeName.endsWith(";") : "ObjectTypeMaker.makeFromInternalTypeName(internalTypeName) : invalid internalTypeName";
+
+        ObjectType ot = OBJECT_TYPE_CACHE.get(internalTypeName);
+
+        if (ot == null) {
+            ot = internalTypeNameToObjectTypeCache.get(internalTypeName);
+        }
 
         if (ot == null) {
             // Search class file with loader, first
@@ -86,48 +113,53 @@ public class ObjectTypeMaker {
         return ot;
     }
 
-    private ObjectType loadFromLoader(String internalTypeName) throws Exception {
-        ObjectType ot = objectTypeCache.get(internalTypeName);
+    private ObjectType loadFromLoader(String internalTypeName) {
+        try {
+            ObjectType ot = internalTypeNameToObjectTypeCache.get(internalTypeName);
 
-        if ((ot == null) && loader.canLoad(internalTypeName)) {
-            String outerTypeName = getOuterTypeName(internalTypeName);
+            if ((ot == null) && loader.canLoad(internalTypeName)) {
+                String outerTypeName = getOuterTypeName(internalTypeName);
 
-            if (outerTypeName == null) {
-                int lastSlash = internalTypeName.lastIndexOf('/');
-                String qualifiedName = internalTypeName.replace('/', '.');
-                String name = qualifiedName.substring(lastSlash + 1);
+                if (outerTypeName == null) {
+                    int lastSlash = internalTypeName.lastIndexOf('/');
+                    String qualifiedName = internalTypeName.replace('/', '.');
+                    String name = qualifiedName.substring(lastSlash + 1);
 
-                ot = new ObjectType(internalTypeName, qualifiedName, name);
-            } else {
-                ObjectType outerOT = loadFromLoader(outerTypeName);
-                int index;
-
-                assert outerOT != null;
-
-                if (internalTypeName.length() > outerTypeName.length() + 1) {
-                    index = outerTypeName.length();
+                    ot = new ObjectType(internalTypeName, qualifiedName, name);
                 } else {
-                    index = internalTypeName.lastIndexOf('$');
+                    ObjectType outerOT = loadFromLoader(outerTypeName);
+                    int index;
+
+                    assert outerOT != null;
+
+                    if (internalTypeName.length() > outerTypeName.length() + 1) {
+                        index = outerTypeName.length();
+                    } else {
+                        index = internalTypeName.lastIndexOf('$');
+                    }
+
+                    String innerName = internalTypeName.substring(index + 1);
+
+                    if (Character.isDigit(innerName.charAt(0))) {
+                        ot = new InnerObjectType(internalTypeName, null, extractLocalClassName(innerName), outerOT);
+                    } else {
+                        String qualifiedName = outerOT.getQualifiedName() + '.' + innerName;
+                        ot = new InnerObjectType(internalTypeName, qualifiedName, innerName, outerOT);
+                    }
                 }
 
-                String innerName = internalTypeName.substring(index + 1);
-
-                if (Character.isDigit(innerName.charAt(0))) {
-                    ot = new InnerObjectType(internalTypeName, null, extractLocalClassName(innerName), outerOT);
-                } else {
-                    String qualifiedName = outerOT.getQualifiedName() + '.' + innerName;
-                    ot = new InnerObjectType(internalTypeName, qualifiedName, innerName, outerOT);
-                }
+                internalTypeNameToObjectTypeCache.put(internalTypeName, ot);
             }
 
-            objectTypeCache.put(internalTypeName, ot);
+            return ot;
+        } catch (Exception ignore) {
+            // Class file not found by the system class loader, or invalid class file
+            return null;
         }
-
-        return ot;
     }
 
     private ObjectType loadFromClassLoader(String internalTypeName) {
-        ObjectType ot = objectTypeCache.get(internalTypeName);
+        ObjectType ot = internalTypeNameToObjectTypeCache.get(internalTypeName);
 
         if (ot == null) {
             try {
@@ -155,7 +187,7 @@ public class ObjectTypeMaker {
             } catch (ClassNotFoundException ignore) {
             }
 
-            objectTypeCache.put(internalTypeName, ot);
+            internalTypeNameToObjectTypeCache.put(internalTypeName, ot);
         }
 
         return ot;
@@ -171,7 +203,11 @@ public class ObjectTypeMaker {
             ObjectType outerSot = create(outerTypeName);
             String innerName = internalTypeName.substring(outerTypeName.length() + 1);
 
-            if (Character.isDigit(innerName.charAt(0))) {
+            if (innerName.isEmpty()) {
+                String qualifiedName = internalTypeName.replace('/', '.');
+                String name = qualifiedName.substring(lastSlash + 1);
+                ot = new ObjectType(internalTypeName, qualifiedName, name);
+            } else if (Character.isDigit(innerName.charAt(0))) {
                 ot = new InnerObjectType(internalTypeName, null, extractLocalClassName(innerName), outerSot);
             } else {
                 String qualifiedName = outerSot.getQualifiedName() + '.' + innerName;
@@ -180,11 +216,10 @@ public class ObjectTypeMaker {
         } else {
             String qualifiedName = internalTypeName.replace('/', '.');
             String name = qualifiedName.substring(lastSlash + 1);
-
             ot = new ObjectType(internalTypeName, qualifiedName, name);
         }
 
-        objectTypeCache.put(internalTypeName, ot);
+        internalTypeNameToObjectTypeCache.put(internalTypeName, ot);
 
         return ot;
     }
@@ -389,7 +424,7 @@ public class ObjectTypeMaker {
         }
     }
 
-    private Object[] loadConstants(ClassFileReader reader) throws UTFDataFormatException {
+    private Object[] loadConstants(ClassFileReader reader) throws Exception {
         int count = reader.readUnsignedShort();
 
         if (count == 0)

@@ -407,14 +407,14 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 if (expression.getBodyDeclaration() == null) {
                     ObjectType type = expression.getObjectType();
                     String internalName = type.getInternalName();
-                    InterfaceDeclaration declaration = (InterfaceDeclaration)bodyDeclaration.getInnerTypeDeclaration(internalName);
+                    ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalName);
 
-                    if (declaration != null) {
-                        cfbd = (ClassFileBodyDeclaration) declaration.getBodyDeclaration();
+                    if ((memberDeclaration != null) && (memberDeclaration.getClass() == ClassFileClassDeclaration.class)) {
+                        ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) memberDeclaration;
+                        cfbd = (ClassFileBodyDeclaration)cfcd.getBodyDeclaration();
 
                         if ((type.getQualifiedName() == null) && (type.getName() != null)) {
                             // Local class
-                            ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) declaration;
                             cfcd.setFlags(cfcd.getFlags() & (~Declaration.FLAG_SYNTHETIC));
                             localClassDeclarations.add(cfcd);
                             bodyDeclaration.removeInnerType(internalName);

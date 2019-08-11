@@ -61,22 +61,22 @@ public class LocalVariableMaker {
                 String descriptor = field.getDescriptor();
 
                 if (descriptor.charAt(descriptor.length() - 1) == ';') {
-                    objectTypeMaker.make(descriptor).accept(populateBlackListNamesVisitor);
+                    objectTypeMaker.makeFromDescriptor(descriptor).accept(populateBlackListNamesVisitor);
                 }
 
                 blackListNames.add(field.getName());
             }
         }
 
-        objectTypeMaker.make(classFile.getInternalTypeName()).accept(populateBlackListNamesVisitor);
+        objectTypeMaker.makeFromInternalTypeName(classFile.getInternalTypeName()).accept(populateBlackListNamesVisitor);
 
         if (classFile.getSuperTypeName() != null) {
-            objectTypeMaker.make(classFile.getSuperTypeName()).accept(populateBlackListNamesVisitor);
+            objectTypeMaker.makeFromInternalTypeName(classFile.getSuperTypeName()).accept(populateBlackListNamesVisitor);
         }
 
         if (classFile.getInterfaceTypeNames() != null) {
             for (String interfaceTypeName : classFile.getInterfaceTypeNames()) {
-                objectTypeMaker.make(interfaceTypeName).accept(populateBlackListNamesVisitor);
+                objectTypeMaker.makeFromInternalTypeName(interfaceTypeName).accept(populateBlackListNamesVisitor);
             }
         }
 
@@ -95,7 +95,7 @@ public class LocalVariableMaker {
         if ((method.getAccessFlags() & FLAG_STATIC) == 0) {
             if (localVariableSet.root(0) == null) {
                 // Local variable missing
-                localVariableSet.add(0, new ObjectLocalVariable(objectTypeMaker, 0, 0, objectTypeMaker.make(classFile.getInternalTypeName()), "this"));
+                localVariableSet.add(0, new ObjectLocalVariable(objectTypeMaker, 0, 0, objectTypeMaker.makeFromInternalTypeName(classFile.getInternalTypeName()), "this"));
                 blackListNames.add("this");
             }
             firstVariableIndex = 1;
@@ -116,7 +116,7 @@ public class LocalVariableMaker {
             } else if ((classFile.getOuterClassFile() != null) && ((classFile.getAccessFlags() & FLAG_STATIC) == 0)) {
                 if (localVariableSet.root(1) == null) {
                     // Local variable missing
-                    localVariableSet.add(1, new ObjectLocalVariable(objectTypeMaker, 1, 0, objectTypeMaker.make(classFile.getOuterClassFile().getInternalTypeName()), "this$0"));
+                    localVariableSet.add(1, new ObjectLocalVariable(objectTypeMaker, 1, 0, objectTypeMaker.makeFromInternalTypeName(classFile.getOuterClassFile().getInternalTypeName()), "this$0"));
                     blackListNames.add("this$0");
                 }
             }
@@ -187,12 +187,12 @@ public class LocalVariableMaker {
                     AbstractLocalVariable lv;
 
                     if (descriptor.charAt(descriptor.length() - 1) == ';') {
-                        lv = new ObjectLocalVariable(objectTypeMaker, index, startPc, objectTypeMaker.make(descriptor), name);
+                        lv = new ObjectLocalVariable(objectTypeMaker, index, startPc, objectTypeMaker.makeFromDescriptor(descriptor), name);
                     } else {
                         int dimension = SignatureParser.countDimension(descriptor);
 
                         if (dimension == 0) {
-                            lv = new PrimitiveLocalVariable(index, startPc, PrimitiveTypeUtil.getPrimitiveTypeFromDescriptor(descriptor), name);
+                            lv = new PrimitiveLocalVariable(index, startPc, PrimitiveType.getPrimitiveType(descriptor.charAt(0)), name);
                         } else {
                             lv = new ObjectLocalVariable(objectTypeMaker, index, startPc, signatureParser.parseTypeSignature(descriptor.substring(dimension)).createType(dimension), name);
                         }
@@ -229,7 +229,7 @@ public class LocalVariableMaker {
 
         if (classFile.getOuterClassFile() != null) {
             int innerTypeDepth = 1;
-            ObjectType type = objectTypeMaker.make(classFile.getOuterClassFile().getInternalTypeName());
+            ObjectType type = objectTypeMaker.makeFromInternalTypeName(classFile.getOuterClassFile().getInternalTypeName());
 
             while ((type != null) && (type.getClass() == InnerObjectType.class)) {
                 innerTypeDepth++;

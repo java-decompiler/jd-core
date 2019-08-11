@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -345,19 +345,19 @@ public class ClassFileDeserializer {
                 ConstantValue constValue = (ConstantValue)constants.getConstant(constValueIndex);
                 return new ElementValuePrimitiveType(type, constValue);
             case 'e':
-                int typeNameIndex = reader.readUnsignedShort();
-                String typeName = constants.getConstantUtf8(typeNameIndex);
+                int descriptorIndex = reader.readUnsignedShort();
+                String descriptor = constants.getConstantUtf8(descriptorIndex);
                 int constNameIndex = reader.readUnsignedShort();
                 String constName = constants.getConstantUtf8(constNameIndex);
-                return new ElementValueEnumConstValue(typeName, constName);
+                return new ElementValueEnumConstValue(descriptor, constName);
             case 'c':
                 int classInfoIndex = reader.readUnsignedShort();
                 String classInfo = constants.getConstantUtf8(classInfoIndex);
                 return new ElementValueClassInfo(classInfo);
             case '@':
                 int typeIndex = reader.readUnsignedShort();
-                typeName = constants.getConstantUtf8(typeIndex);
-                return new ElementValueAnnotationValue(new Annotation(typeName, loadElementValuePairs(reader, constants)));
+                descriptor = constants.getConstantUtf8(typeIndex);
+                return new ElementValueAnnotationValue(new Annotation(descriptor, loadElementValuePairs(reader, constants)));
             case '[':
                 return new ElementValueArrayValue(loadElementValues(reader, constants));
             default:
@@ -651,9 +651,9 @@ public class ClassFileDeserializer {
         Annotation[] annotations = new Annotation[count];
 
         for (int i=0; i<count; i++) {
-            int typeIndex = reader.readUnsignedShort();
-            String typeName = constants.getConstantUtf8(typeIndex);
-            annotations[i] = new Annotation(typeName, loadElementValuePairs(reader, constants));
+            int descriptorIndex = reader.readUnsignedShort();
+            String descriptor = constants.getConstantUtf8(descriptorIndex);
+            annotations[i] = new Annotation(descriptor, loadElementValuePairs(reader, constants));
         }
 
         return annotations;

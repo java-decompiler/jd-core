@@ -8,7 +8,6 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
@@ -21,7 +20,7 @@ public class GenerateParameterSuffixNameVisitor extends AbstractNopTypeVisitor {
 
     @Override
     public void visit(PrimitiveType type) {
-        switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(type.getFlags())) {
+        switch (type.getJavaPrimitiveFlags()) {
             case FLAG_BYTE : suffix = "Byte"; break;
             case FLAG_CHAR : suffix = "Char"; break;
             case FLAG_DOUBLE : suffix = "Double"; break;

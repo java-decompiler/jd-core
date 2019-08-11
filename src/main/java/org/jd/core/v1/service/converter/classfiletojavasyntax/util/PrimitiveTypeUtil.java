@@ -7,32 +7,25 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
 public class PrimitiveTypeUtil {
-    protected static final PrimitiveType[] descriptorToPrimitiveType = new PrimitiveType['Z' - 'B' + 1];
-
-    static {
-        descriptorToPrimitiveType['B' - 'B'] = TYPE_BYTE;
-        descriptorToPrimitiveType['C' - 'B'] = TYPE_CHAR;
-        descriptorToPrimitiveType['D' - 'B'] = TYPE_DOUBLE;
-        descriptorToPrimitiveType['F' - 'B'] = TYPE_FLOAT;
-        descriptorToPrimitiveType['I' - 'B'] = TYPE_INT;
-        descriptorToPrimitiveType['J' - 'B'] = TYPE_LONG;
-        descriptorToPrimitiveType['S' - 'B'] = TYPE_SHORT;
-        descriptorToPrimitiveType['Z' - 'B'] = TYPE_BOOLEAN;
-    }
-
-    public static PrimitiveType getPrimitiveTypeFromDescriptor(String descriptor) {
+    public static Type getPrimitiveTypeFromDescriptor(String descriptor) {
         int dimension = 0;
 
         while (descriptor.charAt(dimension) == '[') {
             dimension++;
         }
 
-        return descriptorToPrimitiveType[descriptor.charAt(dimension) - 'B'].createType(dimension);
+        if (dimension == 0) {
+            return PrimitiveType.getPrimitiveType(descriptor.charAt(dimension));
+        } else {
+            return new ObjectType(descriptor.substring(dimension), dimension);
+        }
     }
 
     public static PrimitiveType getPrimitiveTypeFromValue(int value) {
@@ -54,25 +47,11 @@ public class PrimitiveTypeUtil {
         return MAYBE_INT_TYPE;
     }
 
-    public static int getStandardPrimitiveTypeFlags(int flags) {
-        if ((flags & FLAG_BOOLEAN) != 0)
-            return FLAG_BOOLEAN;
-        else if ((flags & FLAG_BYTE) != 0)
-            return FLAG_BYTE;
-        else if ((flags & FLAG_CHAR) != 0)
-            return FLAG_CHAR;
-        else if ((flags & FLAG_SHORT) != 0)
-            return FLAG_SHORT;
-
-        return flags;
-    }
-
     public static PrimitiveType getCommonPrimitiveType(PrimitiveType pt1, PrimitiveType pt2) {
-        assert (pt1.getDimension() == 0) && (pt2.getDimension() == 0);
-        return getPrimitiveType(pt1.getFlags() & pt2.getFlags());
+        return getPrimitiveTypeFromFlags(pt1.getFlags() & pt2.getFlags());
     }
 
-    protected static PrimitiveType getPrimitiveType(int flags) {
+    public static PrimitiveType getPrimitiveTypeFromFlags(int flags) {
         switch (flags) {
             case FLAG_BOOLEAN:
                 return TYPE_BOOLEAN;
@@ -111,5 +90,19 @@ public class PrimitiveTypeUtil {
         }
 
         return null;
+    }
+
+    public static Type getPrimitiveTypeFromTag(int tag) {
+        switch (tag) {
+            case  4: return TYPE_BOOLEAN;
+            case  5: return TYPE_CHAR;
+            case  6: return TYPE_FLOAT;
+            case  7: return TYPE_DOUBLE;
+            case  8: return TYPE_BYTE;
+            case  9: return TYPE_SHORT;
+            case 10: return TYPE_INT;
+            case 11: return TYPE_LONG;
+            default: assert false; return null;
+        }
     }
 }

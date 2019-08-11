@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -437,7 +437,7 @@ public class StatementMaker {
                     finallyStatements.removeLast();
                 }
             } else {
-                stack.push(new NullExpression(objectTypeMaker.make(exceptionHandler.getInternalThrowableName())));
+                stack.push(new NullExpression(objectTypeMaker.makeFromInternalTypeName(exceptionHandler.getInternalThrowableName())));
 
                 Statements catchStatements = new Statements();
                 localVariableMaker.pushFrame(catchStatements);
@@ -445,7 +445,7 @@ public class StatementMaker {
                 BasicBlock bb = exceptionHandler.getBasicBlock();
                 int lineNumber = bb.getControlFlowGraph().getLineNumber(bb.getFromOffset());
                 int index = ByteCodeParser.getExceptionLocalVariableIndex(bb);
-                ObjectType ot = objectTypeMaker.make(exceptionHandler.getInternalThrowableName());
+                ObjectType ot = objectTypeMaker.makeFromInternalTypeName(exceptionHandler.getInternalThrowableName());
                 int offset = bb.getFromOffset();
                 byte[] code = bb.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
 
@@ -475,7 +475,7 @@ public class StatementMaker {
 
                 if (exceptionHandler.getOtherInternalThrowableNames() != null) {
                     for (String name : exceptionHandler.getOtherInternalThrowableNames()) {
-                        cc.addType(objectTypeMaker.make(name));
+                        cc.addType(objectTypeMaker.makeFromInternalTypeName(name));
                     }
                 }
 
@@ -664,7 +664,7 @@ public class StatementMaker {
                 changeEndLoopToStartLoop(new BitSet(), sub1.getSub1());
                 subStatements = makeSubStatements(watchdog, sub1.getSub1(), statements, jumps, updateStatements);
 
-                assert subStatements.getLast() == ContinueStatement.CONTINUE;
+                assert subStatements.getLast() == ContinueStatement.CONTINUE : "StatementMaker.parseLoop(...) : unexpected basic block for create a do-while loop";
 
                 subStatements.removeLast();
             } else {
@@ -898,7 +898,7 @@ public class StatementMaker {
         }
 
         String typeName = ((StringConstantExpression) mie.getParameters()).getString();
-        ObjectType ot = objectTypeMaker.make(typeName.replace('.', '/'));
+        ObjectType ot = objectTypeMaker.makeFromInternalTypeName(typeName.replace('.', '/'));
 
         return new TypeReferenceDotClassExpression(lineNumber, ot);
     }
@@ -932,7 +932,7 @@ public class StatementMaker {
 
     @SuppressWarnings("unchecked")
     protected void updateJumpStatements(Statements jumps) {
-        assert false : "'jumps' list is not empty";
+        assert false : "StatementMaker.updateJumpStatements(stmt) : 'jumps' list is not empty";
 
         Iterator<ClassFileBreakContinueStatement> iterator = jumps.iterator();
 

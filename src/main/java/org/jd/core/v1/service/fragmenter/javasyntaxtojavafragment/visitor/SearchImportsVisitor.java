@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -313,19 +313,23 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected void add(ObjectType type) {
-        String internalName = type.getInternalName();
-        String qualifiedName = type.getQualifiedName();
+        String descriptor = type.getDescriptor();
 
-        if (internalName.startsWith("java/lang/")) {
-            if (internalName.indexOf('/', 10) != -1) { // 10 = "java/lang/".length()
+        if (descriptor.charAt(descriptor.length()-1) == ';') {
+            String internalName = type.getInternalName();
+            String qualifiedName = type.getQualifiedName();
+
+            if (internalName.startsWith("java/lang/")) {
+                if (internalName.indexOf('/', 10) != -1) { // 10 = "java/lang/".length()
+                    importsFragment.addImport(internalName, qualifiedName);
+                }
+            } else if (internalName.startsWith(internalPackagePrefix)) {
+                if (internalName.indexOf('/', internalPackagePrefix.length()) != -1) {
+                    importsFragment.addImport(internalName, qualifiedName);
+                }
+            } else {
                 importsFragment.addImport(internalName, qualifiedName);
             }
-        } else if (internalName.startsWith(internalPackagePrefix)) {
-            if (internalName.indexOf('/', internalPackagePrefix.length()) != -1) {
-                importsFragment.addImport(internalName, qualifiedName);
-            }
-        } else {
-            importsFragment.addImport(internalName, qualifiedName);
         }
     }
 }

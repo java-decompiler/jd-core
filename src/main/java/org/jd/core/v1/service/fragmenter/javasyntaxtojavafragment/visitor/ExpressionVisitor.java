@@ -21,7 +21,6 @@ import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.token.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.CharacterUtil;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.StringUtil;
@@ -221,7 +220,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         PrimitiveType pt = (PrimitiveType)expression.getType();
 
-        switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(pt.getFlags())) {
+        switch (pt.getJavaPrimitiveFlags()) {
             case FLAG_CHAR:
                 tokens.add(new CharacterConstantToken(CharacterUtil.escapeChar((char)expression.getValue()), currentInternalTypeName));
                 break;
@@ -671,7 +670,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
             PrimitiveType pt = (PrimitiveType)expression.getType();
 
-            switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(pt.getFlags())) {
+            switch (pt.getJavaPrimitiveFlags()) {
                 case FLAG_BOOLEAN:
                     tokens.add(new BooleanConstantToken(expression.getValue() == 1));
                     break;

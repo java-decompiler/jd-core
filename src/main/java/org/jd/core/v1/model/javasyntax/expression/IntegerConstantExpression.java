@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -35,24 +35,14 @@ public class IntegerConstantExpression extends AbstractLineNumberTypeExpression 
 
     @Override
     public void setType(Type type) {
-        assert type.isPrimitive() && checkType(type) : "setType : incompatible types";
+        assert checkType(type) : "IntegerConstantExpression.setType(type) : incompatible types";
         super.setType(type);
     }
 
     protected boolean checkType(Type type) {
         if (type.isPrimitive()) {
-            switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(((PrimitiveType)type).getFlags())) {
-                case FLAG_BYTE:
-                    return (Byte.MIN_VALUE <= value) && (value <= Byte.MAX_VALUE);
-                case FLAG_CHAR:
-                    return (Character.MIN_VALUE <= (char)value) && ((char)value <= Character.MAX_VALUE);
-                case FLAG_SHORT:
-                    return (Short.MIN_VALUE <= value) && (value <= Short.MAX_VALUE);
-                case FLAG_BOOLEAN:
-                    return (0 <= value) && (value <= 1);
-                default:
-                    return (Integer.MIN_VALUE <= value) && (value <= Integer.MAX_VALUE);
-            }
+            PrimitiveType valueType = PrimitiveTypeUtil.getPrimitiveTypeFromValue(value);
+            return (((PrimitiveType)type).getFlags() & valueType.getFlags()) != 0;
         }
 
         return false;

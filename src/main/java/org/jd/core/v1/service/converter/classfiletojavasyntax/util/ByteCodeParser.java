@@ -244,7 +244,7 @@ public class ByteCodeParser {
                     indexRef = stack.pop();
                     arrayRef = stack.pop();
                     t = arrayRef.getType();
-                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, t.createType(t.getDimension()-1), new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
+                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, t.createType(t.getDimension()>0 ? t.getDimension()-1 : 0), new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
                     break;
                 case 84: // BASTORE
                     valueRef = stack.pop();
@@ -722,26 +722,14 @@ public class ByteCodeParser {
                 case 182: case 183: case 184: case 185: // INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE
                     constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                     typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
-                    ot = objectTypeMaker.make(typeName);
+                    ot = (typeName.charAt(0) == '[') ?
+                        objectTypeMaker.makeFromDescriptor(typeName) :
+                        objectTypeMaker.makeFromInternalTypeName(typeName);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
                     BaseExpression parameters = getParameters(statements, stack, descriptor);
                     Type returnedType = signatureParser.parseReturnedType(descriptor);
-
-//                    if (!statements.isEmpty() && (opcode == 184)) { // INVOKESTATIC
-//                        Statement last = statements.getLast();
-//
-//                        if (last.getClass() == ExpressionStatement.class) {
-//                            Expression expression = ((ExpressionStatement)last).getExpression();
-//
-//                            if ((expression.getLineNumber() == lineNumber) && (expression.getType().equals(ot))) {
-//                                statements.removeLast();
-//                                stack.push(expression);
-//                                opcode = 0;
-//                            }
-//                        }
-//                    }
 
                     if (opcode == 184) { // INVOKESTATIC
                         expression1 = new MethodInvocationExpression(lineNumber, returnedType, new ObjectTypeReferenceExpression(lineNumber, ot), typeName, name, descriptor, parameters);
@@ -752,6 +740,9 @@ public class ByteCodeParser {
                         }
                     } else {
                         expression1 = stack.pop();
+                        if (expression1.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                            ((ClassFileLocalVariableReferenceExpression)expression1).getLocalVariable().typeOnLeft(ot);
+                        }
                         if (opcode == 185) { // INVOKEINTERFACE
                             offset += 2; // Skip 'count' and one byte
                         }
@@ -791,12 +782,17 @@ public class ByteCodeParser {
                     stack.push(newNewExpression(lineNumber, typeName));
                     break;
                 case 188: // NEWARRAY
-                    type1 = parsePrimitiveTypeForNewArray( (code[++offset] & 255) );
+                    type1 = PrimitiveTypeUtil.getPrimitiveTypeFromTag( (code[++offset] & 255) ).createType(1);
                     stack.push(new NewArray(lineNumber, type1, stack.pop()));
                     break;
                 case 189: // ANEWARRAY
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
-                    type1 = parseTypeNameForNewArray(typeName);
+                    if (typeName.charAt(0) == '[') {
+                        type1 = objectTypeMaker.makeFromDescriptor(typeName);
+                        type1 = type1.createType(type1.getDimension()+1);
+                    } else {
+                        type1 = objectTypeMaker.makeFromInternalTypeName(typeName).createType(1);
+                    }
                     stack.push(new NewArray(lineNumber, type1, stack.pop()));
                     break;
                 case 190: // ARRAYLENGTH
@@ -807,10 +803,9 @@ public class ByteCodeParser {
                     break;
                 case 192: // CHECKCAST
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
-                    t = objectTypeMaker.make(typeName);
-                    if (t == null) {
-                        t = PrimitiveTypeUtil.getPrimitiveTypeFromDescriptor(typeName);
-                    }
+                    t = (typeName.charAt(0) == '[') ?
+                            objectTypeMaker.makeFromDescriptor(typeName) :
+                            objectTypeMaker.makeFromInternalTypeName(typeName);
                     expression1 = stack.pop();
                     if (expression1.getClass() == CastExpression.class) {
                         // Skip double cast
@@ -824,7 +819,9 @@ public class ByteCodeParser {
                     break;
                 case 193: // INSTANCEOF
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
-                    t = objectTypeMaker.make(typeName);
+                    t = (typeName.charAt(0) == '[') ?
+                            objectTypeMaker.makeFromDescriptor(typeName) :
+                            objectTypeMaker.makeFromInternalTypeName(typeName);
                     if (t == null) {
                         t = PrimitiveTypeUtil.getPrimitiveTypeFromDescriptor(typeName);
                     }
@@ -879,7 +876,7 @@ public class ByteCodeParser {
                     break;
                 case 197: // MULTIANEWARRAY
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
-                    type1 = parseTypeNameForMultiNewArray(typeName);
+                    type1 = objectTypeMaker.makeFromDescriptor(typeName);
                     i = code[++offset] & 255;
 
                     Expressions dimensions = new Expressions(i);
@@ -1010,8 +1007,9 @@ public class ByteCodeParser {
             case Constant.CONSTANT_Class:
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
                 String typeName = ((ConstantUtf8)constants.getConstant(typeNameIndex)).getValue();
-                Type type = objectTypeMaker.make(typeName);
-
+                Type type = (typeName.charAt(0) == '[') ?
+                        objectTypeMaker.makeFromDescriptor(typeName) :
+                        objectTypeMaker.makeFromInternalTypeName(typeName);
                 if (type == null) {
                     type = PrimitiveTypeUtil.getPrimitiveTypeFromDescriptor(typeName);
                 }
@@ -1331,7 +1329,7 @@ public class ByteCodeParser {
 
         if (indyParameters == null) {
             // Create static method reference
-            ObjectType ot = objectTypeMaker.make(typeName);
+            ObjectType ot = objectTypeMaker.makeFromInternalTypeName(typeName);
 
             if (name1.equals("<init>")) {
                 stack.push(new ConstructorReferenceExpression(lineNumber, indyType, ot, descriptor1));
@@ -1577,7 +1575,7 @@ public class ByteCodeParser {
         } else if (expression.getType().isPrimitive()) {
             PrimitiveType pt = (PrimitiveType)expression.getType();
 
-            switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(pt.getFlags())) {
+            switch (pt.getJavaPrimitiveFlags()) {
                 case FLAG_BOOLEAN:
                     if (basicBlock.mustInverseCondition() ^ "==".equals(operator1))
                         stack.push(expression);
@@ -1677,7 +1675,7 @@ public class ByteCodeParser {
 
         String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
         Type type = signatureParser.parseTypeSignature(descriptor);
-        ObjectType ot = objectTypeMaker.make(typeName);
+        ObjectType ot = objectTypeMaker.makeFromInternalTypeName(typeName);
         Expression objectRef = new ObjectTypeReferenceExpression(lineNumber, ot, !internalTypeName.equals(typeName) || localVariableMaker.containsName(name));
         stack.push(new FieldReferenceExpression(lineNumber, type, objectRef, typeName, name, descriptor));
     }
@@ -1685,7 +1683,7 @@ public class ByteCodeParser {
     private void parsePutStatic(Statements statements, DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, int index) {
         ConstantMemberRef constantMemberRef = constants.getConstant(index);
         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
-        ObjectType ot = objectTypeMaker.make(typeName);
+        ObjectType ot = objectTypeMaker.makeFromInternalTypeName(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
         String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
         String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
@@ -1699,7 +1697,7 @@ public class ByteCodeParser {
     private void parseGetField(DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, int index) {
         ConstantMemberRef constantMemberRef = constants.getConstant(index);
         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
-        ObjectType ot = objectTypeMaker.make(typeName);
+        ObjectType ot = objectTypeMaker.makeFromInternalTypeName(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
         String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
         String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
@@ -1711,7 +1709,7 @@ public class ByteCodeParser {
     private void parsePutField(Statements statements, DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, int index) {
         ConstantMemberRef constantMemberRef = constants.getConstant(index);
         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
-        ObjectType ot = objectTypeMaker.make(typeName);
+        ObjectType ot = objectTypeMaker.makeFromInternalTypeName(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
         String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
         String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
@@ -1737,19 +1735,23 @@ public class ByteCodeParser {
     }
 
     private Expression newNewExpression(int lineNumber, String internalName) {
-        ObjectType objectType = objectTypeMaker.make(internalName);
+        ObjectType objectType = objectTypeMaker.makeFromInternalTypeName(internalName);
 
         if ((objectType.getQualifiedName() == null) && (objectType.getName() == null)) {
-            ClassFileClassDeclaration declaration = (ClassFileClassDeclaration)bodyDeclaration.getInnerTypeDeclaration(internalName);
+            ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalName);
 
-            if (declaration == null) {
+            if (memberDeclaration == null) {
                 return new NewExpression(lineNumber, ObjectType.TYPE_OBJECT);
-            } else if (declaration.getInterfaces() != null) {
-                return new NewExpression(lineNumber, (ObjectType)declaration.getInterfaces(), declaration.getBodyDeclaration());
-            } else if (declaration.getSuperType() != null) {
-                return new NewExpression(lineNumber, (ObjectType)declaration.getSuperType(), declaration.getBodyDeclaration());
-            } else {
-                return new NewExpression(lineNumber, ObjectType.TYPE_OBJECT, declaration.getBodyDeclaration());
+            } else if (memberDeclaration.getClass() == ClassFileClassDeclaration.class) {
+                ClassFileClassDeclaration declaration = (ClassFileClassDeclaration) memberDeclaration;
+
+                if (declaration.getInterfaces() != null) {
+                    return new NewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), declaration.getBodyDeclaration());
+                } else if (declaration.getSuperType() != null) {
+                    return new NewExpression(lineNumber, (ObjectType) declaration.getSuperType(), declaration.getBodyDeclaration());
+                } else {
+                    return new NewExpression(lineNumber, ObjectType.TYPE_OBJECT, declaration.getBodyDeclaration());
+                }
             }
         }
 
@@ -1903,83 +1905,14 @@ public class ByteCodeParser {
         }
     }
 
-    private static Type parsePrimitiveTypeForNewArray(int arrayType) {
-        Type type;
-
-        switch (arrayType) {
-            case  4: type = TYPE_BOOLEAN; break;
-            case  5: type = TYPE_CHAR; break;
-            case  6: type = TYPE_FLOAT; break;
-            case  7: type = TYPE_DOUBLE; break;
-            case  8: type = TYPE_BYTE; break;
-            case  9: type = TYPE_SHORT; break;
-            case 10: type = TYPE_INT; break;
-            case 11: type = TYPE_LONG; break;
-            default: assert false; return null;
-        }
-
-        return type.createType(1);
-    }
-
-    private Type parseTypeNameForNewArray(String typeName) {
-        Type type;
-
-        if (typeName.charAt(0) == '[') {
-            int length = typeName.length();
-            char lastChar = typeName.charAt(length - 1);
-
-            switch (lastChar) {
-                case 'B': type = TYPE_BYTE; break;
-                case 'C': type = TYPE_CHAR; break;
-                case 'D': type = TYPE_DOUBLE; break;
-                case 'F': type = TYPE_FLOAT; break;
-                case 'I': type = TYPE_INT; break;
-                case 'J': type = TYPE_LONG; break;
-                case 'S': type = TYPE_SHORT; break;
-                case 'Z': type = TYPE_BOOLEAN; break;
-                case ';':
-                    type = objectTypeMaker.make(typeName);
-                    return type.createType(type.getDimension()+1);
-                default:
-                    assert false;
-                    return null;
-            }
-
-            return type.createType(length);
-        } else {
-            type = objectTypeMaker.make(typeName);
-            return type.createType(type.getDimension()+1);
-        }
-    }
-
-    private Type parseTypeNameForMultiNewArray(String typeName) {
-        int lastIndex = typeName.length() - 1;
-        char lastChar = typeName.charAt(lastIndex);
-        Type type;
-
-        switch (lastChar) {
-            case 'B': type = TYPE_BYTE; break;
-            case 'C': type = TYPE_CHAR; break;
-            case 'D': type = TYPE_DOUBLE; break;
-            case 'F': type = TYPE_FLOAT; break;
-            case 'I': type = TYPE_INT; break;
-            case 'J': type = TYPE_LONG; break;
-            case 'S': type = TYPE_SHORT; break;
-            case 'Z': type = TYPE_BOOLEAN; break;
-            case ';':
-                return objectTypeMaker.make(typeName);
-            default:
-                assert false;
-                return null;
-        }
-
-        return type.createType(lastIndex);
-    }
-
     /**
      * @return expression, 'this' or 'super'
      */
     private Expression getFieldInstanceReference(Expression expression, ObjectType ot, String name) {
+        if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+            ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable().typeOnLeft(ot);
+        }
+
         if ((bodyDeclaration.getFieldDeclarations() != null) && (expression.getClass() == ThisExpression.class) && !ot.equals(expression.getType())) {
             memberVisitor.init(name, null);
 

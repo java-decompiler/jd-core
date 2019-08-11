@@ -9,8 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariab
 
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
-
-import java.util.HashSet;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
@@ -19,13 +18,11 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
 
     public PrimitiveLocalVariable(int index, int offset, PrimitiveType type, String name) {
         super(index, offset, name);
-        assert type.getDimension() == 0;
         this.flags = type.getFlags();
     }
 
     public PrimitiveLocalVariable(int index, int offset, PrimitiveLocalVariable primitiveLocalVariable) {
         super(index, offset, null);
-        assert primitiveLocalVariable.getDimension() == 0;
         int valueFlags = primitiveLocalVariable.flags;
 
         if ((valueFlags & FLAG_INT) != 0) {
@@ -87,8 +84,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         return 0;
     }
 
-    public void setPrimitiveType(PrimitiveType type) {
-        assert type.getDimension() == 0;
+    public void setType(PrimitiveType type) {
         this.flags = type.getFlags();
     }
 
@@ -168,7 +164,14 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
     @Override
     public boolean isAssignableFrom(AbstractLocalVariable variable) {
         if (variable.getClass() == PrimitiveLocalVariable.class) {
-            return (flags & ((PrimitiveLocalVariable)variable).flags) != 0;
+            int variableFlags = ((PrimitiveLocalVariable)variable).flags;
+            PrimitiveType type = PrimitiveTypeUtil.getPrimitiveTypeFromFlags(variableFlags);
+
+            if (type != null) {
+                variableFlags = type.getRightFlags();
+            }
+
+            return (flags & variableFlags) != 0;
         }
 
         return false;
@@ -181,9 +184,15 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         addVariableOnRight(variable);
 
         int old = flags;
+        int variableFlags = ((PrimitiveLocalVariable)variable).flags;
+        PrimitiveType type = PrimitiveTypeUtil.getPrimitiveTypeFromFlags(variableFlags);
 
-        flags &= ((PrimitiveLocalVariable)variable).flags;
-        assert flags != 0;
+        if (type != null) {
+            variableFlags = type.getRightFlags();
+        }
+
+        flags &= variableFlags;
+        assert flags != 0 : "PrimitiveLocalVariable.variableOnRight(var) : flags = 0 after type reduction";
 
         if (old != flags) {
             fireChangeEvent();
@@ -197,9 +206,15 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         addVariableOnLeft(variable);
 
         int old = flags;
+        int variableFlags = ((PrimitiveLocalVariable)variable).flags;
+        PrimitiveType type = PrimitiveTypeUtil.getPrimitiveTypeFromFlags(variableFlags);
 
-        flags &= ((PrimitiveLocalVariable)variable).flags;
-        assert flags != 0;
+        if (type != null) {
+            variableFlags = type.getLeftFlags();
+        }
+
+        flags &= variableFlags;
+        assert flags != 0 : "PrimitiveLocalVariable.variableOnLeft(var) : flags = 0 after type reduction";
 
         if (old != flags) {
             fireChangeEvent();

@@ -60,7 +60,7 @@ public class SignatureParser {
         TypeTypes typeTypes = new TypeTypes();
         String internalTypeName = classFile.getInternalTypeName();
 
-        typeTypes.thisType = objectTypeMaker.make(internalTypeName);
+        typeTypes.thisType = objectTypeMaker.makeFromInternalTypeName(internalTypeName);
 
         AttributeSignature attributeSignature = classFile.getAttribute("Signature");
 
@@ -70,18 +70,18 @@ public class SignatureParser {
             String[] interfaceTypeNames = classFile.getInterfaceTypeNames();
 
             if (! "java/lang/Object".equals(superTypeName)) {
-                typeTypes.superType = objectTypeMaker.make(superTypeName);
+                typeTypes.superType = objectTypeMaker.makeFromInternalTypeName(superTypeName);
             }
 
             if (interfaceTypeNames != null) {
                 int length = interfaceTypeNames.length;
 
                 if (length == 1) {
-                    typeTypes.interfaces = objectTypeMaker.make(interfaceTypeNames[0]);
+                    typeTypes.interfaces = objectTypeMaker.makeFromInternalTypeName(interfaceTypeNames[0]);
                 } else {
                     Types list = new Types(length);
                     for (String interfaceTypeName : interfaceTypeNames) {
-                        list.add(objectTypeMaker.make(interfaceTypeName));
+                        list.add(objectTypeMaker.makeFromInternalTypeName(interfaceTypeName));
                     }
                     typeTypes.interfaces = list;
                 }
@@ -273,12 +273,12 @@ public class SignatureParser {
                         String[] exceptionTypeNames = attributeExceptions.getExceptionTypeNames();
 
                         if (exceptionTypeNames.length == 1) {
-                            methodTypes.exceptions = objectTypeMaker.make(exceptionTypeNames[0]);
+                            methodTypes.exceptions = objectTypeMaker.makeFromInternalTypeName(exceptionTypeNames[0]);
                         } else {
                             Types list = new Types(exceptionTypeNames.length);
 
                             for (String exceptionTypeName : exceptionTypeNames) {
-                                list.add(objectTypeMaker.make(exceptionTypeName));
+                                list.add(objectTypeMaker.makeFromInternalTypeName(exceptionTypeName));
                             }
 
                             methodTypes.exceptions = list;
@@ -530,7 +530,7 @@ public class SignatureParser {
             }
 
             String internalTypeName = reader.substring(index);
-            ObjectType ot = objectTypeMaker.make(internalTypeName);
+            ObjectType ot = objectTypeMaker.makeFromInternalTypeName(internalTypeName);
 
             if (endMarker == '<') {
                 // Skip '<'

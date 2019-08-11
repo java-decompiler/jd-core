@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -69,11 +69,11 @@ public class AnnotationConverter implements ElementValueVisitor {
 
     @SuppressWarnings("unchecked")
     protected AnnotationReference convert(Annotation annotation) {
-        String typeName = annotation.getTypeName();
+        String descriptor = annotation.getDescriptor();
 
-        assert (typeName != null) && (typeName.length() > 2) && (typeName.charAt(0) == 'L') && (typeName.charAt(typeName.length()-1) == ';');
+        assert (descriptor != null) && (descriptor.length() > 2) && (descriptor.charAt(0) == 'L') && (descriptor.charAt(descriptor.length()-1) == ';');
 
-        ObjectType ot = factory.make(typeName);
+        ObjectType ot = factory.makeFromDescriptor(descriptor);
         ElementValuePair[] elementValuePairs = annotation.getElementValuePairs();
 
         if (elementValuePairs == null) {
@@ -145,10 +145,7 @@ public class AnnotationConverter implements ElementValueVisitor {
     @Override
     public void visit(ElementValueClassInfo elementValueClassInfo) {
         String classInfo = elementValueClassInfo.getClassInfo();
-
-        assert (classInfo != null) && (classInfo.length() > 2) && (classInfo.charAt(0) == 'L') && (classInfo.charAt(classInfo.length()-1) == ';');
-
-        ObjectType ot = factory.make(classInfo);
+        ObjectType ot = factory.makeFromDescriptor(classInfo);
         elementValue = new ExpressionElementValue(new TypeReferenceDotClassExpression(ot));
     }
 
@@ -161,14 +158,14 @@ public class AnnotationConverter implements ElementValueVisitor {
 
     @Override
     public void visit(ElementValueEnumConstValue elementValueEnumConstValue) {
-        String typeName = elementValueEnumConstValue.getTypeName();
+        String descriptor = elementValueEnumConstValue.getDescriptor();
 
-        assert (typeName != null) && (typeName.length() > 2) && (typeName.charAt(0) == 'L') && (typeName.charAt(typeName.length()-1) == ';');
+        assert (descriptor != null) && (descriptor.length() > 2) && (descriptor.charAt(0) == 'L') && (descriptor.charAt(descriptor.length()-1) == ';') : "AnnotationConverter.visit(elementValueEnumConstValue)";
 
-        String descriptor = typeName.substring(1, typeName.length()-1);
-        ObjectType ot = factory.make(descriptor);
+        ObjectType ot = factory.makeFromDescriptor(descriptor);
         String constName = elementValueEnumConstValue.getConstName();
-        elementValue = new ExpressionElementValue(new FieldReferenceExpression(ot, new ObjectTypeReferenceExpression(ot), descriptor, constName, descriptor));
+        String internalTypeName = descriptor.substring(1, descriptor.length()-1);
+        elementValue = new ExpressionElementValue(new FieldReferenceExpression(ot, new ObjectTypeReferenceExpression(ot), internalTypeName, constName, descriptor));
     }
 
     @Override

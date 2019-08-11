@@ -314,7 +314,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                     Expression updatedParameter = updateExpression(type, parameter);
 
                     if (updatedParameter.getClass() == IntegerConstantExpression.class) {
-                        switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(((PrimitiveType)type).getFlags())) {
+                        switch (((PrimitiveType)type).getJavaPrimitiveFlags()) {
                             case FLAG_BYTE:
                             case FLAG_SHORT:
                                 list.set(i, new CastExpression(type, updatedParameter));
@@ -329,7 +329,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                 Expression updatedParameter = updateExpression(type, (Expression)expressions);
 
                 if (updatedParameter.getClass() == IntegerConstantExpression.class) {
-                    switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(((PrimitiveType)type).getFlags())) {
+                    switch (((PrimitiveType)type).getJavaPrimitiveFlags()) {
                         case FLAG_BYTE:
                         case FLAG_SHORT:
                             expressions = new CastExpression(type, updatedParameter);
@@ -361,7 +361,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                     int value = ice.getValue();
                     int lineNumber = ice.getLineNumber();
 
-                    switch (PrimitiveTypeUtil.getStandardPrimitiveTypeFlags(primitiveType.getFlags())) {
+                    switch (primitiveType.getJavaPrimitiveFlags()) {
                         case FLAG_BOOLEAN:
                             return new BooleanExpression(lineNumber, value != 0);
                         case FLAG_CHAR:

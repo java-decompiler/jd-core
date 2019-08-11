@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -50,7 +50,7 @@ public class ClassFileDeserializerTest extends TestCase {
         assertEquals(1, invAttr.getAnnotations()[0].getElementValuePairs().length);
 
         ElementValueAnnotationValue annotationValue = invAttr.getAnnotations()[1].getElementValuePairs()[0].getElementValue();
-        assertEquals("Lorg/jd/core/test/annotation/Name;", annotationValue.getAnnotationValue().getTypeName());
+        assertEquals("Lorg/jd/core/test/annotation/Name;", annotationValue.getAnnotationValue().getDescriptor());
         assertNotNull(annotationValue.getAnnotationValue().getElementValuePairs());
         assertEquals(3, annotationValue.getAnnotationValue().getElementValuePairs().length);
         assertEquals("salutation", annotationValue.getAnnotationValue().getElementValuePairs()[0].getElementName());

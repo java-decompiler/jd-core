@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -971,7 +971,7 @@ public class ControlFlowGraphReducer {
         BasicBlock branch = basicBlock.getBranch();
         boolean reduced = reduce(visited, basicBlock.getNext(), jsrTargets) & reduce(visited, branch, jsrTargets);
 
-        if (jsrTargets.get(branch.getIndex())) {
+        if ((branch.getIndex() >= 0) && jsrTargets.get(branch.getIndex())) {
             // Reduce JSR
             int delta = basicBlock.getToOffset() - basicBlock.getFromOffset();
 

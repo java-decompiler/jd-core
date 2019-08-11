@@ -11,8 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
 
-import java.util.HashSet;
-
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class ObjectLocalVariable extends AbstractLocalVariable {
@@ -41,7 +40,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
         return type;
     }
 
-    public void setObjectType(ObjectType type) {
+    public void setType(Type type) {
         if (!this.type.equals(type)) {
             this.type = type;
             fireChangeEvent();
@@ -80,10 +79,12 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
 
     @Override
     public boolean isAssignableFrom(Type type) {
-        if ((type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_UNDEFINED_OBJECT) || this.type.equals(type)) {
-            return true;
-        } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0) && this.type.isObject() && type.isObject()) {
-            return objectTypeMaker.isAssignable((ObjectType)this.type, (ObjectType)type);
+        if (!type.isPrimitive()) {
+            if ((type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_OBJECT) || this.type.equals(type)) {
+                return true;
+            } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0) && this.type.isObject() && type.isObject()) {
+                return objectTypeMaker.isAssignable((ObjectType) this.type, (ObjectType) type);
+            }
         }
 
         return false;
@@ -95,7 +96,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                 this.type = type;
                 fireChangeEvent();
             } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
-                assert !this.type.isPrimitive() && !type.isPrimitive();
+                assert !this.type.isPrimitive() && !type.isPrimitive() : "ObjectLocalVariable.typeOnRight(type) : unexpected type";
 
                 if (this.type.isObject() && type.isObject()) {
                     ObjectType thisObjectType = (ObjectType)this.type;
@@ -126,7 +127,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                 this.type = type;
                 fireChangeEvent();
             } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
-                assert !this.type.isPrimitive() && !type.isPrimitive();
+                assert !this.type.isPrimitive() && !type.isPrimitive() : "unexpected type in ObjectLocalVariable.typeOnLeft(type)";
 
                 if (this.type.isObject() && type.isObject()) {
                     ObjectType thisObjectType = (ObjectType)this.type;

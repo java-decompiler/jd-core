@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -65,7 +65,7 @@ public class AnnotationConverterTest extends TestCase {
                     "lastType=InnerObjectType{ObjectType{org/jd/core/test/annotation/Quality}.Lorg/jd/core/test/annotation/Quality$Level;}, " +
                     "expression=ObjectTypeReferenceExpression{InnerObjectType{ObjectType{org/jd/core/test/annotation/Quality}.Lorg/jd/core/test/annotation/Quality$Level;}}, " +
                     "name=HIGH, " +
-                    "descriptor=org/jd/core/test/annotation/Quality$Level}" +
+                    "descriptor=Lorg/jd/core/test/annotation/Quality$Level;}" +
                 "}",
                 annotationReference0.getElementValue().toString());
 
