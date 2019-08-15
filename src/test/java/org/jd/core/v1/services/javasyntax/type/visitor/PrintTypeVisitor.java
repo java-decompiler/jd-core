@@ -8,7 +8,6 @@
 package org.jd.core.v1.services.javasyntax.type.visitor;
 
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
 import java.util.List;
 
@@ -122,7 +121,7 @@ public class PrintTypeVisitor implements TypeVisitor {
     }
 
     @Override
-    public void visit(UnknownTypeArgument type) {
+    public void visit(WildcardTypeArgument type) {
         sb.append('?');
     }
 

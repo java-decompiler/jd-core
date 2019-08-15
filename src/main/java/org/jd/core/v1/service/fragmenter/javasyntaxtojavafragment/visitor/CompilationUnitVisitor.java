@@ -56,7 +56,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(AnnotationDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForTypeDeclaration(declaration, declaration.getFlags() & ~FLAG_ABSTRACT, ANNOTATION);
@@ -209,7 +209,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(ClassDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags(), CLASS);
@@ -336,7 +336,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             }
 
             // Build tokens for access
-            buildTokensForAccessFlags(declaration.getFlags());
+            buildTokensForMethodAccessFlags(declaration.getFlags());
 
             // Build tokens for type parameters
             BaseTypeParameter typeParameters = declaration.getTypeParameters();
@@ -465,7 +465,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(EnumDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForTypeDeclaration(declaration, declaration.getFlags(), ENUM);
@@ -607,7 +607,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(FieldDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_FIELD_BLOCK);
 
             tokens = new Tokens();
@@ -623,7 +623,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             }
 
             // Build tokens for access
-            buildTokensForAccessFlags(declaration.getFlags());
+            buildTokensForFieldAccessFlags(declaration.getFlags());
             declaration.getType().accept(this);
 
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
@@ -757,7 +757,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(InterfaceDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags() & ~FLAG_ABSTRACT, INTERFACE);
@@ -1085,7 +1085,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             }
 
             // Build tokens for access
-            buildTokensForAccessFlags(declaration.getFlags());
+            buildTokensForMethodAccessFlags(declaration.getFlags());
 
             // Build tokens for type parameters
             BaseTypeParameter typeParameters = declaration.getTypeParameters();
@@ -1248,7 +1248,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         }
 
         // Build tokens for access
-        buildTokensForAccessFlags(flags);
+        buildTokensForTypeAccessFlags(flags);
         tokens.add(keyword);
         tokens.add(TextToken.SPACE);
 
@@ -1269,21 +1269,17 @@ public class CompilationUnitVisitor extends StatementVisitor {
         }
     }
 
-    protected void buildTokensForAccessFlags(int flags) {
+    protected void buildTokensForTypeAccessFlags(int flags) {
         if ((flags & FLAG_PUBLIC) != 0) {
             tokens.add(PUBLIC);
-            tokens.add(TextToken.SPACE);
-        }
-        if ((flags & FLAG_PRIVATE) != 0) {
-            tokens.add(PRIVATE);
             tokens.add(TextToken.SPACE);
         }
         if ((flags & FLAG_PROTECTED) != 0) {
             tokens.add(PROTECTED);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_DEFAULT) != 0) {
-            tokens.add(DEFAULT);
+        if ((flags & FLAG_PRIVATE) != 0) {
+            tokens.add(PRIVATE);
             tokens.add(TextToken.SPACE);
         }
         if ((flags & FLAG_STATIC) != 0) {
@@ -1294,12 +1290,78 @@ public class CompilationUnitVisitor extends StatementVisitor {
             tokens.add(FINAL);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_NATIVE) != 0) {
-            tokens.add(NATIVE);
-            tokens.add(TextToken.SPACE);
-        }
         if ((flags & FLAG_ABSTRACT) != 0) {
             tokens.add(ABSTRACT);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_SYNTHETIC) != 0) {
+            tokens.add(StartMarkerToken.COMMENT);
+            tokens.add(COMMENT_SYNTHETIC);
+            tokens.add(EndMarkerToken.COMMENT);
+            tokens.add(TextToken.SPACE);
+        }
+    }
+
+    protected void buildTokensForFieldAccessFlags(int flags) {
+        if ((flags & FLAG_PUBLIC) != 0) {
+            tokens.add(PUBLIC);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_PROTECTED) != 0) {
+            tokens.add(PROTECTED);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_PRIVATE) != 0) {
+            tokens.add(PRIVATE);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_STATIC) != 0) {
+            tokens.add(STATIC);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_FINAL) != 0) {
+            tokens.add(FINAL);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_VOLATILE) != 0) {
+            tokens.add(VOLATILE);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_TRANSIENT) != 0) {
+            tokens.add(TRANSIENT);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_SYNTHETIC) != 0) {
+            tokens.add(StartMarkerToken.COMMENT);
+            tokens.add(COMMENT_SYNTHETIC);
+            tokens.add(EndMarkerToken.COMMENT);
+            tokens.add(TextToken.SPACE);
+        }
+    }
+
+    protected void buildTokensForMethodAccessFlags(int flags) {
+        if ((flags & FLAG_PUBLIC) != 0) {
+            tokens.add(PUBLIC);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_PROTECTED) != 0) {
+            tokens.add(PROTECTED);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_PRIVATE) != 0) {
+            tokens.add(PRIVATE);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_STATIC) != 0) {
+            tokens.add(STATIC);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_FINAL) != 0) {
+            tokens.add(FINAL);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_SYNCHRONIZED) != 0) {
+            tokens.add(SYNCHRONIZED);
             tokens.add(TextToken.SPACE);
         }
         if ((flags & FLAG_BRIDGE) != 0) {
@@ -1308,10 +1370,26 @@ public class CompilationUnitVisitor extends StatementVisitor {
             tokens.add(EndMarkerToken.COMMENT);
             tokens.add(TextToken.SPACE);
         }
+        if ((flags & FLAG_NATIVE) != 0) {
+            tokens.add(NATIVE);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_ABSTRACT) != 0) {
+            tokens.add(ABSTRACT);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_STRICT) != 0) {
+            tokens.add(STRICT);
+            tokens.add(TextToken.SPACE);
+        }
         if ((flags & FLAG_SYNTHETIC) != 0) {
             tokens.add(StartMarkerToken.COMMENT);
             tokens.add(COMMENT_SYNTHETIC);
             tokens.add(EndMarkerToken.COMMENT);
+            tokens.add(TextToken.SPACE);
+        }
+        if ((flags & FLAG_DEFAULT) != 0) {
+            tokens.add(DEFAULT);
             tokens.add(TextToken.SPACE);
         }
     }

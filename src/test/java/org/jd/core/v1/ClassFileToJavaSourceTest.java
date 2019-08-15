@@ -24,6 +24,7 @@ import org.jd.core.v1.regex.PatternMaker;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -1117,8 +1118,11 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source),
-                                               new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")));
+        assertTrue(CompilerUtil.compile(
+                "1.5",
+                new JavaSourceFileObject(internalClassName, source),
+                new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
+                ));
     }
 
     @Test
@@ -1587,6 +1591,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.matches(PatternMaker.make(": 166 */", "return System.currentTimeMillis();")));
 
+        // TODO assertTrue(source.matches(PatternMaker.make("/* 217:", "inCatch1();")));
+
         assertTrue(source.indexOf("/* 888: 888 */") != -1);
 
         assertTrue(source.indexOf("long l = System.currentTimeMillis(); return l;") == -1);
@@ -1599,6 +1605,9 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+
+        System.out.println(ClassFileToJavaSourceTest.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+        System.out.println(System.getProperty("java.class.path"));
     }
 
     @Test
@@ -1943,11 +1952,14 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source),
+        assertTrue(CompilerUtil.compile(
+                "1.7",
+                new JavaSourceFileObject(internalClassName, source),
                 new JavaSourceFileObject("org/jd/core/test/annotation/Author", "package org.jd.core.test.annotation; public @interface Author {Name value(); Name[] contributors() default {};}"),
                 new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String salutation() default \"\"; String value(); String last() default \"\";}"),
                 new JavaSourceFileObject("org/jd/core/test/annotation/Quality", "package org.jd.core.test.annotation; public @interface Quality {enum Level {LOW,MIDDLE,HIGH}; Level value();}"),
-                new JavaSourceFileObject("org/jd/core/test/annotation/Value", "package org.jd.core.test.annotation; public @interface Value {boolean z() default true; byte b() default 1; short s() default 1; int i() default 1; long l() default 1L; float f() default 1.0F; double d() default 1.0D; String str() default \"str\"; Class clazz() default Object.class;}")));
+                new JavaSourceFileObject("org/jd/core/test/annotation/Value", "package org.jd.core.test.annotation; public @interface Value {boolean z() default true; byte b() default 1; short s() default 1; int i() default 1; long l() default 1L; float f() default 1.0F; double d() default 1.0D; String str() default \"str\"; Class clazz() default Object.class;}")
+                ));
     }
 
     @Test
@@ -2003,8 +2015,11 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source),
-                                               new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")));
+        assertTrue(CompilerUtil.compile(
+                "1.7",
+                new JavaSourceFileObject(internalClassName, source),
+                new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
+                ));
     }
 
     @Test
@@ -2054,8 +2069,11 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source),
-                                               new JavaSourceFileObject("org/jd/core/test/AnnotatedClass", "package org.jd.core.test; public class AnnotatedClass {}")));
+        assertTrue(CompilerUtil.compile(
+                "1.7",
+                new JavaSourceFileObject(internalClassName, source),
+                new JavaSourceFileObject("org/jd/core/test/AnnotatedClass", "package org.jd.core.test; public class AnnotatedClass {}")
+            ));
     }
 
     @Test
@@ -2090,8 +2108,11 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source),
-                                               new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")));
+        assertTrue(CompilerUtil.compile(
+                "1.7",
+                new JavaSourceFileObject(internalClassName, source),
+                new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
+                ));
     }
 
     @Test

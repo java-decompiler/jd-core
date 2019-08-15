@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -20,7 +20,7 @@ public interface Constants {
     int ACC_TRANSITIVE   = 0x0020; // .  .  .  .  .  MR .  .
     int ACC_VOLATILE     = 0x0040; // .  F  .  .  .  .  .  .
     int ACC_BRIDGE       = 0x0040; // .  .  M  .  .  .  .  .
-    int ACC_STATIC_PHASE = 0x0040; // .  .  M  .  .  MR .  .
+    int ACC_STATIC_PHASE = 0x0040; // .  .  .  .  .  MR .  .
     int ACC_TRANSIENT    = 0x0080; // .  F  .  .  .  .  .  .
     int ACC_VARARGS      = 0x0080; // .  .  M  .  .  .  .  .
     int ACC_NATIVE       = 0x0100; // .  .  M  .  .  .  .  .

@@ -37,10 +37,13 @@ public class StatementVisitor extends ExpressionVisitor {
     public static final KeywordToken FOR = new KeywordToken("for");
     public static final KeywordToken IF = new KeywordToken("if");
     public static final KeywordToken RETURN = new KeywordToken("return");
+    public static final KeywordToken STRICT = new KeywordToken("strictfp");
     public static final KeywordToken SYNCHRONIZED = new KeywordToken("synchronized");
     public static final KeywordToken SWITCH = new KeywordToken("switch");
     public static final KeywordToken THROW = new KeywordToken("throw");
+    public static final KeywordToken TRANSIENT = new KeywordToken("transient");
     public static final KeywordToken TRY = new KeywordToken("try");
+    public static final KeywordToken VOLATILE = new KeywordToken("volatile");
     public static final KeywordToken WHILE = new KeywordToken("while");
 
     public StatementVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
