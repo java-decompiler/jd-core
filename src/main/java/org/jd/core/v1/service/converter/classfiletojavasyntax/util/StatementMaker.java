@@ -94,7 +94,7 @@ public class StatementMaker {
             statements.accept(MERGE_TRY_WITH_RESOURCES_STATEMENT_VISITOR);
         }
 
-        // Replace pattern "local_var_2 = ...; return local_var_2;" with "return ...;"
+        // Replace pattern "synthetic_local_var = ...; return synthetic_local_var;" with "return ...;"
         statements.accept(removeBinaryOpReturnStatementsVisitor);
 
         // Remove last 'return' statement
