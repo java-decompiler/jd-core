@@ -18,4 +18,9 @@ public class WildcardTypeArgument implements TypeArgument {
     public String toString() {
         return "Wildcard{?}";
     }
+
+    @Override
+    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+        return true;
+    }
 }

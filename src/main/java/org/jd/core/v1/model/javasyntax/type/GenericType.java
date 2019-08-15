@@ -66,12 +66,25 @@ public class GenericType implements Type {
     }
 
     @Override
+    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+        return equals(typeArgument);
+    }
+
+    @Override
     public boolean isGeneric() {
         return true;
     }
 
     @Override
     public String toString() {
-        return "GenericType{" + name + "}";
+        StringBuilder sb = new StringBuilder("GenericType{");
+
+        sb.append(name);
+
+        if (dimension > 0) {
+            sb.append(", dimension=").append(dimension);
+        }
+
+        return sb.append('}').toString();
     }
 }

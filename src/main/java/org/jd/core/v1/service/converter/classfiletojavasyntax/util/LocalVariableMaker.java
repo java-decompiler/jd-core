@@ -335,6 +335,14 @@ public class LocalVariableMaker {
         return lv;
     }
 
+    protected boolean isAssignableFrom(AbstractLocalVariable lv, Type valueType) {
+        if (lv.getType().isObject() && valueType.isObject() && (lv.getType().getDimension() == valueType.getDimension())) {
+            return objectTypeMaker.isAssignable((ObjectType)lv.getType(), (ObjectType)valueType);
+        }
+
+        return false;
+    }
+
     public AbstractLocalVariable getLocalVariableInAssignment(int index, int offset, Type valueType) {
         AbstractLocalVariable lv = searchLocalVariable(index, offset);
 
@@ -343,10 +351,10 @@ public class LocalVariableMaker {
             createLocalVariableVisitor.init(index, offset);
             valueType.accept(createLocalVariableVisitor);
             lv = createLocalVariableVisitor.getLocalVariable();
-        } else if (lv.isAssignableFrom(valueType)) {
+        } else if (lv.isAssignableFrom(valueType) || isAssignableFrom(lv, valueType)) {
             // Reduce type
             lv.typeOnRight(valueType);
-        } else {
+        } else if (!lv.getType().isGeneric() || (ObjectType.TYPE_OBJECT != valueType)) {
             // Not assignable -> Create a new local variable
             createLocalVariableVisitor.init(index, offset);
             valueType.accept(createLocalVariableVisitor);
@@ -392,14 +400,16 @@ public class LocalVariableMaker {
             createLocalVariableVisitor.init(index, offset);
             valueLocalVariable.accept(createLocalVariableVisitor);
             lv = createLocalVariableVisitor.getLocalVariable();
-        } else if (!lv.isAssignableFrom(valueLocalVariable)) {
+        } else if (lv.isAssignableFrom(valueLocalVariable) || isAssignableFrom(lv, valueLocalVariable.getType())) {
+            // Reduce type
+            lv.variableOnRight(valueLocalVariable);
+        } else if (!lv.getType().isGeneric() || (ObjectType.TYPE_OBJECT != valueLocalVariable.getType())) {
             // Not assignable -> Create a new local variable
             createLocalVariableVisitor.init(index, offset);
             valueLocalVariable.accept(createLocalVariableVisitor);
             lv = createLocalVariableVisitor.getLocalVariable();
         }
 
-        lv.variableOnRight(valueLocalVariable);
         lv.setToOffset(offset);
         store(lv);
 

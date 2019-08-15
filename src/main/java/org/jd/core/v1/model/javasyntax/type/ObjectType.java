@@ -192,6 +192,27 @@ public class ObjectType implements Type {
     }
 
     @Override
+    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+        if (typeArgument.getClass() != ObjectType.class) {
+            return false;
+        }
+
+        ObjectType ot = (ObjectType)typeArgument;
+
+        if ((dimension != ot.getDimension()) || !internalName.equals(ot.getInternalName())) {
+            return false;
+        }
+
+        if (ot.getTypeArguments() == null) {
+            return (typeArgument == null);
+        } else if (typeArgument == null) {
+            return false;
+        } else {
+            return typeArguments.isTypeArgumentAssignableFrom(ot.getTypeArguments());
+        }
+    }
+
+    @Override
     public boolean isObject() {
         return true;
     }

@@ -82,8 +82,24 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
         if (!type.isPrimitive()) {
             if ((type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_OBJECT) || this.type.equals(type)) {
                 return true;
-            } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0) && this.type.isObject() && type.isObject()) {
-                return objectTypeMaker.isAssignable((ObjectType) this.type, (ObjectType) type);
+            } else if ((this.type.getDimension() == type.getDimension()) && this.type.isObject()) {
+                ObjectType ot1 = (ObjectType) this.type;
+
+                if (type.isObject()) {
+                    ObjectType ot2 = (ObjectType) type;
+
+                    if (ot1.getInternalName().equals(ot2.getInternalName()) && (ot1.getTypeArguments() != null) && (ot2.getTypeArguments() != null)) {
+                        return ot1.getTypeArguments().isTypeArgumentAssignableFrom(ot2.getTypeArguments());
+                    }
+
+                    if (type.getDimension() == 0) {
+                        if ((ot1.getTypeArguments() == null) ? (ot2.getTypeArguments() == null) : ot1.getTypeArguments().equals(ot2.getTypeArguments())) {
+                            return objectTypeMaker.isAssignable(ot1, ot2);
+                        }
+                    }
+                } else if (ot1.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
+                    return true;
+                }
             }
         }
 

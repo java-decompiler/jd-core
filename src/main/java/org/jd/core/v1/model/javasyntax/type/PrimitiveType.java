@@ -154,6 +154,11 @@ public class PrimitiveType implements Type {
     }
 
     @Override
+    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+        return equals(typeArgument);
+    }
+
+    @Override
     public boolean isPrimitive() {
         return true;
     }

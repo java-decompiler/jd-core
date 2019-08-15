@@ -40,7 +40,22 @@ public class GenericLocalVariable extends AbstractLocalVariable {
 
     @Override
     public String toString() {
-        return "GenericLocalVariable{" + type + ", index=" + index + "}";
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("GenericLocalVariable{");
+        sb.append(type.getName());
+
+        if (type.getDimension() > 0) {
+            sb.append(new String(new char[type.getDimension()]).replaceAll("\0", "[]"));
+        }
+
+        sb.append(' ').append(name).append(", index=").append(index);
+
+        if (next != null) {
+            sb.append(", next=").append(next);
+        }
+
+        return sb.append("}").toString();
     }
 
     @Override public boolean isAssignableFrom(Type otherType) {
