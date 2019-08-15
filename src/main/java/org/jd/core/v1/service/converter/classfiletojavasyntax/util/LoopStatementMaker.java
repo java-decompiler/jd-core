@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -7,15 +7,18 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForEachStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateTypeFromTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RemoveLastContinueStatementVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableReferenceVisitor;
 
@@ -600,13 +603,13 @@ public class LoopStatementMaker {
         }
 
         // Check if 'i$' is not used in sub-statements
-        SearchLocalVariableReferenceVisitor visitor = new SearchLocalVariableReferenceVisitor(syntheticIterator);
+        SearchLocalVariableReferenceVisitor visitor1 = new SearchLocalVariableReferenceVisitor(syntheticIterator);
 
         for (int i=1, len=subStatements.size(); i<len; i++) {
-            subStatements.get(i).accept(visitor);
+            subStatements.get(i).accept(visitor1);
         }
 
-        if (visitor.containsReference()) {
+        if (visitor1.containsReference()) {
             return null;
         }
 
@@ -617,6 +620,18 @@ public class LoopStatementMaker {
         subStatements.remove(0);
         item.setDeclared(true);
         localVariableMaker.removeLocalVariable(syntheticIterator);
+
+        ObjectType listType = (ObjectType)list.getType();
+
+        if (listType.getTypeArguments() != null) {
+            CreateTypeFromTypeArgumentVisitor visitor2 = new CreateTypeFromTypeArgumentVisitor();
+            listType.getTypeArguments().accept(visitor2);
+            Type type = visitor2.getType();
+
+            if (type != null) {
+                item.typeOnRight(type);
+            }
+        }
 
         return new ClassFileForEachStatement(item, list, subStatements);
     }
@@ -662,59 +677,5 @@ public class LoopStatementMaker {
         }
 
         return loop;
-    }
-
-    protected static class RemoveLastContinueStatementVisitor extends AbstractJavaSyntaxVisitor {
-        @Override
-        public void visit(Statements list) {
-            if (! list.isEmpty()) {
-                Statement last = (Statement)list.getLast();
-
-                if (last.getClass() == ContinueStatement.class) {
-                    list.removeLast();
-                    visit(list);
-                } else {
-                    last.accept(this);
-                }
-            }
-        }
-
-        @Override public void visit(IfElseStatement statement) {
-            safeAccept(statement.getStatements());
-            statement.getElseStatements().accept(this);
-        }
-
-        @Override public void visit(TryStatement statement) {
-            statement.getTryStatements().accept(this);
-            safeAcceptListStatement(statement.getCatchClauses());
-            safeAccept(statement.getFinallyStatements());
-        }
-
-        @Override public void visit(SwitchStatement statement) { acceptListStatement(statement.getBlocks()); }
-        @Override public void visit(SwitchStatement.LabelBlock statement) { statement.getStatements().accept(this); }
-        @Override public void visit(SwitchStatement.MultiLabelsBlock statement) { statement.getStatements().accept(this); }
-        @Override public void visit(IfStatement statement) { safeAccept(statement.getStatements()); }
-        @Override public void visit(SynchronizedStatement statement) { safeAccept(statement.getStatements()); }
-        @Override public void visit(TryStatement.CatchClause statement) { safeAccept(statement.getStatements()); }
-
-        @Override public void visit(DoWhileStatement statement) {}
-        @Override public void visit(ForEachStatement statement) {}
-        @Override public void visit(ForStatement statement) {}
-        @Override public void visit(WhileStatement statement) {}
-        @Override public void visit(AssertStatement statement) {}
-        @Override public void visit(BreakStatement statement) {}
-        @Override public void visit(ByteCodeStatement statement) {}
-        @Override public void visit(CommentStatement statement) {}
-        @Override public void visit(ContinueStatement statement) {}
-        @Override public void visit(ExpressionStatement statement) {}
-        @Override public void visit(LabelStatement statement) {}
-        @Override public void visit(LambdaExpressionStatement statement) {}
-        @Override public void visit(LocalVariableDeclarationStatement statement) {}
-        @Override public void visit(ReturnExpressionStatement statement) {}
-        @Override public void visit(ReturnStatement statement) {}
-        @Override public void visit(SwitchStatement.ExpressionLabel statement) {}
-        @Override public void visit(ThrowStatement statement) {}
-        @Override public void visit(TypeDeclarationStatement statement) {}
-        @Override public void visit(TryStatement.Resource statement) {}
     }
 }
