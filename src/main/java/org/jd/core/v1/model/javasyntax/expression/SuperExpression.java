@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -7,23 +7,18 @@
 
 package org.jd.core.v1.model.javasyntax.expression;
 
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class SuperExpression extends AbstractLineNumberExpression {
-    protected ObjectType type;
+    protected Type type;
 
-    public SuperExpression(ObjectType type) {
+    public SuperExpression(Type type) {
         this.type = type;
     }
 
-    public SuperExpression(int lineNumber, ObjectType type) {
+    public SuperExpression(int lineNumber, Type type) {
         super(lineNumber);
         this.type = type;
-    }
-
-    public ObjectType getObjectType() {
-        return type;
     }
 
     @Override

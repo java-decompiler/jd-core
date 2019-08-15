@@ -880,7 +880,7 @@ public class StatementMaker {
 
         for (ClassFileFieldDeclaration field : bodyDeclaration.getFieldDeclarations()) {
             field.getFieldDeclarators().accept(memberVisitor);
-            if (memberVisitor.isFound()) {
+            if (memberVisitor.found()) {
                 field.setFlags(field.getFlags() | Constants.ACC_SYNTHETIC);
                 break;
             }
@@ -891,7 +891,7 @@ public class StatementMaker {
 
         for (ClassFileConstructorOrMethodDeclaration member : bodyDeclaration.getMethodDeclarations()) {
             member.accept(memberVisitor);
-            if (memberVisitor.isFound()) {
+            if (memberVisitor.found()) {
                 member.setFlags(member.getFlags() | Constants.ACC_SYNTHETIC);
                 break;
             }
@@ -964,7 +964,7 @@ public class StatementMaker {
             this.found = false;
         }
 
-        public boolean isFound() {
+        public boolean found() {
             return found;
         }
 
