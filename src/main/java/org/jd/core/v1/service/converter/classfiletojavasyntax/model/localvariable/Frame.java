@@ -856,7 +856,7 @@ public class Frame {
         @Override public void visit(TypeParameterWithTypeBounds type) {}
         @Override public void visit(TypeParameters types) {}
         @Override public void visit(WildcardSuperTypeArgument type) {}
-        @Override public void visit(UnknownTypeArgument type) {}
+        @Override public void visit(WildcardTypeArgument type) {}
     }
 
     protected static class AbstractLocalVariableComparator implements Comparator<AbstractLocalVariable> {

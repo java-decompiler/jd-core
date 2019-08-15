@@ -27,7 +27,7 @@ import java.util.List;
  * http://www.angelikalanger.com/GenericsFAQ/JavaGenericsFAQ.html
  */
 public class SignatureParser {
-    protected static final UnknownTypeArgument UNKNOWN_TYPE_ARGUMENT = new UnknownTypeArgument();
+    protected static final WildcardTypeArgument WILDCARD_TYPE_ARGUMENT = new WildcardTypeArgument();
 
     protected HashMap<String, MethodTypes> methodTypesCache = new HashMap<>(1024);
     protected HashMap<String, Type> typeCache = new HashMap<>(1024);
@@ -681,7 +681,7 @@ public class SignatureParser {
             case '-':
                 return new WildcardSuperTypeArgument(parseReferenceTypeSignature(reader));
             case '*':
-                return UNKNOWN_TYPE_ARGUMENT;
+                return WILDCARD_TYPE_ARGUMENT;
             default:
                 // Unread 'c'
                 reader.index--;

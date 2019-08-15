@@ -209,7 +209,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    public void visit(UnknownTypeArgument type) {
+    public void visit(WildcardTypeArgument type) {
         tokens.add(TextToken.QUESTIONMARK);
     }
 
