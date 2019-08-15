@@ -29,6 +29,12 @@ public class PlainTextPrinter implements Printer {
         this.escapeUnicodeCharacters = escapeUnicodeCharacters;
     }
 
+    public void init() {
+        sb.setLength(0);
+        realLineNumber = 0;
+        indentationCount = 0;
+    }
+
     public String toString() { return sb.toString(); }
 
     // --- Printer --- //

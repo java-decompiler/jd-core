@@ -48,6 +48,8 @@ public class ZipLoader implements Loader {
         }
     }
 
+    public HashMap<String, byte[]> getMap() { return map; }
+
     @Override
     public byte[] load(String internalName) throws LoaderException {
         return map.get(internalName + ".class");

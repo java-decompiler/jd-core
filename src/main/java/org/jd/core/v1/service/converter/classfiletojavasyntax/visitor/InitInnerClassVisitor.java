@@ -450,8 +450,12 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                                 Iterator<String> outerParameterNameIterator = outerParameterNames.iterator();
 
                                 while (parameterIterator.hasNext()) {
-                                    Expression param = parameterIterator.next();
                                     String outerParameterName = outerParameterNameIterator.next();
+                                    Expression param = parameterIterator.next();
+
+                                    if (param.getClass() == CastExpression.class) {
+                                        param = ((CastExpression)param).getExpression();
+                                    }
 
                                     if (param.getClass() == ClassFileLocalVariableReferenceExpression.class) {
                                         String localVariableName = ((ClassFileLocalVariableReferenceExpression) param).getLocalVariable().getName();
@@ -461,16 +465,24 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
                                 lastParameters.clear();
                             }
-                        } else if (parameters.getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                            if (outerParameterNames != null) {
-                                expression.setParameters(null);
-                                String localVariableName = ((ClassFileLocalVariableReferenceExpression) parameters).getLocalVariable().getName();
-                                String outerParameterName = outerParameterNames.get(0);
-                                finalLocalVariableNameMap.put(localVariableName, outerParameterName.substring(4));
+                        } else {
+                            Expression param = parameters.getFirst();
+
+                            if (param.getClass() == CastExpression.class) {
+                                param = ((CastExpression)param).getExpression();
                             }
-                        } else if (parameters.getClass() == ThisExpression.class) {
-                            if (cfbd.getOuterType() != null) {
-                                expression.setParameters(null);
+
+                            if (param.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                                if (outerParameterNames != null) {
+                                    expression.setParameters(null);
+                                    String localVariableName = ((ClassFileLocalVariableReferenceExpression) param).getLocalVariable().getName();
+                                    String outerParameterName = outerParameterNames.get(0);
+                                    finalLocalVariableNameMap.put(localVariableName, outerParameterName.substring(4));
+                                }
+                            } else if (param.getClass() == ThisExpression.class) {
+                                if (cfbd.getOuterType() != null) {
+                                    expression.setParameters(null);
+                                }
                             }
                         }
                     }

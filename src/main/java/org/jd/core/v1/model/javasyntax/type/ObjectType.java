@@ -166,12 +166,22 @@ public class ObjectType implements Type {
         if (dimension != that.dimension) return false;
         if (!internalName.equals(that.internalName)) return false;
 
-        return true;
+        if ("java/lang/Class".equals(internalName)) {
+            boolean wildcard1 = (typeArguments == null) || (typeArguments.getClass() == WildcardTypeArgument.class);
+            boolean wildcard2 = (that.typeArguments == null) || (that.typeArguments.getClass() == WildcardTypeArgument.class);
+
+            if (wildcard1 && wildcard2) {
+                return true;
+            }
+        }
+
+        return typeArguments != null ? typeArguments.equals(that.typeArguments) : that.typeArguments == null;
     }
 
     @Override
     public int hashCode() {
         int result = internalName.hashCode();
+        result = 31 * result + (typeArguments != null ? typeArguments.hashCode() : 0);
         result = 31 * result + dimension;
         return result;
     }

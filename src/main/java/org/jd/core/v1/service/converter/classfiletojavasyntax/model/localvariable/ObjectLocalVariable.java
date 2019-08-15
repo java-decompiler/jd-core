@@ -98,23 +98,28 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
             } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
                 assert !this.type.isPrimitive() && !type.isPrimitive() : "ObjectLocalVariable.typeOnRight(type) : unexpected type";
 
-                if (this.type.isObject() && type.isObject()) {
-                    ObjectType thisObjectType = (ObjectType)this.type;
-                    ObjectType otherObjectType = (ObjectType)type;
+                if (this.type.isObject()) {
+                    if (type.isObject()) {
+                        ObjectType thisObjectType = (ObjectType) this.type;
+                        ObjectType otherObjectType = (ObjectType) type;
 
-                    if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
-                        if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
-                            // Keep type, update type arguments
-                            this.type = otherObjectType;
-                            fireChangeEvent();
+                        if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
+                            if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                                // Keep type, update type arguments
+                                this.type = otherObjectType;
+                                fireChangeEvent();
+                            }
+                        } else if (objectTypeMaker.isAssignable(thisObjectType, otherObjectType)) {
+                            // Assignable types
+                            if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                                // Keep type, update type arguments
+                                this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
+                                fireChangeEvent();
+                            }
                         }
-                    } else if (objectTypeMaker.isAssignable(thisObjectType, otherObjectType)) {
-                        // Assignable types
-                        if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
-                            // Keep type, update type arguments
-                            this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
-                            fireChangeEvent();
-                        }
+                    } else if (type.isGeneric() && (this.type == TYPE_OBJECT)) {
+                        this.type = type;
+                        fireChangeEvent();
                     }
                 }
             }
