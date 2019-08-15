@@ -38,30 +38,33 @@ public class RemoveBinaryOpReturnStatementsVisitor extends AbstractJavaSyntaxVis
 
                 if (res.getExpression().getClass() == ClassFileLocalVariableReferenceExpression.class) {
                     ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression)res.getExpression();
-                    Statement statement = (Statement)statements.get(statements.size()-2);
 
-                    if (statement.getClass() == ExpressionStatement.class) {
-                        ExpressionStatement es = (ExpressionStatement)statement;
+                    if (lvr1.getName() == null) {
+                        Statement statement = (Statement)statements.get(statements.size()-2);
 
-                        if (es.getExpression().getClass() == BinaryOperatorExpression.class) {
-                            BinaryOperatorExpression boe = (BinaryOperatorExpression)es.getExpression();
-                            Expression leftExpression = boe.getLeftExpression();
+                        if (statement.getClass() == ExpressionStatement.class) {
+                            ExpressionStatement es = (ExpressionStatement)statement;
 
-                            if (leftExpression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                                ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression)leftExpression;
+                            if (es.getExpression().getClass() == BinaryOperatorExpression.class) {
+                                BinaryOperatorExpression boe = (BinaryOperatorExpression)es.getExpression();
+                                Expression leftExpression = boe.getLeftExpression();
 
-                                if ((lvr1.getLocalVariable() == lvr2.getLocalVariable()) && (lvr1.getLocalVariable().getReferences().size() == 2)) {
-                                    // Remove synthetic assignment statement
-                                    statements.remove(statements.size()-2);
-                                    // Replace synthetic local variable with expression
-                                    res.setExpression(boe.getRightExpression());
-                                    // Check line number
-                                    int expressionLineNumber = boe.getRightExpression().getLineNumber();
-                                    if (res.getLineNumber() > expressionLineNumber) {
-                                        res.setLineNumber(expressionLineNumber);
+                                if (leftExpression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                                    ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) leftExpression;
+
+                                    if ((lvr1.getLocalVariable() == lvr2.getLocalVariable()) && (lvr1.getLocalVariable().getReferences().size() == 2)) {
+                                        // Remove synthetic assignment statement
+                                        statements.remove(statements.size() - 2);
+                                        // Replace synthetic local variable with expression
+                                        res.setExpression(boe.getRightExpression());
+                                        // Check line number
+                                        int expressionLineNumber = boe.getRightExpression().getLineNumber();
+                                        if (res.getLineNumber() > expressionLineNumber) {
+                                            res.setLineNumber(expressionLineNumber);
+                                        }
+                                        // Remove synthetic local variable
+                                        localVariableMaker.removeLocalVariable(lvr1.getLocalVariable());
                                     }
-                                    // Remove synthetic local variable
-                                    localVariableMaker.removeLocalVariable(lvr1.getLocalVariable());
                                 }
                             }
                         }
