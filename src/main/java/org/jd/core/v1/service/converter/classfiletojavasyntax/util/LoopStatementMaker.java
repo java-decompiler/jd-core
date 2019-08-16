@@ -441,6 +441,7 @@ public class LoopStatementMaker {
             return null;
         }
 
+        Type arrayType = boe.getRightExpression().getType();
         Expression array = boe.getRightExpression();
 
         // i$ = 0;
@@ -501,6 +502,8 @@ public class LoopStatementMaker {
         subStatements.removeLast();
 
         item.setDeclared(true);
+        Type itemType = arrayType.createType(arrayType.getDimension()-1);
+        item.typeOnRight(itemType);
 
         localVariableMaker.removeLocalVariable(syntheticArray);
         localVariableMaker.removeLocalVariable(syntheticIndex);

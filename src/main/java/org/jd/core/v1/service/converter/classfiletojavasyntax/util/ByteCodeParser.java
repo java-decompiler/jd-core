@@ -1419,7 +1419,7 @@ public class ByteCodeParser {
             valueRef = NewArrayMaker.make(statements, (NewArray)valueRef);
         }
 
-        if (!localVariable.isAssignableFrom(valueRef.getType())) {
+        if (!localVariable.isAssignableFrom(valueRef.getType()) && !localVariableMaker.isAssignableFrom(localVariable, valueRef.getType())) {
             valueRef = new CastExpression(valueRef.getLineNumber(), localVariable.getType(), valueRef);
         }
 

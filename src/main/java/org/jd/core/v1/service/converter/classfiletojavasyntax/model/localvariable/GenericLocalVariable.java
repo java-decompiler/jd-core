@@ -61,7 +61,6 @@ public class GenericLocalVariable extends AbstractLocalVariable {
     @Override public boolean isAssignableFrom(Type otherType) {
         return type.equals(otherType);
     }
-
     @Override public void typeOnRight(Type type) {}
     @Override public void typeOnLeft(Type type) {}
 

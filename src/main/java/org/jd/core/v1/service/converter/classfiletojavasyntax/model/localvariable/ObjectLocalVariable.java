@@ -83,21 +83,21 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
             if ((type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_OBJECT) || this.type.equals(type)) {
                 return true;
             } else if ((this.type.getDimension() == type.getDimension()) && this.type.isObject()) {
-                ObjectType ot1 = (ObjectType) this.type;
+                ObjectType thisObjectType = (ObjectType) this.type;
 
                 if (type.isObject()) {
-                    ObjectType ot2 = (ObjectType) type;
+                    ObjectType otherObjectType = (ObjectType) type;
 
-                    if (ot1.getInternalName().equals(ot2.getInternalName()) && (ot1.getTypeArguments() != null) && (ot2.getTypeArguments() != null)) {
-                        return ot1.getTypeArguments().isTypeArgumentAssignableFrom(ot2.getTypeArguments());
+                    if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName()) && (thisObjectType.getTypeArguments() != null) && (otherObjectType.getTypeArguments() != null)) {
+                        return thisObjectType.getTypeArguments().isTypeArgumentAssignableFrom(otherObjectType.getTypeArguments());
                     }
 
                     if (type.getDimension() == 0) {
-                        if ((ot1.getTypeArguments() == null) ? (ot2.getTypeArguments() == null) : ot1.getTypeArguments().equals(ot2.getTypeArguments())) {
-                            return objectTypeMaker.isAssignable(ot1, ot2);
+                        if ((thisObjectType.getTypeArguments() == null) ? (otherObjectType.getTypeArguments() == null) : thisObjectType.getTypeArguments().equals(otherObjectType.getTypeArguments())) {
+                            return objectTypeMaker.isAssignable(thisObjectType, otherObjectType);
                         }
                     }
-                } else if (ot1.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
+                } else if (thisObjectType.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
                     return true;
                 }
             }
@@ -115,8 +115,9 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                 assert !this.type.isPrimitive() && !type.isPrimitive() : "ObjectLocalVariable.typeOnRight(type) : unexpected type";
 
                 if (this.type.isObject()) {
+                    ObjectType thisObjectType = (ObjectType) this.type;
+
                     if (type.isObject()) {
-                        ObjectType thisObjectType = (ObjectType) this.type;
                         ObjectType otherObjectType = (ObjectType) type;
 
                         if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
@@ -133,7 +134,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                                 fireChangeEvent();
                             }
                         }
-                    } else if (type.isGeneric() && (this.type == TYPE_OBJECT)) {
+                    } else if (type.isGeneric() && thisObjectType.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
                         this.type = type;
                         fireChangeEvent();
                     }
@@ -150,23 +151,29 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
             } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
                 assert !this.type.isPrimitive() && !type.isPrimitive() : "unexpected type in ObjectLocalVariable.typeOnLeft(type)";
 
-                if (this.type.isObject() && type.isObject()) {
-                    ObjectType thisObjectType = (ObjectType)this.type;
-                    ObjectType otherObjectType = (ObjectType)type;
+                if (this.type.isObject()) {
+                    ObjectType thisObjectType = (ObjectType) this.type;
 
-                    if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
-                        if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
-                            // Keep type, update type arguments
-                            this.type = otherObjectType;
-                            fireChangeEvent();
+                    if (type.isObject()) {
+                        ObjectType otherObjectType = (ObjectType) type;
+
+                        if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
+                            if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                                // Keep type, update type arguments
+                                this.type = otherObjectType;
+                                fireChangeEvent();
+                            }
+                        } else if (objectTypeMaker.isAssignable(otherObjectType, thisObjectType)) {
+                            // Assignable types
+                            if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                                // Keep type, update type arguments
+                                this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
+                                fireChangeEvent();
+                            }
                         }
-                    } else if (objectTypeMaker.isAssignable(otherObjectType, thisObjectType)) {
-                        // Assignable types
-                        if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
-                            // Keep type, update type arguments
-                            this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
-                            fireChangeEvent();
-                        }
+                    } else if (type.isGeneric() && thisObjectType.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
+                        this.type = type;
+                        fireChangeEvent();
                     }
                 }
             }
