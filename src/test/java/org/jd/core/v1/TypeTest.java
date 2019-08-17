@@ -37,7 +37,7 @@ public class TypeTest extends TestCase {
             new ArrayTypeArguments(
                 Arrays.asList(
                     scoit1,
-                    new WildcardTypeArgument(),
+                    WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT,
                     new WildcardSuperTypeArgument(scoit1),
                     new WildcardExtendsTypeArgument(scoit1)
                 )

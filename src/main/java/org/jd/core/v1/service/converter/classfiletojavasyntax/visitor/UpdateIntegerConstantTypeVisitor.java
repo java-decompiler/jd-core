@@ -14,6 +14,10 @@ import org.jd.core.v1.model.javasyntax.reference.InnerObjectReference;
 import org.jd.core.v1.model.javasyntax.reference.ObjectReference;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignatureParser;
 import org.jd.core.v1.util.DefaultList;
@@ -36,7 +40,6 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     protected static final ObjectTypeReferenceExpression TYPE_SHORT_REFERENCE = new ObjectTypeReferenceExpression(ObjectType.TYPE_SHORT);
     protected static final ObjectTypeReferenceExpression TYPE_INTEGER_REFERENCE = new ObjectTypeReferenceExpression(ObjectType.TYPE_INTEGER);
 
-    protected SignatureParser signatureParser;
     protected Type returnedType;
 
     static {
@@ -49,8 +52,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
         TYPES.put("java/lang/String:lastIndexOf(II)I", ci);
     }
 
-    public UpdateIntegerConstantTypeVisitor(SignatureParser signatureParser, Type returnedType) {
-        this.signatureParser = signatureParser;
+    public UpdateIntegerConstantTypeVisitor(Type returnedType) {
         this.returnedType = returnedType;
     }
 
@@ -172,7 +174,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            expression.setParameters(updateExpressions(signatureParser.parseParameterTypes(expression.getDescriptor()), parameters));
+            expression.setParameters(updateExpressions(((ClassFileSuperConstructorInvocationExpression)expression).getParameterTypes(), parameters));
         }
     }
 
@@ -181,7 +183,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            expression.setParameters(updateExpressions(signatureParser.parseParameterTypes(expression.getDescriptor()), parameters));
+            expression.setParameters(updateExpressions(((ClassFileConstructorInvocationExpression)expression).getParameterTypes(), parameters));
         }
     }
 
@@ -196,7 +198,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
             List<Type> types = TYPES.get(internalTypeName + ':' + name + descriptor);
 
             if (types == null) {
-                types = signatureParser.parseParameterTypes(descriptor);
+                types = ((ClassFileMethodInvocationExpression)expression).getParameterTypes();
             }
 
             expression.setParameters(updateExpressions(types, parameters));
@@ -215,7 +217,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
             List<Type> types = TYPES.get(internalTypeName + ":<init>" + descriptor);
 
             if (types == null) {
-                types = signatureParser.parseParameterTypes(descriptor);
+                types = ((ClassFileNewExpression)expression).getParameterTypes();
             }
 
             expression.setParameters(updateExpressions(types, parameters));

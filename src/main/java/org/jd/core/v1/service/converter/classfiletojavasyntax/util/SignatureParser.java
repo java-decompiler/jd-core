@@ -15,9 +15,7 @@ import org.jd.core.v1.model.classfile.attribute.AttributeSignature;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 /*
  * https://jcp.org/aboutJava/communityprocess/maintenance/jsr924/JVMS-SE5.0-Ch4-ClassFile.pdf
@@ -27,8 +25,6 @@ import java.util.List;
  * http://www.angelikalanger.com/GenericsFAQ/JavaGenericsFAQ.html
  */
 public class SignatureParser {
-    protected static final WildcardTypeArgument WILDCARD_TYPE_ARGUMENT = new WildcardTypeArgument();
-
     protected HashMap<String, MethodTypes> methodTypesCache = new HashMap<>(1024);
     protected HashMap<String, Type> typeCache = new HashMap<>(1024);
     protected ObjectTypeMaker objectTypeMaker;
@@ -174,9 +170,9 @@ public class SignatureParser {
         return type;
     }
 
-    public List<Type> parseParameterTypes(String signature) {
+    public DefaultList<Type> parseParameterTypes(String signature) {
         MethodTypes methodTypes = parseMethodSignature(signature, null);
-        return (methodTypes==null) ? Collections.<Type>emptyList() : methodTypes.parameters;
+        return (methodTypes==null) ? DefaultList.<Type>emptyList() : methodTypes.parameters;
     }
 
     public Type parseReturnedType(String signature) {
@@ -235,24 +231,19 @@ public class SignatureParser {
             Type firstParameter = parseReferenceTypeSignature(reader);
 
             if (firstParameter == null) {
-                methodTypes.parameters = Collections.emptyList();
+                methodTypes.parameters = DefaultList.emptyList();
             } else {
                 Type nextParameter = parseReferenceTypeSignature(reader);
+                DefaultList<Type> list = new DefaultList<>();
 
-                if (nextParameter == null) {
-                    methodTypes.parameters = Collections.singletonList(firstParameter);
-                } else {
-                    DefaultList<Type> list = new DefaultList<>();
+                list.add(firstParameter);
 
-                    list.add(firstParameter);
-
-                    do {
-                        list.add(nextParameter);
-                        nextParameter = parseReferenceTypeSignature(reader);
-                    } while (nextParameter != null);
-
-                    methodTypes.parameters = list;
+                while (nextParameter != null) {
+                    list.add(nextParameter);
+                    nextParameter = parseReferenceTypeSignature(reader);
                 }
+
+                methodTypes.parameters = list;
             }
 
             if (reader.read() != ')')
@@ -681,7 +672,7 @@ public class SignatureParser {
             case '-':
                 return new WildcardSuperTypeArgument(parseReferenceTypeSignature(reader));
             case '*':
-                return WILDCARD_TYPE_ARGUMENT;
+                return WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT;
             default:
                 // Unread 'c'
                 reader.index--;
@@ -793,7 +784,7 @@ public class SignatureParser {
 
     public static class MethodTypes {
         public BaseTypeParameter typeParameters;
-        public List<Type>        parameters;
+        public DefaultList<Type> parameters;
         public Type              returned;
         public BaseType exceptions;
     }

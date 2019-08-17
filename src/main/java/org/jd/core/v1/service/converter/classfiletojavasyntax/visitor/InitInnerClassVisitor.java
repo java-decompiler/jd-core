@@ -14,15 +14,18 @@ import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
 
 public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     protected UpdateReferencesVisitor updateReferencesVisitor = new UpdateReferencesVisitor();
-    protected UpdateNewExpressionVisitor updateNewExpressionVisitor = new UpdateNewExpressionVisitor();
     protected ObjectType outerType;
     protected DefaultList<String> outerLocalVariableNames = new DefaultList<>();
 
@@ -62,10 +65,6 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         if ((outerType != null) || !outerLocalVariableNames.isEmpty()) {
             updateReferencesVisitor.visit(bodyDeclaration);
         }
-
-        if (bodyDeclaration.getInnerTypeDeclarations() != null) {
-            updateNewExpressionVisitor.visit(bodyDeclaration);
-        }
     }
 
     @Override
@@ -87,11 +86,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     Expression expression = ((ExpressionStatement) statement).getExpression();
                     Class clazz = expression.getClass();
 
-                    if (clazz == SuperConstructorInvocationExpression.class) {
+                    if (clazz == ClassFileSuperConstructorInvocationExpression.class) {
                         break;
                     }
 
-                    if (clazz == ConstructorInvocationExpression.class) {
+                    if (clazz == ClassFileConstructorInvocationExpression.class) {
                         break;
                     }
 
@@ -298,7 +297,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    protected class UpdateNewExpressionVisitor extends AbstractJavaSyntaxVisitor {
+    public static class UpdateNewExpressionVisitor extends AbstractJavaSyntaxVisitor {
         protected ClassFileBodyDeclaration bodyDeclaration;
         protected HashMap<String, String> finalLocalVariableNameMap = new HashMap<>();
         protected DefaultList<ClassFileClassDeclaration> localClassDeclarations = new DefaultList<>();
@@ -411,7 +410,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
                     if ((memberDeclaration != null) && (memberDeclaration.getClass() == ClassFileClassDeclaration.class)) {
                         ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) memberDeclaration;
-                        cfbd = (ClassFileBodyDeclaration)cfcd.getBodyDeclaration();
+                        cfbd = (ClassFileBodyDeclaration) cfcd.getBodyDeclaration();
 
                         if ((type.getQualifiedName() == null) && (type.getName() != null)) {
                             // Local class
@@ -423,7 +422,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     }
                 } else {
                     // Anonymous class
-                    cfbd = (ClassFileBodyDeclaration)expression.getBodyDeclaration();
+                    cfbd = (ClassFileBodyDeclaration) expression.getBodyDeclaration();
                 }
 
                 if (cfbd != null) {
@@ -441,8 +440,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                                 list.remove(0);
                             }
 
-                            // Remove outer local variable reference
                             if (outerParameterNames != null) {
+                                // Remove outer local variable reference
                                 int size = list.size();
                                 int count = outerParameterNames.size();
                                 List<Expression> lastParameters = list.subList(size - count, size);
@@ -454,7 +453,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                                     Expression param = parameterIterator.next();
 
                                     if (param.getClass() == CastExpression.class) {
-                                        param = ((CastExpression)param).getExpression();
+                                        param = ((CastExpression) param).getExpression();
                                     }
 
                                     if (param.getClass() == ClassFileLocalVariableReferenceExpression.class) {
@@ -465,23 +464,41 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
                                 lastParameters.clear();
                             }
-                        } else {
+                        } else if (cfbd.getOuterType() != null) {
+                            // Remove outer this
+                            expression.setParameters(null);
+                        } else if (outerParameterNames != null) {
+                            // Remove outer local variable reference
                             Expression param = parameters.getFirst();
 
                             if (param.getClass() == CastExpression.class) {
-                                param = ((CastExpression)param).getExpression();
+                                param = ((CastExpression) param).getExpression();
                             }
 
                             if (param.getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                                if (outerParameterNames != null) {
-                                    expression.setParameters(null);
-                                    String localVariableName = ((ClassFileLocalVariableReferenceExpression) param).getLocalVariable().getName();
-                                    String outerParameterName = outerParameterNames.get(0);
-                                    finalLocalVariableNameMap.put(localVariableName, outerParameterName.substring(4));
-                                }
-                            } else if (param.getClass() == ThisExpression.class) {
-                                if (cfbd.getOuterType() != null) {
-                                    expression.setParameters(null);
+                                String localVariableName = ((ClassFileLocalVariableReferenceExpression) param).getLocalVariable().getName();
+                                String outerParameterName = outerParameterNames.get(0);
+                                finalLocalVariableNameMap.put(localVariableName, outerParameterName.substring(4));
+                                expression.setParameters(null);
+                            }
+                        }
+
+                        // Is the last parameter is synthetic ?
+                        parameters = expression.getParameters();
+
+                        if ((parameters != null) && parameters.isList()) {
+                            DefaultList<Expression> list = parameters.getList();
+
+                            if (!list.isEmpty()) {
+                                Expression lastParameter = list.getLast();
+
+                                if (lastParameter.getClass() == NullExpression.class) {
+                                    DefaultList<Type> parameterTypes = ((ClassFileNewExpression) expression).getParameterTypes();
+
+                                    if (parameterTypes.getLast().getName() == null) {
+                                        // Yes. Remove it.
+                                        list.removeLast();
+                                    }
                                 }
                             }
                         }

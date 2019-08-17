@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -17,6 +17,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
@@ -36,7 +37,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
     @SuppressWarnings("unchecked")
     protected Expression updateExpression(Expression expression) {
-        if (expression.getClass() != MethodInvocationExpression.class) {
+        if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
             return expression;
         }
 
@@ -74,7 +75,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new FieldReferenceExpression(mie1.getLineNumber(), mie1.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor());
-        } else if (expClass == MethodInvocationExpression.class) {
+        } else if (expClass == ClassFileMethodInvocationExpression.class) {
             MethodInvocationExpression mie2 = (MethodInvocationExpression) exp;
 
             if ((mie2.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {
@@ -229,7 +230,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                 } else if (parameterTypesCount == 1) {
                     return (fre.getExpression() == null) || checkLocalVariableReference(fre.getExpression(), 0);
                 }
-            } else if (expClass == MethodInvocationExpression.class) {
+            } else if (expClass == ClassFileMethodInvocationExpression.class) {
                 MethodInvocationExpression mie2 = (MethodInvocationExpression) exp;
 
                 if ((mie2.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {

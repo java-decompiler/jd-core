@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -18,19 +18,14 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMemberDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignatureParser;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 
 import java.util.Iterator;
 import java.util.List;
 
 public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
-    protected SignatureParser signatureParser;
     protected int constructorCounter;
     protected ClassFileMemberDeclaration constructor;
-
-    public RemoveDefaultConstructorVisitor(SignatureParser signatureParser) {
-        this.signatureParser = signatureParser;
-    }
 
     @Override
     public void visit(AnnotationDeclaration declaration) {
@@ -73,7 +68,7 @@ public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
                     if (statement.getClass() == ExpressionStatement.class) {
                         Expression es = ((ExpressionStatement) statement).getExpression();
 
-                        if (es.getClass() == SuperConstructorInvocationExpression.class) {
+                        if (es.getClass() == ClassFileSuperConstructorInvocationExpression.class) {
                             SuperConstructorInvocationExpression scie = (SuperConstructorInvocationExpression) es;
 
                             if ("()V".equals(scie.getDescriptor())) {
@@ -105,7 +100,7 @@ public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
                             syntheticParameterCount++;
                         }
 
-                        if (signatureParser.parseParameterTypes(cfcd.getDescriptor()).size() == syntheticParameterCount) {
+                        if (cfcd.getParameterTypes().size() == syntheticParameterCount) {
                             constructor = cfcd;
                         }
                     }

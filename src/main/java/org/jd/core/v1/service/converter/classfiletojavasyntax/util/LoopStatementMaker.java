@@ -13,6 +13,7 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForEachStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
@@ -522,7 +523,7 @@ public class LoopStatementMaker {
         }
 
         // i$.hasNext();
-        if (condition.getClass() != MethodInvocationExpression.class) {
+        if (condition.getClass() != ClassFileMethodInvocationExpression.class) {
             return null;
         }
 
@@ -553,7 +554,7 @@ public class LoopStatementMaker {
 
         BinaryOperatorExpression boe = (BinaryOperatorExpression)es.getExpression();
 
-        if ((boe == null) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getRightExpression().getClass() != MethodInvocationExpression.class) || (boe.getLineNumber() != condition.getLineNumber())) {
+        if ((boe == null) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getRightExpression().getClass() != ClassFileMethodInvocationExpression.class) || (boe.getLineNumber() != condition.getLineNumber())) {
             return null;
         }
 
@@ -592,7 +593,7 @@ public class LoopStatementMaker {
         if (boe.getRightExpression().getClass() == CastExpression.class) {
             expression = ((CastExpression)expression).getExpression();
         }
-        if (expression.getClass() != MethodInvocationExpression.class) {
+        if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
             return null;
         }
 

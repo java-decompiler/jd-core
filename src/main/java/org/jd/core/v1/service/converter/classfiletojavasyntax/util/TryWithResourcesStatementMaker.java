@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -14,12 +14,12 @@ import org.jd.core.v1.model.javasyntax.expression.NullExpression;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.List;
-
 
 public class TryWithResourcesStatementMaker {
 
@@ -108,7 +108,7 @@ public class TryWithResourcesStatementMaker {
 
         expression = ((ExpressionStatement)statement).getExpression();
 
-        if (expression.getClass() != MethodInvocationExpression.class) {
+        if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
             return null;
         }
 
@@ -127,7 +127,7 @@ public class TryWithResourcesStatementMaker {
 
         expression = ((ExpressionStatement)statement).getExpression();
 
-        if (expression.getClass() != MethodInvocationExpression.class) {
+        if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
             return null;
         }
 
@@ -145,7 +145,7 @@ public class TryWithResourcesStatementMaker {
 
         expression = ((ExpressionStatement)statement).getExpression();
 
-        if (expression.getClass() != MethodInvocationExpression.class) {
+        if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
             return null;
         }
 

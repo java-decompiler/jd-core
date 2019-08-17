@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -14,13 +14,13 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
 import java.util.ListIterator;
-
 
 public class SwitchStatementMaker {
     protected static final Integer MINUS_ONE = Integer.valueOf(-1);
@@ -30,10 +30,10 @@ public class SwitchStatementMaker {
         int size = statements.size();
         SwitchStatement previousSwitchStatement = (SwitchStatement)statements.get(size - 2);
 
-        if ((previousSwitchStatement.getCondition().getLineNumber() == switchStatement.getCondition().getLineNumber()) && (previousSwitchStatement.getCondition().getClass() == MethodInvocationExpression.class)) {
+        if ((previousSwitchStatement.getCondition().getLineNumber() == switchStatement.getCondition().getLineNumber()) && (previousSwitchStatement.getCondition().getClass() == ClassFileMethodInvocationExpression.class)) {
             Expression expression = previousSwitchStatement.getCondition();
 
-            if (expression.getClass() == MethodInvocationExpression.class) {
+            if (expression.getClass() == ClassFileMethodInvocationExpression.class) {
                 expression = ((MethodInvocationExpression)expression).getExpression();
 
                 if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
@@ -88,7 +88,7 @@ public class SwitchStatementMaker {
 
                                                                     expression = is.getCondition();
 
-                                                                    if (expression.getClass() != MethodInvocationExpression.class) {
+                                                                    if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
                                                                         break;
                                                                     }
 
@@ -193,9 +193,9 @@ public class SwitchStatementMaker {
                 bodyDeclaration = (ClassFileBodyDeclaration)syntheticClass.getBodyDeclaration();
 
                 DefaultList<Statement> statements = (DefaultList)bodyDeclaration.getMethodDeclarations().get(0).getStatements();
-                updateSwitchStatement(switchStatement, statements.listIterator());
+                updateSwitchStatement(switchStatement, statements.listIterator(1));
             }
-        } else if (expressionClass == MethodInvocationExpression.class) {
+        } else if (expressionClass == ClassFileMethodInvocationExpression.class) {
             MethodInvocationExpression mie = (MethodInvocationExpression)ae.getExpression();
             String methodName = mie.getName();
 
@@ -259,7 +259,7 @@ public class SwitchStatementMaker {
 
             expression = ((ArrayExpression)expression).getIndex();
 
-            if (expression.getClass() != MethodInvocationExpression.class) {
+            if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
                 break;
             }
 

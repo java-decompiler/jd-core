@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -12,7 +12,8 @@ import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignatureParser;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep1Visitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep2Visitor;
 
 /**
  * Create statements, init fields, merge declarations.<br><br>
@@ -28,7 +29,10 @@ public class UpdateJavaSyntaxTreeProcessor implements Processor {
         SignatureParser parser = message.getHeader("signatureParser");
         CompilationUnit compilationUnit = message.getBody();
 
-        UpdateJavaSyntaxTreeVisitor updateJavaSyntaxTreeVisitor = new UpdateJavaSyntaxTreeVisitor(maker, parser);
-        updateJavaSyntaxTreeVisitor.visit(compilationUnit);
+        UpdateJavaSyntaxTreeStep1Visitor updateJavaSyntaxTreeStep1Visitor = new UpdateJavaSyntaxTreeStep1Visitor(maker, parser);
+        updateJavaSyntaxTreeStep1Visitor.visit(compilationUnit);
+
+        UpdateJavaSyntaxTreeStep2Visitor updateJavaSyntaxTreeStep2Visitor = new UpdateJavaSyntaxTreeStep2Visitor();
+        updateJavaSyntaxTreeStep2Visitor.visit(compilationUnit);
     }
 }

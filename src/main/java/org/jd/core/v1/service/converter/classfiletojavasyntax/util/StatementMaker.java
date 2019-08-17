@@ -24,6 +24,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorEnterStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorExitStatement;
@@ -43,7 +45,6 @@ public class StatementMaker {
     protected static final MergeTryWithResourcesStatementVisitor MERGE_TRY_WITH_RESOURCES_STATEMENT_VISITOR = new MergeTryWithResourcesStatementVisitor();
 
     protected ObjectTypeMaker objectTypeMaker;
-    protected SignatureParser signatureParser;
     protected LocalVariableMaker localVariableMaker;
     protected ByteCodeParser byteCodeParser;
     protected int majorVersion;
@@ -62,7 +63,6 @@ public class StatementMaker {
             ObjectTypeMaker objectTypeMaker, SignatureParser signatureParser, LocalVariableMaker localVariableMaker,
             ClassFile classFile, ClassFileBodyDeclaration bodyDeclaration, Type returnedType) {
         this.objectTypeMaker = objectTypeMaker;
-        this.signatureParser = signatureParser;
         this.localVariableMaker = localVariableMaker;
         this.majorVersion = classFile.getMajorVersion();
         this.internalTypeName = classFile.getInternalTypeName();
@@ -70,7 +70,7 @@ public class StatementMaker {
         this.byteCodeParser = new ByteCodeParser(objectTypeMaker, signatureParser, localVariableMaker, internalTypeName, classFile, bodyDeclaration, returnedType);
         this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor(localVariableMaker);
         this.removeBinaryOpReturnStatementsVisitor = new RemoveBinaryOpReturnStatementsVisitor(localVariableMaker);
-        this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(signatureParser, returnedType);
+        this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(returnedType);
     }
 
     public Statements make(ControlFlowGraph cfg) {
@@ -562,7 +562,7 @@ public class StatementMaker {
 
             if (subStatements.get(0).getClass() == ThrowStatement.class) {
                 Expression e = ((ThrowStatement)subStatements.get(0)).getExpression();
-                if (e.getClass() == NewExpression.class) {
+                if (e.getClass() == ClassFileNewExpression.class) {
                     BaseExpression parameters = ((NewExpression)e).getParameters();
                     if ((parameters != null) && !parameters.isList()) {
                         message = parameters.getFirst();
@@ -836,7 +836,7 @@ public class StatementMaker {
                         if (boeCond.getOperator().equals("==") && (exp1.getClass() == BinaryOperatorExpression.class) && checkFieldReference(fieldName, exp2)) {
                             BinaryOperatorExpression boe1 = (BinaryOperatorExpression) exp1;
 
-                            if ((boe1.getRightExpression().getClass() == MethodInvocationExpression.class) && checkFieldReference(fieldName, boe1.getLeftExpression())) {
+                            if ((boe1.getRightExpression().getClass() == ClassFileMethodInvocationExpression.class) && checkFieldReference(fieldName, boe1.getLeftExpression())) {
                                 MethodInvocationExpression mie = (MethodInvocationExpression) boe1.getRightExpression();
 
                                 if ((mie.getParameters().getClass() == StringConstantExpression.class) && mie.getName().equals("class$") && mie.getInternalTypeName().equals(internalTypeName)) {
@@ -847,7 +847,7 @@ public class StatementMaker {
                         } else if (boeCond.getOperator().equals("!=") && (exp2.getClass() == BinaryOperatorExpression.class) && checkFieldReference(fieldName, exp1)) {
                             BinaryOperatorExpression boe2 = (BinaryOperatorExpression) exp2;
 
-                            if ((boe2.getRightExpression().getClass() == MethodInvocationExpression.class) && checkFieldReference(fieldName, boe2.getLeftExpression())) {
+                            if ((boe2.getRightExpression().getClass() == ClassFileMethodInvocationExpression.class) && checkFieldReference(fieldName, boe2.getLeftExpression())) {
                                 MethodInvocationExpression mie = (MethodInvocationExpression) boe2.getRightExpression();
 
                                 if ((mie.getParameters().getClass() == StringConstantExpression.class) && mie.getName().equals("class$") && mie.getInternalTypeName().equals(internalTypeName)) {

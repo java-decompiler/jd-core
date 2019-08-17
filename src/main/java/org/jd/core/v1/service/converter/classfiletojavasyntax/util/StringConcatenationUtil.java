@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -9,6 +9,8 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.StringTokenizer;
@@ -16,14 +18,14 @@ import java.util.StringTokenizer;
 public class StringConcatenationUtil {
 
     public static Expression create(Expression expression, int lineNumber, String typeName) {
-        if (expression.getClass() == MethodInvocationExpression.class) {
+        if (expression.getClass() == ClassFileMethodInvocationExpression.class) {
             MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
             if ("append".equals(mie.getName()) && (mie.getParameters() != null) && !mie.getParameters().isList()) {
                 Expression concatenatedStringExpression = mie.getParameters().getFirst();
                 Expression expr = mie.getExpression();
 
-                while (expr.getClass() == MethodInvocationExpression.class) {
+                while (expr.getClass() == ClassFileMethodInvocationExpression.class) {
                     mie = (MethodInvocationExpression) expr;
 
                     if (("append".equals(mie.getName()) == false) || (mie.getParameters() == null) || mie.getParameters().isList()) {
@@ -34,8 +36,8 @@ public class StringConcatenationUtil {
                     expr = mie.getExpression();
                 }
 
-                if (expr.getClass() == NewExpression.class) {
-                    NewExpression ne = (NewExpression) expr;
+                if (expr.getClass() == ClassFileNewExpression.class) {
+                    ClassFileNewExpression ne = (ClassFileNewExpression) expr;
                     String internalTypeName = ne.getType().getDescriptor();
 
                     if ("Ljava/lang/StringBuilder;".equals(internalTypeName) || "Ljava/lang/StringBuffer;".equals(internalTypeName)) {
