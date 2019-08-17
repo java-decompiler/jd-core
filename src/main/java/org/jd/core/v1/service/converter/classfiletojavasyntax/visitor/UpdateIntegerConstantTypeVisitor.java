@@ -144,11 +144,12 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                             expression.setLeftExpression(updateExpression(rightType, left));
                             right.accept(this);
                         }
+                        break;
                     } else if (rightType.isPrimitive()) {
                         left.accept(this);
                         expression.setRightExpression(updateExpression(leftType, right));
+                        break;
                     }
-                    break;
                 }
 
                 left.accept(this);
