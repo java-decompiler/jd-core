@@ -510,7 +510,7 @@ public class SignatureParser {
      *  SimpleClassTypeSignature: Identifier TypeArguments?
      *  ClassTypeSignatureSuffix: '.' SimpleClassTypeSignature
      */
-    protected Type parseClassTypeSignature(SignatureReader reader, int dimension) {
+    protected ObjectType parseClassTypeSignature(SignatureReader reader, int dimension) {
         if (reader.nextEqualsTo('L')) {
             // Skip 'L'. Parse 'PackageSpecifier* SimpleClassTypeSignature'
             int index = ++reader.index;
@@ -570,7 +570,7 @@ public class SignatureParser {
             // Skip ';'
             reader.index++;
 
-            return (dimension==0) ? ot : ot.createType(dimension);
+            return (dimension==0) ? ot : (ObjectType)ot.createType(dimension);
         } else {
             return null;
         }
@@ -778,7 +778,7 @@ public class SignatureParser {
     public static class TypeTypes {
         public ObjectType thisType;
         public BaseTypeParameter typeParameters;
-        public Type              superType;
+        public ObjectType superType;
         public BaseType interfaces;
     }
 
