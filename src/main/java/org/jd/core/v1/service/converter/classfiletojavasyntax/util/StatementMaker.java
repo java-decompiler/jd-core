@@ -375,7 +375,7 @@ public class StatementMaker {
         if ((size > 3) && (conditionClass == ClassFileLocalVariableReferenceExpression.class) && (statements.get(size-2).getClass() == SwitchStatement.class)) {
             // Check pattern & make 'switch-string'
             SwitchStatementMaker.makeSwitchString(localVariableMaker, statements, switchStatement);
-        } else if ((bodyDeclaration.getInnerTypeDeclarations() != null) && (conditionClass == ArrayExpression.class)) {
+        } else if (conditionClass == ArrayExpression.class) {
             // Check pattern & make 'switch-enum'
             SwitchStatementMaker.makeSwitchEnum(bodyDeclaration, switchStatement);
         }

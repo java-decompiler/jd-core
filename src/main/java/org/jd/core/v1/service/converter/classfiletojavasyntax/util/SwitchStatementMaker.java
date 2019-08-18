@@ -187,13 +187,14 @@ public class SwitchStatementMaker {
             FieldReferenceExpression fre = (FieldReferenceExpression)ae.getExpression();
 
             if (fre.getDescriptor().equals("[I") && fre.getName().startsWith("$SwitchMap$")) {
-                // Javac switch-enum pattern
-                ClassFileClassDeclaration syntheticClass =  (ClassFileClassDeclaration)bodyDeclaration.getInnerTypeDeclaration(fre.getInternalTypeName());
+                ClassFileClassDeclaration syntheticClass = (ClassFileClassDeclaration)bodyDeclaration.getInnerTypeDeclaration(fre.getInternalTypeName());
 
-                bodyDeclaration = (ClassFileBodyDeclaration)syntheticClass.getBodyDeclaration();
-
-                DefaultList<Statement> statements = (DefaultList)bodyDeclaration.getMethodDeclarations().get(0).getStatements();
-                updateSwitchStatement(switchStatement, statements.listIterator(1));
+                if (syntheticClass != null) {
+                    // Javac switch-enum pattern
+                    bodyDeclaration = (ClassFileBodyDeclaration) syntheticClass.getBodyDeclaration();
+                    DefaultList<Statement> statements = (DefaultList) bodyDeclaration.getMethodDeclarations().get(0).getStatements();
+                    updateSwitchStatement(switchStatement, statements.listIterator(1));
+                }
             }
         } else if (expressionClass == ClassFileMethodInvocationExpression.class) {
             MethodInvocationExpression mie = (MethodInvocationExpression)ae.getExpression();
