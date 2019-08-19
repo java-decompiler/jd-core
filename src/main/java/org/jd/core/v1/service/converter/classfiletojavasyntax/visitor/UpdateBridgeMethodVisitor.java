@@ -152,6 +152,11 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
     protected class BodyDeclarationsVisitor extends AbstractJavaSyntaxVisitor {
         protected HashMap<String, ClassFileMethodDeclaration> map = null;
 
+        @Override public void visit(ClassDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
+        @Override public void visit(EnumDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
+        @Override public void visit(InterfaceDeclaration declaration) {}
+        @Override public void visit(AnnotationDeclaration declaration) {}
+
         @Override
         public void visit(BodyDeclaration declaration) {
             ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
@@ -173,6 +178,9 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
             safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
         }
+
+        @Override public void visit(StaticInitializerDeclaration declaration) {}
+        @Override public void visit(ConstructorDeclaration declaration) {}
 
         @Override
         public void visit(MethodDeclaration declaration) {
@@ -200,11 +208,6 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
             map.put(name + declaration.getDescriptor(), bridgeMethodDeclaration);
         }
-
-        @Override public void visit(ClassDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
-        @Override public void visit(EnumDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
-        @Override public void visit(InterfaceDeclaration declaration) {}
-        @Override public void visit(AnnotationDeclaration declaration) {}
 
         private boolean checkBridgeMethodDeclaration(ClassFileMethodDeclaration bridgeMethodDeclaration) {
             Statement statement = bridgeMethodDeclaration.getStatements().getFirst();

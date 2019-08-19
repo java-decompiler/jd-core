@@ -133,11 +133,13 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     int size = list.size();
                     list.subList(size - count, size).clear();
                 }
-            } else if (outerType != null) {
+            } else if ((outerType != null) || !outerLocalVariableNames.isEmpty()) {
+                // Remove outer this and outer local variable reference
                 cfcd.setFormalParameters(null);
             }
         }
 
+        // Hide anonymous class constructor
         ClassFile outerClassFile = cfcd.getClassFile().getOuterClassFile();
 
         if (outerClassFile != null) {
@@ -170,18 +172,16 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override
-    public void visit(MethodDeclaration declaration) {}
+    @Override public void visit(MethodDeclaration declaration) {}
+    @Override public void visit(StaticInitializerDeclaration declaration) {}
 
-    @Override
-    public void visit(StaticInitializerDeclaration declaration) {}
-
-    protected class UpdateFieldReferencesVisitor extends AbstractJavaSyntaxVisitor {
+    protected class UpdateFieldReferencesVisitor extends AbstractUpdateExpressionVisitor {
         @Override
         public void visit(BodyDeclaration declaration) {
-            ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
-            safeAcceptListDeclaration(bodyDeclaration.getMethodDeclarations());
+            safeAcceptListDeclaration(((ClassFileBodyDeclaration)declaration).getMethodDeclarations());
         }
+
+        @Override public void visit(StaticInitializerDeclaration declaration) {}
 
         @Override
         public void visit(MethodDeclaration declaration) {
@@ -189,46 +189,39 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         @Override
+        public void visit(NewExpression expression) {
+            if (expression.getParameters() != null) {
+                expression.setParameters(updateBaseExpression(expression.getParameters()));
+                expression.getParameters().accept(this);
+            }
+            safeAccept(expression.getBodyDeclaration());
+        }
+
+        @Override
         public void visit(FieldReferenceExpression expression) {
-            FieldReferenceExpression cffre = expression;
-
-            if (outerLocalVariableNames.contains(expression.getName())) {
-                cffre.setName(cffre.getName().substring(4));
-                cffre.setExpression(null);
-            } else if (cffre.getExpression() != null) {
-                Class clazz = cffre.getExpression().getClass();
-
-                if (clazz == FieldReferenceExpression.class) {
-                    FieldReferenceExpression cffre2 = (FieldReferenceExpression) cffre.getExpression();
-
-                    if (cffre2.getName().startsWith("this$") && cffre2.getDescriptor().equals(outerType.getDescriptor())) {
-                        cffre.setExpression(new FieldReferenceExpression(outerType, new ObjectTypeReferenceExpression(cffre2.getLineNumber(), outerType), outerType.getInternalName(), "this", outerType.getDescriptor()));
-                    }
-                } else if (clazz == ClassFileLocalVariableReferenceExpression.class) {
-                    ClassFileLocalVariableReferenceExpression cdlvre = (ClassFileLocalVariableReferenceExpression) cffre.getExpression();
-
-                    if ((cdlvre.getName() != null) && cdlvre.getName().startsWith("this$") && cdlvre.getType().getDescriptor().equals(outerType.getDescriptor())) {
-                        cffre.setExpression(new FieldReferenceExpression(outerType, new ObjectTypeReferenceExpression(cdlvre.getLineNumber(), outerType), outerType.getInternalName(), "this", outerType.getDescriptor()));
-                    }
-                } else if (clazz == ThisExpression.class) {
-                    if (cffre.getName().startsWith("this$") && cffre.getType().getDescriptor().equals(outerType.getDescriptor())) {
-                        cffre.setExpression(new ObjectTypeReferenceExpression(cffre.getExpression().getLineNumber(), outerType));
-                        cffre.setName("this");
-                    }
-                }
+            if (expression.getName().startsWith("this$") && expression.getType().getDescriptor().equals(outerType.getDescriptor())) {
+                Expression exp = (expression.getExpression() == null) ? expression : expression.getExpression();
+                expression.setExpression(new ObjectTypeReferenceExpression(exp.getLineNumber(), outerType));
+                expression.setName("this");
+            } else if (outerLocalVariableNames.contains(expression.getName())) {
+                expression.setName(expression.getName().substring(4));
+                expression.setExpression(null);
+            } else {
+                super.visit(expression);
             }
         }
 
         @Override
-        public void visit(NewExpression expression) {
-            safeAccept(expression.getParameters());
-            if (expression.getBodyDeclaration() != null) {
-                ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)expression.getBodyDeclaration();
+        protected Expression updateExpression(Expression expression) {
+            if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                ClassFileLocalVariableReferenceExpression cdlvre = (ClassFileLocalVariableReferenceExpression) expression;
 
-                for (ClassFileConstructorOrMethodDeclaration comd : bodyDeclaration.getMethodDeclarations()) {
-                    safeAccept(comd.getStatements());
+                if ((cdlvre.getName() != null) && cdlvre.getName().startsWith("this$") && cdlvre.getType().getDescriptor().equals(outerType.getDescriptor())) {
+                    return new FieldReferenceExpression(outerType, new ObjectTypeReferenceExpression(cdlvre.getLineNumber(), outerType), outerType.getInternalName(), "this", outerType.getDescriptor());
                 }
             }
+
+            return expression;
         }
     }
 
@@ -447,24 +440,30 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
         @Override
         public void visit(SuperConstructorInvocationExpression expression) {
-            ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(superTypeName);
+            BaseExpression parameters = expression.getParameters();
 
-            if ((memberDeclaration != null) && (memberDeclaration.getClass() == ClassFileClassDeclaration.class)) {
-                ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) memberDeclaration;
-                ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) cfcd.getBodyDeclaration();
+            if ((parameters != null) && (parameters.size() > 0)) {
+                ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(superTypeName);
 
-                if (cfbd.getOuterType() != null) {
-                    assert expression.getParameters().getFirst().getType().equals(cfbd.getOuterType());
-                    expression.setParameters(removeOuterThisParameter(expression.getParameters()));
+                if ((memberDeclaration != null) && (memberDeclaration.getClass() == ClassFileClassDeclaration.class)) {
+                    ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) memberDeclaration;
+                    ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) cfcd.getBodyDeclaration();
+
+                    if (parameters.getFirst().getType().equals(cfbd.getOuterType())) {
+                        expression.setParameters(removeOuterThisParameter(parameters));
+                    }
                 }
             }
         }
 
         @Override
         public void visit(ConstructorInvocationExpression expression) {
-            if (bodyDeclaration.getOuterType() != null) {
-                assert expression.getParameters().getFirst().getType().equals(bodyDeclaration.getOuterType());
-                expression.setParameters(removeOuterThisParameter(expression.getParameters()));
+            BaseExpression parameters = expression.getParameters();
+
+            if ((parameters != null) && (parameters.size() > 0)) {
+                if (parameters.getFirst().getType().equals(bodyDeclaration.getOuterType())) {
+                    expression.setParameters(removeOuterThisParameter(parameters));
+                }
             }
         }
 
