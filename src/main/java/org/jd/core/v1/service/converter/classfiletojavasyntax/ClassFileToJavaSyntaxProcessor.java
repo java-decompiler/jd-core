@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -12,8 +12,7 @@ import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.ConvertClassFileProcessor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.UpdateJavaSyntaxTreeProcessor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignatureParser;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 /**
  * Convert ClassFile model to Java syntax model.<br><br>
@@ -30,11 +29,9 @@ public class ClassFileToJavaSyntaxProcessor implements Processor {
     public void process(Message message) throws Exception {
         Loader loader = message.getHeader("loader");
 
-        ObjectTypeMaker maker = new ObjectTypeMaker(loader);
-        SignatureParser parser = new SignatureParser(maker);
+        TypeMaker typeMaker = new TypeMaker(loader);
 
-        message.setHeader("objectTypeMaker", maker);
-        message.setHeader("signatureParser", parser);
+        message.setHeader("typeMaker", typeMaker);
 
         CONVERT_CLASS_FILE_PROCESSOR.process(message);
         UPDATE_JAVA_SYNTAX_TREE_PROCESSOR.process(message);

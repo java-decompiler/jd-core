@@ -23,14 +23,11 @@ import java.util.List;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
 
-
 public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
-    protected ObjectTypeMaker objectTypeMaker;
-    protected SignatureParser signatureParser;
+    protected TypeMaker typeMaker;
 
-    public CreateInstructionsVisitor(ObjectTypeMaker objectTypeMaker, SignatureParser signatureParser) {
-        this.objectTypeMaker = objectTypeMaker;
-        this.signatureParser = signatureParser;
+    public CreateInstructionsVisitor(TypeMaker typeMaker) {
+        this.typeMaker = typeMaker;
     }
 
     @Override
@@ -58,7 +55,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                 } else if (method.getParameterTypes() != null) {
                     for (Type type : method.getParameterTypes()) {
                         if (type.isObject() && ((ObjectType)type).getName() == null) {
-                            // Synthetic type in parameters -> synthetic method
+                            // Synthetic type in parameterTypes -> synthetic method
                             method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
                             method.accept(this);
                             break;
@@ -81,7 +78,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(ConstructorDeclaration declaration) {
         ClassFileConstructorOrMethodDeclaration comdwln = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(objectTypeMaker, signatureParser, comdwln, true, comdwln.getParameterTypes());
+        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comdwln, true, comdwln.getParameterTypes());
 
         createParametersVariablesAndStatements(comdwln, localVariableMaker);
     }
@@ -89,7 +86,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(MethodDeclaration declaration) {
         ClassFileConstructorOrMethodDeclaration comdwln = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(objectTypeMaker, signatureParser, comdwln, false, comdwln.getParameterTypes());
+        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comdwln, false, comdwln.getParameterTypes());
 
         createParametersVariablesAndStatements(comdwln, localVariableMaker);
     }
@@ -97,7 +94,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(StaticInitializerDeclaration declaration) {
         ClassFileConstructorOrMethodDeclaration comdwln = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(objectTypeMaker, signatureParser, comdwln, false, null);
+        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comdwln, false, null);
 
         createParametersVariablesAndStatements(comdwln, localVariableMaker);
     }
@@ -107,7 +104,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
         ClassFileBodyDeclaration bodyDeclaration = comdwln.getBodyDeclaration();
         Method method = comdwln.getMethod();
         Type returnedType = comdwln.getReturnedType();
-        StatementMaker statementMaker = new StatementMaker(objectTypeMaker, signatureParser, localVariableMaker, classFile, bodyDeclaration, returnedType);
+        StatementMaker statementMaker = new StatementMaker(typeMaker, localVariableMaker, classFile, bodyDeclaration, returnedType);
 
         try {
             ControlFlowGraph cfg = ControlFlowGraphMaker.make(method);

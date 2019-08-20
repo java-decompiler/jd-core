@@ -44,7 +44,7 @@ public class StatementMaker {
     protected static final NullExpression FINALLY_EXCEPTION_EXPRESSION = new NullExpression(new ObjectType("java/lang/Exception", "java.lang.Exception", "Exception"));
     protected static final MergeTryWithResourcesStatementVisitor MERGE_TRY_WITH_RESOURCES_STATEMENT_VISITOR = new MergeTryWithResourcesStatementVisitor();
 
-    protected ObjectTypeMaker objectTypeMaker;
+    protected TypeMaker typeMaker;
     protected LocalVariableMaker localVariableMaker;
     protected ByteCodeParser byteCodeParser;
     protected int majorVersion;
@@ -60,14 +60,14 @@ public class StatementMaker {
     protected boolean mergeTryWithResourcesStatementFlag = false;
 
     public StatementMaker(
-            ObjectTypeMaker objectTypeMaker, SignatureParser signatureParser, LocalVariableMaker localVariableMaker,
+            TypeMaker typeMaker, LocalVariableMaker localVariableMaker,
             ClassFile classFile, ClassFileBodyDeclaration bodyDeclaration, Type returnedType) {
-        this.objectTypeMaker = objectTypeMaker;
+        this.typeMaker = typeMaker;
         this.localVariableMaker = localVariableMaker;
         this.majorVersion = classFile.getMajorVersion();
         this.internalTypeName = classFile.getInternalTypeName();
         this.bodyDeclaration = bodyDeclaration;
-        this.byteCodeParser = new ByteCodeParser(objectTypeMaker, signatureParser, localVariableMaker, internalTypeName, classFile, bodyDeclaration, returnedType);
+        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, internalTypeName, classFile, bodyDeclaration, returnedType);
         this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor(localVariableMaker);
         this.removeBinaryOpReturnStatementsVisitor = new RemoveBinaryOpReturnStatementsVisitor(localVariableMaker);
         this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(returnedType);
@@ -437,7 +437,7 @@ public class StatementMaker {
                     finallyStatements.removeLast();
                 }
             } else {
-                stack.push(new NullExpression(objectTypeMaker.makeFromInternalTypeName(exceptionHandler.getInternalThrowableName())));
+                stack.push(new NullExpression(typeMaker.makeFromInternalTypeName(exceptionHandler.getInternalThrowableName())));
 
                 Statements catchStatements = new Statements();
                 localVariableMaker.pushFrame(catchStatements);
@@ -445,7 +445,7 @@ public class StatementMaker {
                 BasicBlock bb = exceptionHandler.getBasicBlock();
                 int lineNumber = bb.getControlFlowGraph().getLineNumber(bb.getFromOffset());
                 int index = ByteCodeParser.getExceptionLocalVariableIndex(bb);
-                ObjectType ot = objectTypeMaker.makeFromInternalTypeName(exceptionHandler.getInternalThrowableName());
+                ObjectType ot = typeMaker.makeFromInternalTypeName(exceptionHandler.getInternalThrowableName());
                 int offset = bb.getFromOffset();
                 byte[] code = bb.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
 
@@ -475,7 +475,7 @@ public class StatementMaker {
 
                 if (exceptionHandler.getOtherInternalThrowableNames() != null) {
                     for (String name : exceptionHandler.getOtherInternalThrowableNames()) {
-                        cc.addType(objectTypeMaker.makeFromInternalTypeName(name));
+                        cc.addType(typeMaker.makeFromInternalTypeName(name));
                     }
                 }
 
@@ -898,7 +898,7 @@ public class StatementMaker {
         }
 
         String typeName = ((StringConstantExpression) mie.getParameters()).getString();
-        ObjectType ot = objectTypeMaker.makeFromInternalTypeName(typeName.replace('.', '/'));
+        ObjectType ot = typeMaker.makeFromInternalTypeName(typeName.replace('.', '/'));
 
         return new TypeReferenceDotClassExpression(lineNumber, ot);
     }

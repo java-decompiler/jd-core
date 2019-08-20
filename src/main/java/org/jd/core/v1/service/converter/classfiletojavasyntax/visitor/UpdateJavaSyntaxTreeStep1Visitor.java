@@ -10,16 +10,15 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignatureParser;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class UpdateJavaSyntaxTreeStep1Visitor extends AbstractJavaSyntaxVisitor {
     protected InitInnerClassVisitor initInnerClassStep1Visitor = new InitInnerClassVisitor();
 
     protected CreateInstructionsVisitor createInstructionsVisitor;
 
-    public UpdateJavaSyntaxTreeStep1Visitor(ObjectTypeMaker objectTypeMaker, SignatureParser signatureParser) {
-        createInstructionsVisitor = new CreateInstructionsVisitor(objectTypeMaker, signatureParser);
+    public UpdateJavaSyntaxTreeStep1Visitor(TypeMaker typeMaker) {
+        createInstructionsVisitor = new CreateInstructionsVisitor(typeMaker);
     }
 
     @Override

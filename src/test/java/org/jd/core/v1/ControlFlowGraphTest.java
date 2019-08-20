@@ -38,8 +38,7 @@ public class ControlFlowGraphTest extends TestCase {
     protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
     protected ConvertClassFileProcessor converter = new ConvertClassFileProcessor();
     protected ClassPathLoader loader = new ClassPathLoader();
-    protected ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
-    protected SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
+    protected TypeMaker typeMaker = new TypeMaker(loader);
 
     // --- Basic test ----------------------------------------------------------------------------------------------- //
     @Test
@@ -2634,7 +2633,7 @@ public class ControlFlowGraphTest extends TestCase {
     }
 
     protected Method searchMethod(String internalTypeName, String methodName) throws Exception {
-        return searchMethod(loader, objectTypeMaker, signatureParser, internalTypeName, methodName, null);
+        return searchMethod(loader, typeMaker, internalTypeName, methodName, null);
     }
 
     protected Method searchMethod(InputStream is, String internalTypeName, String methodName) throws Exception {
@@ -2646,18 +2645,16 @@ public class ControlFlowGraphTest extends TestCase {
             return null;
         } else {
             ZipLoader loader = new ZipLoader(is);
-            ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
-            SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
-            return searchMethod(loader, objectTypeMaker, signatureParser, internalTypeName, methodName, methodDescriptor);
+            TypeMaker typeMaker = new TypeMaker(loader);
+            return searchMethod(loader, typeMaker, internalTypeName, methodName, methodDescriptor);
         }
     }
 
-    protected Method searchMethod(Loader loader, ObjectTypeMaker objectTypeMaker, SignatureParser signatureParser, String internalTypeName, String methodName, String methodDescriptor) throws Exception {
+    protected Method searchMethod(Loader loader, TypeMaker typeMaker, String internalTypeName, String methodName, String methodDescriptor) throws Exception {
         Message message = new Message();
         message.setHeader("mainInternalTypeName", internalTypeName);
         message.setHeader("loader", loader);
-        message.setHeader("objectTypeMaker", objectTypeMaker);
-        message.setHeader("signatureParser", signatureParser);
+        message.setHeader("typeMaker", typeMaker);
 
         deserializer.process(message);
         converter.process(message);

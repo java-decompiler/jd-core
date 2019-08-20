@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -23,8 +23,7 @@ import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignatureParser;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.List;
@@ -39,25 +38,24 @@ public class ConvertClassFileProcessor implements Processor {
 
     @Override
     public void process(Message message) throws Exception {
-        ObjectTypeMaker objectTypeMaker = message.getHeader("objectTypeMaker");
-        SignatureParser signatureParser = message.getHeader("signatureParser");
+        TypeMaker typeMaker = message.getHeader("typeMaker");
         ClassFile classFile = message.getBody();
 
-        AnnotationConverter annotationConverter = new AnnotationConverter(objectTypeMaker);
+        AnnotationConverter annotationConverter = new AnnotationConverter(typeMaker);
 
         int flags = classFile.getAccessFlags();
         TypeDeclaration typeDeclaration;
 
         if ((flags & Constants.ACC_ENUM) != 0) {
-            typeDeclaration = convertEnumDeclaration(signatureParser, annotationConverter, classFile, null);
+            typeDeclaration = convertEnumDeclaration(typeMaker, annotationConverter, classFile, null);
         } else if ((flags & Constants.ACC_ANNOTATION) != 0) {
-            typeDeclaration = convertAnnotationDeclaration(signatureParser, annotationConverter, classFile, null);
+            typeDeclaration = convertAnnotationDeclaration(typeMaker, annotationConverter, classFile, null);
         } else if ((flags & Constants.ACC_MODULE) != 0) {
             typeDeclaration = convertModuleDeclaration(classFile);
         } else if ((flags & Constants.ACC_INTERFACE) != 0) {
-            typeDeclaration = convertInterfaceDeclaration(signatureParser, annotationConverter, classFile, null);
+            typeDeclaration = convertInterfaceDeclaration(typeMaker, annotationConverter, classFile, null);
         } else {
-            typeDeclaration = convertClassDeclaration(signatureParser, annotationConverter, classFile, null);
+            typeDeclaration = convertClassDeclaration(typeMaker, annotationConverter, classFile, null);
         }
 
         message.setHeader("majorVersion", classFile.getMajorVersion());
@@ -65,9 +63,9 @@ public class ConvertClassFileProcessor implements Processor {
         message.setBody(new CompilationUnit(typeDeclaration));
     }
 
-    protected ClassFileInterfaceDeclaration convertInterfaceDeclaration(SignatureParser parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+    protected ClassFileInterfaceDeclaration convertInterfaceDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
-        SignatureParser.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
+        TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
         ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, outerClassFileBodyDeclaration);
 
         return new ClassFileInterfaceDeclaration(
@@ -76,9 +74,9 @@ public class ConvertClassFileProcessor implements Processor {
                 typeTypes.typeParameters, typeTypes.interfaces, bodyDeclaration);
     }
 
-    protected ClassFileEnumDeclaration convertEnumDeclaration(SignatureParser parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+    protected ClassFileEnumDeclaration convertEnumDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
-        SignatureParser.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
+        TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
         ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, outerClassFileBodyDeclaration);
 
         return new ClassFileEnumDeclaration(
@@ -87,9 +85,9 @@ public class ConvertClassFileProcessor implements Processor {
                 typeTypes.interfaces, bodyDeclaration);
     }
 
-    protected ClassFileAnnotationDeclaration convertAnnotationDeclaration(SignatureParser parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+    protected ClassFileAnnotationDeclaration convertAnnotationDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
-        SignatureParser.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
+        TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
         ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, outerClassFileBodyDeclaration);
 
         return new ClassFileAnnotationDeclaration(
@@ -98,9 +96,9 @@ public class ConvertClassFileProcessor implements Processor {
                 bodyDeclaration);
     }
 
-    protected ClassFileClassDeclaration convertClassDeclaration(SignatureParser parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+    protected ClassFileClassDeclaration convertClassDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
-        SignatureParser.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
+        TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
         ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, outerClassFileBodyDeclaration);
 
         return new ClassFileClassDeclaration(
@@ -110,7 +108,7 @@ public class ConvertClassFileProcessor implements Processor {
                 typeTypes.interfaces, bodyDeclaration);
     }
 
-    protected ClassFileBodyDeclaration convertBodyDeclaration(SignatureParser parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+    protected ClassFileBodyDeclaration convertBodyDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile.getInternalTypeName(), outerClassFileBodyDeclaration);
 
         bodyDeclaration.setFieldDeclarations(convertFields(parser, converter, classFile));
@@ -120,7 +118,7 @@ public class ConvertClassFileProcessor implements Processor {
         return bodyDeclaration;
     }
 
-    protected List<ClassFileFieldDeclaration> convertFields(SignatureParser parser, AnnotationConverter converter, ClassFile classFile) {
+    protected List<ClassFileFieldDeclaration> convertFields(TypeMaker parser, AnnotationConverter converter, ClassFile classFile) {
         Field[] fields = classFile.getFields();
 
         if (fields == null) {
@@ -141,7 +139,7 @@ public class ConvertClassFileProcessor implements Processor {
         }
     }
 
-    protected List<ClassFileConstructorOrMethodDeclaration> convertMethods(SignatureParser parser, AnnotationConverter converter, ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile) {
+    protected List<ClassFileConstructorOrMethodDeclaration> convertMethods(TypeMaker parser, AnnotationConverter converter, ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile) {
         Method[] methods = classFile.getMethods();
 
         if (methods == null) {
@@ -170,18 +168,18 @@ public class ConvertClassFileProcessor implements Processor {
                 }
 
                 if ("<init>".equals(name)) {
-                    SignatureParser.MethodTypes methodTypes = parser.parseConstructorSignature(method);
+                    TypeMaker.MethodTypes methodTypes = parser.parseConstructorSignature(method);
                     list.add(new ClassFileConstructorDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, methodTypes.typeParameters,
-                            methodTypes.parameters, methodTypes.exceptions, firstLineNumber));
+                            methodTypes.parameterTypes, methodTypes.exceptions, firstLineNumber));
                 } else if ("<clinit>".equals(name)) {
                     list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, firstLineNumber));
                 } else {
                     ClassFileMethodDeclaration methodDeclaration;
-                    SignatureParser.MethodTypes methodTypes = parser.parseMethodSignature(method);
+                    TypeMaker.MethodTypes methodTypes = parser.parseMethodSignature(method);
                     list.add(methodDeclaration = new ClassFileMethodDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
-                            methodTypes.returned, methodTypes.parameters, methodTypes.exceptions, defaultAnnotationValue,
+                            methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptions, defaultAnnotationValue,
                             firstLineNumber));
                     if ((classFile.getAccessFlags() & Constants.ACC_INTERFACE) != 0) {
                         if (methodDeclaration.getFlags() == Constants.ACC_PUBLIC) {
@@ -196,7 +194,7 @@ public class ConvertClassFileProcessor implements Processor {
         }
     }
 
-    protected List<ClassFileMemberDeclaration> convertInnerTypes(SignatureParser parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+    protected List<ClassFileMemberDeclaration> convertInnerTypes(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         List<ClassFile> innerClassFiles = classFile.getInnerClassFiles();
 
         if (innerClassFiles == null) {

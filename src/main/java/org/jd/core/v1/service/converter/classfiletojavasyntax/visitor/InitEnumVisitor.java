@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -56,7 +56,7 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
                 cfcd.setFlags(FLAG_SYNTHETIC);
             } else {
                 FormalParameters parameters = (FormalParameters)cfcd.getFormalParameters();
-                // Remove name & index parameters
+                // Remove name & index parameterTypes
                 parameters.subList(0, 2).clear();
                 // Remove super constructor call
                 statements.remove(0);

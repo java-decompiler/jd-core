@@ -17,11 +17,11 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
 public class AnnotationConverter implements ElementValueVisitor {
-    protected ObjectTypeMaker objectTypeMaker;
+    protected TypeMaker typeMaker;
     protected org.jd.core.v1.model.javasyntax.reference.ElementValue elementValue = null;
 
-    public AnnotationConverter(ObjectTypeMaker objectTypeMaker) {
-        this.objectTypeMaker = objectTypeMaker;
+    public AnnotationConverter(TypeMaker typeMaker) {
+        this.typeMaker = typeMaker;
     }
 
     @SuppressWarnings("unchecked")
@@ -73,7 +73,7 @@ public class AnnotationConverter implements ElementValueVisitor {
 
         assert (descriptor != null) && (descriptor.length() > 2) && (descriptor.charAt(0) == 'L') && (descriptor.charAt(descriptor.length()-1) == ';');
 
-        ObjectType ot = objectTypeMaker.makeFromDescriptor(descriptor);
+        ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
         ElementValuePair[] elementValuePairs = annotation.getElementValuePairs();
 
         if (elementValuePairs == null) {
@@ -145,7 +145,7 @@ public class AnnotationConverter implements ElementValueVisitor {
     @Override
     public void visit(ElementValueClassInfo elementValueClassInfo) {
         String classInfo = elementValueClassInfo.getClassInfo();
-        ObjectType ot = objectTypeMaker.makeFromDescriptor(classInfo);
+        ObjectType ot = typeMaker.makeFromDescriptor(classInfo);
         elementValue = new ExpressionElementValue(new TypeReferenceDotClassExpression(ot));
     }
 
@@ -162,7 +162,7 @@ public class AnnotationConverter implements ElementValueVisitor {
 
         assert (descriptor != null) && (descriptor.length() > 2) && (descriptor.charAt(0) == 'L') && (descriptor.charAt(descriptor.length()-1) == ';') : "AnnotationConverter.visit(elementValueEnumConstValue)";
 
-        ObjectType ot = objectTypeMaker.makeFromDescriptor(descriptor);
+        ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
         String constName = elementValueEnumConstValue.getConstName();
         String internalTypeName = descriptor.substring(1, descriptor.length()-1);
         elementValue = new ExpressionElementValue(new FieldReferenceExpression(ot, new ObjectTypeReferenceExpression(ot), internalTypeName, constName, descriptor));

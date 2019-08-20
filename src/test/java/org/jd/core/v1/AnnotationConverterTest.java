@@ -14,7 +14,7 @@ import org.jd.core.v1.model.classfile.attribute.Annotations;
 import org.jd.core.v1.model.javasyntax.reference.*;
 import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
 import org.junit.Test;
 
@@ -27,8 +27,8 @@ public class AnnotationConverterTest extends TestCase {
     public void test() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
-        ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
-        AnnotationConverter converter = new AnnotationConverter(objectTypeMaker);
+        TypeMaker typeMaker = new TypeMaker(loader);
+        AnnotationConverter converter = new AnnotationConverter(typeMaker);
         DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
 
         Message message = new Message();

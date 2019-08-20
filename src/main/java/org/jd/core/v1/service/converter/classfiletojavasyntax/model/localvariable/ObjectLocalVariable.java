@@ -9,29 +9,29 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariab
 
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class ObjectLocalVariable extends AbstractLocalVariable {
-    protected ObjectTypeMaker objectTypeMaker;
+    protected TypeMaker typeMaker;
     protected Type type;
 
-    public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, Type type, String name) {
+    public ObjectLocalVariable(TypeMaker typeMaker, int index, int offset, Type type, String name) {
         super(index, offset, name);
-        this.objectTypeMaker = objectTypeMaker;
+        this.typeMaker = typeMaker;
         this.type = type;
     }
 
-    public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, Type type, String name, boolean declared) {
-        this(objectTypeMaker, index, offset, type, name);
+    public ObjectLocalVariable(TypeMaker typeMaker, int index, int offset, Type type, String name, boolean declared) {
+        this(typeMaker, index, offset, type, name);
         this.declared = declared;
     }
 
-    public ObjectLocalVariable(ObjectTypeMaker objectTypeMaker, int index, int offset, ObjectLocalVariable objectLocalVariable) {
+    public ObjectLocalVariable(TypeMaker typeMaker, int index, int offset, ObjectLocalVariable objectLocalVariable) {
         super(index, offset, null);
-        this.objectTypeMaker = objectTypeMaker;
+        this.typeMaker = typeMaker;
         this.type = objectLocalVariable.type;
     }
 
@@ -94,7 +94,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
 
                     if (type.getDimension() == 0) {
                         if ((thisObjectType.getTypeArguments() == null) ? (otherObjectType.getTypeArguments() == null) : thisObjectType.getTypeArguments().equals(otherObjectType.getTypeArguments())) {
-                            return objectTypeMaker.isAssignable(thisObjectType, otherObjectType);
+                            return typeMaker.isAssignable(thisObjectType, otherObjectType);
                         }
                     }
                 } else if (thisObjectType.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
@@ -126,7 +126,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                                 this.type = otherObjectType;
                                 fireChangeEvent();
                             }
-                        } else if (objectTypeMaker.isAssignable(thisObjectType, otherObjectType)) {
+                        } else if (typeMaker.isAssignable(thisObjectType, otherObjectType)) {
                             // Assignable types
                             if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
                                 // Keep type, update type arguments
@@ -163,7 +163,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                                 this.type = otherObjectType;
                                 fireChangeEvent();
                             }
-                        } else if (objectTypeMaker.isAssignable(otherObjectType, thisObjectType)) {
+                        } else if (typeMaker.isAssignable(otherObjectType, thisObjectType)) {
                             // Assignable types
                             if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
                                 // Keep type, update type arguments

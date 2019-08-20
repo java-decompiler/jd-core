@@ -114,7 +114,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             }
         }
 
-        // Remove synthetic parameters
+        // Remove synthetic parameterTypes
         BaseFormalParameter parameters = cfcd.getFormalParameters();
 
         if (parameters != null) {
@@ -360,7 +360,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     BaseExpression parameters = expression.getParameters();
 
                     if (parameters != null) {
-                        // Remove synthetic parameters
+                        // Remove synthetic parameterTypes
                         DefaultList<String> outerParameterNames = cfbd.getOuterLocalVariableNames();
 
                         if (parameters.isList()) {

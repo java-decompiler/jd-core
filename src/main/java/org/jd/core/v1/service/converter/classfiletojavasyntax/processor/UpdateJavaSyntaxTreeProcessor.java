@@ -10,8 +10,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.processor;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.model.processor.Processor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignatureParser;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep1Visitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep2Visitor;
 
@@ -25,11 +24,10 @@ public class UpdateJavaSyntaxTreeProcessor implements Processor {
 
     @Override
     public void process(Message message) throws Exception {
-        ObjectTypeMaker maker = message.getHeader("objectTypeMaker");
-        SignatureParser parser = message.getHeader("signatureParser");
+        TypeMaker typeMaker = message.getHeader("typeMaker");
         CompilationUnit compilationUnit = message.getBody();
 
-        UpdateJavaSyntaxTreeStep1Visitor updateJavaSyntaxTreeStep1Visitor = new UpdateJavaSyntaxTreeStep1Visitor(maker, parser);
+        UpdateJavaSyntaxTreeStep1Visitor updateJavaSyntaxTreeStep1Visitor = new UpdateJavaSyntaxTreeStep1Visitor(typeMaker);
         updateJavaSyntaxTreeStep1Visitor.visit(compilationUnit);
 
         UpdateJavaSyntaxTreeStep2Visitor updateJavaSyntaxTreeStep2Visitor = new UpdateJavaSyntaxTreeStep2Visitor();

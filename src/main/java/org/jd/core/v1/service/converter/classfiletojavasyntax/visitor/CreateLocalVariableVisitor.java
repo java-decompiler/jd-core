@@ -9,17 +9,17 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ObjectTypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class CreateLocalVariableVisitor extends AbstractNopTypeVisitor implements LocalVariableVisitor {
-    protected ObjectTypeMaker objectTypeMaker;
+    protected TypeMaker typeMaker;
     protected int index;
     protected int offset;
 
     protected AbstractLocalVariable localVariable;
 
-    public CreateLocalVariableVisitor(ObjectTypeMaker objectTypeMaker) {
-        this.objectTypeMaker = objectTypeMaker;
+    public CreateLocalVariableVisitor(TypeMaker typeMaker) {
+        this.typeMaker = typeMaker;
     }
 
     public void init(int index, int offset) {
@@ -36,18 +36,18 @@ public class CreateLocalVariableVisitor extends AbstractNopTypeVisitor implement
         if (type.getDimension() == 0) {
             localVariable = new PrimitiveLocalVariable(index, offset, type, null);
         } else {
-            localVariable = new ObjectLocalVariable(objectTypeMaker, index, offset, type, null);
+            localVariable = new ObjectLocalVariable(typeMaker, index, offset, type, null);
         }
     }
 
     @Override
     public void visit(ObjectType type) {
-        localVariable = new ObjectLocalVariable(objectTypeMaker, index, offset, type, null);
+        localVariable = new ObjectLocalVariable(typeMaker, index, offset, type, null);
     }
 
     @Override
     public void visit(InnerObjectType type) {
-        localVariable = new ObjectLocalVariable(objectTypeMaker, index, offset, type, null);
+        localVariable = new ObjectLocalVariable(typeMaker, index, offset, type, null);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class CreateLocalVariableVisitor extends AbstractNopTypeVisitor implement
 
     @Override
     public void visit(ObjectLocalVariable lv) {
-        localVariable = new ObjectLocalVariable(objectTypeMaker, index, offset, lv);
+        localVariable = new ObjectLocalVariable(typeMaker, index, offset, lv);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class CreateLocalVariableVisitor extends AbstractNopTypeVisitor implement
         if (lv.getDimension() == 0) {
             localVariable = new PrimitiveLocalVariable(index, offset, lv);
         } else {
-            localVariable = new ObjectLocalVariable(objectTypeMaker, index, offset, lv.getType(), null);
+            localVariable = new ObjectLocalVariable(typeMaker, index, offset, lv.getType(), null);
         }
     }
 }
