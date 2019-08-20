@@ -19,7 +19,6 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.SignatureParser;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.AbstractList;

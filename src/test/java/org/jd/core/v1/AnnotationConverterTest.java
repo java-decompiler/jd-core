@@ -27,8 +27,8 @@ public class AnnotationConverterTest extends TestCase {
     public void test() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
-        ObjectTypeMaker factory = new ObjectTypeMaker(loader);
-        AnnotationConverter converter = new AnnotationConverter(factory);
+        ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
+        AnnotationConverter converter = new AnnotationConverter(objectTypeMaker);
         DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
 
         Message message = new Message();

@@ -34,13 +34,12 @@ import java.util.List;
 
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
-
 public class ControlFlowGraphTest extends TestCase {
     protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
     protected ConvertClassFileProcessor converter = new ConvertClassFileProcessor();
     protected ClassPathLoader loader = new ClassPathLoader();
-    protected ObjectTypeMaker factory = new ObjectTypeMaker(loader);
-    protected SignatureParser parser = new SignatureParser(factory);
+    protected ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
+    protected SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
 
     // --- Basic test ----------------------------------------------------------------------------------------------- //
     @Test
@@ -2635,7 +2634,7 @@ public class ControlFlowGraphTest extends TestCase {
     }
 
     protected Method searchMethod(String internalTypeName, String methodName) throws Exception {
-        return searchMethod(loader, factory, parser, internalTypeName, methodName, null);
+        return searchMethod(loader, objectTypeMaker, signatureParser, internalTypeName, methodName, null);
     }
 
     protected Method searchMethod(InputStream is, String internalTypeName, String methodName) throws Exception {
@@ -2647,18 +2646,18 @@ public class ControlFlowGraphTest extends TestCase {
             return null;
         } else {
             ZipLoader loader = new ZipLoader(is);
-            ObjectTypeMaker factory = new ObjectTypeMaker(loader);
-            SignatureParser parser = new SignatureParser(factory);
-            return searchMethod(loader, factory, parser, internalTypeName, methodName, methodDescriptor);
+            ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
+            SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
+            return searchMethod(loader, objectTypeMaker, signatureParser, internalTypeName, methodName, methodDescriptor);
         }
     }
 
-    protected Method searchMethod(Loader loader, ObjectTypeMaker factory, SignatureParser parser, String internalTypeName, String methodName, String methodDescriptor) throws Exception {
+    protected Method searchMethod(Loader loader, ObjectTypeMaker objectTypeMaker, SignatureParser signatureParser, String internalTypeName, String methodName, String methodDescriptor) throws Exception {
         Message message = new Message();
         message.setHeader("mainInternalTypeName", internalTypeName);
         message.setHeader("loader", loader);
-        message.setHeader("objectTypeMaker", factory);
-        message.setHeader("signatureParser", parser);
+        message.setHeader("objectTypeMaker", objectTypeMaker);
+        message.setHeader("signatureParser", signatureParser);
 
         deserializer.process(message);
         converter.process(message);

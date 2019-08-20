@@ -113,6 +113,10 @@ public class ObjectTypeMaker {
         return ot;
     }
 
+    public ObjectType makeFromDescriptorOrInternalTypeName(String descriptorOrInternalTypeName) {
+        return (descriptorOrInternalTypeName.charAt(0) == '[') ? makeFromDescriptor(descriptorOrInternalTypeName) : makeFromInternalTypeName(descriptorOrInternalTypeName);
+    }
+
     private ObjectType loadFromLoader(String internalTypeName) {
         try {
             ObjectType ot = internalTypeNameToObjectTypeCache.get(internalTypeName);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -31,8 +31,8 @@ public class SignatureParserTest extends TestCase {
         PrintTypeVisitor visitor = new PrintTypeVisitor();
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
-        ObjectTypeMaker factory = new ObjectTypeMaker(loader);
-        SignatureParser parser = new SignatureParser(factory);
+        ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
+        SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
 
         Message message = new Message();
         message.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
@@ -43,7 +43,7 @@ public class SignatureParserTest extends TestCase {
         ClassFile classFile = message.getBody();
 
         // Check type
-        SignatureParser.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
+        SignatureParser.TypeTypes typeTypes = signatureParser.parseClassFileSignature(classFile);
 
         // Check type parameterTypes
         assertNull(typeTypes.typeParameters);
@@ -66,7 +66,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check field 'list1'
         //  public List<List<? extends Generic>> list1
-        Type type = parser.parseFieldSignature(classFile.getFields()[0]);
+        Type type = signatureParser.parseFieldSignature(classFile.getFields()[0]);
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -75,7 +75,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check method 'add'
         //  public int add(int i1, int i2)
-        SignatureParser.MethodTypes methodTypes = parser.parseMethodSignature(classFile.getMethods()[1]);
+        SignatureParser.MethodTypes methodTypes = signatureParser.parseMethodSignature(classFile.getMethods()[1]);
 
         // Check type parameterTypes
         assertNull(methodTypes.typeParameters);
@@ -105,7 +105,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check method 'ping'
         //  public void ping(String host) throws UnknownHostException, UnsatisfiedLinkError
-        methodTypes = parser.parseMethodSignature(classFile.getMethods()[2]);
+        methodTypes = signatureParser.parseMethodSignature(classFile.getMethods()[2]);
 
         // Check type parameterTypes
         assertNull(methodTypes.typeParameters);
@@ -145,8 +145,8 @@ public class SignatureParserTest extends TestCase {
         PrintTypeVisitor visitor = new PrintTypeVisitor();
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
-        ObjectTypeMaker factory = new ObjectTypeMaker(loader);
-        SignatureParser parser = new SignatureParser(factory);
+        ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
+        SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
 
         Message message = new Message();
         message.setHeader("mainInternalTypeName", "org/jd/core/test/GenericClass");
@@ -157,7 +157,7 @@ public class SignatureParserTest extends TestCase {
         ClassFile classFile = message.getBody();
 
         // Check type
-        SignatureParser.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
+        SignatureParser.TypeTypes typeTypes = signatureParser.parseClassFileSignature(classFile);
 
         // Check type parameterTypes
         // See "org.jd.core.test.resources.java.Generic"
@@ -205,7 +205,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check field 'list1'
         //  public List<List<? extends Generic>> list1
-        Type type = parser.parseFieldSignature(classFile.getFields()[0]);
+        Type type = signatureParser.parseFieldSignature(classFile.getFields()[0]);
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -214,7 +214,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check method 'copy2'
         //  public <T, S extends T> List<? extends Number> copy2(List<? super T> dest, List<S> src) throws InvalidParameterException, ClassCastException
-        SignatureParser.MethodTypes methodTypes = parser.parseMethodSignature(classFile.getMethods()[3]);
+        SignatureParser.MethodTypes methodTypes = signatureParser.parseMethodSignature(classFile.getMethods()[3]);
 
         // Check type parameterTypes
         assertNotNull(methodTypes.typeParameters);
@@ -255,7 +255,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check method 'print'
         //  public <T1, T2 extends Exception> List<? extends Number> print(List<? super T1> list) throws InvalidParameterException, T2
-        methodTypes = parser.parseMethodSignature(classFile.getMethods()[4]);
+        methodTypes = signatureParser.parseMethodSignature(classFile.getMethods()[4]);
 
         // Check type parameterTypes
         assertNotNull(methodTypes.typeParameters);
@@ -299,30 +299,30 @@ public class SignatureParserTest extends TestCase {
     public void testParseReturnedVoid() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
-        ObjectTypeMaker factory = new ObjectTypeMaker(loader);
-        SignatureParser parser = new SignatureParser(factory);
+        ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
+        SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
 
-        Assert.assertEquals(parser.parseReturnedType("()V"), PrimitiveType.TYPE_VOID);
+        Assert.assertEquals(signatureParser.parseReturnedType("()V"), PrimitiveType.TYPE_VOID);
     }
 
     @Test
     public void testParseReturnedPrimitiveType() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
-        ObjectTypeMaker factory = new ObjectTypeMaker(loader);
-        SignatureParser parser = new SignatureParser(factory);
+        ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
+        SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
 
-        Assert.assertEquals(parser.parseReturnedType("()Z"), PrimitiveType.TYPE_BOOLEAN);
+        Assert.assertEquals(signatureParser.parseReturnedType("()Z"), PrimitiveType.TYPE_BOOLEAN);
     }
 
     @Test
     public void testParseReturnedStringType() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
-        ObjectTypeMaker factory = new ObjectTypeMaker(loader);
-        SignatureParser parser = new SignatureParser(factory);
+        ObjectTypeMaker objectTypeMaker = new ObjectTypeMaker(loader);
+        SignatureParser signatureParser = new SignatureParser(objectTypeMaker);
 
-        Assert.assertEquals(parser.parseReturnedType("()Ljava/lang/String;"), ObjectType.TYPE_STRING);
+        Assert.assertEquals(signatureParser.parseReturnedType("()Ljava/lang/String;"), ObjectType.TYPE_STRING);
     }
 
 

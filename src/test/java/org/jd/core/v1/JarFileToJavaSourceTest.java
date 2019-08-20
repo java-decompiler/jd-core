@@ -95,9 +95,9 @@ public class JarFileToJavaSourceTest extends TestCase {
                     // Recompile source
                     String source = printer.toString();
 
-                    // TODO if (!CompilerUtil.compile("1.8", new JavaSourceFileObject(internalTypeName, source))) {
-                    // TODO     recompilationFailedCounter++;
-                    // TODO }
+                    if (!CompilerUtil.compile("1.8", new JavaSourceFileObject(internalTypeName, source))) {
+                        recompilationFailedCounter++;
+                    }
                 }
             }
 
@@ -128,7 +128,7 @@ public class JarFileToJavaSourceTest extends TestCase {
 
             assertTrue(exceptionCounter == 0);
             assertTrue(assertFailedCounter == 0);
-            // TODO assertTrue(recompilationFailedCounter == 0);
+            assertTrue(recompilationFailedCounter == 0);
         }
     }
 
