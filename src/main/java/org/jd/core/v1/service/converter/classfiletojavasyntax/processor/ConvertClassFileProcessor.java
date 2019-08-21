@@ -128,7 +128,7 @@ public class ConvertClassFileProcessor implements Processor {
 
             for (Field field : fields) {
                 BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, field);
-                Type typeField = parser.parseFieldSignature(field);
+                Type typeField = parser.parseFieldSignature(classFile, field);
                 ExpressionVariableInitializer variableInitializer = convertFieldInitializer(field, typeField);
                 FieldDeclarator fieldDeclarator = new FieldDeclarator(field.getName(), variableInitializer);
 
@@ -168,7 +168,7 @@ public class ConvertClassFileProcessor implements Processor {
                 }
 
                 if ("<init>".equals(name)) {
-                    TypeMaker.MethodTypes methodTypes = parser.parseConstructorSignature(method);
+                    TypeMaker.MethodTypes methodTypes = parser.parseConstructorSignature(classFile, method);
                     list.add(new ClassFileConstructorDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, methodTypes.typeParameters,
                             methodTypes.parameterTypes, methodTypes.exceptions, firstLineNumber));
@@ -176,7 +176,7 @@ public class ConvertClassFileProcessor implements Processor {
                     list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, firstLineNumber));
                 } else {
                     ClassFileMethodDeclaration methodDeclaration;
-                    TypeMaker.MethodTypes methodTypes = parser.parseMethodSignature(method);
+                    TypeMaker.MethodTypes methodTypes = parser.parseMethodSignature(classFile, method);
                     list.add(methodDeclaration = new ClassFileMethodDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
                             methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptions, defaultAnnotationValue,

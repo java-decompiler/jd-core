@@ -31,8 +31,10 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJ
  * http://www.angelikalanger.com/GenericsFAQ/JavaGenericsFAQ.html
  */
 public class TypeMaker {
-    protected HashMap<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
     protected HashMap<String, Type> signatureToType = new HashMap<>(1024);
+    protected HashMap<String, Type> internalTypeNameFieldNameToType = new HashMap<>(1024);
+    protected HashMap<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
+    protected HashMap<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
 
     public TypeMaker(Loader loader) {
         this.loader = loader;
@@ -119,20 +121,22 @@ public class TypeMaker {
         return typeTypes;
     }
 
-    public MethodTypes parseConstructorSignature(Method method) {
+    public MethodTypes parseConstructorSignature(ClassFile classFile, Method method) {
+        String key = classFile.getInternalTypeName() + ":<init>" + method.getDescriptor();
         AttributeSignature attributeSignature = method.getAttribute("Signature");
+        MethodTypes methodTypes;
 
         if (attributeSignature == null) {
-            return parseMethodSignature(method.getDescriptor(), method);
+            methodTypes = parseMethodSignature(method.getDescriptor(), method);
         } else {
             // Signature does not contain synthetic parameterTypes like outer type name, for example.
             MethodTypes mt1 = parseMethodSignature(attributeSignature.getSignature(), method);
             MethodTypes mt2 = parseMethodSignature(method.getDescriptor(), method);
 
             if (mt1.parameterTypes.size() == mt2.parameterTypes.size()) {
-                return mt1;
+                methodTypes = mt1;
             } else if (mt1.parameterTypes.isEmpty() && (mt1.typeParameters == null)) {
-                return mt2;
+                methodTypes = mt2;
             } else {
                 DefaultList<Type> parameters = new DefaultList<>(mt2.parameterTypes);
 
@@ -146,24 +150,38 @@ public class TypeMaker {
                 mt3.returnedType = mt1.returnedType;
                 mt3.exceptions = mt1.exceptions;
 
-                return mt3;
+                methodTypes = mt3;
             }
         }
+
+        internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
+
+        return methodTypes;
     }
 
-    public MethodTypes parseMethodSignature(Method method) {
+    public MethodTypes parseMethodSignature(ClassFile classFile, Method method) {
+        String key = classFile.getInternalTypeName() + ':' + method.getName() + method.getDescriptor();
         AttributeSignature attributeSignature = method.getAttribute("Signature");
         String signature = (attributeSignature == null) ? method.getDescriptor() : attributeSignature.getSignature();
-        return parseMethodSignature(signature, method);
+        MethodTypes methodTypes = parseMethodSignature(signature, method);
+
+        internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
+
+        return methodTypes;
     }
 
-    public Type parseFieldSignature(Field field) {
+    public Type parseFieldSignature(ClassFile classFile, Field field) {
+        String key = classFile.getInternalTypeName() + ':' + field.getName();
         AttributeSignature attributeSignature = field.getAttribute("Signature");
         String signature = (attributeSignature == null) ? field.getDescriptor() : attributeSignature.getSignature();
-        return parseTypeSignature(signature);
+        Type type = makeFromSignature(signature);
+
+        internalTypeNameFieldNameToType.put(key, type);
+
+        return type;
     }
 
-    public Type parseTypeSignature(String signature) {
+    public Type makeFromSignature(String signature) {
         Type type = signatureToType.get(signature);
 
         if (type == null) {
@@ -173,16 +191,6 @@ public class TypeMaker {
         }
 
         return type;
-    }
-
-    public DefaultList<Type> parseParameterTypes(String signature) {
-        MethodTypes methodTypes = parseMethodSignature(signature, null);
-        return (methodTypes==null) ? DefaultList.<Type>emptyList() : methodTypes.parameterTypes;
-    }
-
-    public Type parseReturnedType(String signature) {
-        MethodTypes methodTypes = parseMethodSignature(signature, null);
-        return (methodTypes==null) ? null : methodTypes.returnedType;
     }
 
     public static int countDimension(String descriptor) {
@@ -1251,5 +1259,49 @@ public class TypeMaker {
 
             reader.skip(attributeLength);
         }
+    }
+
+    public MethodTypes makeMethodTypes(String descriptor) {
+        return parseMethodSignature(descriptor, null);
+    }
+
+    public MethodTypes makeMethodTypes(ObjectType objectType, String methodName, String descriptor) {
+        if (objectType.getDimension() == 0) {
+            String key = objectType.getInternalName() + ':' + methodName + descriptor;
+
+            if (internalTypeNameMethodNameDescriptorToMethodTypes.containsKey(key)) {
+                MethodTypes methodTypes = internalTypeNameMethodNameDescriptorToMethodTypes.get(key);
+
+                if (methodTypes != null) {
+                    if (methodTypes.typeParameters == null) {
+                        return methodTypes;
+                    }
+                }
+            } else {
+                // Search method
+                // ...
+            }
+        }
+
+        return parseMethodSignature(descriptor, null);
+    }
+
+    public Type makeFieldType(ObjectType objectType, String fieldName, String descriptor) {
+        if (objectType.getDimension() == 0) {
+            String key = objectType.getInternalName() + ':' + fieldName;
+
+            if (internalTypeNameFieldNameToType.containsKey(key)) {
+                Type type = internalTypeNameFieldNameToType.get(key);
+
+                if (type != null) {
+                    return type;
+                }
+            } else {
+                // Search field
+                // ...
+            }
+        }
+
+        return makeFromSignature(descriptor);
     }
 }

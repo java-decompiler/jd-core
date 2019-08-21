@@ -29,7 +29,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class ClassFileToJavaSourceTest extends TestCase {
     protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
     protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
@@ -2062,7 +2061,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("public <T, S extends T> List<? extends Number> copy2(List<? super T> dest, List<S> src) throws InvalidParameterException, ClassCastException") != -1);
         assertTrue(source.indexOf("public <T1, T2 extends Exception> List<? extends Number> print(List<? super T1> list) throws T2, InvalidParameterException") != -1);
 
-        assertTrue(source.matches(PatternMaker.make(": 100 */", "return (T1)call(0);")));
+        assertTrue(source.matches(PatternMaker.make(": 100 */", "return call(0);")));
         assertTrue(source.matches(PatternMaker.make(": 104 */", "return (T1)this;")));
 
         assertTrue(source.indexOf("/* 104: 104 */") != -1);

@@ -192,7 +192,7 @@ public class LocalVariableMaker {
                         if (dimension == 0) {
                             lv = new PrimitiveLocalVariable(index, startPc, PrimitiveType.getPrimitiveType(descriptor.charAt(0)), name);
                         } else {
-                            lv = new ObjectLocalVariable(typeMaker, index, startPc, typeMaker.parseTypeSignature(descriptor.substring(dimension)).createType(dimension), name);
+                            lv = new ObjectLocalVariable(typeMaker, index, startPc, typeMaker.makeFromSignature(descriptor.substring(dimension)).createType(dimension), name);
                         }
                     }
 
@@ -209,7 +209,7 @@ public class LocalVariableMaker {
 
                 for (LocalVariableType lv : localVariableTypeTable.getLocalVariableTypeTable()) {
                     updateTypeVisitor.setLocalVariableType(lv);
-                    typeMaker.parseTypeSignature(lv.getSignature()).accept(updateTypeVisitor);
+                    typeMaker.makeFromSignature(lv.getSignature()).accept(updateTypeVisitor);
                 }
             }
         }

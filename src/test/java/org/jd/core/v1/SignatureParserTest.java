@@ -64,7 +64,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check field 'list1'
         //  public List<List<? extends Generic>> list1
-        Type type = typeMaker.parseFieldSignature(classFile.getFields()[0]);
+        Type type = typeMaker.parseFieldSignature(classFile, classFile.getFields()[0]);
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -73,7 +73,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check method 'add'
         //  public int add(int i1, int i2)
-        TypeMaker.MethodTypes methodTypes = typeMaker.parseMethodSignature(classFile.getMethods()[1]);
+        TypeMaker.MethodTypes methodTypes = typeMaker.parseMethodSignature(classFile, classFile.getMethods()[1]);
 
         // Check type parameterTypes
         assertNull(methodTypes.typeParameters);
@@ -103,7 +103,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check method 'ping'
         //  public void ping(String host) throws UnknownHostException, UnsatisfiedLinkError
-        methodTypes = typeMaker.parseMethodSignature(classFile.getMethods()[2]);
+        methodTypes = typeMaker.parseMethodSignature(classFile, classFile.getMethods()[2]);
 
         // Check type parameterTypes
         assertNull(methodTypes.typeParameters);
@@ -202,7 +202,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check field 'list1'
         //  public List<List<? extends Generic>> list1
-        Type type = typeMaker.parseFieldSignature(classFile.getFields()[0]);
+        Type type = typeMaker.parseFieldSignature(classFile, classFile.getFields()[0]);
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -211,7 +211,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check method 'copy2'
         //  public <T, S extends T> List<? extends Number> copy2(List<? super T> dest, List<S> src) throws InvalidParameterException, ClassCastException
-        TypeMaker.MethodTypes methodTypes = typeMaker.parseMethodSignature(classFile.getMethods()[3]);
+        TypeMaker.MethodTypes methodTypes = typeMaker.parseMethodSignature(classFile, classFile.getMethods()[3]);
 
         // Check type parameterTypes
         assertNotNull(methodTypes.typeParameters);
@@ -252,7 +252,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check method 'print'
         //  public <T1, T2 extends Exception> List<? extends Number> print(List<? super T1> list) throws InvalidParameterException, T2
-        methodTypes = typeMaker.parseMethodSignature(classFile.getMethods()[4]);
+        methodTypes = typeMaker.parseMethodSignature(classFile, classFile.getMethods()[4]);
 
         // Check type parameterTypes
         assertNotNull(methodTypes.typeParameters);
@@ -298,7 +298,7 @@ public class SignatureParserTest extends TestCase {
         ZipLoader loader = new ZipLoader(is);
         TypeMaker typeMaker = new TypeMaker(loader);
 
-        Assert.assertEquals(typeMaker.parseReturnedType("()V"), PrimitiveType.TYPE_VOID);
+        Assert.assertEquals(typeMaker.makeMethodTypes("()V").returnedType, PrimitiveType.TYPE_VOID);
     }
 
     @Test
@@ -307,7 +307,7 @@ public class SignatureParserTest extends TestCase {
         ZipLoader loader = new ZipLoader(is);
         TypeMaker typeMaker = new TypeMaker(loader);
 
-        Assert.assertEquals(typeMaker.parseReturnedType("()Z"), PrimitiveType.TYPE_BOOLEAN);
+        Assert.assertEquals(typeMaker.makeMethodTypes("()Z").returnedType, PrimitiveType.TYPE_BOOLEAN);
     }
 
     @Test
@@ -316,6 +316,6 @@ public class SignatureParserTest extends TestCase {
         ZipLoader loader = new ZipLoader(is);
         TypeMaker typeMaker = new TypeMaker(loader);
 
-        Assert.assertEquals(typeMaker.parseReturnedType("()Ljava/lang/String;"), ObjectType.TYPE_STRING);
+        Assert.assertEquals(typeMaker.makeMethodTypes("()Ljava/lang/String;").returnedType, ObjectType.TYPE_STRING);
     }
 }

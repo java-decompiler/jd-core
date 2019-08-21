@@ -346,7 +346,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     }
 
     protected Expression updateExpression(Type type, Expression expression) {
-        assert (type != TYPE_VOID);
+        assert type != TYPE_VOID : "UpdateIntegerConstantTypeVisitor.updateExpression(type, expr) : try to set 'void' to a numeric expression";
 
         if (type != expression.getType()) {
             Class clazz = expression.getClass();
