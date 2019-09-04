@@ -14,6 +14,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.ConvertC
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.UpdateJavaSyntaxTreeProcessor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
+import java.util.Map;
+
 /**
  * Convert ClassFile model to Java syntax model.<br><br>
  *
@@ -28,10 +30,28 @@ public class ClassFileToJavaSyntaxProcessor implements Processor {
 
     public void process(Message message) throws Exception {
         Loader loader = message.getHeader("loader");
+        Map<String, Object> configuration = message.getHeader("configuration");
 
-        TypeMaker typeMaker = new TypeMaker(loader);
+        if (configuration == null) {
+            message.setHeader("typeMaker", new TypeMaker(loader));
+        } else {
+            TypeMaker typeMaker = null;
 
-        message.setHeader("typeMaker", typeMaker);
+            try {
+                typeMaker = (TypeMaker)configuration.get("typeMaker");
+
+                if (typeMaker == null) {
+                    // Store the heavy weight object 'typeMaker' in 'configuration' to reuse it
+                    configuration.put("typeMaker", typeMaker=new TypeMaker(loader));
+                }
+            } catch (Exception e) {
+                if (typeMaker == null) {
+                    typeMaker = new TypeMaker(loader);
+                }
+            }
+
+            message.setHeader("typeMaker", typeMaker);
+        }
 
         CONVERT_CLASS_FILE_PROCESSOR.process(message);
         UPDATE_JAVA_SYNTAX_TREE_PROCESSOR.process(message);

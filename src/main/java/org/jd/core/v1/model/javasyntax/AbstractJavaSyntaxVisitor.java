@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -87,7 +87,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(ExpressionVariableInitializer declaration) {
-        safeAccept(declaration.getExpression());
+        declaration.getExpression().accept(this);
     }
 
     @Override
@@ -98,8 +98,8 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
     }
 
     @Override
-    public void visit(FieldDeclarator declaration) {
-        safeAccept(declaration.getVariableInitializer());
+    public void visit(FieldDeclarator declarator) {
+        safeAccept(declarator.getVariableInitializer());
     }
 
     @Override

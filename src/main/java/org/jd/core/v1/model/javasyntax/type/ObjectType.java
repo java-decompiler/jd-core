@@ -204,8 +204,8 @@ public class ObjectType implements Type {
         }
 
         if (ot.getTypeArguments() == null) {
-            return (typeArgument == null);
-        } else if (typeArgument == null) {
+            return (typeArguments == null);
+        } else if (typeArguments == null) {
             return false;
         } else {
             return typeArguments.isTypeArgumentAssignableFrom(ot.getTypeArguments());

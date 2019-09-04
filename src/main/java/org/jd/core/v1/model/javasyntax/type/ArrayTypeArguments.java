@@ -20,8 +20,8 @@ public class ArrayTypeArguments extends DefaultList<TypeArgument> implements Bas
     }
 
     @Override
-    public void accept(TypeVisitor visitor) {
-        visitor.visit(this);
+    public boolean isList() {
+        return true;
     }
 
     @Override
@@ -46,5 +46,15 @@ public class ArrayTypeArguments extends DefaultList<TypeArgument> implements Bas
         }
 
         return true;
+    }
+
+    @Override
+    public int typeArgumentSize() {
+        return size();
+    }
+
+    @Override
+    public void accept(TypeVisitor visitor) {
+        visitor.visit(this);
     }
 }

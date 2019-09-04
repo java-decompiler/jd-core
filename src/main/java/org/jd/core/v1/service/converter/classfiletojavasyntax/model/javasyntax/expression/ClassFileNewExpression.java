@@ -10,12 +10,11 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.util.DefaultList;
 
 public class ClassFileNewExpression extends NewExpression {
-    protected DefaultList<Type> parameterTypes;
+    protected BaseType parameterTypes;
 
     public ClassFileNewExpression(int lineNumber, ObjectType type) {
         super(lineNumber, type);
@@ -25,11 +24,11 @@ public class ClassFileNewExpression extends NewExpression {
         super(lineNumber, type, bodyDeclaration);
     }
 
-    public DefaultList<Type> getParameterTypes() {
+    public BaseType getParameterTypes() {
         return parameterTypes;
     }
 
-    public void set(String descriptor, DefaultList<Type> parameterTypes, BaseExpression parameters) {
+    public void set(String descriptor, BaseType parameterTypes, BaseExpression parameters) {
         this.descriptor = descriptor;
         this.parameterTypes = parameterTypes;
         this.parameters = parameters;

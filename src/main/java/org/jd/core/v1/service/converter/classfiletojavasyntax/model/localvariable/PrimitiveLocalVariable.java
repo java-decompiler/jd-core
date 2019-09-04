@@ -129,34 +129,38 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
 
     @Override
     public void typeOnRight(Type type) {
-        assert (type.getDimension() == 0);
+        if (type.isPrimitive()) {
+            assert (type.getDimension() == 0);
 
-        int f = ((PrimitiveType)type).getRightFlags();
+            int f = ((PrimitiveType) type).getRightFlags();
 
-        if ((flags & f) != 0) {
-            int old = flags;
+            if ((flags & f) != 0) {
+                int old = flags;
 
-            flags &= f;
+                flags &= f;
 
-            if (old != flags) {
-                fireChangeEvent();
+                if (old != flags) {
+                    fireChangeEvent();
+                }
             }
         }
     }
 
     @Override
     public void typeOnLeft(Type type) {
-        assert (type.getDimension() == 0);
+        if (type.isPrimitive()) {
+            assert (type.getDimension() == 0);
 
-        int f = ((PrimitiveType)type).getLeftFlags();
+            int f = ((PrimitiveType) type).getLeftFlags();
 
-        if ((flags & f) != 0) {
-            int old = flags;
+            if ((flags & f) != 0) {
+                int old = flags;
 
-            flags &= f;
+                flags &= f;
 
-            if (old != flags) {
-                fireChangeEvent();
+                if (old != flags) {
+                    fireChangeEvent();
+                }
             }
         }
     }

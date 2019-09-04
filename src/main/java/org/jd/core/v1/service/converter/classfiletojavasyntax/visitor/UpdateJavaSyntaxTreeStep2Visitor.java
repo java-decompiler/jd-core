@@ -11,6 +11,7 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileEnumDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor {
     protected static final AggregateFieldsVisitor AGGREGATE_FIELDS_VISITOR = new AggregateFieldsVisitor();
@@ -20,10 +21,15 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
     protected InitStaticFieldVisitor initStaticFieldVisitor = new InitStaticFieldVisitor();
     protected InitInstanceFieldVisitor initInstanceFieldVisitor = new InitInstanceFieldVisitor();
     protected InitEnumVisitor initEnumVisitor = new InitEnumVisitor();
-    protected UpdateBridgeMethodVisitor replaceBridgeMethodVisitor = new UpdateBridgeMethodVisitor();
     protected RemoveDefaultConstructorVisitor removeDefaultConstructorVisitor = new RemoveDefaultConstructorVisitor();
+    protected UpdateBridgeMethodVisitor replaceBridgeMethodVisitor = new UpdateBridgeMethodVisitor();
+    protected AddCastExpressionVisitor addCastExpressionVisitor;
 
     protected TypeDeclaration typeDeclaration;
+
+    public UpdateJavaSyntaxTreeStep2Visitor(TypeMaker typeMaker) {
+        this.addCastExpressionVisitor = new AddCastExpressionVisitor(typeMaker);
+    }
 
     @Override
     public void visit(BodyDeclaration declaration) {
@@ -37,7 +43,7 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
         }
 
         // Init visitor
-        initStaticFieldVisitor.setInternalTypeName(typeDeclaration.getInternalName());
+        initStaticFieldVisitor.setInternalTypeName(typeDeclaration.getInternalTypeName());
 
         // Visit declaration
         initInnerClassStep2Visitor.visit(declaration);
@@ -47,9 +53,16 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
         AGGREGATE_FIELDS_VISITOR.visit(declaration);
         SORT_MEMBERS_VISITOR.visit(declaration);
 
-        if ((bodyDeclaration.getOuterBodyDeclaration() == null) && (bodyDeclaration.getInnerTypeDeclarations() != null) && replaceBridgeMethodVisitor.init(bodyDeclaration)) {
-            // Replace bridge method invocation
-            replaceBridgeMethodVisitor.visit(bodyDeclaration);
+        if (bodyDeclaration.getOuterBodyDeclaration() == null) {
+            // Main body declaration
+
+            if ((bodyDeclaration.getInnerTypeDeclarations() != null) && replaceBridgeMethodVisitor.init(bodyDeclaration)) {
+                // Replace bridge method invocation
+                replaceBridgeMethodVisitor.visit(bodyDeclaration);
+            }
+
+            // Add cast expressions
+            addCastExpressionVisitor.visit(declaration);
         }
     }
 

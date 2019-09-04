@@ -9,19 +9,18 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.
 
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.ConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.util.DefaultList;
 
 public class ClassFileConstructorInvocationExpression extends ConstructorInvocationExpression {
-    protected DefaultList<Type> parameterTypes;
+    protected BaseType parameterTypes;
 
-    public ClassFileConstructorInvocationExpression(int lineNumber, ObjectType type, String descriptor, DefaultList<Type> parameterTypes, BaseExpression parameters) {
+    public ClassFileConstructorInvocationExpression(int lineNumber, ObjectType type, String descriptor, BaseType parameterTypes, BaseExpression parameters) {
         super(lineNumber, type, descriptor, parameters);
         this.parameterTypes = parameterTypes;
     }
 
-    public DefaultList<Type> getParameterTypes() {
+    public BaseType getParameterTypes() {
         return parameterTypes;
     }
 }

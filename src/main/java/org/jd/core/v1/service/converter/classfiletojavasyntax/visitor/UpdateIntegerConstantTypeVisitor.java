@@ -21,16 +21,12 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.AbstractList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
-
 public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor {
-    protected static final HashMap<String, List<Type>> TYPES = new HashMap<>();
+    protected static final HashMap<String, BaseType> TYPES = new HashMap<>();
 
     protected static final DimensionTypes DIMENSION_TYPES = new DimensionTypes();
 
@@ -42,8 +38,8 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     protected Type returnedType;
 
     static {
-        List<Type> c  = Arrays.<Type>asList(TYPE_CHAR);
-        List<Type> ci = Arrays.<Type>asList(TYPE_CHAR, TYPE_INT);
+        BaseType c  = TYPE_CHAR;
+        BaseType ci = new Types<Type>(TYPE_CHAR, TYPE_INT);
 
         TYPES.put("java/lang/String:indexOf(I)I", c);
         TYPES.put("java/lang/String:indexOf(II)I", ci);
@@ -195,7 +191,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
             String internalTypeName = expression.getInternalTypeName();
             String name = expression.getName();
             String descriptor = expression.getDescriptor();
-            List<Type> types = TYPES.get(internalTypeName + ':' + name + descriptor);
+            BaseType types = TYPES.get(internalTypeName + ':' + name + descriptor);
 
             if (types == null) {
                 types = ((ClassFileMethodInvocationExpression)expression).getParameterTypes();
@@ -214,7 +210,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
         if (parameters != null) {
             String internalTypeName = expression.getObjectType().getInternalName();
             String descriptor = expression.getDescriptor();
-            List<Type> types = TYPES.get(internalTypeName + ":<init>" + descriptor);
+            BaseType types = TYPES.get(internalTypeName + ":<init>" + descriptor);
 
             if (types == null) {
                 types = ((ClassFileNewExpression)expression).getParameterTypes();
@@ -304,28 +300,29 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     }
 
     @SuppressWarnings("unchecked")
-    protected BaseExpression updateExpressions(List<Type> types, BaseExpression expressions) {
+    protected BaseExpression updateExpressions(BaseType types, BaseExpression expressions) {
         if (expressions.isList()) {
-            DefaultList<Expression> list = expressions.getList();
+            DefaultList<Type> t = types.getList();
+            DefaultList<Expression> e = expressions.getList();
 
-            for (int i=list.size()-1; i>=0; i--) {
-                Type type = types.get(i);
+            for (int i=e.size()-1; i>=0; i--) {
+                Type type = t.get(i);
 
                 if ((type.getDimension() == 0) && type.isPrimitive()) {
-                    Expression parameter = list.get(i);
+                    Expression parameter = e.get(i);
                     Expression updatedParameter = updateExpression(type, parameter);
 
                     if (updatedParameter.getClass() == IntegerConstantExpression.class) {
                         switch (((PrimitiveType)type).getJavaPrimitiveFlags()) {
                             case FLAG_BYTE:
                             case FLAG_SHORT:
-                                list.set(i, new CastExpression(type, updatedParameter));
+                                e.set(i, new CastExpression(type, updatedParameter));
                         }
                     }
                 }
             }
         } else {
-            Type type = types.get(0);
+            Type type = types.getFirst();
 
             if ((type.getDimension() == 0) && type.isPrimitive()) {
                 Expression updatedParameter = updateExpression(type, (Expression)expressions);
@@ -352,7 +349,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
             Class clazz = expression.getClass();
 
             if (clazz == IntegerConstantExpression.class) {
-                if (type == ObjectType.TYPE_STRING) {
+                if (ObjectType.TYPE_STRING.equals(type)) {
                     type = PrimitiveType.TYPE_CHAR;
                 }
 
@@ -503,7 +500,9 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     @Override public void visit(TypeParameterWithTypeBounds type) {}
     @Override public void visit(BodyDeclaration declaration) {}
 
-    protected static class DimensionTypes extends AbstractList<Type> {
+    protected static class DimensionTypes extends Types {
+        @Override public Type getFirst() { return PrimitiveType.TYPE_INT; }
+        @Override public Type getLast() { return PrimitiveType.TYPE_INT; }
         @Override public Type get(int i) { return PrimitiveType.TYPE_INT; }
         @Override public int size() { return 0; }
     }

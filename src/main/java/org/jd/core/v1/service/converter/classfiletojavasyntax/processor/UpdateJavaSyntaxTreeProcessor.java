@@ -30,7 +30,7 @@ public class UpdateJavaSyntaxTreeProcessor implements Processor {
         UpdateJavaSyntaxTreeStep1Visitor updateJavaSyntaxTreeStep1Visitor = new UpdateJavaSyntaxTreeStep1Visitor(typeMaker);
         updateJavaSyntaxTreeStep1Visitor.visit(compilationUnit);
 
-        UpdateJavaSyntaxTreeStep2Visitor updateJavaSyntaxTreeStep2Visitor = new UpdateJavaSyntaxTreeStep2Visitor();
+        UpdateJavaSyntaxTreeStep2Visitor updateJavaSyntaxTreeStep2Visitor = new UpdateJavaSyntaxTreeStep2Visitor(typeMaker);
         updateJavaSyntaxTreeStep2Visitor.visit(compilationUnit);
     }
 }

@@ -7,7 +7,6 @@
 
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor;
 
-
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.javafragment.ImportsFragment;
@@ -105,13 +104,13 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         // Build token for type reference
         tokens.add(newTypeReferenceToken(type, currentInternalTypeName));
 
-        // Build token for type arguments
-        BaseTypeArgument typeArguments = type.getTypeArguments();
-
         if (majorVersion >= 49) { // (majorVersion >= Java 5)
+            // Build token for type arguments
+            BaseTypeArgument typeArguments = type.getTypeArguments();
+
             if (typeArguments != null) {
                 visitTypeArgumentList(typeArguments);
-            } else if (type.equals(TYPE_CLASS)) {
+            } else if (TYPE_CLASS.getInternalName().equals(type.getInternalName())) {
                 tokens.add(TextToken.LEFTANGLEBRACKET);
                 tokens.add(TextToken.QUESTIONMARK);
                 tokens.add(TextToken.RIGHTANGLEBRACKET);

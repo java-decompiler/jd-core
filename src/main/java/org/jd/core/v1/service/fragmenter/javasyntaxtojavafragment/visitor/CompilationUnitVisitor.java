@@ -75,7 +75,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 int fragmentCount2 = fragments.size();
 
                 storeContext();
-                currentInternalTypeName = declaration.getInternalName();
+                currentInternalTypeName = declaration.getInternalTypeName();
                 currentTypeName = declaration.getName();
 
                 if (annotationDeclaratorList != null) {
@@ -218,7 +218,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             // Build fragments for super type
             Type superType = declaration.getSuperType();
-            if (superType != null) {
+            if ((superType != null) && !superType.equals(ObjectType.TYPE_OBJECT)) {
                 fragments.addTokensFragment(tokens);
 
                 JavaFragmentFactory.addSpacerBeforeExtends(fragments);
@@ -263,7 +263,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 int fragmentCount2 = fragments.size();
 
                 storeContext();
-                currentInternalTypeName = declaration.getInternalName();
+                currentInternalTypeName = declaration.getInternalTypeName();
                 currentTypeName = declaration.getName();
                 bodyDeclaration.accept(this);
                 restoreContext();
@@ -495,7 +495,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             StartBodyFragment start = JavaFragmentFactory.addStartTypeBody(fragments);
 
             storeContext();
-            currentInternalTypeName = declaration.getInternalName();
+            currentInternalTypeName = declaration.getInternalTypeName();
             currentTypeName = declaration.getName();
 
             List<EnumDeclaration.Constant> constants = declaration.getConstants();
@@ -793,7 +793,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 int fragmentCount2 = fragments.size();
 
                 storeContext();
-                currentInternalTypeName = declaration.getInternalName();
+                currentInternalTypeName = declaration.getInternalTypeName();
                 currentTypeName = declaration.getName();
                 bodyDeclaration.accept(this);
                 restoreContext();
@@ -827,7 +827,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens.add(MODULE);
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(DeclarationToken.MODULE, declaration.getInternalName(), declaration.getName(), null));
+        tokens.add(new DeclarationToken(DeclarationToken.MODULE, declaration.getInternalTypeName(), declaration.getName(), null));
         fragments.addTokensFragment(tokens);
 
         StartBodyFragment start = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1253,7 +1253,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         tokens.add(TextToken.SPACE);
 
         // Build token for type declaration
-        tokens.add(new DeclarationToken(DeclarationToken.TYPE, declaration.getInternalName(), declaration.getName(), null));
+        tokens.add(new DeclarationToken(DeclarationToken.TYPE, declaration.getInternalTypeName(), declaration.getName(), null));
     }
 
     protected void buildFragmentsForClassOrInterfaceDeclaration(InterfaceDeclaration declaration, int flags, KeywordToken keyword) {

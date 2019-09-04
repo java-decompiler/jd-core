@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -37,7 +37,7 @@ public class ClassFileEnumDeclaration extends EnumDeclaration implements ClassFi
 
     @Override
     public String toString() {
-        return "ClassFileEnumDeclaration{" + internalName + ", firstLineNumber=" + firstLineNumber + "}";
+        return "ClassFileEnumDeclaration{" + internalTypeName + ", firstLineNumber=" + firstLineNumber + "}";
     }
 
     public static class ClassFileConstant extends Constant {

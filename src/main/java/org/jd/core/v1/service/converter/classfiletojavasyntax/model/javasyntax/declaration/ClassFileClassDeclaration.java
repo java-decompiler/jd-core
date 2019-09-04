@@ -32,6 +32,6 @@ public class ClassFileClassDeclaration extends ClassDeclaration implements Class
 
     @Override
     public String toString() {
-        return "ClassFileClassDeclaration{" + internalName + ", firstLineNumber=" + firstLineNumber + "}";
+        return "ClassFileClassDeclaration{" + internalTypeName + ", firstLineNumber=" + firstLineNumber + "}";
     }
 }

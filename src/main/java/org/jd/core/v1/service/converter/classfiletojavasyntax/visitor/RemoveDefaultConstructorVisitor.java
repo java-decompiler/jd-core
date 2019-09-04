@@ -9,6 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.SuperConstructorInvocationExpression;
 import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
@@ -70,8 +71,9 @@ public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
 
                         if (es.getClass() == ClassFileSuperConstructorInvocationExpression.class) {
                             SuperConstructorInvocationExpression scie = (SuperConstructorInvocationExpression) es;
+                            BaseExpression parameters = scie.getParameters();
 
-                            if ("()V".equals(scie.getDescriptor())) {
+                            if ((parameters == null) || (parameters.size() == 0)) {
                                 iterator.remove();
                                 break;
                             }
@@ -81,28 +83,8 @@ public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
 
                 // Store empty default constructor
                 if (statements.isEmpty()) {
-                    ClassFileBodyDeclaration bodyDeclaration = cfcd.getBodyDeclaration();
-
-                    if (bodyDeclaration.getOuterLocalVariableNames() == null) {
-                        if (bodyDeclaration.getOuterType() == null) {
-                            if (cfcd.getDescriptor().equals("()V")) {
-                                constructor = cfcd;
-                            }
-                        } else {
-                            if (cfcd.getDescriptor().equals("(L" + bodyDeclaration.getOuterType().getInternalName() + ";)V")) {
-                                constructor = cfcd;
-                            }
-                        }
-                    } else {
-                        int syntheticParameterCount = bodyDeclaration.getOuterLocalVariableNames().size();
-
-                        if (bodyDeclaration.getOuterType() != null) {
-                            syntheticParameterCount++;
-                        }
-
-                        if (cfcd.getParameterTypes().size() == syntheticParameterCount) {
-                            constructor = cfcd;
-                        }
+                    if ((cfcd.getFormalParameters() == null) || (cfcd.getFormalParameters().size() == 0)) {
+                        constructor = cfcd;
                     }
                 }
             }

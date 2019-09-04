@@ -80,7 +80,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
     @Override
     public boolean isAssignableFrom(Type type) {
         if (!type.isPrimitive()) {
-            if ((type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_OBJECT) || this.type.equals(type)) {
+            if ((type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_UNDEFINED_OBJECT) || TYPE_OBJECT.equals(this.type) || this.type.equals(type)) {
                 return true;
             } else if ((this.type.getDimension() == type.getDimension()) && this.type.isObject()) {
                 ObjectType thisObjectType = (ObjectType) this.type;
@@ -134,7 +134,9 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                                 fireChangeEvent();
                             }
                         }
-                    } else if (type.isGeneric() && thisObjectType.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
+                    }
+                } else if (this.type.isGeneric()) {
+                    if (type.isGeneric()) {
                         this.type = type;
                         fireChangeEvent();
                     }
@@ -171,9 +173,6 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                                 fireChangeEvent();
                             }
                         }
-                    } else if (type.isGeneric() && thisObjectType.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
-                        this.type = type;
-                        fireChangeEvent();
                     }
                 }
             }

@@ -13,8 +13,8 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
@@ -23,6 +23,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
+
+import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
 
 public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     protected UpdateFieldReferencesVisitor updateFieldReferencesVisitor = new UpdateFieldReferencesVisitor();
@@ -71,6 +73,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     @SuppressWarnings("unchecked")
     public void visit(ConstructorDeclaration declaration) {
         ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration)declaration;
+        ClassFile classFile = cfcd.getClassFile();
+        ClassFile outerClassFile = classFile.getOuterClassFile();
 
         outerLocalVariableNames.clear();
 
@@ -87,10 +91,16 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     Class clazz = expression.getClass();
 
                     if (clazz == ClassFileSuperConstructorInvocationExpression.class) {
+                        // 'super(...)'
                         break;
                     }
 
                     if (clazz == ClassFileConstructorInvocationExpression.class) {
+                        // 'this(...)'
+                        if ((outerClassFile != null) && ((classFile.getAccessFlags() & ACC_STATIC) == 0)) {
+                            // Inner non-static class --> First parameter is the synthetic outer reference
+                            outerType = (ObjectType) cfcd.getParameterTypes().getFirst();
+                        }
                         break;
                     }
 
@@ -140,8 +150,6 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         // Hide anonymous class constructor
-        ClassFile outerClassFile = cfcd.getClassFile().getOuterClassFile();
-
         if (outerClassFile != null) {
             String outerTypeName = outerClassFile.getInternalTypeName();
             String internalTypeName = cfcd.getClassFile().getInternalTypeName();
@@ -176,9 +184,12 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     @Override public void visit(StaticInitializerDeclaration declaration) {}
 
     protected class UpdateFieldReferencesVisitor extends AbstractUpdateExpressionVisitor {
+        protected ClassFileBodyDeclaration bodyDeclaration;
+
         @Override
         public void visit(BodyDeclaration declaration) {
-            safeAcceptListDeclaration(((ClassFileBodyDeclaration)declaration).getMethodDeclarations());
+            bodyDeclaration = (ClassFileBodyDeclaration)declaration;
+            safeAcceptListDeclaration(bodyDeclaration.getMethodDeclarations());
         }
 
         @Override public void visit(StaticInitializerDeclaration declaration) {}
@@ -199,10 +210,30 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
         @Override
         public void visit(FieldReferenceExpression expression) {
-            if (expression.getName().startsWith("this$") && expression.getType().getDescriptor().equals(outerType.getDescriptor())) {
-                Expression exp = (expression.getExpression() == null) ? expression : expression.getExpression();
-                expression.setExpression(new ObjectTypeReferenceExpression(exp.getLineNumber(), outerType));
-                expression.setName("this");
+            if (expression.getName().startsWith("this$")) {
+                if (expression.getType().getDescriptor().equals(outerType.getDescriptor())) {
+                    Expression exp = (expression.getExpression() == null) ? expression : expression.getExpression();
+                    expression.setExpression(new ObjectTypeReferenceExpression(exp.getLineNumber(), outerType));
+                    expression.setName("this");
+                } else {
+                    ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(expression.getInternalTypeName());
+
+                    if ((memberDeclaration != null) && (memberDeclaration.getClass() == ClassFileClassDeclaration.class)) {
+                        ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) memberDeclaration;
+
+                        if (cfcd.getInternalTypeName().equals(expression.getInternalTypeName())) {
+                            ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) cfcd.getBodyDeclaration();
+                            String outerInternalTypeName = cfbd.getOuterBodyDeclaration().getInternalTypeName();
+                            ObjectType objectType = (ObjectType)expression.getType();
+
+                            if (outerInternalTypeName.equals(objectType.getInternalName())) {
+                                Expression exp = (expression.getExpression() == null) ? expression : expression.getExpression();
+                                expression.setExpression(new ObjectTypeReferenceExpression(exp.getLineNumber(), objectType));
+                                expression.setName("this");
+                            }
+                        }
+                    }
+                }
             } else if (outerLocalVariableNames.contains(expression.getName())) {
                 expression.setName(expression.getName().substring(4));
                 expression.setExpression(null);
@@ -414,22 +445,18 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                             }
                         }
 
-                        // Is the last parameter is synthetic ?
+                        // Is the last parameter synthetic ?
                         parameters = expression.getParameters();
 
-                        if ((parameters != null) && parameters.isList()) {
-                            DefaultList<Expression> list = parameters.getList();
+                        if ((parameters != null) && (parameters.size() > 0) && (parameters.getLast().getClass() == NullExpression.class)) {
+                            BaseType parameterTypes = ((ClassFileNewExpression) expression).getParameterTypes();
 
-                            if (!list.isEmpty()) {
-                                Expression lastParameter = list.getLast();
-
-                                if (lastParameter.getClass() == NullExpression.class) {
-                                    DefaultList<Type> parameterTypes = ((ClassFileNewExpression) expression).getParameterTypes();
-
-                                    if (parameterTypes.getLast().getName() == null) {
-                                        // Yes. Remove it.
-                                        list.removeLast();
-                                    }
+                            if (parameterTypes.getLast().getName() == null) {
+                                // Yes. Remove it.
+                                if (parameters.isList()) {
+                                    parameters.getList().removeLast();
+                                } else {
+                                    expression.setParameters(null);
                                 }
                             }
                         }
@@ -443,6 +470,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             BaseExpression parameters = expression.getParameters();
 
             if ((parameters != null) && (parameters.size() > 0)) {
+                // Remove outer 'this' reference parameter
                 ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(superTypeName);
 
                 if ((memberDeclaration != null) && (memberDeclaration.getClass() == ClassFileClassDeclaration.class)) {
@@ -453,6 +481,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                         expression.setParameters(removeOuterThisParameter(parameters));
                     }
                 }
+
+                // Remove last synthetic parameter
+                expression.setParameters(removeLastSyntheticParameter(
+                        expression.getParameters(),
+                        ((ClassFileSuperConstructorInvocationExpression)expression).getParameterTypes()));
             }
         }
 
@@ -461,18 +494,40 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             BaseExpression parameters = expression.getParameters();
 
             if ((parameters != null) && (parameters.size() > 0)) {
+                // Remove outer this reference parameter
                 if (parameters.getFirst().getType().equals(bodyDeclaration.getOuterType())) {
                     expression.setParameters(removeOuterThisParameter(parameters));
                 }
+
+                // Remove last synthetic parameter
+                expression.setParameters(removeLastSyntheticParameter(
+                        expression.getParameters(),
+                        ((ClassFileConstructorInvocationExpression)expression).getParameterTypes()));
             }
         }
 
         protected BaseExpression removeOuterThisParameter(BaseExpression parameters) {
-            // Remove outer this
+            // Remove outer 'this' reference parameter
             if (parameters.isList()) {
                 parameters.getList().removeFirst();
             } else {
                 parameters = null;
+            }
+
+            return parameters;
+        }
+
+        protected BaseExpression removeLastSyntheticParameter(BaseExpression parameters, BaseType parameterTypes) {
+            // Is the last parameter synthetic ?
+            if ((parameters != null) && (parameters.size() > 0) && (parameters.getLast().getClass() == NullExpression.class)) {
+                if (parameterTypes.getLast().getName() == null) {
+                    // Yes. Remove it.
+                    if (parameters.isList()) {
+                        parameters.getList().removeLast();
+                    } else {
+                        parameters = null;
+                    }
+                }
             }
 
             return parameters;

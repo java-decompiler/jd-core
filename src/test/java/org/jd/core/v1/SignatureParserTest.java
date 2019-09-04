@@ -8,11 +8,10 @@
 package org.jd.core.v1;
 
 import junit.framework.TestCase;
+import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
@@ -82,7 +81,7 @@ public class SignatureParserTest extends TestCase {
         assertNotNull(methodTypes.parameterTypes);
         assertEquals(2, methodTypes.parameterTypes.size());
 
-        type = methodTypes.parameterTypes.get(0);
+        type = methodTypes.parameterTypes.getFirst();
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -112,7 +111,7 @@ public class SignatureParserTest extends TestCase {
         assertNotNull(methodTypes.parameterTypes);
         assertEquals(3, methodTypes.parameterTypes.size());
 
-        type = methodTypes.parameterTypes.get(1);
+        type = methodTypes.parameterTypes.getList().get(1);
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -225,7 +224,7 @@ public class SignatureParserTest extends TestCase {
         assertNotNull(methodTypes.parameterTypes);
         assertEquals(2, methodTypes.parameterTypes.size());
 
-        type = methodTypes.parameterTypes.get(0);
+        type = methodTypes.parameterTypes.getFirst();
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -266,7 +265,7 @@ public class SignatureParserTest extends TestCase {
         assertNotNull(methodTypes.parameterTypes);
         assertEquals(1, methodTypes.parameterTypes.size());
 
-        type = methodTypes.parameterTypes.get(0);
+        type = methodTypes.parameterTypes.getFirst();
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -317,5 +316,43 @@ public class SignatureParserTest extends TestCase {
         TypeMaker typeMaker = new TypeMaker(loader);
 
         Assert.assertEquals(typeMaker.makeMethodTypes("()Ljava/lang/String;").returnedType, ObjectType.TYPE_STRING);
+    }
+
+    @Test
+    public void testGenericInnerClass() throws Exception {
+        ClassPathLoader loader = new ClassPathLoader();
+        TypeMaker typeMaker = new TypeMaker(loader);
+
+        Type type = typeMaker.makeFromSignature("Lorg/apache/commons/collections4/multimap/AbstractMultiValuedMap<TK;TV;>.AsMap.AsMapEntrySetIterator;");
+
+        Assert.assertEquals(type.getDescriptor(), "Lorg/apache/commons/collections4/multimap/AbstractMultiValuedMap$AsMap$AsMapEntrySetIterator;");
+        Assert.assertEquals(type.getDescriptor(), "Lorg/apache/commons/collections4/multimap/AbstractMultiValuedMap$AsMap$AsMapEntrySetIterator;");
+
+        ObjectType ot = (ObjectType)type;
+
+        Assert.assertEquals(ot.getInternalName(), "org/apache/commons/collections4/multimap/AbstractMultiValuedMap$AsMap$AsMapEntrySetIterator");
+        Assert.assertEquals(ot.getQualifiedName(), "org.apache.commons.collections4.multimap.AbstractMultiValuedMap.AsMap.AsMapEntrySetIterator");
+        Assert.assertEquals(ot.getName(), "AsMapEntrySetIterator");
+        Assert.assertNull(ot.getTypeArguments());
+
+        ot = ((InnerObjectType)ot).getOuterType();
+
+        Assert.assertEquals(ot.getInternalName(), "org/apache/commons/collections4/multimap/AbstractMultiValuedMap$AsMap");
+        Assert.assertEquals(ot.getQualifiedName(), "org.apache.commons.collections4.multimap.AbstractMultiValuedMap.AsMap");
+        Assert.assertEquals(ot.getName(), "AsMap");
+        Assert.assertNull(ot.getTypeArguments());
+
+        ot = ((InnerObjectType)ot).getOuterType();
+
+        Assert.assertEquals(ot.getInternalName(), "org/apache/commons/collections4/multimap/AbstractMultiValuedMap");
+        Assert.assertEquals(ot.getQualifiedName(), "org.apache.commons.collections4.multimap.AbstractMultiValuedMap");
+        Assert.assertEquals(ot.getName(), "AbstractMultiValuedMap");
+        Assert.assertNotNull(ot.getTypeArguments());
+
+        ArrayTypeArguments typeArguments = (ArrayTypeArguments)ot.getTypeArguments();
+
+        Assert.assertEquals(typeArguments.size(), 2);
+        Assert.assertEquals(typeArguments.getFirst().toString(), "GenericType{K}");
+        Assert.assertEquals(typeArguments.getLast().toString(), "GenericType{V}");
     }
 }

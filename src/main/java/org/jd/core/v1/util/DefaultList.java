@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -12,7 +12,7 @@ import java.util.Collection;
 
 @SuppressWarnings("unchecked")
 public class DefaultList<E> extends ArrayList<E> {
-    protected static DefaultList EMPTY_LIST = new DefaultList() {
+    protected static DefaultList EMPTY_LIST = new DefaultList(0) {
         public Object set(int var1, Object var2) {
             throw new UnsupportedOperationException();
         }
@@ -74,7 +74,7 @@ public class DefaultList<E> extends ArrayList<E> {
         return true;
     }
 
-    public static final <T> DefaultList<T> emptyList() {
+    public static <T> DefaultList<T> emptyList() {
         return EMPTY_LIST;
     }
 }

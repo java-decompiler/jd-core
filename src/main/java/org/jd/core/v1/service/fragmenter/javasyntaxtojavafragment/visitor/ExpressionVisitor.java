@@ -63,7 +63,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(ArrayExpression expression) {
-        expression.getExpression().accept(this);
+        visit(expression, expression.getExpression());
         tokens.add(StartBlockToken.START_ARRAY_BLOCK);
         expression.getIndex().accept(this);
         tokens.add(EndBlockToken.END_ARRAY_BLOCK);
@@ -332,7 +332,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(LengthExpression expression) {
-        expression.getExpression().accept(this);
+        visit(expression, expression.getExpression());
         tokens.add(TextToken.DOT);
         tokens.add(LENGTH);
     }
@@ -467,7 +467,7 @@ public class ExpressionVisitor extends TypeVisitor {
             ObjectType ot = expression.getObjectType();
 
             storeContext();
-            currentInternalTypeName = ot.getInternalName();
+            currentInternalTypeName = bodyDeclaration.getInternalTypeName();
             currentTypeName = ot.getName();
             bodyDeclaration.accept(this);
 

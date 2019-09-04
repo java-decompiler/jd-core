@@ -10,18 +10,25 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.util.DefaultList;
 
 public class ClassFileMethodInvocationExpression extends MethodInvocationExpression {
-    protected DefaultList<Type> parameterTypes;
+    protected BaseTypeParameter typeParameters;
+    protected BaseType parameterTypes;
 
-    public ClassFileMethodInvocationExpression(int lineNumber, Type type, Expression expression, String internalTypeName, String name, String descriptor, DefaultList<Type> parameterTypes, BaseExpression parameters) {
+    public ClassFileMethodInvocationExpression(int lineNumber, BaseTypeParameter typeParameters, Type type, Expression expression, String internalTypeName, String name, String descriptor, BaseType parameterTypes, BaseExpression parameters) {
         super(lineNumber, type, expression, internalTypeName, name, descriptor, parameters);
+        this.typeParameters = typeParameters;
         this.parameterTypes = parameterTypes;
     }
 
-    public DefaultList<Type> getParameterTypes() {
+    public BaseTypeParameter getTypeParameters() {
+        return typeParameters;
+    }
+
+    public BaseType getParameterTypes() {
         return parameterTypes;
     }
 }

@@ -7,22 +7,21 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.AbstractTypeVisitor;
-import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
-import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
-import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.*;
 
-public class SearchWildcardTypeArgumentVisitor extends AbstractTypeVisitor {
+public class SearchInTypeArgumentVisitor extends AbstractTypeVisitor {
     protected boolean wildcardFound;
     protected boolean wildcardSuperOrExtendsTypeFound;
+    protected boolean genericFound;
 
-    public SearchWildcardTypeArgumentVisitor() {
+    public SearchInTypeArgumentVisitor() {
         init();
     }
 
     public void init() {
         wildcardFound = false;
         wildcardSuperOrExtendsTypeFound = false;
+        genericFound = false;
     }
 
     public boolean containsWildcard() {
@@ -33,6 +32,10 @@ public class SearchWildcardTypeArgumentVisitor extends AbstractTypeVisitor {
         return wildcardSuperOrExtendsTypeFound;
     }
 
+    public boolean containsGeneric() {
+        return genericFound;
+    }
+
     @Override
     public void visit(WildcardTypeArgument type) {
         wildcardFound = true;
@@ -41,10 +44,17 @@ public class SearchWildcardTypeArgumentVisitor extends AbstractTypeVisitor {
     @Override
     public void visit(WildcardExtendsTypeArgument type) {
         wildcardSuperOrExtendsTypeFound = true;
+        type.getType().accept(this);
     }
 
     @Override
     public void visit(WildcardSuperTypeArgument type) {
         wildcardSuperOrExtendsTypeFound = true;
+        type.getType().accept(this);
+    }
+
+    @Override
+    public void visit(GenericType type) {
+        genericFound = true;
     }
 }

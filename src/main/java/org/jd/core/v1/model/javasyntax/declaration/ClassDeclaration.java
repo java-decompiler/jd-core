@@ -35,6 +35,6 @@ public class ClassDeclaration extends InterfaceDeclaration {
 
     @Override
     public String toString() {
-        return "ClassDeclaration{" + internalName + "}";
+        return "ClassDeclaration{" + internalTypeName + "}";
     }
 }

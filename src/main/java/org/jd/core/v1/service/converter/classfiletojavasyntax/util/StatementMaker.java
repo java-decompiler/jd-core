@@ -53,7 +53,7 @@ public class StatementMaker {
     protected DefaultStack<Expression> stack = new DefaultStack<>();
     protected RemoveFinallyStatementsVisitor removeFinallyStatementsVisitor;
     protected RemoveBinaryOpReturnStatementsVisitor removeBinaryOpReturnStatementsVisitor;
-    protected final UpdateIntegerConstantTypeVisitor updateIntegerConstantTypeVisitor;
+    protected UpdateIntegerConstantTypeVisitor updateIntegerConstantTypeVisitor;
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
     protected MemberVisitor memberVisitor = new MemberVisitor();
     protected boolean removeFinallyStatementsFlag = false;
@@ -67,7 +67,7 @@ public class StatementMaker {
         this.majorVersion = classFile.getMajorVersion();
         this.internalTypeName = classFile.getInternalTypeName();
         this.bodyDeclaration = bodyDeclaration;
-        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, internalTypeName, classFile, bodyDeclaration, returnedType);
+        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, internalTypeName, classFile, bodyDeclaration);
         this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor(localVariableMaker);
         this.removeBinaryOpReturnStatementsVisitor = new RemoveBinaryOpReturnStatementsVisitor(localVariableMaker);
         this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(returnedType);
@@ -823,7 +823,7 @@ public class StatementMaker {
     }
 
     protected Expression parseTernaryOperator(int lineNumber, Expression condition, Expression exp1, Expression exp2) {
-        if ((exp1.getType() == ObjectType.TYPE_CLASS) && (exp2.getType() == ObjectType.TYPE_CLASS) && (condition.getClass() == BinaryOperatorExpression.class)) {
+        if (ObjectType.TYPE_CLASS.equals(exp1.getType()) && ObjectType.TYPE_CLASS.equals(exp2.getType()) && (condition.getClass() == BinaryOperatorExpression.class)) {
             BinaryOperatorExpression boeCond = (BinaryOperatorExpression) condition;
 
             if ((boeCond.getLeftExpression().getClass() == FieldReferenceExpression.class) && (boeCond.getRightExpression().getClass() == NullExpression.class)) {

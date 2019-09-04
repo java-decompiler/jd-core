@@ -62,12 +62,12 @@ public class Enum {
 
     public enum EmptyEnum {}
 
-    public enum EnumWithAConstructor {
+    public enum EnumWithOneConstructor {
         A, B, C;
 
         protected int i;
 
-        EnumWithAConstructor() {
+        EnumWithOneConstructor() {
             this.i = 0;
         }
     }

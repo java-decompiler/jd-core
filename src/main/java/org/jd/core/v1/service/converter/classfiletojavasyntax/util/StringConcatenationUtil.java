@@ -21,17 +21,19 @@ public class StringConcatenationUtil {
         if (expression.getClass() == ClassFileMethodInvocationExpression.class) {
             MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
-            if ("append".equals(mie.getName()) && (mie.getParameters() != null) && !mie.getParameters().isList()) {
+            if ((mie.getParameters() != null) && !mie.getParameters().isList() && "append".equals(mie.getName())) {
                 Expression concatenatedStringExpression = mie.getParameters().getFirst();
                 Expression expr = mie.getExpression();
+                boolean firstParameterHaveGenericType = false;
 
                 while (expr.getClass() == ClassFileMethodInvocationExpression.class) {
                     mie = (MethodInvocationExpression) expr;
 
-                    if (("append".equals(mie.getName()) == false) || (mie.getParameters() == null) || mie.getParameters().isList()) {
+                    if ((mie.getParameters() == null) || mie.getParameters().isList() || !"append".equals(mie.getName())) {
                         break;
                     }
 
+                    firstParameterHaveGenericType = mie.getParameters().getFirst().getType().isGeneric();
                     concatenatedStringExpression = new BinaryOperatorExpression(mie.getLineNumber(), ObjectType.TYPE_STRING, (Expression) mie.getParameters(), "+", concatenatedStringExpression, 4);
                     expr = mie.getExpression();
                 }
@@ -42,12 +44,13 @@ public class StringConcatenationUtil {
 
                     if ("Ljava/lang/StringBuilder;".equals(internalTypeName) || "Ljava/lang/StringBuffer;".equals(internalTypeName)) {
                         if (ne.getParameters() == null) {
-                            return concatenatedStringExpression;
-                        }
-                        if (!ne.getParameters().isList()) {
+                            if (!firstParameterHaveGenericType) {
+                                return concatenatedStringExpression;
+                            }
+                        } else if (!ne.getParameters().isList()) {
                             expression = ne.getParameters().getFirst();
 
-                            if (expression.getType() == ObjectType.TYPE_STRING) {
+                            if (ObjectType.TYPE_STRING.equals(expression.getType())) {
                                 return new BinaryOperatorExpression(ne.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", concatenatedStringExpression, 4);
                             }
                         }
@@ -56,7 +59,7 @@ public class StringConcatenationUtil {
             }
         }
 
-        return new MethodInvocationExpression(lineNumber, ObjectType.TYPE_STRING, expression, typeName, "toString", "()Ljava/lang/String;");
+        return new ClassFileMethodInvocationExpression(lineNumber, null, ObjectType.TYPE_STRING, expression, typeName, "toString", "()Ljava/lang/String;", null, null);
     }
 
     public static Expression create(String recipe, BaseExpression parameters) {

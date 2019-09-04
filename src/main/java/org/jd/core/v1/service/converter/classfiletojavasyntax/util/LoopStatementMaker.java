@@ -18,6 +18,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.s
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForEachStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.ObjectLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateTypeFromTypeArgumentVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RemoveLastContinueStatementVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
@@ -503,8 +504,13 @@ public class LoopStatementMaker {
         subStatements.removeLast();
 
         item.setDeclared(true);
-        Type itemType = arrayType.createType(arrayType.getDimension()-1);
-        item.typeOnRight(itemType);
+        Type type = arrayType.createType(arrayType.getDimension()-1);
+
+        if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
+            ((ObjectLocalVariable)item).setType(type);
+        } else {
+            item.typeOnRight(type);
+        }
 
         localVariableMaker.removeLocalVariable(syntheticArray);
         localVariableMaker.removeLocalVariable(syntheticIndex);
@@ -633,7 +639,11 @@ public class LoopStatementMaker {
             Type type = visitor2.getType();
 
             if (type != null) {
-                item.typeOnRight(type);
+                if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
+                    ((ObjectLocalVariable)item).setType(type);
+                } else {
+                    item.typeOnRight(type);
+                }
             }
         }
 

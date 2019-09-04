@@ -21,7 +21,6 @@ import java.util.HashMap;
 
 import static org.jd.core.v1.model.classfile.Constants.ACC_SYNTHETIC;
 
-
 public class ClassFileDeserializer {
 
     public ClassFile loadClassFile(Loader loader, String internalTypeName) throws Exception {
@@ -188,13 +187,13 @@ public class ClassFileDeserializer {
         for (int i=0; i<count; i++) {
             int accessFlags = reader.readUnsignedShort();
             int nameIndex = reader.readUnsignedShort();
-            int signatureIndex = reader.readUnsignedShort();
+            int descriptorIndex = reader.readUnsignedShort();
             HashMap<String, Attribute> attributes = loadAttributes(reader, constants);
 
             String name = constants.getConstantUtf8(nameIndex);
-            String signature = constants.getConstantUtf8(signatureIndex);
+            String descriptor = constants.getConstantUtf8(descriptorIndex);
 
-            fields[i] = new Field(accessFlags, name, signature, attributes);
+            fields[i] = new Field(accessFlags, name, descriptor, attributes);
         }
 
         return fields;
@@ -210,13 +209,13 @@ public class ClassFileDeserializer {
         for (int i=0; i<count; i++) {
             int accessFlags = reader.readUnsignedShort();
             int nameIndex = reader.readUnsignedShort();
-            int signatureIndex = reader.readUnsignedShort();
+            int descriptorIndex = reader.readUnsignedShort();
             HashMap<String, Attribute> attributes = loadAttributes(reader, constants);
 
             String name = constants.getConstantUtf8(nameIndex);
-            String signature = constants.getConstantUtf8(signatureIndex);
+            String descriptor = constants.getConstantUtf8(descriptorIndex);
 
-            methods[i] = new Method(accessFlags, name, signature, attributes, constants);
+            methods[i] = new Method(accessFlags, name, descriptor, attributes, constants);
         }
 
         return methods;

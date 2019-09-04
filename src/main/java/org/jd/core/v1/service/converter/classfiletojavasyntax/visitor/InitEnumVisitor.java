@@ -94,6 +94,7 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void visit(NewExpression expression) {
         Expressions<Expression> parameters = (Expressions)expression.getParameters();
         Expression exp = parameters.get(1);

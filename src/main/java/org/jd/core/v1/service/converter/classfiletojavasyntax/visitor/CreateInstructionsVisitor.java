@@ -53,8 +53,18 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                         method.accept(this);
                     }
                 } else if (method.getParameterTypes() != null) {
-                    for (Type type : method.getParameterTypes()) {
-                        if (type.isObject() && ((ObjectType)type).getName() == null) {
+                    if (method.getParameterTypes().isList()) {
+                        for (Type type : method.getParameterTypes().getList()) {
+                            if (type.isObject() && ((ObjectType) type).getName() == null) {
+                                // Synthetic type in parameterTypes -> synthetic method
+                                method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
+                                method.accept(this);
+                                break;
+                            }
+                        }
+                    } else {
+                        Type type = method.getParameterTypes().getFirst();
+                        if (type.isObject() && ((ObjectType) type).getName() == null) {
                             // Synthetic type in parameterTypes -> synthetic method
                             method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
                             method.accept(this);

@@ -2584,7 +2584,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 20 */", "list.stream().filter(s -> (s != null)).forEach(s -> System.out.println(s));")));
         assertTrue(source.indexOf("Predicate<String> filter = s -> (s.length() == length);") != -1);
         assertTrue(source.indexOf("Consumer<String> println = s -> System.out.println(s);") != -1);
-        assertTrue(source.matches(PatternMaker.make(": 27 */", "list.stream().filter(filter).forEach(println);")));
+        assertTrue(source.matches(PatternMaker.make(": 27 */", "list.stream().filter((Predicate)filter).forEach((Consumer)println);")));
         assertTrue(source.matches(PatternMaker.make(": 31 */", "((Map)list.stream()")));
         assertTrue(source.matches(PatternMaker.make(": 32 */", ".collect(Collectors.toMap(lambda -> Integer.valueOf(lambda.index), Function.identity())))")));
         assertTrue(source.matches(PatternMaker.make(": 33 */", ".forEach((key, value) ->")));
@@ -2595,7 +2595,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 61 */", "Supplier<String> constructorReference = String::new;")));
         assertTrue(source.matches(PatternMaker.make(": 65 */", "MethodType mtToString = MethodType.methodType(String.class);")));
         assertTrue(source.matches(PatternMaker.make(": 66 */", "MethodType mtSetter = MethodType.methodType(void.class, Object.class);")));
-        assertTrue(source.matches(PatternMaker.make(": 67 */", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class[]", "{ String.class")));
+        assertTrue(source.matches(PatternMaker.make(": 67 */", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class<?>[]", "{ String.class")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
 

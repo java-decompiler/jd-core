@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -17,18 +17,16 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
-import java.util.List;
-
 public class ClassFileConstructorDeclaration extends ConstructorDeclaration implements ClassFileConstructorOrMethodDeclaration {
     protected ClassFileBodyDeclaration bodyDeclaration;
     protected ClassFile classFile;
     protected Method method;
-    protected List<Type> parameterTypes;
+    protected BaseType parameterTypes;
     protected int firstLineNumber;
 
     public ClassFileConstructorDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, BaseAnnotationReference annotationReferences,
-            BaseTypeParameter typeParameters, List<Type> parameterTypes, BaseType exceptions, int firstLineNumber) {
+            BaseTypeParameter typeParameters, BaseType parameterTypes, BaseType exceptions, int firstLineNumber) {
         super(annotationReferences, method.getAccessFlags(), typeParameters, null, exceptions, method.getDescriptor(), null);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
@@ -68,7 +66,7 @@ public class ClassFileConstructorDeclaration extends ConstructorDeclaration impl
     }
 
     @Override
-    public List<Type> getParameterTypes() {
+    public BaseType getParameterTypes() {
         return parameterTypes;
     }
 
