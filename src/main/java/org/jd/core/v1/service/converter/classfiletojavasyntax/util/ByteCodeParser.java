@@ -49,18 +49,18 @@ public class ByteCodeParser {
 
     private TypeMaker typeMaker;
     private LocalVariableMaker localVariableMaker;
+    private ClassFile classFile;
     private String internalTypeName;
     private AttributeBootstrapMethods attributeBootstrapMethods;
     private ClassFileBodyDeclaration bodyDeclaration;
     private MemberVisitor memberVisitor = new MemberVisitor();
     private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
 
-    public ByteCodeParser(
-            TypeMaker typeMaker, LocalVariableMaker localVariableMaker, String internalTypeName,
-            ClassFile classFile, ClassFileBodyDeclaration bodyDeclaration) {
+    public ByteCodeParser(TypeMaker typeMaker, LocalVariableMaker localVariableMaker, ClassFile classFile, ClassFileBodyDeclaration bodyDeclaration) {
         this.typeMaker = typeMaker;
         this.localVariableMaker = localVariableMaker;
-        this.internalTypeName = internalTypeName;
+        this.classFile = classFile;
+        this.internalTypeName = classFile.getInternalTypeName();
         this.attributeBootstrapMethods = classFile.getAttribute("BootstrapMethods");
         this.bodyDeclaration = bodyDeclaration;
     }
@@ -722,7 +722,7 @@ public class ByteCodeParser {
                     BaseExpression parameters = extractParametersFromStack(statements, stack, methodTypes.parameterTypes);
 
                     if (opcode == 184) { // INVOKESTATIC
-                        Type returnedType = bindParameterTypesWithArgumentTypes(ot, methodTypes.returnedType);
+                        Type returnedType = bindParameterTypesWithArgumentType(ot, methodTypes.returnedType);
                         BaseType parameterTypes = bindParameterTypesWithArgumentTypes(ot, methodTypes.parameterTypes);
                         parameters = prepareParameters(parameters, parameterTypes);
                         expression1 = new ClassFileMethodInvocationExpression(lineNumber, methodTypes.typeParameters, returnedType, new ObjectTypeReferenceExpression(lineNumber, ot), typeName, name, descriptor, parameterTypes, parameters);
@@ -733,9 +733,9 @@ public class ByteCodeParser {
                         }
                     } else {
                         expression1 = stack.pop();
-                        Type returnedType = bindParameterTypesWithArgumentTypes(ot, methodTypes.returnedType);
+                        Type returnedType = bindParameterTypesWithArgumentType(ot, methodTypes.returnedType);
                         BaseType parameterTypes = bindParameterTypesWithArgumentTypes(ot, methodTypes.parameterTypes);
-                        //BaseType parameterTypes = bindParameterTypesWithArgumentTypes(expression1, ot, methodTypes.parameterTypes);
+                        //BaseType parameterTypes = getRawType(expression1, ot, methodTypes.parameterTypes);
                         parameters = prepareParameters(parameters, parameterTypes);
                         if (expression1.getClass() == ClassFileLocalVariableReferenceExpression.class) {
                             ((ClassFileLocalVariableReferenceExpression)expression1).getLocalVariable().typeOnLeft(ot);
@@ -934,7 +934,7 @@ public class ByteCodeParser {
         }
     }
 
-    private Type bindParameterTypesWithArgumentTypes(Type type) {
+    private Type getRawType(Type type) {
         if (type.isGeneric()) {
             return TYPE_OBJECT.createType(type.getDimension());
         }
@@ -950,7 +950,7 @@ public class ByteCodeParser {
         return type;
     }
 
-    private Type bindParameterTypesWithArgumentTypes(ObjectType objectType, Type type) {
+    private Type bindParameterTypesWithArgumentType(ObjectType objectType, Type type) {
         if (type == null) {
             return null;
         }
@@ -959,7 +959,7 @@ public class ByteCodeParser {
             return type;
         }
 
-        return bindParameterTypesWithArgumentTypes(type);
+        return getRawType(type);
     }
 
     private BaseType bindParameterTypesWithArgumentTypes(ObjectType objectType, BaseType parameterTypes) {
@@ -975,7 +975,7 @@ public class ByteCodeParser {
             case 0:
                 return null;
             case 1:
-                return bindParameterTypesWithArgumentTypes(parameterTypes.getFirst());
+                return getRawType(parameterTypes.getFirst());
             default:
                 DefaultList<Type> list = parameterTypes.getList();
                 int count = list.size();
@@ -985,7 +985,7 @@ public class ByteCodeParser {
                         Types<Type> types = new Types<>(list);
                         for (i=0; i<count; i++) {
                             Type type = list.get(i);
-                            types.set(i, bindParameterTypesWithArgumentTypes(type));
+                            types.set(i, getRawType(type));
                         }
                         return types;
                     }

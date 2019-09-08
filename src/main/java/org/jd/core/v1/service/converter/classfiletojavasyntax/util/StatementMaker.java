@@ -67,7 +67,7 @@ public class StatementMaker {
         this.majorVersion = classFile.getMajorVersion();
         this.internalTypeName = classFile.getInternalTypeName();
         this.bodyDeclaration = bodyDeclaration;
-        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, internalTypeName, classFile, bodyDeclaration);
+        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, classFile, bodyDeclaration);
         this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor(localVariableMaker);
         this.removeBinaryOpReturnStatementsVisitor = new RemoveBinaryOpReturnStatementsVisitor(localVariableMaker);
         this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(returnedType);

@@ -48,10 +48,10 @@ public class StringConcatenationUtil {
                                 return concatenatedStringExpression;
                             }
                         } else if (!ne.getParameters().isList()) {
-                            expression = ne.getParameters().getFirst();
+                            expr = ne.getParameters().getFirst();
 
-                            if (ObjectType.TYPE_STRING.equals(expression.getType())) {
-                                return new BinaryOperatorExpression(ne.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", concatenatedStringExpression, 4);
+                            if (ObjectType.TYPE_STRING.equals(expr.getType())) {
+                                return new BinaryOperatorExpression(ne.getLineNumber(), ObjectType.TYPE_STRING, expr, "+", concatenatedStringExpression, 4);
                             }
                         }
                     }

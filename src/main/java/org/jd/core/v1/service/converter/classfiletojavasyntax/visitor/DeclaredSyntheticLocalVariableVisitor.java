@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -17,8 +17,15 @@ import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
 import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
 import org.jd.core.v1.model.javasyntax.statement.TryStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.util.DefaultList;
 
 public class DeclaredSyntheticLocalVariableVisitor extends AbstractJavaSyntaxVisitor {
+    protected DefaultList<LocalVariableReferenceExpression> localVariableReferenceExpressions = new DefaultList<>();
+
+    public void init() {
+        localVariableReferenceExpressions.clear();
+    }
 
     @Override
     public void visit(FieldDeclaration declaration) {
@@ -66,7 +73,13 @@ public class DeclaredSyntheticLocalVariableVisitor extends AbstractJavaSyntaxVis
 
     @Override
     public void visit(LocalVariableReferenceExpression expression) {
-        ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable().setDeclared(true);
+        AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable();
+
+        localVariableReferenceExpressions.add(expression);
+
+        if (localVariableReferenceExpressions.containsAll(localVariable.getReferences())) {
+            localVariable.setDeclared(true);
+        }
     }
 
     @Override

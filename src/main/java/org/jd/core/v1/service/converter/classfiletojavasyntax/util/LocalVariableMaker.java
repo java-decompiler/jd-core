@@ -337,27 +337,32 @@ public class LocalVariableMaker {
     }
 
     protected boolean isCompatible(AbstractLocalVariable lv, Type valueType) {
-        if (lv.getType().isObject() && valueType.isObject() && (lv.getType().getDimension() == valueType.getDimension())) {
-            ObjectType lvObjectType = (ObjectType)lv.getType();
-            ObjectType valueObjectType = (ObjectType)valueType;
+        if (valueType.isObject() && (lv.getType().getDimension() == valueType.getDimension())) {
+            ObjectType valueObjectType = (ObjectType) valueType;
 
-            BaseTypeArgument lvTypeArguments = lvObjectType.getTypeArguments();
-            BaseTypeArgument valueTypeArguments = valueObjectType.getTypeArguments();
+            if (lv.getType().isObject()) {
+                ObjectType lvObjectType = (ObjectType) lv.getType();
 
-            if ((lvTypeArguments == null) || (valueTypeArguments == null)) {
-                return typeMaker.isAssignable(lvObjectType, valueObjectType);
-            }
+                BaseTypeArgument lvTypeArguments = lvObjectType.getTypeArguments();
+                BaseTypeArgument valueTypeArguments = valueObjectType.getTypeArguments();
 
-            searchInTypeArgumentVisitor.init();
-            lvTypeArguments.accept(searchInTypeArgumentVisitor);
-
-            if (!searchInTypeArgumentVisitor.containsGeneric()) {
-                searchInTypeArgumentVisitor.init();
-                valueTypeArguments.accept(searchInTypeArgumentVisitor);
-
-                if (searchInTypeArgumentVisitor.containsGeneric()) {
+                if ((lvTypeArguments == null) || (valueTypeArguments == null)) {
                     return typeMaker.isAssignable(lvObjectType, valueObjectType);
                 }
+
+                searchInTypeArgumentVisitor.init();
+                lvTypeArguments.accept(searchInTypeArgumentVisitor);
+
+                if (!searchInTypeArgumentVisitor.containsGeneric()) {
+                    searchInTypeArgumentVisitor.init();
+                    valueTypeArguments.accept(searchInTypeArgumentVisitor);
+
+                    if (searchInTypeArgumentVisitor.containsGeneric()) {
+                        return typeMaker.isAssignable(lvObjectType, valueObjectType);
+                    }
+                }
+            } else if (lv.getType().isGeneric() && valueObjectType.getInternalName().equals(ObjectType.TYPE_OBJECT.getInternalName())) {
+                return true;
             }
         }
 

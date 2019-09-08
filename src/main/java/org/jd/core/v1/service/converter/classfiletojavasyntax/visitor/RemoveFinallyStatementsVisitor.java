@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -16,8 +16,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.List;
 
 public class RemoveFinallyStatementsVisitor implements StatementVisitor {
-    protected static final DeclaredSyntheticLocalVariableVisitor DECLARED_SYNTHETIC_LOCAL_VARIABLE_VISITOR = new DeclaredSyntheticLocalVariableVisitor();
-
+    protected DeclaredSyntheticLocalVariableVisitor declaredSyntheticLocalVariableVisitor = new DeclaredSyntheticLocalVariableVisitor();
     protected LocalVariableMaker localVariableMaker;
     protected int statementCountInFinally;
     protected int statementCountToRemove;
@@ -63,16 +62,18 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
             }
 
             // Remove 'finally' statements
+            declaredSyntheticLocalVariableVisitor.init();
+
             if (statementCountToRemove > 0) {
                 // Remove 'finally' statements
                 if (i > statementCountToRemove) {
                     List<Statement> list = statements.subList(i - statementCountToRemove, i);
 
                     for (Statement statement : list) {
-                        statement.accept(DECLARED_SYNTHETIC_LOCAL_VARIABLE_VISITOR);
+                        statement.accept(declaredSyntheticLocalVariableVisitor);
                     }
 
-                    lastStatement.accept(DECLARED_SYNTHETIC_LOCAL_VARIABLE_VISITOR);
+                    lastStatement.accept(declaredSyntheticLocalVariableVisitor);
                     list.clear();
                     i -= statementCountToRemove;
                     statementCountToRemove = 0;
@@ -80,7 +81,7 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
                     List<Statement> list = statements;
 
                     for (Statement statement : list) {
-                        statement.accept(DECLARED_SYNTHETIC_LOCAL_VARIABLE_VISITOR);
+                        statement.accept(declaredSyntheticLocalVariableVisitor);
                     }
 
                     list.clear();
