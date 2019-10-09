@@ -13,6 +13,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.util.DefaultList;
 
+import java.util.Iterator;
 import java.util.StringTokenizer;
 
 public class StringConcatenationUtil {
@@ -59,7 +60,7 @@ public class StringConcatenationUtil {
             }
         }
 
-        return new ClassFileMethodInvocationExpression(lineNumber, null, ObjectType.TYPE_STRING, expression, typeName, "toString", "()Ljava/lang/String;", null, null);
+        return new ClassFileMethodInvocationExpression(null, lineNumber, null, ObjectType.TYPE_STRING, expression, typeName, "toString", "()Ljava/lang/String;", null, null);
     }
 
     public static Expression create(String recipe, BaseExpression parameters) {
@@ -93,25 +94,20 @@ public class StringConcatenationUtil {
     }
 
     public static Expression create(BaseExpression parameters) {
-        if (parameters.isList()) {
-            DefaultList<Expression> list = parameters.getList();
+        switch (parameters.size()) {
+            case 0:
+                return StringConstantExpression.EMPTY_STRING;
+            case 1:
+                return createFirstStringConcatenationItem(parameters.getFirst());
+            default:
+                Iterator<Expression> iterator = parameters.iterator();
+                Expression expression = createFirstStringConcatenationItem(iterator.next());
 
-            switch (list.size()) {
-                case 0:
-                    return StringConstantExpression.EMPTY_STRING;
-                case 1:
-                    return createFirstStringConcatenationItem(parameters.getFirst());
-                default:
-                    Expression expression = createFirstStringConcatenationItem(parameters.getFirst());
+                while (iterator.hasNext()) {
+                    expression = new BinaryOperatorExpression(expression.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", iterator.next(), 6);
+                }
 
-                    for (int i = 1, len = list.size(); i < len; i++) {
-                        expression = new BinaryOperatorExpression(expression.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", list.get(i), 6);
-                    }
-
-                    return expression;
-            }
-        } else {
-            return createFirstStringConcatenationItem(parameters.getFirst());
+                return expression;
         }
     }
 

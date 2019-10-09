@@ -7,10 +7,6 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
-public interface TypeVisitor {
-    void visit(PrimitiveType type);
-    void visit(ObjectType type);
-    void visit(InnerObjectType type);
-    void visit(Types types);
-    void visit(GenericType type);
+public interface TypeParameterVisitable {
+    void accept(TypeParameterVisitor visitor);
 }

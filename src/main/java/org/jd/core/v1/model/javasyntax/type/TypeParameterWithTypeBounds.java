@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -8,19 +8,19 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 public class TypeParameterWithTypeBounds extends TypeParameter {
-    protected TypeBoundList typeBounds;
+    protected BaseType typeBounds;
 
-    public TypeParameterWithTypeBounds(String identifier, TypeBoundList typeBounds) {
+    public TypeParameterWithTypeBounds(String identifier, BaseType typeBounds) {
         super(identifier);
         this.typeBounds = typeBounds;
     }
 
-    public TypeBoundList getTypeBounds() {
+    public BaseType getTypeBounds() {
         return typeBounds;
     }
 
     @Override
-    public void accept(TypeVisitor visitor) {
+    public void accept(TypeParameterVisitor visitor) {
         visitor.visit(this);
     }
 

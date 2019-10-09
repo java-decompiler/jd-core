@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
-public class CreateLocalVariableVisitor extends AbstractNopTypeVisitor implements LocalVariableVisitor {
+public class CreateLocalVariableVisitor extends AbstractNopTypeArgumentVisitor implements LocalVariableVisitor {
     protected TypeMaker typeMaker;
     protected int index;
     protected int offset;

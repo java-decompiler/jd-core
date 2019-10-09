@@ -125,6 +125,11 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             }
         }
 
+        if (expression.getClass() == NewInitializedArray.class) {
+            ((NewInitializedArray)expression).getArrayInitializer().accept(this);
+            return;
+        }
+
         Type t = type;
 
         if (extraDimension > 0) {
@@ -159,12 +164,8 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if (parameters != null) {
             ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
 
-            if (mie.getTypeParameters() == null) {
-                // Do not add cast expression if method contains type parameters
-                expression.setParameters(updateExpressions(mie.getParameterTypes(), parameters));
-            } else {
-                parameters.accept(this);
-            }
+            parameters.accept(this);
+            expression.setParameters(updateExpressions(mie.getParameterTypes(), parameters));
         }
 
         expression.getExpression().accept(this);
@@ -236,9 +237,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     private Expression updateExpression(Type type, Expression expression) {
-        Class expressionClass = expression.getClass();
-
-        if (expressionClass != NullExpression.class) {
+        if (match(expression)) {
             Type expressionType = expression.getType();
 
             if (!expressionType.equals(type) && !TYPE_OBJECT.equals(type)) {
@@ -249,17 +248,21 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                         String internalName = objectType.getInternalName();
 
                         if (internalName.equals(expressionObjectType.getInternalName()) || typeMaker.isAssignable(objectType, expressionObjectType)) {
-                            if (!internalName.equals(TYPE_CLASS.getInternalName())) {
-                                if (expressionObjectType.getTypeArguments() != null) {
-                                    if ((objectType.getTypeArguments() == null) || !objectType.getTypeArguments().isTypeArgumentAssignableFrom(expressionObjectType.getTypeArguments())) {
-                                        expression = addCastExpression(type, expression);
-                                    }
+                            if (expressionObjectType.getTypeArguments() == null) {
+                                if (objectType.getTypeArguments() != null) {
+                                    expression = addCastExpression(type, expression);
+                                }
+                            } else {
+                                if (objectType.getTypeArguments() == null) {
+                                    expression = addCastExpression(type, expression);
+                                } else if (!objectType.getTypeArguments().isTypeArgumentAssignableFrom(expressionObjectType.getTypeArguments())) {
+                                    expression = addCastExpression(objectType.createType(null), expression);
                                 }
                             }
                         }
                     }
                 } else if (type.isGeneric()) {
-                    if (expressionType.isObject()) {
+                    if (expressionType.isObject() || expressionType.isGeneric()) {
                         expression = addCastExpression(type, expression);
                     }
                 }
@@ -271,10 +274,36 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         return expression;
     }
 
+    private static final boolean match(Expression expression) {
+        Class expressionClass = expression.getClass();
+
+        if (expressionClass == NullExpression.class) {
+            // Do not add a cast before a null value
+            return false;
+        }
+
+        if (expressionClass == ClassFileMethodInvocationExpression.class) {
+            ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
+
+            if (mie.getTypeParameters() != null) {
+                // Do not add a cast before parameterized method invocation
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private static final Expression addCastExpression(Type type, Expression expression) {
         if (expression.getClass() == CastExpression.class) {
-            ((CastExpression)expression).setType(type);
-            return expression;
+            CastExpression ca = (CastExpression)expression;
+
+            if (type.equals(ca.getExpression().getType())) {
+                return ca.getExpression();
+            } else {
+                ca.setType(type);
+                return ca;
+            }
         } else {
             return new CastExpression(expression.getLineNumber(), type, expression);
         }
@@ -297,12 +326,11 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     @Override public void visit(TypeReferenceDotClassExpression expression) {}
     @Override public void visit(ObjectReference reference) {}
     @Override public void visit(InnerObjectReference reference) {}
-    @Override public void visit(ArrayTypeArguments type) {}
+    @Override public void visit(TypeArguments type) {}
     @Override public void visit(WildcardExtendsTypeArgument type) {}
     @Override public void visit(ObjectType type) {}
     @Override public void visit(InnerObjectType type) {}
     @Override public void visit(WildcardSuperTypeArgument type) {}
     @Override public void visit(Types list) {}
-    @Override public void visit(TypeBounds list) {}
     @Override public void visit(TypeParameterWithTypeBounds type) {}
 }

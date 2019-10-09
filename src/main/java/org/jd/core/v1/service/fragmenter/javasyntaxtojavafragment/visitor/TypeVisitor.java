@@ -66,19 +66,22 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    public void visit(ArrayTypeArguments list) {
-        buildTokensForList(list, TextToken.COMMA_SPACE);
+    public void visit(TypeArguments arguments) {
+        buildTokensForList(arguments, TextToken.COMMA_SPACE);
     }
 
     @Override
-    public void visit(DiamondTypeArgument type) {}
+    public void visit(DiamondTypeArgument argument) {}
 
     @Override
-    public void visit(WildcardExtendsTypeArgument type) {
+    public void visit(WildcardExtendsTypeArgument argument) {
         tokens.add(TextToken.QUESTIONMARK_SPACE);
         tokens.add(EXTENDS);
         tokens.add(TextToken.SPACE);
-        type.getType().accept(this);
+
+        BaseType type = argument.getType();
+
+        type.accept(this);
     }
 
     @Override
@@ -110,10 +113,6 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
             if (typeArguments != null) {
                 visitTypeArgumentList(typeArguments);
-            } else if (TYPE_CLASS.getInternalName().equals(type.getInternalName())) {
-                tokens.add(TextToken.LEFTANGLEBRACKET);
-                tokens.add(TextToken.QUESTIONMARK);
-                tokens.add(TextToken.RIGHTANGLEBRACKET);
             }
         }
 
@@ -124,7 +123,9 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(InnerObjectType type) {
         if ((currentInternalTypeName == null) || (!currentInternalTypeName.equals(type.getInternalName()) && !currentInternalTypeName.equals(type.getOuterType().getInternalName()))) {
-            type.getOuterType().accept(this);
+            BaseType outerType = type.getOuterType();
+
+            outerType.accept(this);
             tokens.add(TextToken.DOT);
         }
 
@@ -138,10 +139,10 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         visitDimension(type.getDimension());
     }
 
-    protected void visitTypeArgumentList(BaseTypeArgument typeArguments) {
-        if (typeArguments != null) {
+    protected void visitTypeArgumentList(BaseTypeArgument arguments) {
+        if (arguments != null) {
             tokens.add(TextToken.LEFTANGLEBRACKET);
-            typeArguments.accept(this);
+            arguments.accept(this);
             tokens.add(TextToken.RIGHTANGLEBRACKET);
         }
     }
@@ -162,43 +163,58 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    public void visit(WildcardSuperTypeArgument type) {
+    public void visit(WildcardSuperTypeArgument argument) {
         tokens.add(TextToken.QUESTIONMARK_SPACE);
         tokens.add(SUPER);
         tokens.add(TextToken.SPACE);
-        type.getType().accept(this);
+
+        BaseType type = argument.getType();
+
+        type.accept(this);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void visit(Types list) {
-        buildTokensForList(list, TextToken.COMMA_SPACE);
+    public void visit(Types types) {
+        buildTokensForList(types, TextToken.COMMA_SPACE);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void visit(TypeBounds list) {
-        buildTokensForList(list, TextToken.SPACE_AND_SPACE);
+    public void visit(TypeParameter parameter) {
+        tokens.add(newTextToken(parameter.getIdentifier()));
     }
 
     @Override
-    public void visit(TypeParameter type) {
-        tokens.add(newTextToken(type.getIdentifier()));
-    }
-
-    @Override
-    public void visit(TypeParameterWithTypeBounds type) {
-        tokens.add(newTextToken(type.getIdentifier()));
+    public void visit(TypeParameterWithTypeBounds parameter) {
+        tokens.add(newTextToken(parameter.getIdentifier()));
         tokens.add(TextToken.SPACE);
         tokens.add(EXTENDS);
         tokens.add(TextToken.SPACE);
-        type.getTypeBounds().accept(this);
+
+        BaseType types = parameter.getTypeBounds();
+
+        if (types.isList()) {
+            buildTokensForList(types.getList(), TextToken.SPACE_AND_SPACE);
+        } else {
+            BaseType type = types.getFirst();
+
+            type.accept(this);
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public void visit(TypeParameters list) {
-        buildTokensForList(list, TextToken.COMMA_SPACE);
+        int size = list.size();
+
+        if (size > 0) {
+            list.get(0).accept(this);
+
+            for (int i=1; i<size; i++) {
+                tokens.add(TextToken.COMMA_SPACE);
+                list.get(i).accept(this);
+            }
+        }
     }
 
     @Override
@@ -212,7 +228,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         tokens.add(TextToken.QUESTIONMARK);
     }
 
-    protected <T extends TypeVisitable> void buildTokensForList(List<T> list, TextToken separator) {
+    protected <T extends TypeArgumentVisitable> void buildTokensForList(List<T> list, TextToken separator) {
         int size = list.size();
 
         if (size > 0) {

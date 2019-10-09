@@ -11,6 +11,11 @@ public class GenericType implements Type {
     protected String name;
     protected int  dimension;
 
+    public GenericType(String name) {
+        this.name = name;
+        this.dimension = 0;
+    }
+
     public GenericType(String name, int dimension) {
         this.name = name;
         this.dimension = dimension;
@@ -66,12 +71,19 @@ public class GenericType implements Type {
     }
 
     @Override
+    public void accept(TypeArgumentVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
-        if (typeArgument.getClass() == GenericType.class) {
+        Class typeArgumentClass = typeArgument.getClass();
+
+        if (typeArgumentClass == GenericType.class) {
             return true;
         } else if (typeArgument instanceof Type) {
-            return true;
-        } else if (typeArgument instanceof WildcardTypeArgument) {
+            return false;
+        } else if (typeArgumentClass == WildcardTypeArgument.class) {
             return false;
         }
 

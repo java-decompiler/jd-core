@@ -154,6 +154,11 @@ public class PrimitiveType implements Type {
     }
 
     @Override
+    public void accept(TypeArgumentVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
         return equals(typeArgument);
     }

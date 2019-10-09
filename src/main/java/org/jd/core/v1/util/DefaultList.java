@@ -9,20 +9,12 @@ package org.jd.core.v1.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 @SuppressWarnings("unchecked")
 public class DefaultList<E> extends ArrayList<E> {
-    protected static DefaultList EMPTY_LIST = new DefaultList(0) {
-        public Object set(int var1, Object var2) {
-            throw new UnsupportedOperationException();
-        }
-        public void add(int var1, Object var2) {
-            throw new UnsupportedOperationException();
-        }
-        public Object remove(int var1) {
-            throw new UnsupportedOperationException();
-        }
-    };
+    protected static EmptyList EMPTY_LIST = new EmptyList();
 
     public DefaultList() {}
 
@@ -76,5 +68,24 @@ public class DefaultList<E> extends ArrayList<E> {
 
     public static <T> DefaultList<T> emptyList() {
         return EMPTY_LIST;
+    }
+
+    protected static class EmptyList<E> extends DefaultList<E> implements Iterator<E> {
+        public EmptyList() { super(0); }
+
+        public E set(int index, E e) {
+            throw new UnsupportedOperationException();
+        }
+        public void add(int index, E e) {
+            throw new UnsupportedOperationException();
+        }
+        public E remove(int index) {
+            throw new UnsupportedOperationException();
+        }
+        public Iterator iterator() { return this; }
+
+        public boolean hasNext() { return false; }
+        public E next() { throw new NoSuchElementException(); }
+        public void remove() { throw new UnsupportedOperationException(); }
     }
 }

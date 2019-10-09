@@ -13,12 +13,12 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class UpdateJavaSyntaxTreeStep1Visitor extends AbstractJavaSyntaxVisitor {
-    protected InitInnerClassVisitor initInnerClassStep1Visitor = new InitInnerClassVisitor();
-
     protected CreateInstructionsVisitor createInstructionsVisitor;
+    protected InitInnerClassVisitor initInnerClassStep1Visitor;
 
     public UpdateJavaSyntaxTreeStep1Visitor(TypeMaker typeMaker) {
         createInstructionsVisitor = new CreateInstructionsVisitor(typeMaker);
+        initInnerClassStep1Visitor = new InitInnerClassVisitor();
     }
 
     @Override

@@ -13,7 +13,7 @@ public class WildcardTypeArgument implements TypeArgument {
     private WildcardTypeArgument() {}
 
     @Override
-    public void accept(TypeVisitor visitor) {
+    public void accept(TypeArgumentVisitor visitor) {
         visitor.visit(this);
     }
 

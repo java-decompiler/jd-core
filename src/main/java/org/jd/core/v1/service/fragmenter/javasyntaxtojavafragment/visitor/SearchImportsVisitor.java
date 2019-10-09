@@ -13,6 +13,7 @@ import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationReference;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 
@@ -30,13 +31,6 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    public void visit(AnnotationDeclaration declaration) {
-        safeAccept(declaration.getAnnotationReferences());
-        safeAccept(declaration.getAnnotationDeclarators());
-        safeAccept(declaration.getBodyDeclaration());
-    }
-
-    @Override
     public void visit(AnnotationReference reference) {
         super.visit(reference);
         add(reference.getType());
@@ -49,36 +43,11 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    public void visit(ClassDeclaration declaration) {
-        safeAccept(declaration.getSuperType());
-        safeAccept(declaration.getTypeParameters());
-        safeAccept(declaration.getInterfaces());
-        safeAccept(declaration.getAnnotationReferences());
-        safeAccept(declaration.getBodyDeclaration());
-    }
-
-    @Override
     public void visit(BodyDeclaration declaration) {
         if (!internalTypeNames.contains(declaration.getInternalTypeName())) {
             internalTypeNames.add(declaration.getInternalTypeName());
             safeAccept(declaration.getMemberDeclarations());
         }
-    }
-
-    @Override
-    public void visit(ConstructorDeclaration declaration) {
-        safeAccept(declaration.getAnnotationReferences());
-        safeAccept(declaration.getFormalParameters());
-        safeAccept(declaration.getExceptions());
-        safeAccept(declaration.getStatements());
-    }
-
-    @Override
-    public void visit(InterfaceDeclaration declaration) {
-        safeAccept(declaration.getTypeParameters());
-        safeAccept(declaration.getInterfaces());
-        safeAccept(declaration.getAnnotationReferences());
-        safeAccept(declaration.getBodyDeclaration());
     }
 
     public ImportsFragment getImportsFragment() {
@@ -88,13 +57,6 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
     public int getMaxLineNumber() {
         return maxLineNumber;
-    }
-
-    @Override
-    public void visit(FieldDeclaration declaration) {
-        safeAccept(declaration.getAnnotationReferences());
-        declaration.getType().accept(this);
-        declaration.getFieldDeclarators().accept(this);
     }
 
     @Override
@@ -150,13 +112,6 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(EnumDeclaration declaration) {
         safeAccept(declaration.getInterfaces());
         safeAccept(declaration.getAnnotationReferences());
-        safeAccept(declaration.getBodyDeclaration());
-    }
-
-    @Override
-    public void visit(EnumDeclaration.Constant declaration) {
-        safeAccept(declaration.getAnnotationReferences());
-        safeAccept(declaration.getArguments());
         safeAccept(declaration.getBodyDeclaration());
     }
 
@@ -233,7 +188,10 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(NewExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
         safeAccept(expression.getNonWildcardTypeArguments());
-        expression.getType().accept(this);
+
+        BaseType type = expression.getType();
+
+        type.accept(this);
         safeAccept(expression.getParameters());
         safeAccept(expression.getBodyDeclaration());
     }
@@ -249,7 +207,10 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
         if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
         expression.getExpression().accept(this);
         safeAccept(expression.getNonWildcardTypeArguments());
-        expression.getType().accept(this);
+
+        BaseType type = expression.getType();
+
+        type.accept(this);
         safeAccept(expression.getParameters());
         safeAccept(expression.getBodyDeclaration());
     }

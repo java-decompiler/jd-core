@@ -7,14 +7,14 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeVisitor;
+import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
 import java.util.HashSet;
 
-public class PopulateBlackListNamesVisitor extends AbstractNopTypeVisitor {
+public class PopulateBlackListNamesVisitor extends AbstractNopTypeArgumentVisitor {
     protected HashSet<String> blackListNames;
 
     public PopulateBlackListNamesVisitor(HashSet<String> blackListNames) {

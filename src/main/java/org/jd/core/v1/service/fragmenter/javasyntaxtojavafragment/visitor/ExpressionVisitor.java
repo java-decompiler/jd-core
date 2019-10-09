@@ -17,6 +17,7 @@ import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
@@ -108,7 +109,10 @@ public class ExpressionVisitor extends TypeVisitor {
         if (expression.isExplicit()) {
             tokens.addLineNumberToken(expression.getLineNumber());
             tokens.add(TextToken.LEFTROUNDBRACKET);
-            expression.getType().accept(this);
+
+            BaseType type = expression.getType();
+
+            type.accept(this);
             tokens.add(TextToken.RIGHTROUNDBRACKET);
         }
 
@@ -239,7 +243,10 @@ public class ExpressionVisitor extends TypeVisitor {
         tokens.add(TextToken.SPACE);
         tokens.add(INSTANCEOF);
         tokens.add(TextToken.SPACE);
-        expression.getInstanceOfType().accept(this);
+
+        BaseType type = expression.getInstanceOfType();
+
+        type.accept(this);
     }
 
     @Override
@@ -248,30 +255,29 @@ public class ExpressionVisitor extends TypeVisitor {
 
         if (parameters == null) {
             tokens.add(TextToken.LEFTRIGHTROUNDBRACKETS);
-        } else if (parameters.isList()) {
-            List<FormalParameter> list = parameters.getList();
-            int size = list.size();
+        } else {
+            int size = parameters.size();
 
             switch (size) {
                 case 0:
                     tokens.add(TextToken.LEFTRIGHTROUNDBRACKETS);
                     break;
                 case 1:
-                    list.get(0).accept(this);
+                    parameters.getFirst().accept(this);
                     break;
                 default:
                     tokens.add(TextToken.LEFTROUNDBRACKET);
-                    list.get(0).accept(this);
+                    Iterator<FormalParameter> iterator = parameters.iterator();
+                    iterator.next().accept(this);
 
-                    for (int i = 1; i < size; i++) {
+                    while (iterator.hasNext()) {
                         tokens.add(TextToken.COMMA_SPACE);
-                        list.get(1).accept(this);
+                        iterator.next().accept(this);
                     }
+
                     tokens.add(TextToken.RIGHTROUNDBRACKET);
                     break;
             }
-        } else {
-            parameters.accept(this);
         }
 
         visitLambdaBody(expression.getStatements());
@@ -395,7 +401,10 @@ public class ExpressionVisitor extends TypeVisitor {
         tokens.addLineNumberToken(expression);
         tokens.add(NEW);
         tokens.add(TextToken.SPACE);
-        expression.getType().accept(this);
+
+        BaseType type = expression.getType();
+
+        type.accept(this);
 
         BaseExpression dimensionExpressionList = expression.getDimensionExpressionList();
         int dimension = expression.getType().getDimension();
@@ -406,7 +415,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         if (dimensionExpressionList != null) {
             if (dimensionExpressionList.isList()) {
-                Iterator<Expression> iterator = dimensionExpressionList.getList().iterator();
+                Iterator<Expression> iterator = dimensionExpressionList.iterator();
 
                 while (iterator.hasNext()) {
                     tokens.add(StartBlockToken.START_ARRAY_BLOCK);
@@ -430,7 +439,10 @@ public class ExpressionVisitor extends TypeVisitor {
         tokens.addLineNumberToken(expression);
         tokens.add(NEW);
         tokens.add(TextToken.SPACE);
-        expression.getType().accept(this);
+
+        BaseType type = expression.getType();
+
+        type.accept(this);
         tokens.add(TextToken.SPACE);
         expression.getArrayInitializer().accept(this);
     }
@@ -450,7 +462,9 @@ public class ExpressionVisitor extends TypeVisitor {
             tokens.add(TextToken.RIGHTANGLEBRACKET);
         }
 
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
         BaseExpression parameters = expression.getParameters();
@@ -502,7 +516,10 @@ public class ExpressionVisitor extends TypeVisitor {
     public void visit(ObjectTypeReferenceExpression expression) {
         if (expression.isExplicit()) {
             tokens.addLineNumberToken(expression);
-            expression.getObjectType().accept(this);
+
+            BaseType type = expression.getType();
+
+            type.accept(this);
         }
     }
 
@@ -603,7 +620,10 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(TypeReferenceDotClassExpression expression) {
         tokens.addLineNumberToken(expression);
-        expression.getTypeDotClass().accept(this);
+
+        BaseType type = expression.getTypeDotClass();
+
+        type.accept(this);
         tokens.add(TextToken.DOT);
         tokens.add(CLASS);
     }

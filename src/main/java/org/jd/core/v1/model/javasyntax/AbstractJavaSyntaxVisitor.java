@@ -11,14 +11,12 @@ import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.reference.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.AbstractTypeVisitor;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.*;
 
+import java.util.Iterator;
 import java.util.List;
 
-public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor implements DeclarationVisitor, ExpressionVisitor, ReferenceVisitor, StatementVisitor {
+public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisitor implements DeclarationVisitor, ExpressionVisitor, ReferenceVisitor, StatementVisitor, TypeVisitor, TypeParameterVisitor {
     public void visit(CompilationUnit compilationUnit) {
         compilationUnit.getTypeDeclarations().accept(this);
     }
@@ -27,7 +25,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
     public void visit(AnnotationDeclaration declaration) {
         safeAccept(declaration.getAnnotationDeclarators());
         safeAccept(declaration.getBodyDeclaration());
-        visit((TypeDeclaration) declaration);
+        safeAccept(declaration.getAnnotationReferences());
     }
 
     @Override
@@ -42,8 +40,16 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(ClassDeclaration declaration) {
-        safeAccept(declaration.getSuperType());
-        visit((InterfaceDeclaration) declaration);
+        BaseType superType = declaration.getSuperType();
+
+        if (superType != null) {
+            superType.accept(this);
+        }
+
+        safeAccept(declaration.getTypeParameters());
+        safeAccept(declaration.getInterfaces());
+        safeAccept(declaration.getAnnotationReferences());
+        safeAccept(declaration.getBodyDeclaration());
     }
 
     @Override public void visit(CommentStatement statement) {}
@@ -52,8 +58,10 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(ConstructorInvocationExpression expression) {
+        BaseType type = expression.getType();
+
+        type.accept(this);
         safeAccept(expression.getParameters());
-        expression.getType().accept(this);
     }
 
     @Override
@@ -92,8 +100,10 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(FieldDeclaration declaration) {
+        BaseType type = declaration.getType();
+
+        type.accept(this);
         safeAccept(declaration.getAnnotationReferences());
-        declaration.getType().accept(this);
         declaration.getFieldDeclarators().accept(this);
     }
 
@@ -110,8 +120,10 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(FormalParameter declaration) {
+        BaseType type = declaration.getType();
+
+        type.accept(this);
         safeAccept(declaration.getAnnotationReferences());
-        declaration.getType().accept(this);
     }
 
     @Override
@@ -128,13 +140,15 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
     @Override
     public void visit(InterfaceDeclaration declaration) {
         safeAccept(declaration.getInterfaces());
+        safeAccept(declaration.getAnnotationReferences());
         safeAccept(declaration.getBodyDeclaration());
-        visit((TypeDeclaration) declaration);
     }
 
     @Override
     public void visit(LocalVariableDeclaration declaration) {
-        declaration.getType().accept(this);
+        BaseType type = declaration.getType();
+
+        type.accept(this);
         declaration.getLocalVariableDeclarators().accept(this);
     }
 
@@ -151,8 +165,10 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(MethodDeclaration declaration) {
+        BaseType returnedType = declaration.getReturnedType();
+
+        returnedType.accept(this);
         safeAccept(declaration.getAnnotationReferences());
-        declaration.getReturnedType().accept(this);
         safeAccept(declaration.getFormalParameters());
         safeAccept(declaration.getExceptionTypes());
         safeAccept(declaration.getStatements());
@@ -175,7 +191,9 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(ArrayExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
         expression.getExpression().accept(this);
         expression.getIndex().accept(this);
     }
@@ -191,45 +209,61 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(CastExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
         expression.getExpression().accept(this);
     }
 
     @Override
     public void visit(ConstructorReferenceExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
     public void visit(DoubleConstantExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
     public void visit(EnumConstantReferenceExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
     public void visit(FieldReferenceExpression expression) {
+        BaseType type = expression.getType();
+
+        type.accept(this);
         safeAccept(expression.getExpression());
-        expression.getType().accept(this);
     }
 
     @Override
     public void visit(FloatConstantExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
     public void visit(IntegerConstantExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
     public void visit(InstanceOfExpression expression) {
+        BaseType type = expression.getType();
+
+        type.accept(this);
         expression.getExpression().accept(this);
-        expression.getType().accept(this);
     }
 
     @Override
@@ -249,12 +283,16 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(LocalVariableReferenceExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
     public void visit(LongConstantExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
@@ -270,46 +308,60 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(NewArray expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
         safeAccept(expression.getDimensionExpressionList());
     }
 
     @Override
     public void visit(NewExpression expression) {
+        BaseType type = expression.getType();
+
+        type.accept(this);
         safeAccept(expression.getNonWildcardTypeArguments());
-        expression.getType().accept(this);
         safeAccept(expression.getParameters());
         // safeAccept(expression.getBodyDeclaration());
     }
 
     @Override
     public void visit(NewInitializedArray expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
         safeAccept(expression.getArrayInitializer());
     }
 
     @Override
     public void visit(NewInnerExpression expression) {
+        BaseType type = expression.getType();
+
+        type.accept(this);
         expression.getExpression().accept(this);
         safeAccept(expression.getNonWildcardTypeArguments());
-        expression.getType().accept(this);
         safeAccept(expression.getParameters());
         //safeAccept(expression.getBodyDeclaration());
     }
 
     @Override
     public void visit(NullExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
     public void visit(TypeReferenceDotClassExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
     public void visit(ObjectTypeReferenceExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
@@ -332,13 +384,17 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(SuperConstructorInvocationExpression expression) {
+        BaseType type = expression.getType();
+
+        type.accept(this);
         safeAccept(expression.getParameters());
-        expression.getType().accept(this);
     }
 
     @Override
     public void visit(SuperExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
@@ -350,7 +406,9 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(ThisExpression expression) {
-        expression.getType().accept(this);
+        BaseType type = expression.getType();
+
+        type.accept(this);
     }
 
     @Override
@@ -434,7 +492,9 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(ForEachStatement statement) {
-        statement.getType().accept(this);
+        BaseType type = statement.getType();
+
+        type.accept(this);
         statement.getExpression().accept(this);
         safeAccept(statement.getStatements());
     }
@@ -536,13 +596,17 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
 
     @Override
     public void visit(TryStatement.CatchClause statement) {
-        statement.getType().accept(this);
+        BaseType type = statement.getType();
+
+        type.accept(this);
         safeAccept(statement.getStatements());
     }
 
     @Override
     public void visit(TryStatement.Resource statement) {
-        statement.getType().accept(this);
+        BaseType type = statement.getType();
+
+        type.accept(this);
         statement.getExpression().accept(this);
     }
 
@@ -562,8 +626,36 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
         safeAccept(statement.getStatements());
     }
 
+    @Override
+    public void visit(TypeParameter type) {}
+
+    @Override
+    public void visit(TypeParameterWithTypeBounds type) {
+        type.getTypeBounds().accept(this);
+    }
+
+    @Override
+    public void visit(TypeParameters types) {
+        Iterator<TypeParameter> iterator = types.iterator();
+
+        while (iterator.hasNext())
+            iterator.next().accept(this);
+    }
+
     protected void visit(TypeDeclaration declaration) {
         safeAccept(declaration.getAnnotationReferences());
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void visit(Types types) {
+        Iterator<Type> iterator = types.iterator();
+
+        while (iterator.hasNext()) {
+            BaseType type = iterator.next();
+
+            type.accept(this);
+        }
     }
 
     protected void acceptListDeclaration(List<? extends Declaration> list) {
@@ -607,6 +699,11 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeVisitor impl
     }
 
     protected void safeAccept(BaseType list) {
+        if (list != null)
+            list.accept(this);
+    }
+
+    protected void safeAccept(BaseTypeParameter list) {
         if (list != null)
             list.accept(this);
     }

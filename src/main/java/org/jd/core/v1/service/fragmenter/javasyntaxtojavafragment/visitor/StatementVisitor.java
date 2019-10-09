@@ -14,10 +14,10 @@ import org.jd.core.v1.model.javafragment.StartStatementsBlockFragment;
 import org.jd.core.v1.model.javafragment.TokensFragment;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
-import org.jd.core.v1.util.DefaultList;
 
 import java.util.Iterator;
 import java.util.List;
@@ -188,7 +188,9 @@ public class StatementVisitor extends ExpressionVisitor {
         tokens.add(TextToken.SPACE);
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
-        statement.getType().accept(this);
+        BaseType type = statement.getType();
+
+        type.accept(this);
 
         tokens.add(TextToken.SPACE);
         tokens.add(newTextToken(statement.getName()));
@@ -303,9 +305,8 @@ public class StatementVisitor extends ExpressionVisitor {
         BaseStatement statementList = elseStatements;
 
         if (elseStatements.isList()) {
-            DefaultList<Statement> list = elseStatements.getList();
-            if (list.size() == 1) {
-                statementList = list.getFirst();
+            if (elseStatements.size() == 1) {
+                statementList = elseStatements.getFirst();
             }
         }
 
@@ -388,7 +389,9 @@ public class StatementVisitor extends ExpressionVisitor {
             tokens.add(TextToken.SPACE);
         }
 
-        statement.getType().accept(this);
+        BaseType type = statement.getType();
+
+        type.accept(this);
 
         tokens.add(TextToken.SPACE);
 
@@ -588,7 +591,10 @@ public class StatementVisitor extends ExpressionVisitor {
         Expression expression = resource.getExpression();
 
         tokens.addLineNumberToken(expression);
-        resource.getType().accept(this);
+
+        BaseType type = resource.getType();
+
+        type.accept(this);
         tokens.add(TextToken.SPACE);
         tokens.add(newTextToken(resource.getName()));
         tokens.add(TextToken.SPACE_EQUAL_SPACE);

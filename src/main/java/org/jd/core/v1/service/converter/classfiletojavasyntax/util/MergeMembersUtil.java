@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.jd.core.v1.model.javasyntax.declaration.MemberDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.MemberDeclarations;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMemberDeclaration;
 
@@ -44,7 +45,7 @@ public class MergeMembersUtil {
         return result;
     }
 
-    protected static void merge(List<ClassFileMemberDeclaration> result, List<? extends ClassFileMemberDeclaration> members) {
+    protected static void merge(List<MemberDeclaration> result, List<? extends ClassFileMemberDeclaration> members) {
         if ((members != null) && !members.isEmpty()) {
             sort(members);
 
@@ -68,7 +69,8 @@ public class MergeMembersUtil {
                     } else {
                         // Search insert index in result
                         while (resultIndex < resultLength) {
-                            int resultLineNumber = result.get(resultIndex).getFirstLineNumber();
+                            ClassFileMemberDeclaration member = (ClassFileMemberDeclaration)result.get(resultIndex);
+                            int resultLineNumber = member.getFirstLineNumber();
                             if (resultLineNumber > listLineNumber)
                                 break;
                             resultIndex++;

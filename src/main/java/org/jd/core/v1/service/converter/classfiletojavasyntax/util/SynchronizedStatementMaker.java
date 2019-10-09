@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 public class SynchronizedStatementMaker {
 
-    public static Statement make(LocalVariableMaker localVariableMaker, Statements<Statement> statements, Statements<Statement> tryStatements) {
+    public static Statement make(LocalVariableMaker localVariableMaker, Statements statements, Statements tryStatements) {
         // Remove monitor enter
         ClassFileMonitorEnterStatement monitorEnterStatement = (ClassFileMonitorEnterStatement) statements.removeLast();
         Expression monitor = monitorEnterStatement.getMonitor();

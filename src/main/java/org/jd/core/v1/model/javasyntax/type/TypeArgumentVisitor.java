@@ -7,10 +7,14 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
-public interface TypeVisitor {
+public interface TypeArgumentVisitor {
+    void visit(TypeArguments arguments);
+    void visit(DiamondTypeArgument argument);
+    void visit(WildcardExtendsTypeArgument argument);
+    void visit(WildcardSuperTypeArgument argument);
+    void visit(WildcardTypeArgument argument);
     void visit(PrimitiveType type);
     void visit(ObjectType type);
     void visit(InnerObjectType type);
-    void visit(Types types);
     void visit(GenericType type);
 }

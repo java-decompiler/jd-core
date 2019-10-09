@@ -26,7 +26,7 @@ public class SwitchStatementMaker {
     protected static final Integer MINUS_ONE = Integer.valueOf(-1);
 
     @SuppressWarnings("unchecked")
-    public static void makeSwitchString(LocalVariableMaker localVariableMaker, Statements<Statement> statements, SwitchStatement switchStatement) {
+    public static void makeSwitchString(LocalVariableMaker localVariableMaker, Statements statements, SwitchStatement switchStatement) {
         int size = statements.size();
         SwitchStatement previousSwitchStatement = (SwitchStatement)statements.get(size - 2);
 
@@ -79,7 +79,7 @@ public class SwitchStatementMaker {
 
                                                                 assert (stmts != null) && (stmts.getClass() == Statements.class) && !((Statements) stmts).isEmpty();
 
-                                                                for (Statement stmt : (Statements<Statement>) stmts) {
+                                                                for (Statement stmt : stmts) {
                                                                     if (stmt.getClass() != IfStatement.class) {
                                                                         break;
                                                                     }
@@ -192,7 +192,7 @@ public class SwitchStatementMaker {
                 if (syntheticClass != null) {
                     // Javac switch-enum pattern
                     bodyDeclaration = (ClassFileBodyDeclaration) syntheticClass.getBodyDeclaration();
-                    DefaultList<Statement> statements = (DefaultList) bodyDeclaration.getMethodDeclarations().get(0).getStatements();
+                    DefaultList<Statement> statements = bodyDeclaration.getMethodDeclarations().get(0).getStatements().getList();
                     updateSwitchStatement(switchStatement, statements.listIterator(1));
                 }
             }
@@ -204,7 +204,7 @@ public class SwitchStatementMaker {
                 // Eclipse compiler switch-enum pattern
                 for (ClassFileConstructorOrMethodDeclaration declaration : bodyDeclaration.getMethodDeclarations()) {
                      if (declaration.getMethod().getName().equals(methodName)) {
-                         DefaultList<Statement> statements = (DefaultList)declaration.getStatements();
+                         DefaultList<Statement> statements = declaration.getStatements().getList();
                          updateSwitchStatement(switchStatement, statements.listIterator(3));
                          break;
                      }
@@ -230,7 +230,7 @@ public class SwitchStatementMaker {
                 break;
             }
 
-            statement = statements.getList().getFirst();
+            statement = statements.getFirst();
 
             if (statement.getClass() != ExpressionStatement.class) {
                 break;

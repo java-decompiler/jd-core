@@ -9,6 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
@@ -18,6 +19,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.s
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForEachStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.GenericLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.ObjectLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateTypeFromTypeArgumentVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RemoveLastContinueStatementVisitor;
@@ -33,7 +35,7 @@ import static org.jd.core.v1.model.javasyntax.statement.ContinueStatement.CONTIN
 public class LoopStatementMaker {
     protected static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
 
-    public static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements<Statement> statements, Expression condition, Statements<Statement> subStatements, Statements jumps) {
+    public static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements statements, Expression condition, Statements subStatements, Statements jumps) {
         Statement loop = makeLoop(localVariableMaker, loopBasicBlock, statements, condition, subStatements);
         int continueOffset = loopBasicBlock.getSub1().getFromOffset();
         int breakOffset = loopBasicBlock.getNext().getFromOffset();
@@ -45,7 +47,7 @@ public class LoopStatementMaker {
         return makeLabels(loopBasicBlock.getIndex(), continueOffset, breakOffset, loop, jumps);
     }
 
-    protected static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements<Statement> statements, Expression condition, Statements<Statement> subStatements) {
+    protected static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements statements, Expression condition, Statements subStatements) {
         subStatements.accept(REMOVE_LAST_CONTINUE_STATEMENT_VISITOR);
 
         Statement statement = makeForEachArray(localVariableMaker, statements, condition, subStatements);
@@ -122,7 +124,7 @@ public class LoopStatementMaker {
         return new WhileStatement(condition, subStatements);
     }
 
-    public static Statement makeLoop(BasicBlock loopBasicBlock, Statements<Statement> statements, Statements<Statement> subStatements, Statements jumps) {
+    public static Statement makeLoop(BasicBlock loopBasicBlock, Statements statements, Statements subStatements, Statements jumps) {
         subStatements.accept(REMOVE_LAST_CONTINUE_STATEMENT_VISITOR);
 
         Statement loop = makeLoop(loopBasicBlock, statements, subStatements);
@@ -136,7 +138,7 @@ public class LoopStatementMaker {
         return makeLabels(loopBasicBlock.getIndex(), continueOffset, breakOffset, loop, jumps);
     }
 
-    protected static Statement makeLoop(BasicBlock loopBasicBlock, Statements<Statement> statements, Statements<Statement> subStatements) {
+    protected static Statement makeLoop(BasicBlock loopBasicBlock, Statements statements, Statements subStatements) {
         int subStatementsSize = subStatements.size();
 
         if ((subStatementsSize > 0) && (subStatements.getLast() == CONTINUE)) {
@@ -173,7 +175,7 @@ public class LoopStatementMaker {
 
                 if (firstLineNumber > 0) {
                     // Populates 'update'
-                    Expressions<Expression> update = extractUpdate(subStatements, firstLineNumber);
+                    Expressions update = extractUpdate(subStatements, firstLineNumber);
 
                     if (update.size() > 0) {
                         // Populates 'init'
@@ -208,7 +210,7 @@ public class LoopStatementMaker {
     }
 
     @SuppressWarnings("unchecked")
-    protected static BaseExpression extractInit(Statements<Statement> statements, int lineNumber) {
+    protected static BaseExpression extractInit(Statements statements, int lineNumber) {
         if (lineNumber > 0) {
             switch (statements.size()) {
                 case 0:
@@ -266,8 +268,8 @@ public class LoopStatementMaker {
     }
 
     @SuppressWarnings("unchecked")
-    protected static Expressions<Expression> extractUpdate(Statements statements, int firstLineNumber) {
-        Expressions<Expression> update = new Expressions();
+    protected static Expressions extractUpdate(Statements statements, int firstLineNumber) {
+        Expressions update = new Expressions();
         ListIterator<Statement> iterator = statements.listIterator(statements.size());
 
         // Populates 'update'
@@ -291,7 +293,7 @@ public class LoopStatementMaker {
         return update;
     }
 
-    protected static Statement createForStatementWithoutLineNumber(BasicBlock basicBlock, Statements<Statement> statements, Expression condition, Statements<Statement> subStatements) {
+    protected static Statement createForStatementWithoutLineNumber(BasicBlock basicBlock, Statements statements, Expression condition, Statements subStatements) {
         if (!statements.isEmpty()) {
             Statement statement = statements.getLast();
 
@@ -342,7 +344,7 @@ public class LoopStatementMaker {
         return new WhileStatement(condition, subStatements);
     }
 
-    protected static Statement makeForEachArray(LocalVariableMaker localVariableMaker, Statements<Statement> statements, Expression condition, Statements<Statement> subStatements) {
+    protected static Statement makeForEachArray(LocalVariableMaker localVariableMaker, Statements statements, Expression condition, Statements subStatements) {
         if (condition == null) {
             return null;
         }
@@ -508,6 +510,8 @@ public class LoopStatementMaker {
 
         if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
             ((ObjectLocalVariable)item).setType(type);
+        } else if (item.getType().isGeneric()) {
+            ((GenericLocalVariable)item).setType((GenericType)type);
         } else {
             item.typeOnRight(type);
         }
@@ -519,7 +523,7 @@ public class LoopStatementMaker {
         return new ClassFileForEachStatement(item, array, subStatements);
     }
 
-    protected static Statement makeForEachList(LocalVariableMaker localVariableMaker, Statements<Statement> statements, Expression condition, Statements<Statement> subStatements) {
+    protected static Statement makeForEachList(LocalVariableMaker localVariableMaker, Statements statements, Expression condition, Statements subStatements) {
         if (condition == null) {
             return null;
         }
@@ -574,6 +578,10 @@ public class LoopStatementMaker {
         }
 
         Expression list = mie.getExpression();
+
+        if (list.getClass() == CastExpression.class) {
+            list = ((CastExpression)list).getExpression();
+        }
 
         // String s = (String)i$.next();
         Statement firstSubStatement = subStatements.get(0);
@@ -633,7 +641,15 @@ public class LoopStatementMaker {
 
         ObjectType listType = (ObjectType)list.getType();
 
-        if (listType.getTypeArguments() != null) {
+        if (listType.getTypeArguments() == null) {
+            if (item.getType().isObject()) {
+                ObjectType ot = (ObjectType)item.getType();
+
+                if (ot.getTypeArguments() != null) {
+                    TypeParametersToTypeArgumentsBinder.staticBindParameterTypesWithArgumentTypes(ot, list);
+                }
+            }
+        } else {
             CreateTypeFromTypeArgumentVisitor visitor2 = new CreateTypeFromTypeArgumentVisitor();
             listType.getTypeArguments().accept(visitor2);
             Type type = visitor2.getType();
@@ -641,6 +657,8 @@ public class LoopStatementMaker {
             if (type != null) {
                 if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
                     ((ObjectLocalVariable)item).setType(type);
+                } else if (item.getType().isGeneric()) {
+                    ((GenericLocalVariable)item).setType((GenericType)type);
                 } else {
                     item.typeOnRight(type);
                 }
@@ -653,12 +671,12 @@ public class LoopStatementMaker {
     @SuppressWarnings("unchecked")
     protected static Statement makeLabels(int loopIndex, int continueOffset, int breakOffset, Statement loop, Statements jumps) {
         if (!jumps.isEmpty()) {
-            Iterator<ClassFileBreakContinueStatement> iterator = jumps.iterator();
+            Iterator<Statement> iterator = jumps.iterator();
             String label = "label" + loopIndex;
             boolean createLabel = false;
 
             while (iterator.hasNext()) {
-                ClassFileBreakContinueStatement statement = iterator.next();
+                ClassFileBreakContinueStatement statement = (ClassFileBreakContinueStatement)iterator.next();
                 int offset = statement.getOffset();
                 int targetOffset = statement.getTargetOffset();
 

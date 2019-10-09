@@ -13,6 +13,7 @@ import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ClassFileStaticInitializerDeclaration extends StaticInitializerDeclaration implements ClassFileConstructorOrMethodDeclaration {
@@ -50,6 +51,11 @@ public class ClassFileStaticInitializerDeclaration extends StaticInitializerDecl
 
     @Override
     public Method getMethod() { return method; }
+
+    @Override
+    public BaseTypeParameter getTypeParameters() {
+        return null;
+    }
 
     @Override
     public BaseType getParameterTypes() {

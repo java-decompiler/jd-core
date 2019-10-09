@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
-public interface Type extends TypeArgument, BaseType, TypeBoundList {
+public interface Type extends BaseType, TypeArgument {
     String getName();
 
     String getDescriptor();

@@ -9,7 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.type.*;
 
-public class SearchInTypeArgumentVisitor extends AbstractTypeVisitor {
+public class SearchInTypeArgumentVisitor extends AbstractTypeArgumentVisitor {
     protected boolean wildcardFound;
     protected boolean wildcardSuperOrExtendsTypeFound;
     protected boolean genericFound;

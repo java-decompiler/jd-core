@@ -22,6 +22,7 @@ import java.util.HashMap;
 import static org.jd.core.v1.model.classfile.Constants.ACC_SYNTHETIC;
 
 public class ClassFileDeserializer {
+    protected static final int[] EMPTY_INT_ARRAY = new int[0];
 
     public ClassFile loadClassFile(Loader loader, String internalTypeName) throws Exception {
         return innerLoadClassFile(loader, internalTypeName);
@@ -407,7 +408,7 @@ public class ClassFileDeserializer {
             int[] bootstrapArguments;
 
             if (numBootstrapArguments == 0) {
-                bootstrapArguments = null;
+                bootstrapArguments = EMPTY_INT_ARRAY;
             } else {
                 bootstrapArguments = new int[numBootstrapArguments];
                 for (int j=0; j<numBootstrapArguments; j++) {

@@ -56,6 +56,10 @@ public class NewExpression extends AbstractLineNumberExpression {
         return type;
     }
 
+    public void setType(ObjectType type) {
+        this.type = type;
+    }
+
     @Override
     public int getPriority() {
         return 3;
@@ -80,5 +84,10 @@ public class NewExpression extends AbstractLineNumberExpression {
     @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
+    }
+
+    @Override
+    public String toString() {
+        return "NewExpression{new " + type + "}";
     }
 }

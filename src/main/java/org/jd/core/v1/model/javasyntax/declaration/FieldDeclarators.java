@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -11,20 +11,20 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.Collection;
 
-public class FieldDeclarators<T extends FieldDeclarator> extends DefaultList<T> implements BaseFieldDeclarator {
+public class FieldDeclarators extends DefaultList<FieldDeclarator> implements BaseFieldDeclarator {
     public FieldDeclarators() {}
 
     public FieldDeclarators(int capacity) {
         super(capacity);
     }
 
-    public FieldDeclarators(Collection<T> collection) {
+    public FieldDeclarators(Collection<FieldDeclarator> collection) {
         super(collection);
         assert (collection != null) && (collection.size() > 1) : "Uses 'FieldDeclarator' instead";
     }
 
     @SuppressWarnings("unchecked")
-    public FieldDeclarators(T declarator, T... declarators) {
+    public FieldDeclarators(FieldDeclarator declarator, FieldDeclarator... declarators) {
         super(declarator, declarators);
         assert (declarators != null) && (declarators.length > 0) : "Uses 'FieldDeclarator' instead";
     }

@@ -12,6 +12,7 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public interface ClassFileConstructorOrMethodDeclaration extends ClassFileMemberDeclaration {
@@ -21,6 +22,8 @@ public interface ClassFileConstructorOrMethodDeclaration extends ClassFileMember
     ClassFile getClassFile();
 
     Method getMethod();
+
+    BaseTypeParameter getTypeParameters();
 
     BaseType getParameterTypes();
 

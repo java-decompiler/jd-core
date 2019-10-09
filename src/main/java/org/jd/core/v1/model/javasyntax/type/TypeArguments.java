@@ -9,13 +9,17 @@ package org.jd.core.v1.model.javasyntax.type;
 
 import org.jd.core.v1.util.DefaultList;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
-public class ArrayTypeArguments extends DefaultList<TypeArgument> implements BaseTypeArgument {
-    public ArrayTypeArguments() {}
+public class TypeArguments extends DefaultList<TypeArgument> implements BaseTypeArgument {
+    public TypeArguments() {}
 
-    public ArrayTypeArguments(List<TypeArgument> list) {
+    public TypeArguments(int capacity) {
+        super(capacity);
+    }
+
+    public TypeArguments(Collection<TypeArgument> list) {
         super(list);
     }
 
@@ -26,11 +30,11 @@ public class ArrayTypeArguments extends DefaultList<TypeArgument> implements Bas
 
     @Override
     public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
-        if (typeArgument.getClass() != ArrayTypeArguments.class) {
+        if (typeArgument.getClass() != TypeArguments.class) {
             return false;
         }
 
-        ArrayTypeArguments ata = (ArrayTypeArguments)typeArgument;
+        TypeArguments ata = (TypeArguments)typeArgument;
 
         if (size() != ata.size()) {
             return false;
@@ -49,12 +53,27 @@ public class ArrayTypeArguments extends DefaultList<TypeArgument> implements Bas
     }
 
     @Override
+    public boolean isTypeArgumentList() {
+        return true;
+    }
+
+    @Override
+    public TypeArgument getTypeArgumentFirst() {
+        return getFirst();
+    }
+
+    @Override
+    public DefaultList<TypeArgument> getTypeArgumentList() {
+        return this;
+    }
+
+    @Override
     public int typeArgumentSize() {
         return size();
     }
 
     @Override
-    public void accept(TypeVisitor visitor) {
+    public void accept(TypeArgumentVisitor visitor) {
         visitor.visit(this);
     }
 }

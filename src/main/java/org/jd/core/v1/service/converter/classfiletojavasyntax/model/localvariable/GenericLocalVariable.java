@@ -28,6 +28,10 @@ public class GenericLocalVariable extends AbstractLocalVariable {
         return type;
     }
 
+    public void setType(GenericType type) {
+        this.type = type;
+    }
+
     @Override
     public int getDimension() {
         return type.getDimension();

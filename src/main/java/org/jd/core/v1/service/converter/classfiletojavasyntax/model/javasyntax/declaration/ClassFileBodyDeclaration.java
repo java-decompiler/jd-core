@@ -10,7 +10,9 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.
 import org.jd.core.v1.model.javasyntax.declaration.BaseMemberDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.Collections;
@@ -25,15 +27,14 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     protected Map<String, ClassFileMemberDeclaration> innerTypeMap = Collections.emptyMap();
     protected int firstLineNumber;
     protected ObjectType outerType;
-    protected DefaultList<String> outerLocalVariableNames;
+    protected DefaultList<String> syntheticInnerFieldNames;
+    protected Map<String, List<FieldReferenceExpression>> syntheticInnerFieldNameToSyntheticInnerFieldReferences;
     protected ClassFileBodyDeclaration outerBodyDeclaration;
+    protected Map<String, TypeArgument> bindings;
 
-    public ClassFileBodyDeclaration(String internalTypeName) {
+    public ClassFileBodyDeclaration(String internalTypeName, Map<String, TypeArgument> bindings, ClassFileBodyDeclaration outerBodyDeclaration) {
         super(internalTypeName, null);
-    }
-
-    public ClassFileBodyDeclaration(String internalTypeName, ClassFileBodyDeclaration outerBodyDeclaration) {
-        super(internalTypeName, null);
+        this.bindings = bindings;
         this.outerBodyDeclaration = outerBodyDeclaration;
     }
 
@@ -123,16 +124,28 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
         this.outerType = outerType;
     }
 
-    public DefaultList<String> getOuterLocalVariableNames() {
-        return outerLocalVariableNames;
+    public DefaultList<String> getSyntheticInnerFieldNames() {
+        return syntheticInnerFieldNames;
     }
 
-    public void setOuterLocalVariableNames(DefaultList<String> outerLocalVariableNames) {
-        this.outerLocalVariableNames = outerLocalVariableNames;
+    public void setSyntheticInnerFieldNames(DefaultList<String> syntheticInnerFieldNames) {
+        this.syntheticInnerFieldNames = syntheticInnerFieldNames;
+    }
+
+    public Map<String, List<FieldReferenceExpression>> getSyntheticInnerFieldNameToSyntheticInnerFieldReferences() {
+        return syntheticInnerFieldNameToSyntheticInnerFieldReferences;
+    }
+
+    public void setSyntheticInnerFieldNameToSyntheticInnerFieldReferences(Map<String, List<FieldReferenceExpression>> map) {
+        this.syntheticInnerFieldNameToSyntheticInnerFieldReferences = map;
     }
 
     public ClassFileBodyDeclaration getOuterBodyDeclaration() {
         return outerBodyDeclaration;
+    }
+
+    public Map<String, TypeArgument> getBindings() {
+        return bindings;
     }
 
     @Override

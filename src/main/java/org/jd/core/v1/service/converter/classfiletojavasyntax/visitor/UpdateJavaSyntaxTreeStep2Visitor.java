@@ -17,17 +17,19 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
     protected static final AggregateFieldsVisitor AGGREGATE_FIELDS_VISITOR = new AggregateFieldsVisitor();
     protected static final SortMembersVisitor SORT_MEMBERS_VISITOR = new SortMembersVisitor();
 
-    protected InitInnerClassVisitor.UpdateNewExpressionVisitor initInnerClassStep2Visitor = new InitInnerClassVisitor.UpdateNewExpressionVisitor();
     protected InitStaticFieldVisitor initStaticFieldVisitor = new InitStaticFieldVisitor();
     protected InitInstanceFieldVisitor initInstanceFieldVisitor = new InitInstanceFieldVisitor();
     protected InitEnumVisitor initEnumVisitor = new InitEnumVisitor();
     protected RemoveDefaultConstructorVisitor removeDefaultConstructorVisitor = new RemoveDefaultConstructorVisitor();
     protected UpdateBridgeMethodVisitor replaceBridgeMethodVisitor = new UpdateBridgeMethodVisitor();
+
+    protected InitInnerClassVisitor.UpdateNewExpressionVisitor initInnerClassStep2Visitor;
     protected AddCastExpressionVisitor addCastExpressionVisitor;
 
     protected TypeDeclaration typeDeclaration;
 
     public UpdateJavaSyntaxTreeStep2Visitor(TypeMaker typeMaker) {
+        this.initInnerClassStep2Visitor = new InitInnerClassVisitor.UpdateNewExpressionVisitor(typeMaker);
         this.addCastExpressionVisitor = new AddCastExpressionVisitor(typeMaker);
     }
 
@@ -42,7 +44,7 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
             typeDeclaration = td;
         }
 
-        // Init visitor
+        // Init bindTypeArgumentVisitor
         initStaticFieldVisitor.setInternalTypeName(typeDeclaration.getInternalTypeName());
 
         // Visit declaration

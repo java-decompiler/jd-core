@@ -28,9 +28,18 @@ public class ClassFileNewExpression extends NewExpression {
         return parameterTypes;
     }
 
+    public void setParameterTypes(BaseType parameterTypes) {
+        this.parameterTypes = parameterTypes;
+    }
+
     public void set(String descriptor, BaseType parameterTypes, BaseExpression parameters) {
         this.descriptor = descriptor;
         this.parameterTypes = parameterTypes;
         this.parameters = parameters;
+    }
+
+    @Override
+    public String toString() {
+        return "ClassFileNewExpression{new " + type + "}";
     }
 }

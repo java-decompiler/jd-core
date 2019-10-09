@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -9,7 +9,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
-import org.jd.core.v1.util.DefaultList;
 
 import java.util.List;
 
@@ -37,21 +36,17 @@ public class MergeTryWithResourcesStatementVisitor implements StatementVisitor {
         safeAcceptListStatement(statement.getCatchClauses());
         safeAccept(statement.getFinallyStatements());
 
-        if (tryStatements.isList()) {
-            DefaultList<Statement> sal = tryStatements.getList();
+        if (tryStatements.size() == 1) {
+            Statement first = tryStatements.getFirst();
 
-            if (sal.size() == 1) {
-                Statement first = sal.getFirst();
+            if (first.getClass() == ClassFileTryStatement.class) {
+                ClassFileTryStatement cfswrs1 = (ClassFileTryStatement)statement;
+                ClassFileTryStatement cfswrs2 = (ClassFileTryStatement)first;
 
-                if (first.getClass() == ClassFileTryStatement.class) {
-                    ClassFileTryStatement cfswrs1 = (ClassFileTryStatement)statement;
-                    ClassFileTryStatement cfswrs2 = (ClassFileTryStatement)first;
-
-                    if ((cfswrs2.getResources() != null) && (cfswrs2.getCatchClauses() == null) && (cfswrs2.getFinallyStatements() == null)) {
-                        // Merge 'try' and 'try-with-resources" statements
-                        cfswrs1.setTryStatements(cfswrs2.getTryStatements());
-                        cfswrs1.addResources(cfswrs2.getResources());
-                    }
+                if ((cfswrs2.getResources() != null) && (cfswrs2.getCatchClauses() == null) && (cfswrs2.getFinallyStatements() == null)) {
+                    // Merge 'try' and 'try-with-resources" statements
+                    cfswrs1.setTryStatements(cfswrs2.getTryStatements());
+                    cfswrs1.addResources(cfswrs2.getResources());
                 }
             }
         }

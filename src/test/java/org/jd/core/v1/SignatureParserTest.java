@@ -48,7 +48,10 @@ public class SignatureParserTest extends TestCase {
         // Check super type
         assertNotNull(typeTypes.superType);
         visitor.reset();
-        typeTypes.superType.accept(visitor);
+
+        BaseType superType = typeTypes.superType;
+
+        superType.accept(visitor);
         String source = visitor.toString();
 
         Assert.assertEquals("java.util.ArrayList", source);
@@ -63,7 +66,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check field 'list1'
         //  public List<List<? extends Generic>> list1
-        Type type = typeMaker.parseFieldSignature(classFile, classFile.getFields()[0]);
+        BaseType type = typeMaker.parseFieldSignature(classFile, classFile.getFields()[0]);
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -91,8 +94,9 @@ public class SignatureParserTest extends TestCase {
         // Check return type
         assertNotNull(methodTypes.returnedType);
 
+        BaseType returnedType = methodTypes.returnedType;
         visitor.reset();
-        methodTypes.returnedType.accept(visitor);
+        returnedType.accept(visitor);
         source = visitor.toString();
 
         Assert.assertEquals("int", source);
@@ -121,8 +125,9 @@ public class SignatureParserTest extends TestCase {
         // Check return type
         assertNotNull(methodTypes.returnedType);
 
+        returnedType = methodTypes.returnedType;
         visitor.reset();
-        methodTypes.returnedType.accept(visitor);
+        returnedType.accept(visitor);
         source = visitor.toString();
 
         Assert.assertEquals("void", source);
@@ -184,9 +189,10 @@ public class SignatureParserTest extends TestCase {
         Assert.assertEquals(expected, source);
 
         // Check super type
-        assertNotNull(typeTypes.superType);
+        BaseType superType = typeTypes.superType;
+        assertNotNull(superType);
         visitor.reset();
-        typeTypes.superType.accept(visitor);
+        superType.accept(visitor);
         source = visitor.toString();
 
         Assert.assertEquals("java.util.ArrayList<T7>", source);
@@ -201,7 +207,7 @@ public class SignatureParserTest extends TestCase {
 
         // Check field 'list1'
         //  public List<List<? extends Generic>> list1
-        Type type = typeMaker.parseFieldSignature(classFile, classFile.getFields()[0]);
+        BaseType type = typeMaker.parseFieldSignature(classFile, classFile.getFields()[0]);
         visitor.reset();
         type.accept(visitor);
         source = visitor.toString();
@@ -234,8 +240,9 @@ public class SignatureParserTest extends TestCase {
         // Check return type
         assertNotNull(methodTypes.returnedType);
 
+        BaseType returnedType = methodTypes.returnedType;
         visitor.reset();
-        methodTypes.returnedType.accept(visitor);
+        returnedType.accept(visitor);
         source = visitor.toString();
 
         Assert.assertEquals("java.util.List<? extends java.lang.Number>", source);
@@ -275,8 +282,9 @@ public class SignatureParserTest extends TestCase {
         // Check return type
         assertNotNull(methodTypes.returnedType);
 
+        returnedType = methodTypes.returnedType;
         visitor.reset();
-        methodTypes.returnedType.accept(visitor);
+        returnedType.accept(visitor);
         source = visitor.toString();
 
         Assert.assertEquals("java.util.List<? extends java.lang.Number>", source);
@@ -349,7 +357,7 @@ public class SignatureParserTest extends TestCase {
         Assert.assertEquals(ot.getName(), "AbstractMultiValuedMap");
         Assert.assertNotNull(ot.getTypeArguments());
 
-        ArrayTypeArguments typeArguments = (ArrayTypeArguments)ot.getTypeArguments();
+        TypeArguments typeArguments = (TypeArguments)ot.getTypeArguments();
 
         Assert.assertEquals(typeArguments.size(), 2);
         Assert.assertEquals(typeArguments.getFirst().toString(), "GenericType{K}");

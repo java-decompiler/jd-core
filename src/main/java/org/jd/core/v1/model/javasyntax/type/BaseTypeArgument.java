@@ -10,8 +10,14 @@ package org.jd.core.v1.model.javasyntax.type;
 import org.jd.core.v1.util.DefaultList;
 
 @SuppressWarnings("unchecked")
-public interface BaseTypeArgument extends TypeVisitable {
-    boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument);
+public interface BaseTypeArgument extends TypeArgumentVisitable {
+    default boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+        return false;
+    }
+
+    default boolean isTypeArgumentList() {
+        return false;
+    }
 
     default TypeArgument getTypeArgumentFirst() {
         return (TypeArgument)this;

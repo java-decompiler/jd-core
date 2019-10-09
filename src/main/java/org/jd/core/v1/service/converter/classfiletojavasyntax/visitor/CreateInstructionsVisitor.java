@@ -54,8 +54,8 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                     }
                 } else if (method.getParameterTypes() != null) {
                     if (method.getParameterTypes().isList()) {
-                        for (Type type : method.getParameterTypes().getList()) {
-                            if (type.isObject() && ((ObjectType) type).getName() == null) {
+                        for (Type type : method.getParameterTypes()) {
+                            if (type.isObject() && (type.getName() == null)) {
                                 // Synthetic type in parameterTypes -> synthetic method
                                 method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
                                 method.accept(this);
@@ -64,7 +64,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                         }
                     } else {
                         Type type = method.getParameterTypes().getFirst();
-                        if (type.isObject() && ((ObjectType) type).getName() == null) {
+                        if (type.isObject() && (type.getName() == null)) {
                             // Synthetic type in parameterTypes -> synthetic method
                             method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
                             method.accept(this);
@@ -87,34 +87,33 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        ClassFileConstructorOrMethodDeclaration comdwln = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comdwln, true, comdwln.getParameterTypes());
+        ClassFileConstructorOrMethodDeclaration comd = (ClassFileConstructorOrMethodDeclaration)declaration;
+        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comd, true, comd.getParameterTypes());
 
-        createParametersVariablesAndStatements(comdwln, localVariableMaker);
+        createParametersVariablesAndStatements(comd, localVariableMaker);
     }
 
     @Override
     public void visit(MethodDeclaration declaration) {
-        ClassFileConstructorOrMethodDeclaration comdwln = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comdwln, false, comdwln.getParameterTypes());
+        ClassFileConstructorOrMethodDeclaration comd = (ClassFileConstructorOrMethodDeclaration)declaration;
+        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comd, false, comd.getParameterTypes());
 
-        createParametersVariablesAndStatements(comdwln, localVariableMaker);
+        createParametersVariablesAndStatements(comd, localVariableMaker);
     }
 
     @Override
     public void visit(StaticInitializerDeclaration declaration) {
-        ClassFileConstructorOrMethodDeclaration comdwln = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comdwln, false, null);
+        ClassFileConstructorOrMethodDeclaration comd = (ClassFileConstructorOrMethodDeclaration)declaration;
+        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comd, false, null);
 
-        createParametersVariablesAndStatements(comdwln, localVariableMaker);
+        createParametersVariablesAndStatements(comd, localVariableMaker);
     }
 
-    protected void createParametersVariablesAndStatements(ClassFileConstructorOrMethodDeclaration comdwln, LocalVariableMaker localVariableMaker) {
-        ClassFile classFile = comdwln.getClassFile();
-        ClassFileBodyDeclaration bodyDeclaration = comdwln.getBodyDeclaration();
-        Method method = comdwln.getMethod();
-        Type returnedType = comdwln.getReturnedType();
-        StatementMaker statementMaker = new StatementMaker(typeMaker, localVariableMaker, classFile, bodyDeclaration, returnedType);
+    protected void createParametersVariablesAndStatements(ClassFileConstructorOrMethodDeclaration comd, LocalVariableMaker localVariableMaker) {
+        ClassFile classFile = comd.getClassFile();
+        ClassFileBodyDeclaration bodyDeclaration = comd.getBodyDeclaration();
+        Method method = comd.getMethod();
+        StatementMaker statementMaker = new StatementMaker(typeMaker, localVariableMaker, classFile, bodyDeclaration, comd);
 
         try {
             ControlFlowGraph cfg = ControlFlowGraphMaker.make(method);
@@ -124,22 +123,22 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                 ControlFlowGraphLoopReducer.reduce(cfg);
 
                 if (ControlFlowGraphReducer.reduce(cfg)) {
-                    comdwln.setStatements(statementMaker.make(cfg));
+                    comd.setStatements(statementMaker.make(cfg));
                 } else {
-                    comdwln.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
+                    comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
                 }
             }
         } catch (Exception e) {
             assert ExceptionUtil.printStackTrace(e);
-            comdwln.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
+            comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
         }
 
         if ((classFile.getAccessFlags() & FLAG_INTERFACE) != 0) {
-            comdwln.setFlags(comdwln.getFlags() & ~(FLAG_PUBLIC|FLAG_ABSTRACT));
+            comd.setFlags(comd.getFlags() & ~(FLAG_PUBLIC|FLAG_ABSTRACT));
         }
 
         localVariableMaker.make();
-        comdwln.setFormalParameters(localVariableMaker.getFormalParameters());
+        comd.setFormalParameters(localVariableMaker.getFormalParameters());
     }
 
     @Override

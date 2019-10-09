@@ -23,7 +23,7 @@ import java.util.List;
 
 public class TryWithResourcesStatementMaker {
 
-    public static Statement make(LocalVariableMaker localVariableMaker, Statements<Statement> statements, Statements tryStatements, DefaultList<TryStatement.CatchClause> catchClauses, Statements<Statement> finallyStatements) {
+    public static Statement make(LocalVariableMaker localVariableMaker, Statements statements, Statements tryStatements, DefaultList<TryStatement.CatchClause> catchClauses, Statements finallyStatements) {
         int size = statements.size();
 
         if ((size < 2) || (finallyStatements == null) || (finallyStatements.size() != 1) || !checkThrowable(catchClauses)) {

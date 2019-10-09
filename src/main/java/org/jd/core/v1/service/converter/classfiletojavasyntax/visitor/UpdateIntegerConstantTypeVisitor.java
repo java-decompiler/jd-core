@@ -39,7 +39,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
 
     static {
         BaseType c  = TYPE_CHAR;
-        BaseType ci = new Types<Type>(TYPE_CHAR, TYPE_INT);
+        BaseType ci = new Types(TYPE_CHAR, TYPE_INT);
 
         TYPES.put("java/lang/String:indexOf(I)I", c);
         TYPES.put("java/lang/String:indexOf(II)I", ci);
@@ -490,13 +490,12 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     @Override public void visit(TypeReferenceDotClassExpression expression) {}
     @Override public void visit(ObjectReference reference) {}
     @Override public void visit(InnerObjectReference reference) {}
-    @Override public void visit(ArrayTypeArguments type) {}
+    @Override public void visit(TypeArguments type) {}
     @Override public void visit(WildcardExtendsTypeArgument type) {}
     @Override public void visit(ObjectType type) {}
     @Override public void visit(InnerObjectType type) {}
     @Override public void visit(WildcardSuperTypeArgument type) {}
     @Override public void visit(Types list) {}
-    @Override public void visit(TypeBounds list) {}
     @Override public void visit(TypeParameterWithTypeBounds type) {}
     @Override public void visit(BodyDeclaration declaration) {}
 

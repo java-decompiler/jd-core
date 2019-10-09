@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -24,7 +24,7 @@ public class NewArrayMaker {
     protected static final ArrayVariableInitializer EMPTY_ARRAY = new ArrayVariableInitializer(PrimitiveType.TYPE_VOID);
 
     @SuppressWarnings("unchecked")
-    public static Expression make(Statements<Statement> statements, NewArray newArray) {
+    public static Expression make(Statements statements, NewArray newArray) {
         if (! statements.isEmpty()) {
             Statement statement = statements.getLast();
 

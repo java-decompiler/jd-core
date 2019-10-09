@@ -77,7 +77,7 @@ public class AnnotationConverterTest extends TestCase {
         assertNotNull(annotationReference1.getElementValuePairs());
         assertTrue(annotationReference1.getElementValuePairs() instanceof ElementValuePairs);
 
-        ElementValuePairs<ElementValuePair> elementValuePairArrayList = (ElementValuePairs)annotationReference1.getElementValuePairs();
+        ElementValuePairs elementValuePairArrayList = (ElementValuePairs)annotationReference1.getElementValuePairs();
 
         assertEquals(2, elementValuePairArrayList.size());
         assertEquals("value", elementValuePairArrayList.getFirst().getName());

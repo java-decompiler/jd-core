@@ -37,6 +37,8 @@ import org.jd.core.v1.util.DefaultStack;
 
 import java.util.*;
 
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
 public class StatementMaker {
@@ -61,16 +63,16 @@ public class StatementMaker {
 
     public StatementMaker(
             TypeMaker typeMaker, LocalVariableMaker localVariableMaker,
-            ClassFile classFile, ClassFileBodyDeclaration bodyDeclaration, Type returnedType) {
+            ClassFile classFile, ClassFileBodyDeclaration bodyDeclaration, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
         this.localVariableMaker = localVariableMaker;
         this.majorVersion = classFile.getMajorVersion();
         this.internalTypeName = classFile.getInternalTypeName();
         this.bodyDeclaration = bodyDeclaration;
-        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, classFile, bodyDeclaration);
+        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, classFile, bodyDeclaration, comd);
         this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor(localVariableMaker);
         this.removeBinaryOpReturnStatementsVisitor = new RemoveBinaryOpReturnStatementsVisitor(localVariableMaker);
-        this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(returnedType);
+        this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(comd.getReturnedType());
     }
 
     public Statements make(ControlFlowGraph cfg) {
@@ -260,8 +262,8 @@ public class StatementMaker {
         }
     }
 
-    protected Statements<Statement> makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps, Statements<Statement> updateStatements) {
-        Statements<Statement> subStatements = makeSubStatements(watchdog, basicBlock, statements, jumps);
+    protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps, Statements updateStatements) {
+        Statements subStatements = makeSubStatements(watchdog, basicBlock, statements, jumps);
 
         if (updateStatements != null) {
             subStatements.addAll(updateStatements);
@@ -270,8 +272,8 @@ public class StatementMaker {
         return subStatements;
     }
 
-    protected Statements<Statement> makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps) {
-        Statements<Statement> subStatements = new Statements<>();
+    protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
+        Statements subStatements = new Statements();
 
         if (!statements.isEmpty() && (statements.getLast().getClass() == ClassFileMonitorEnterStatement.class)) {
             subStatements.add(statements.removeLast());
@@ -289,7 +291,7 @@ public class StatementMaker {
         return subStatements;
     }
 
-    protected Expression makeExpression(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps) {
+    protected Expression makeExpression(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         int initialStatementCount = statements.size();
 
         makeStatements(watchdog, basicBlock, statements, jumps);
@@ -325,7 +327,7 @@ public class StatementMaker {
         }
     }
 
-    protected void parseSwitch(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps) {
+    protected void parseSwitch(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         parseByteCode(basicBlock, statements);
 
         List<SwitchCase> switchCases = basicBlock.getSwitchCases();
@@ -387,7 +389,7 @@ public class StatementMaker {
     protected void parseTry(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps, boolean jsr, boolean eclipse) {
         Statements tryStatements;
         DefaultList<TryStatement.CatchClause> catchClauses = new DefaultList<>();
-        Statements<Statement> finallyStatements = null;
+        Statements finallyStatements = null;
         int assertStackSize = stack.size();
 
         tryStatements = makeSubStatements(watchdog, basicBlock.getSub1(), statements, jumps);
@@ -520,7 +522,7 @@ public class StatementMaker {
         }
     }
 
-    protected void parseJSR(WatchDog watchdog, BasicBlock basicBlock, Statements<Statement> statements, Statements jumps) {
+    protected void parseJSR(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         int statementCount = statements.size();
 
         parseByteCode(basicBlock, statements);
@@ -595,7 +597,8 @@ public class StatementMaker {
 
                     if (cfres1.getLineNumber() == cfres2.getLineNumber()) {
                         statements.subList(index-1, statements.size()).clear();
-                        statements.add(new ReturnExpressionStatement(new TernaryOperatorExpression(cfres1.getLineNumber(), cond, cfres1.getExpression(), cfres2.getExpression())));
+                        statements.add(new ReturnExpressionStatement(newTernaryOperatorExpression(
+                            cfres1.getLineNumber(), cond, cfres1.getExpression(), cfres2.getExpression())));
                     }
                 }
             }
@@ -605,7 +608,7 @@ public class StatementMaker {
     @SuppressWarnings("unchecked")
     protected void parseLoop(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         BasicBlock sub1 = basicBlock.getSub1();
-        Statements<Statement> updateStatements = null;
+        Statements updateStatements = null;
 
         if ((sub1.getType() == TYPE_IF) && (sub1.getCondition() == END)) {
             updateStatements = makeSubStatements(watchdog, sub1.getNext(), statements, jumps);
@@ -618,7 +621,8 @@ public class StatementMaker {
             if (ifBB.getNext() == LOOP_END) {
                 // 'while' or 'for' loop
                 makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
-                statements.add(LoopStatementMaker.makeLoop(localVariableMaker, basicBlock, statements, stack.pop(), makeSubStatements(watchdog, ifBB.getSub1(), statements, jumps, updateStatements), jumps));
+                statements.add(LoopStatementMaker.makeLoop(
+                    localVariableMaker, basicBlock, statements, stack.pop(), makeSubStatements(watchdog, ifBB.getSub1(), statements, jumps, updateStatements), jumps));
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
                 return;
             }
@@ -861,7 +865,62 @@ public class StatementMaker {
             }
         }
 
-        return new TernaryOperatorExpression(lineNumber, condition, exp1, exp2);
+        return newTernaryOperatorExpression(lineNumber, condition, exp1, exp2);
+    }
+
+    protected TernaryOperatorExpression newTernaryOperatorExpression(int lineNumber, Expression condition, Expression expressionTrue, Expression expressionFalse) {
+        Type expressionTrueType = expressionTrue.getType();
+        Type expressionFalseType = expressionFalse.getType();
+        Type type;
+
+        if (expressionTrue.getClass() == NullExpression.class) {
+            type = expressionFalseType;
+        } else if (expressionFalse.getClass() == NullExpression.class) {
+            type = expressionTrueType;
+        } else if (expressionTrueType.equals(expressionFalseType)) {
+            type = expressionTrueType;
+        } else if (expressionTrueType.isPrimitive() && expressionFalseType.isPrimitive()) {
+            int flags = ((PrimitiveType)expressionTrueType).getFlags() | ((PrimitiveType)expressionFalseType).getFlags();
+
+            if ((flags & FLAG_DOUBLE) != 0) {
+                type = TYPE_DOUBLE;
+            } else if ((flags & FLAG_FLOAT) != 0) {
+                type = TYPE_FLOAT;
+            } else if ((flags & FLAG_LONG) != 0) {
+                type = TYPE_LONG;
+            } else {
+                type = TYPE_INT;
+            }
+        } else if (expressionTrueType.isObject() && expressionFalseType.isObject()) {
+            ObjectType ot1 = (ObjectType)expressionTrueType;
+            ObjectType ot2 = (ObjectType)expressionFalseType;
+
+            if (typeMaker.isAssignable(ot1, ot2)) {
+                type = getTernaryOperatorExpressionType(ot1, ot2);
+            } else if (typeMaker.isAssignable(ot2, ot1)) {
+                type = getTernaryOperatorExpressionType(ot2, ot1);
+            } else {
+                type = TYPE_OBJECT;
+            }
+        } else {
+            type = TYPE_OBJECT;
+        }
+
+        return new TernaryOperatorExpression(lineNumber, type, condition, expressionTrue, expressionFalse);
+    }
+
+    protected Type getTernaryOperatorExpressionType(ObjectType ot1, ObjectType ot2) {
+        if (ot1.getTypeArguments() == null) {
+            return ot1;
+        } else if (ot2.getTypeArguments() == null) {
+            return ot1.createType(null);
+        } else if (ot1.isTypeArgumentAssignableFrom(ot2)) {
+            return ot1;
+        } else if (ot2.isTypeArgumentAssignableFrom(ot1)) {
+            return ot1.createType(ot2.getTypeArguments());
+        } else {
+            return ot1.createType(null);
+        }
     }
 
     protected boolean checkFieldReference(String fieldName, Expression expression) {
@@ -903,7 +962,7 @@ public class StatementMaker {
         return new TypeReferenceDotClassExpression(lineNumber, ot);
     }
 
-    protected void parseByteCode(BasicBlock basicBlock, Statements<Statement> statements) {
+    protected void parseByteCode(BasicBlock basicBlock, Statements statements) {
         byteCodeParser.parse(basicBlock, statements, stack);
     }
 
@@ -934,10 +993,10 @@ public class StatementMaker {
     protected void updateJumpStatements(Statements jumps) {
         assert false : "StatementMaker.updateJumpStatements(stmt) : 'jumps' list is not empty";
 
-        Iterator<ClassFileBreakContinueStatement> iterator = jumps.iterator();
+        Iterator<Statement> iterator = jumps.iterator();
 
         while (iterator.hasNext()) {
-            ClassFileBreakContinueStatement statement = iterator.next();
+            ClassFileBreakContinueStatement statement = (ClassFileBreakContinueStatement)iterator.next();
 
             statement.setStatement(new CommentStatement("// Byte code: goto -> " + statement.getTargetOffset()));
         }

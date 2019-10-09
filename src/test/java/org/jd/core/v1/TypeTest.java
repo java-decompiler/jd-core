@@ -17,7 +17,7 @@ import java.util.Arrays;
 public class TypeTest extends TestCase {
     @Test
     public void testSimpleClassOrInterfaceType() throws Exception {
-        Type scoit = new ObjectType("org/project/Test", "org.project.Test", "Test");
+        BaseType scoit = new ObjectType("org/project/Test", "org.project.Test", "Test");
         PrintTypeVisitor visitor = new PrintTypeVisitor();
 
         scoit.accept(visitor);
@@ -34,7 +34,7 @@ public class TypeTest extends TestCase {
         Type scoit1 = new ObjectType("org/project/Test", "org.project.Test", "Test");
         Type scoit2 = new ObjectType(
             "org/project/OtherTest", "org.project.OtherTest", "OtherTest",
-            new ArrayTypeArguments(
+            new TypeArguments(
                 Arrays.asList(
                     scoit1,
                     WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT,
@@ -45,8 +45,9 @@ public class TypeTest extends TestCase {
         );
 
         PrintTypeVisitor visitor = new PrintTypeVisitor();
+        BaseType baseType2 = scoit2;
 
-        scoit2.accept(visitor);
+        baseType2.accept(visitor);
 
         String source = visitor.toString();
 
@@ -57,7 +58,7 @@ public class TypeTest extends TestCase {
 
     @Test
     public void testDiamond() throws Exception {
-        Type scoit = new ObjectType("org/project/Test", "org.project.Test", "Test", DiamondTypeArgument.DIAMOND);
+        BaseType scoit = new ObjectType("org/project/Test", "org.project.Test", "Test", DiamondTypeArgument.DIAMOND);
 
         PrintTypeVisitor visitor = new PrintTypeVisitor();
 
@@ -72,7 +73,7 @@ public class TypeTest extends TestCase {
 
     @Test
     public void testInnerClass() throws Exception {
-        Type scoit = new InnerObjectType("org/project/Test$InnerTest", "org.project.Test.InnerTest", "InnerTest",
+        BaseType scoit = new InnerObjectType("org/project/Test$InnerTest", "org.project.Test.InnerTest", "InnerTest",
                             new ObjectType("org/project/Test", "org.project.Test", "Test"));
 
         PrintTypeVisitor visitor = new PrintTypeVisitor();

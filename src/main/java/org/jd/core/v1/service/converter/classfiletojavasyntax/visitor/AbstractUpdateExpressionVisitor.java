@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -13,7 +13,8 @@ import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.reference.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.util.DefaultList;
+
+import java.util.ListIterator;
 
 public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntaxVisitor {
     protected abstract Expression updateExpression(Expression expression);
@@ -24,10 +25,12 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
         }
 
         if (baseExpression.isList()) {
-            DefaultList<Expression> list = baseExpression.getList();
-            for (int length=list.size(), i=0; i<length; i++) {
-                list.set(i, updateExpression(list.get(i)));
+            ListIterator<Expression> iterator = baseExpression.getList().listIterator();
+
+            while (iterator.hasNext()) {
+                iterator.set(updateExpression(iterator.next()));
             }
+
             return baseExpression;
         }
 
@@ -383,12 +386,11 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
     @Override public void visit(SwitchStatement.DefaultLabel statement) {}
 
     @Override public void visit(InnerObjectReference reference) {}
-    @Override public void visit(ArrayTypeArguments type) {}
+    @Override public void visit(TypeArguments type) {}
     @Override public void visit(WildcardExtendsTypeArgument type) {}
     @Override public void visit(ObjectType type) {}
     @Override public void visit(InnerObjectType type) {}
     @Override public void visit(WildcardSuperTypeArgument type) {}
     @Override public void visit(Types list) {}
-    @Override public void visit(TypeBounds list) {}
     @Override public void visit(TypeParameterWithTypeBounds type) {}
 }

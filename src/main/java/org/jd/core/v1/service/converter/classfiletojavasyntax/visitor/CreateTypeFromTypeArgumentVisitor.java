@@ -9,11 +9,11 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.type.*;
 
-public class CreateTypeFromTypeArgumentVisitor extends AbstractNopTypeVisitor {
+public class CreateTypeFromTypeArgumentVisitor implements TypeArgumentVisitor {
     protected Type type;
 
     public CreateTypeFromTypeArgumentVisitor() {
-        init();
+        type = null;
     }
 
     public void init() {
@@ -24,6 +24,9 @@ public class CreateTypeFromTypeArgumentVisitor extends AbstractNopTypeVisitor {
         return type;
     }
 
+    @Override public void visit(TypeArguments arguments) { this.type = null; }
+    @Override public void visit(DiamondTypeArgument argument) { this.type = null; }
+    @Override public void visit(WildcardTypeArgument type) { this.type = null; }
     @Override public void visit(WildcardExtendsTypeArgument type) { this.type = type.getType(); }
     @Override public void visit(WildcardSuperTypeArgument type) { this.type = type.getType(); }
     @Override public void visit(PrimitiveType type) { this.type = type; }

@@ -16,6 +16,7 @@ import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
 
@@ -76,7 +77,7 @@ public class Frame {
         this.exceptionLocalVariable = exceptionLocalVariable;
     }
 
-    public void mergeLocalVariable(AbstractLocalVariable lv) {
+    public void mergeLocalVariable(LocalVariableMaker localVariableMaker, AbstractLocalVariable lv) {
         int index = lv.getIndex();
         AbstractLocalVariable alvToMerge;
 
@@ -93,7 +94,7 @@ public class Frame {
         if (alvToMerge == null) {
             if (children != null) {
                 for (Frame frame : children) {
-                    frame.mergeLocalVariable(lv);
+                    frame.mergeLocalVariable(localVariableMaker, lv);
                 }
             }
         } else if (lv != alvToMerge) {
@@ -104,22 +105,22 @@ public class Frame {
             lv.getReferences().addAll(alvToMerge.getReferences());
             lv.setFromOffset(alvToMerge.getFromOffset());
 
-            if (!lv.isAssignableFrom(alvToMerge)) {
+            if (!lv.isAssignableFrom(alvToMerge) && !localVariableMaker.isCompatible(lv, alvToMerge.getType())) {
                 Type type = lv.getType();
                 Type alvToMergeType = alvToMerge.getType();
 
                 assert (type.isPrimitive() == alvToMergeType.isPrimitive()) && (type.isObject() == alvToMergeType.isObject()) && (type.isGeneric() == alvToMergeType.isGeneric()) : "Frame.mergeLocalVariable(lv) : merge local variable failed";
 
                 if (type.isPrimitive()) {
-                    if (alvToMerge.isAssignableFrom(lv)) {
+                    if (alvToMerge.isAssignableFrom(lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
                         ((PrimitiveLocalVariable)lv).setType((PrimitiveType)alvToMergeType);
-                    } else if (!lv.isAssignableFrom(alvToMerge)) {
+                    } else {
                         ((PrimitiveLocalVariable)lv).setType(PrimitiveType.TYPE_INT);
                     }
                 } else if (type.isObject()) {
-                    if (alvToMerge.isAssignableFrom(lv)) {
+                    if (alvToMerge.isAssignableFrom(lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
                         ((ObjectLocalVariable)lv).setType(alvToMergeType);
-                    } else if (!lv.isAssignableFrom(alvToMerge)) {
+                    } else {
                         int dimension = Math.max(lv.getDimension(), alvToMerge.getDimension());
                         ((ObjectLocalVariable)lv).setType(ObjectType.TYPE_OBJECT.createType(dimension));
                     }
@@ -382,8 +383,8 @@ public class Frame {
                 splitMultiAssignment(Integer.MAX_VALUE, undeclaredLocalVariablesInStatement, expressions, boe);
                 iterator.remove();
 
-                for (BinaryOperatorExpression exp : (List<BinaryOperatorExpression>)expressions) {
-                    iterator.add(newDeclarationStatement(undeclaredLocalVariables, undeclaredLocalVariablesInStatement, exp));
+                for (Expression exp : expressions) {
+                    iterator.add(newDeclarationStatement(undeclaredLocalVariables, undeclaredLocalVariablesInStatement, (BinaryOperatorExpression)exp));
                 }
 
                 if (expressions.isEmpty()) {
@@ -434,9 +435,17 @@ public class Frame {
         localVariable.setDeclared(true);
 
         Type type = localVariable.getType();
-        VariableInitializer variableInitializer = (boe.getRightExpression().getClass() == NewInitializedArray.class) ?
-                ((NewInitializedArray)boe.getRightExpression()).getArrayInitializer() :
-                new ExpressionVariableInitializer(boe.getRightExpression());
+        VariableInitializer variableInitializer;
+
+        if (boe.getRightExpression().getClass() == NewInitializedArray.class) {
+            if (type.isObject() && (((ObjectType)type).getTypeArguments() != null)) {
+                variableInitializer = new ExpressionVariableInitializer(boe.getRightExpression());
+            } else {
+                variableInitializer = ((NewInitializedArray) boe.getRightExpression()).getArrayInitializer();
+            }
+        } else {
+            variableInitializer = new ExpressionVariableInitializer(boe.getRightExpression());
+        }
 
         return new LocalVariableDeclarationStatement(type, new LocalVariableDeclarator(boe.getLineNumber(), reference.getName(), variableInitializer));
     }
@@ -448,18 +457,18 @@ public class Frame {
         BaseExpression init = fs.getInit();
 
         if (init != null) {
-            Expressions<Expression> expressions = new Expressions();
+            Expressions expressions = new Expressions();
             int toOffset = fs.getToOffset();
 
             if (init.isList()) {
-                for (Expression exp : init.getList()) {
+                for (Expression exp : init) {
                     splitMultiAssignment(toOffset, undeclaredLocalVariablesInStatement, expressions, exp);
                     if (expressions.isEmpty()) {
                         expressions.add(exp);
                     }
                 }
             } else {
-                splitMultiAssignment(toOffset, undeclaredLocalVariablesInStatement, expressions, (Expression)init);
+                splitMultiAssignment(toOffset, undeclaredLocalVariablesInStatement, expressions, init.getFirst());
                 if (expressions.isEmpty()) {
                     expressions.add(init.getFirst());
                 }
@@ -704,7 +713,7 @@ public class Frame {
         return declarators;
     }
 
-    protected static class GenerateLocalVariableNameVisitor implements TypeVisitor {
+    protected static class GenerateLocalVariableNameVisitor implements TypeArgumentVisitor {
         protected static final String[] INTEGER_NAMES = { "i", "j", "k", "m", "n" };
 
         protected StringBuilder sb = new StringBuilder();
@@ -847,14 +856,9 @@ public class Frame {
             blackListNames.add(name);
         }
 
-        @Override public void visit(ArrayTypeArguments type) {}
+        @Override public void visit(TypeArguments type) {}
         @Override public void visit(DiamondTypeArgument type) {}
         @Override public void visit(WildcardExtendsTypeArgument type) {}
-        @Override public void visit(Types type) {}
-        @Override public void visit(TypeBounds type) {}
-        @Override public void visit(TypeParameter type) {}
-        @Override public void visit(TypeParameterWithTypeBounds type) {}
-        @Override public void visit(TypeParameters types) {}
         @Override public void visit(WildcardSuperTypeArgument type) {}
         @Override public void visit(WildcardTypeArgument type) {}
     }

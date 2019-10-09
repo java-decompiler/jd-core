@@ -217,7 +217,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
 
             // Build fragments for super type
-            Type superType = declaration.getSuperType();
+            BaseType superType = declaration.getSuperType();
             if ((superType != null) && !superType.equals(ObjectType.TYPE_OBJECT)) {
                 fragments.addTokensFragment(tokens);
 
@@ -595,17 +595,6 @@ public class CompilationUnitVisitor extends StatementVisitor {
     }
 
     @Override
-    public void visit(ExpressionVariableInitializer declaration) {
-        Expression expression = declaration.getExpression();
-
-        if (expression.getClass() == NewInitializedArray.class) {
-            ((NewInitializedArray)expression).getArrayInitializer().accept(this);
-        } else {
-            expression.accept(this);
-        }
-    }
-
-    @Override
     public void visit(FieldDeclaration declaration) {
         if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_FIELD_BLOCK);
@@ -624,7 +613,10 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             // Build tokens for access
             buildTokensForFieldAccessFlags(declaration.getFlags());
-            declaration.getType().accept(this);
+
+            BaseType type = declaration.getType();
+
+            type.accept(this);
 
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
             fragments.addTokensFragment(tokens);
@@ -700,8 +692,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
         }
 
         if (declaration.isVarargs()) {
-            Type type = declaration.getType();
-            type.createType(type.getDimension() - 1).accept(this);
+            Type arrayType = declaration.getType();
+            BaseType type = arrayType.createType(arrayType.getDimension() - 1);
+            type.accept(this);
             tokens.add(TextToken.VARARGS);
         } else {
             if (declaration.isFinal()) {
@@ -709,7 +702,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 tokens.add(TextToken.SPACE);
             }
 
-            declaration.getType().accept(this);
+            BaseType type = declaration.getType();
+
+            type.accept(this);
             tokens.add(TextToken.SPACE);
         }
 
@@ -1003,7 +998,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
             tokens.add(TextToken.SPACE);
         }
 
-        declaration.getType().accept(this);
+        BaseType type = declaration.getType();
+
+        type.accept(this);
         tokens.add(TextToken.SPACE);
         declaration.getLocalVariableDeclarators().accept(this);
     }
@@ -1097,7 +1094,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 tokens.add(TextToken.SPACE);
             }
 
-            declaration.getReturnedType().accept(this);
+            BaseType returnedType = declaration.getReturnedType();
+
+            returnedType.accept(this);
             tokens.add(TextToken.SPACE);
 
             // Build token for type declaration
@@ -1224,7 +1223,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
     @SuppressWarnings("unchecked")
     public void visit(TypeDeclarations declaration) {
         if (declaration.size() > 0) {
-            Iterator<TypeDeclaration> iterator = declaration.iterator();
+            Iterator<MemberDeclaration> iterator = declaration.iterator();
 
             iterator.next().accept(this);
 

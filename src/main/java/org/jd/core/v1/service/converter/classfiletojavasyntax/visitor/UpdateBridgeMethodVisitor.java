@@ -20,6 +20,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeParametersToTypeArgumentsBinder;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
@@ -35,6 +36,24 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         bridgeMethodDeclarations.clear();
         bodyDeclarationsVisitor.visit(bodyDeclaration);
         return !bridgeMethodDeclarations.isEmpty();
+    }
+
+    @Override
+    public void visit(MethodInvocationExpression expression) {
+        Expression exp = expression.getExpression();
+
+        expression.setExpression(updateExpression(exp));
+
+        if (exp != expression.getExpression()) {
+            TypeParametersToTypeArgumentsBinder.staticBindParameterTypesWithArgumentTypes(expression.getType(), expression);
+        }
+
+        if (expression.getParameters() != null) {
+            expression.setParameters(updateBaseExpression(expression.getParameters()));
+            expression.getParameters().accept(this);
+        }
+
+        expression.getExpression().accept(this);
     }
 
     @SuppressWarnings("unchecked")
@@ -77,12 +96,12 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
             expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
 
-            return new FieldReferenceExpression(mie1.getLineNumber(), mie1.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor());
+            return new FieldReferenceExpression(mie1.getLineNumber(), fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor());
         } else if (expClass == ClassFileMethodInvocationExpression.class) {
             MethodInvocationExpression mie2 = (MethodInvocationExpression) exp;
 
             if ((mie2.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {
-                return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, mie2.getType(), mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), mie1.getParameterTypes(), mie1.getParameters());
+                return new ClassFileMethodInvocationExpression(null, mie1.getLineNumber(), null, mie2.getType(), mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), mie1.getParameterTypes(), mie1.getParameters());
             } else {
                 BaseType mie1ParameterTypes = mie1.getParameterTypes();
                 BaseExpression mie1Parameters = mie1.getParameters();
@@ -108,7 +127,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                     }
                 }
 
-                return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, mie2.getType(), mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), newParameterTypes, newParameters);
+                return new ClassFileMethodInvocationExpression(null, mie1.getLineNumber(), null, mie2.getType(), mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), newParameterTypes, newParameters);
             }
         } else if (expClass == BinaryOperatorExpression.class) {
             BinaryOperatorExpression boe = (BinaryOperatorExpression) exp;
@@ -139,7 +158,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
             return new PostOperatorExpression(
                     mie1.getLineNumber(),
-                    new FieldReferenceExpression(mie1.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor()),
+                    new FieldReferenceExpression(fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor()),
                     poe.getOperator());
         } else if (expClass == PreOperatorExpression.class) {
             PreOperatorExpression poe = (PreOperatorExpression)exp;
@@ -150,7 +169,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             return new PreOperatorExpression(
                     mie1.getLineNumber(),
                     poe.getOperator(),
-                    new FieldReferenceExpression(mie1.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor()));
+                    new FieldReferenceExpression(fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor()));
         } else if (expClass == IntegerConstantExpression.class) {
             return exp;
         }
@@ -255,7 +274,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
                     if (mie2Parameters.isList()) {
                         int i = 0;
-                        for (Expression parameter : mie2Parameters.getList()) {
+                        for (Expression parameter : mie2Parameters) {
                             if (!checkLocalVariableReference(parameter, i++)) {
                                 return false;
                             }
@@ -277,7 +296,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
                     if (mie2Parameters.isList()) {
                         int i = 1;
-                        for (Expression parameter : mie2Parameters.getList()) {
+                        for (Expression parameter : mie2Parameters) {
                             if (!checkLocalVariableReference(parameter, i++)) {
                                 return false;
                             }

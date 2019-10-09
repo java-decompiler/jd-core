@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
-public class PrintTypeVisitor implements TypeVisitor {
+public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeParameterVisitor {
     protected StringBuilder sb = new StringBuilder();
 
     public void reset() {
@@ -25,23 +25,35 @@ public class PrintTypeVisitor implements TypeVisitor {
     }
 
     @Override
-    public void visit(ArrayTypeArguments type) {
-        printList(type, ", ");
+    public void visit(TypeArguments arguments) {
+        int size = arguments.size();
+
+        if (size > 0) {
+            arguments.get(0).accept(this);
+
+            for (int i=1; i<size; i++) {
+                sb.append(", ");
+                arguments.get(i).accept(this);
+            }
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void visit(Types type) {
-        printList(type, ", ");
+    public void visit(Types types) {
+        printList(types, ", ");
     }
 
     @Override
-    public void visit(DiamondTypeArgument type) {}
+    public void visit(DiamondTypeArgument argument) {}
 
     @Override
-    public void visit(WildcardExtendsTypeArgument type) {
+    public void visit(WildcardExtendsTypeArgument argument) {
         sb.append("? extends ");
-        type.getType().accept(this);
+
+        BaseType type = argument.getType();
+
+        type.accept(this);
     }
 
     @Override
@@ -69,7 +81,10 @@ public class PrintTypeVisitor implements TypeVisitor {
     }
 
     public void visit(InnerObjectType type) {
-        type.getOuterType().accept(this);
+        BaseType outerType = type.getOuterType();
+
+        outerType.accept(this);
+
         sb.append('.').append(type.getName());
         printTypeArguments(type);
         printDimension(type.getDimension());
@@ -86,33 +101,48 @@ public class PrintTypeVisitor implements TypeVisitor {
     }
 
     @Override
-    public void visit(WildcardSuperTypeArgument type) {
+    public void visit(WildcardSuperTypeArgument argument) {
         sb.append("? super ");
-        type.getType().accept(this);
+
+        BaseType type = argument.getType();
+
+        type.accept(this);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void visit(TypeBounds type) {
-        printList(type, " & ");
+    public void visit(TypeParameter parameter) {
+        sb.append(parameter.getIdentifier());
     }
 
     @Override
-    public void visit(TypeParameter type) {
-        sb.append(type.getIdentifier());
-    }
-
-    @Override
-    public void visit(TypeParameterWithTypeBounds type) {
-        sb.append(type.getIdentifier());
+    public void visit(TypeParameterWithTypeBounds parameter) {
+        sb.append(parameter.getIdentifier());
         sb.append(" extends ");
-        type.getTypeBounds().accept(this);
+
+        BaseType types = parameter.getTypeBounds();
+
+        if (types.isList()) {
+            printList(types.getList(), " & ");
+        } else {
+            BaseType type = types.getFirst();
+
+            type.accept(this);
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public void visit(TypeParameters types) {
-        printList(types, ", ");
+    public void visit(TypeParameters parameters) {
+        int size = parameters.size();
+
+        if (size > 0) {
+            parameters.get(0).accept(this);
+
+            for (int i=1; i<size; i++) {
+                sb.append(", ");
+                parameters.get(i).accept(this);
+            }
+        }
     }
 
     @Override public void visit(GenericType type) {
@@ -121,19 +151,19 @@ public class PrintTypeVisitor implements TypeVisitor {
     }
 
     @Override
-    public void visit(WildcardTypeArgument type) {
+    public void visit(WildcardTypeArgument argument) {
         sb.append('?');
     }
 
-    protected <T extends TypeVisitable> void printList(List<T> list, String separator) {
-        int size = list.size();
+    protected <T extends TypeVisitable> void printList(List<T> visitables, String separator) {
+        int size = visitables.size();
 
         if (size > 0) {
-            list.get(0).accept(this);
+            visitables.get(0).accept(this);
 
             for (int i=1; i<size; i++) {
                 sb.append(separator);
-                list.get(i).accept(this);
+                visitables.get(i).accept(this);
             }
         }
     }

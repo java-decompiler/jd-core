@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -11,20 +11,20 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.Collection;
 
-public class Types<T extends Type> extends DefaultList<T> implements BaseType {
+public class Types extends DefaultList<Type> implements BaseType {
     public Types() {}
 
     public Types(int capacity) {
         super(capacity);
     }
 
-    public Types(Collection<T> collection) {
+    public Types(Collection<Type> collection) {
         super(collection);
         assert (collection != null) && (collection.size() > 1) : "Uses 'Type' implementation instead";
     }
 
     @SuppressWarnings("unchecked")
-    public Types(T type, T... types) {
+    public Types(Type type, Type... types) {
         super(type, types);
         assert (types != null) && (types.length > 0) : "Uses 'Type' implementation instead";
     }

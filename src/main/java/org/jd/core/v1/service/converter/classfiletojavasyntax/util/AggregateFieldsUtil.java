@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.jd.core.v1.model.javasyntax.declaration.BaseFieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarators;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
 
@@ -63,10 +64,22 @@ public class AggregateFieldsUtil {
 
             int length = lastIndex - firstIndex;
             FieldDeclarators declarators = new FieldDeclarators(length);
-            declarators.add(firstField.getFieldDeclarators());
+            BaseFieldDeclarator bfd = firstField.getFieldDeclarators();
+
+            if (bfd.isList()) {
+                declarators.addAll(bfd.getList());
+            } else {
+                declarators.add(bfd.getFirst());
+            }
 
             for (ClassFileFieldDeclaration f : sublist) {
-                declarators.add(f.getFieldDeclarators());
+                bfd = f.getFieldDeclarators();
+
+                if (bfd.isList()) {
+                    declarators.addAll(bfd.getList());
+                } else {
+                    declarators.add(bfd.getFirst());
+                }
             }
 
             firstField.setFieldDeclarators(declarators);

@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.*;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
-public class GenerateParameterSuffixNameVisitor extends AbstractNopTypeVisitor {
+public class GenerateParameterSuffixNameVisitor extends AbstractNopTypeArgumentVisitor {
     protected String suffix;
 
     public String getSuffix() {
