@@ -24,6 +24,7 @@ import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.PopulateBindingsWithTypeParameterVisitor;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.Collections;
@@ -40,6 +41,7 @@ import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
  * Output: {@link org.jd.core.v1.model.javasyntax.CompilationUnit}<br>
  */
 public class ConvertClassFileProcessor implements Processor {
+    protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
 
     @Override
     public void process(Message message) throws Exception {
@@ -114,41 +116,40 @@ public class ConvertClassFileProcessor implements Processor {
     }
 
     protected ClassFileBodyDeclaration convertBodyDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, BaseTypeParameter typeParameters, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
-        ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile.getInternalTypeName(), createBindings(classFile, typeParameters, outerClassFileBodyDeclaration), outerClassFileBodyDeclaration);
+        Map<String, TypeArgument> bindings = Collections.emptyMap();
+        Map<String, BaseType> typeBounds = Collections.emptyMap();
+
+        if (typeParameters == null) {
+            if (((classFile.getAccessFlags() & ACC_STATIC) == 0) && (outerClassFileBodyDeclaration != null)) {
+                bindings = outerClassFileBodyDeclaration.getBindings();
+                typeBounds = outerClassFileBodyDeclaration.getTypeBounds();
+            }
+        } else {
+            bindings = new HashMap<>();
+            typeBounds = new HashMap<>();
+
+            populateBindingsWithTypeParameterVisitor.init(bindings, typeBounds);
+            typeParameters.accept(populateBindingsWithTypeParameterVisitor);
+
+            for (Map.Entry<String, TypeArgument> entry : bindings.entrySet()) {
+                if (entry.getValue() == null) {
+                    entry.setValue(new GenericType(entry.getKey()));
+                }
+            }
+
+            if (((classFile.getAccessFlags() & ACC_STATIC) == 0) && (outerClassFileBodyDeclaration != null)) {
+                bindings.putAll(outerClassFileBodyDeclaration.getBindings());
+                typeBounds.putAll(outerClassFileBodyDeclaration.getTypeBounds());
+            }
+        }
+
+        ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile.getInternalTypeName(), bindings, typeBounds, outerClassFileBodyDeclaration);
 
         bodyDeclaration.setFieldDeclarations(convertFields(parser, converter, classFile));
         bodyDeclaration.setMethodDeclarations(convertMethods(parser, converter, bodyDeclaration, classFile));
         bodyDeclaration.setInnerTypeDeclarations(convertInnerTypes(parser, converter, classFile, bodyDeclaration));
 
         return bodyDeclaration;
-    }
-
-    protected Map<String, TypeArgument> createBindings(ClassFile classFile, BaseTypeParameter typeParameters, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
-        if (typeParameters == null) {
-            if (((classFile.getAccessFlags() & ACC_STATIC) == 0) && (outerClassFileBodyDeclaration != null) && (outerClassFileBodyDeclaration.getBindings() != null)) {
-                return outerClassFileBodyDeclaration.getBindings();
-            } else {
-                return Collections.emptyMap();
-            }
-        } else {
-            HashMap<String, TypeArgument> bindings = new HashMap<>();
-
-            if (typeParameters.isList()) {
-                for (TypeParameter tp : typeParameters) {
-                    String identifier = tp.getIdentifier();
-                    bindings.put(identifier, new GenericType(identifier));
-                }
-            } else {
-                String identifier = typeParameters.getFirst().getIdentifier();
-                bindings.put(identifier, new GenericType(identifier));
-            }
-
-            if (((classFile.getAccessFlags() & ACC_STATIC) == 0) && (outerClassFileBodyDeclaration != null) && (outerClassFileBodyDeclaration.getBindings() != null)) {
-                bindings.putAll(outerClassFileBodyDeclaration.getBindings());
-            }
-
-            return bindings;
-        }
     }
 
     protected List<ClassFileFieldDeclaration> convertFields(TypeMaker parser, AnnotationConverter converter, ClassFile classFile) {

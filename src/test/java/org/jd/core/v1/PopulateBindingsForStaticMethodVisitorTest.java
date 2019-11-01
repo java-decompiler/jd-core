@@ -42,13 +42,15 @@ public class PopulateBindingsForStaticMethodVisitorTest extends TestCase {
         // Create bindings
         PopulateBindingsWithTypeArgumentVisitor visitor = new PopulateBindingsWithTypeArgumentVisitor(new TypeMaker(new ClassPathLoader()));
         HashMap<String, TypeArgument> bindings = new HashMap<>();
+        HashMap<String, BaseType> typeBounds = new HashMap<>();
+
         bindings.put("I", null);
         bindings.put("O", null);
 
-        visitor.init(bindings, returnedType);
+        visitor.init(typeBounds, bindings, typeBounds, returnedType);
         genericReturnedType.accept(visitor);
 
-        visitor.init(bindings, parameterTypes);
+        visitor.init(typeBounds, bindings, typeBounds, parameterTypes);
         genericParameterTypes.accept(visitor);
 
         // Result: bindings[I:Integer, O:? extends String]

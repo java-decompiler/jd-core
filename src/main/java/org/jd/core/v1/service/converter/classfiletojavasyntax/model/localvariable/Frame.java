@@ -26,6 +26,12 @@ import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
 public class Frame {
     protected static final AbstractLocalVariableComparator ABSTRACT_LOCAL_VARIABLE_COMPARATOR = new AbstractLocalVariableComparator();
+    protected static final HashSet<String> CAPITALIZED_JAVA_LANGUAGE_KEYWORDS = new HashSet(Arrays.asList(
+        "Abstract", "Continue", "For", "New", "Switch", "Assert", "Default", "Goto", "Package", "Synchronized",
+        "Boolean", "Do", "If", "Private", "This", "Break", "Double", "Implements", "Protected", "Throw", "Byte", "Else",
+        "Import", "Public", "Throws", "Case", "Enum", "Instanceof", "Return", "Transient", "Catch", "Extends", "Int",
+        "Short", "Try", "Char", "Final", "Interface", "Static", "Void", "Class", "Finally", "Long", "Strictfp",
+        "Volatile", "Const", "Float", "Native", "Super", "While"));
 
     protected AbstractLocalVariable[] localVariableArray = new AbstractLocalVariable[10];
     protected HashMap<NewExpression, AbstractLocalVariable> newExpressions = null;
@@ -171,7 +177,7 @@ public class Frame {
         // Update lastType for 'new' expression
         if (newExpressions != null) {
             for (Map.Entry<NewExpression, AbstractLocalVariable> entry : newExpressions.entrySet()) {
-                ObjectType ot1 = (ObjectType) entry.getKey().getType();
+                ObjectType ot1 = entry.getKey().getObjectType();
                 ObjectType ot2 = (ObjectType) entry.getValue().getType();
 
                 if ((ot1.getTypeArguments() == null) && (ot2.getTypeArguments() != null)) {
@@ -784,6 +790,9 @@ public class Frame {
                         sb.append("bool");
                     } else {
                         uncapitalize(str);
+                        if (CAPITALIZED_JAVA_LANGUAGE_KEYWORDS.contains(str)) {
+                            sb.append("_");
+                        }
                     }
                     break;
                 default:

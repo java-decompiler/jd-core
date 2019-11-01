@@ -20,7 +20,6 @@ public class Types extends DefaultList<Type> implements BaseType {
 
     public Types(Collection<Type> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'Type' implementation instead";
     }
 
     @SuppressWarnings("unchecked")

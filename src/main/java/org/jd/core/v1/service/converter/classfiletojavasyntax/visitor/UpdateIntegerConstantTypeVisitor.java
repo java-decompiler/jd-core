@@ -343,102 +343,100 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     }
 
     protected Expression updateExpression(Type type, Expression expression) {
+        Class clazz = expression.getClass();
+
         assert type != TYPE_VOID : "UpdateIntegerConstantTypeVisitor.updateExpression(type, expr) : try to set 'void' to a numeric expression";
 
-        if (type != expression.getType()) {
-            Class clazz = expression.getClass();
-
-            if (clazz == IntegerConstantExpression.class) {
-                if (ObjectType.TYPE_STRING.equals(type)) {
-                    type = PrimitiveType.TYPE_CHAR;
-                }
-
-                if (type.isPrimitive()) {
-                    PrimitiveType primitiveType = (PrimitiveType) type;
-                    IntegerConstantExpression ice = (IntegerConstantExpression) expression;
-                    PrimitiveType icePrimitiveType = (PrimitiveType)ice.getType();
-                    int value = ice.getValue();
-                    int lineNumber = ice.getLineNumber();
-
-                    switch (primitiveType.getJavaPrimitiveFlags()) {
-                        case FLAG_BOOLEAN:
-                            return new BooleanExpression(lineNumber, value != 0);
-                        case FLAG_CHAR:
-                            switch (value) {
-                                case Character.MIN_VALUE:
-                                    return new FieldReferenceExpression(lineNumber, TYPE_CHAR, TYPE_CHARACTER_REFERENCE, "java/lang/Character", "MIN_VALUE", "C");
-                                case Character.MAX_VALUE:
-                                    return new FieldReferenceExpression(lineNumber, TYPE_CHAR, TYPE_CHARACTER_REFERENCE, "java/lang/Character", "MAX_VALUE", "C");
-                                default:
-                                    if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
-                                        ice.setType(type);
-                                    } else {
-                                        ice.setType(TYPE_INT);
-                                    }
-                                    break;
-                            }
-                            break;
-                        case FLAG_BYTE:
-                            switch (value) {
-                                case Byte.MIN_VALUE:
-                                    return new FieldReferenceExpression(lineNumber, TYPE_BYTE, TYPE_BYTE_REFERENCE, "java/lang/Byte", "MIN_VALUE", "B");
-                                case Byte.MAX_VALUE:
-                                    return new FieldReferenceExpression(lineNumber, TYPE_BYTE, TYPE_BYTE_REFERENCE, "java/lang/Byte", "MAX_VALUE", "B");
-                                default:
-                                    if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
-                                        ice.setType(type);
-                                    } else {
-                                        ice.setType(TYPE_INT);
-                                    }
-                                    break;
-                            }
-                            break;
-                        case FLAG_SHORT:
-                            switch (value) {
-                                case Short.MIN_VALUE:
-                                    return new FieldReferenceExpression(lineNumber, TYPE_SHORT, TYPE_SHORT_REFERENCE, "java/lang/Short", "MIN_VALUE", "S");
-                                case Short.MAX_VALUE:
-                                    return new FieldReferenceExpression(lineNumber, TYPE_SHORT, TYPE_SHORT_REFERENCE, "java/lang/Short", "MAX_VALUE", "S");
-                                default:
-                                    if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
-                                        ice.setType(type);
-                                    } else {
-                                        ice.setType(TYPE_INT);
-                                    }
-                                    break;
-                            }
-                            break;
-                        case FLAG_INT:
-                            switch (value) {
-                                case Integer.MIN_VALUE:
-                                    return new FieldReferenceExpression(lineNumber, TYPE_INT, TYPE_INTEGER_REFERENCE, "java/lang/Integer", "MIN_VALUE", "I");
-                                case Integer.MAX_VALUE:
-                                    return new FieldReferenceExpression(lineNumber, TYPE_INT, TYPE_INTEGER_REFERENCE, "java/lang/Integer", "MAX_VALUE", "I");
-                                default:
-                                    if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
-                                        ice.setType(type);
-                                    } else {
-                                        ice.setType(TYPE_INT);
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
-
-                    return expression;
-                }
-            } else if (clazz == TernaryOperatorExpression.class) {
-                if (type.isPrimitive()) {
-                    TernaryOperatorExpression toe = (TernaryOperatorExpression) expression;
-
-                    toe.setType(type);
-                    toe.setCondition(updateBooleanExpression(toe.getCondition()));
-                    toe.setExpressionTrue(updateExpression(type, toe.getExpressionTrue()));
-                    toe.setExpressionFalse(updateExpression(type, toe.getExpressionFalse()));
-
-                    return expression;
-                }
+        if ((type != expression.getType()) && (clazz == IntegerConstantExpression.class)) {
+            if (ObjectType.TYPE_STRING.equals(type)) {
+                type = PrimitiveType.TYPE_CHAR;
             }
+
+            if (type.isPrimitive()) {
+                PrimitiveType primitiveType = (PrimitiveType) type;
+                IntegerConstantExpression ice = (IntegerConstantExpression) expression;
+                PrimitiveType icePrimitiveType = (PrimitiveType)ice.getType();
+                int value = ice.getValue();
+                int lineNumber = ice.getLineNumber();
+
+                switch (primitiveType.getJavaPrimitiveFlags()) {
+                    case FLAG_BOOLEAN:
+                        return new BooleanExpression(lineNumber, value != 0);
+                    case FLAG_CHAR:
+                        switch (value) {
+                            case Character.MIN_VALUE:
+                                return new FieldReferenceExpression(lineNumber, TYPE_CHAR, TYPE_CHARACTER_REFERENCE, "java/lang/Character", "MIN_VALUE", "C");
+                            case Character.MAX_VALUE:
+                                return new FieldReferenceExpression(lineNumber, TYPE_CHAR, TYPE_CHARACTER_REFERENCE, "java/lang/Character", "MAX_VALUE", "C");
+                            default:
+                                if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
+                                    ice.setType(type);
+                                } else {
+                                    ice.setType(TYPE_INT);
+                                }
+                                break;
+                        }
+                        break;
+                    case FLAG_BYTE:
+                        switch (value) {
+                            case Byte.MIN_VALUE:
+                                return new FieldReferenceExpression(lineNumber, TYPE_BYTE, TYPE_BYTE_REFERENCE, "java/lang/Byte", "MIN_VALUE", "B");
+                            case Byte.MAX_VALUE:
+                                return new FieldReferenceExpression(lineNumber, TYPE_BYTE, TYPE_BYTE_REFERENCE, "java/lang/Byte", "MAX_VALUE", "B");
+                            default:
+                                if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
+                                    ice.setType(type);
+                                } else {
+                                    ice.setType(TYPE_INT);
+                                }
+                                break;
+                        }
+                        break;
+                    case FLAG_SHORT:
+                        switch (value) {
+                            case Short.MIN_VALUE:
+                                return new FieldReferenceExpression(lineNumber, TYPE_SHORT, TYPE_SHORT_REFERENCE, "java/lang/Short", "MIN_VALUE", "S");
+                            case Short.MAX_VALUE:
+                                return new FieldReferenceExpression(lineNumber, TYPE_SHORT, TYPE_SHORT_REFERENCE, "java/lang/Short", "MAX_VALUE", "S");
+                            default:
+                                if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
+                                    ice.setType(type);
+                                } else {
+                                    ice.setType(TYPE_INT);
+                                }
+                                break;
+                        }
+                        break;
+                    case FLAG_INT:
+                        switch (value) {
+                            case Integer.MIN_VALUE:
+                                return new FieldReferenceExpression(lineNumber, TYPE_INT, TYPE_INTEGER_REFERENCE, "java/lang/Integer", "MIN_VALUE", "I");
+                            case Integer.MAX_VALUE:
+                                return new FieldReferenceExpression(lineNumber, TYPE_INT, TYPE_INTEGER_REFERENCE, "java/lang/Integer", "MAX_VALUE", "I");
+                            default:
+                                if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
+                                    ice.setType(type);
+                                } else {
+                                    ice.setType(TYPE_INT);
+                                }
+                                break;
+                        }
+                        break;
+                }
+
+                return expression;
+            }
+        }
+
+        if (type.isPrimitive() && (clazz == TernaryOperatorExpression.class)) {
+            TernaryOperatorExpression toe = (TernaryOperatorExpression) expression;
+
+            toe.setType(type);
+            toe.setCondition(updateBooleanExpression(toe.getCondition()));
+            toe.setExpressionTrue(updateExpression(type, toe.getExpressionTrue()));
+            toe.setExpressionFalse(updateExpression(type, toe.getExpressionFalse()));
+
+            return expression;
         }
 
         expression.accept(this);

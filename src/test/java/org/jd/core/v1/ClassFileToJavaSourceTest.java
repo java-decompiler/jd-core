@@ -76,7 +76,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("char c3 = '\\'';") != -1);
         assertTrue(source.indexOf("char c4 = c3 = c2 = c1 = Character.toUpperCase('x');") != -1);
         assertTrue(source.indexOf("Class<String> class3 = String.class, class2 = class3, class1 = class2;") != -1);
-        assertTrue(source.matches(PatternMaker.make("Class<?> class5 = doSomething(class6 = String.class, args1 = args2 = new String[], class4 = class5;")));
+        assertTrue(source.matches(PatternMaker.make("Class class5 = doSomething(class6 = String.class, args1 = args2 = new String[], class4 = class5;")));
         assertTrue(source.matches(PatternMaker.make("int j = 1, k[] = {1, l[][] = {")));
         assertTrue(source.matches(PatternMaker.make("String stringNull = null;")));
 
@@ -126,7 +126,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
     }
 
     @Test
-    public void testJdk170NoDebugBasic() throws Exception {
+    public void testJdk170NoDebugInfoBasic() throws Exception {
         String internalClassName = "org/jd/core/test/Basic";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0-no-debug-info.zip");
         Loader loader = new ZipLoader(is);
@@ -159,7 +159,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("Class<String> clazz3 = String.class;")));
         assertTrue(source.matches(PatternMaker.make("Class<String> clazz2 = clazz3;")));
         assertTrue(source.matches(PatternMaker.make("Class<String> clazz1 = clazz2;")));
-        assertTrue(source.indexOf("Class<?> clazz5 = doSomething(clazz6 = String.class, arrayOfString1 = arrayOfString2 = new String[]") != -1);
+        assertTrue(source.indexOf("Class clazz5 = doSomething(clazz6 = String.class, arrayOfString1 = arrayOfString2 = new String[]") != -1);
 
         assertTrue(source.matches(PatternMaker.make("if (this instanceof Object)")));
 
@@ -726,7 +726,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
     }
 
     @Test
-    public void testJdk170NoDebugFor() throws Exception {
+    public void testJdk170NoDebugInfoFor() throws Exception {
         String internalClassName = "org/jd/core/test/For";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0-no-debug-info.zip");
         Loader loader = new ZipLoader(is);
@@ -734,7 +734,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
 
         Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/For");
+        message.setHeader("mainInternalTypeName", internalClassName);
         message.setHeader("loader", loader);
         message.setHeader("printer", printer);
 
@@ -800,7 +800,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 345 */", "while (b < 10);")));
         assertTrue(source.matches(PatternMaker.make(": 381 */", "for (String str : paramArrayOfString)")));
         assertTrue(source.matches(PatternMaker.make(": 395 */", "for (String str : paramList)")));
-        assertTrue(source.matches(PatternMaker.make(": 407 */", "Iterator iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
+        assertTrue(source.matches(PatternMaker.make(": 407 */", "Iterator<Class<?>> iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
         assertTrue(source.matches(PatternMaker.make(": 423 */", "for (byte b = 0; b < 3; b++)")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
@@ -1079,11 +1079,13 @@ public class ClassFileToJavaSourceTest extends TestCase {
         Loader loader = new ZipLoader(is);
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
         Message message = new Message();
         message.setHeader("mainInternalTypeName", internalClassName);
         message.setHeader("loader", loader);
         message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
 
         deserializer.process(message);
         converter.process(message);
@@ -1114,6 +1116,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(":  96 */", "return (abc.equals(param2Object) || def.equals(param2Object) || str1.equals(param2Object) || str2.equals(param2Object));")));
         assertTrue(source.matches(PatternMaker.make(": 104 */", "System.out.println(\"end\");")));
 
+        assertTrue(source.indexOf("/* 111: 111 */") != -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
@@ -2052,9 +2055,9 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("extends ArrayList<T7>") != -1);
         assertTrue(source.indexOf("implements Serializable, Comparable<T1>") != -1);
 
-        assertTrue(source.matches(PatternMaker.make("/*  26:  26 */", "public List<List<? extends GenericClass>> list1 = new ArrayList();")));
+        assertTrue(source.matches(PatternMaker.make("/*  26:  26 */", "public List<List<? extends GenericClass>> list1 = new ArrayList<>();")));
         assertTrue(source.indexOf("public List<List<? super GenericClass>> list2;") != -1);
-        assertTrue(source.matches(PatternMaker.make("/*  31:  31 */", "list2 = new ArrayList();")));
+        assertTrue(source.matches(PatternMaker.make("/*  31:  31 */", "list2 = new ArrayList<>();")));
 
         assertTrue(source.indexOf("public <T> void fromArrayToCollection(T[] a, Collection<T> c)") != -1);
         assertTrue(source.indexOf("public <T> void copy(List<T> dest, List<? extends T> src)") != -1);
@@ -2145,7 +2148,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/*  11:   0 */", "boolean z() default true;")));
         assertTrue(source.matches(PatternMaker.make("/*  13:   0 */", "byte b() default 1;")));
         assertTrue(source.matches(PatternMaker.make("/*  25:   0 */", "String str() default \"str\";")));
-        assertTrue(source.matches(PatternMaker.make("/*  27:   0 */", "Class<?> clazz() default Object.class;")));
+        assertTrue(source.matches(PatternMaker.make("/*  27:   0 */", "Class clazz() default Object.class;")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
 
@@ -2584,7 +2587,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 20 */", "list.stream().filter(s -> (s != null)).forEach(s -> System.out.println(s));")));
         assertTrue(source.indexOf("Predicate<String> filter = s -> (s.length() == length);") != -1);
         assertTrue(source.indexOf("Consumer<String> println = s -> System.out.println(s);") != -1);
-        assertTrue(source.matches(PatternMaker.make(": 27 */", "list.stream().filter((Predicate)filter).forEach((Consumer)println);")));
+        assertTrue(source.matches(PatternMaker.make(": 27 */", "list.stream().filter(filter).forEach(println);")));
         assertTrue(source.matches(PatternMaker.make(": 31 */", "((Map)list.stream()")));
         assertTrue(source.matches(PatternMaker.make(": 32 */", ".collect(Collectors.toMap(lambda -> Integer.valueOf(lambda.index), Function.identity())))")));
         assertTrue(source.matches(PatternMaker.make(": 33 */", ".forEach((key, value) ->")));
@@ -2595,7 +2598,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 61 */", "Supplier<String> constructorReference = String::new;")));
         assertTrue(source.matches(PatternMaker.make(": 65 */", "MethodType mtToString = MethodType.methodType(String.class);")));
         assertTrue(source.matches(PatternMaker.make(": 66 */", "MethodType mtSetter = MethodType.methodType(void.class, Object.class);")));
-        assertTrue(source.matches(PatternMaker.make(": 67 */", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class<?>[]", "{ String.class")));
+        assertTrue(source.matches(PatternMaker.make(": 67 */", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class[]", "{ String.class")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
 

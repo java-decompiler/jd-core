@@ -13,9 +13,11 @@ import java.util.Map;
 
 public class PopulateBindingsWithTypeParameterVisitor implements TypeParameterVisitor {
     protected Map<String, TypeArgument> bindings = null;
+    protected Map<String, BaseType> typeBounds = null;
 
-    public void init(Map<String, TypeArgument> bindings) {
+    public void init(Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds) {
         this.bindings = bindings;
+        this.typeBounds = typeBounds;
     }
 
     @Override
@@ -26,6 +28,7 @@ public class PopulateBindingsWithTypeParameterVisitor implements TypeParameterVi
     @Override
     public void visit(TypeParameterWithTypeBounds type) {
         bindings.put(type.getIdentifier(), null);
+        typeBounds.put(type.getIdentifier(), type.getTypeBounds());
     }
 
     @Override

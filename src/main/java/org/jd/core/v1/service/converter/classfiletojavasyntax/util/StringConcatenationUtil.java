@@ -40,10 +40,11 @@ public class StringConcatenationUtil {
                 }
 
                 if (expr.getClass() == ClassFileNewExpression.class) {
-                    ClassFileNewExpression ne = (ClassFileNewExpression) expr;
-                    String internalTypeName = ne.getType().getDescriptor();
+                    String internalTypeName = expr.getType().getDescriptor();
 
                     if ("Ljava/lang/StringBuilder;".equals(internalTypeName) || "Ljava/lang/StringBuffer;".equals(internalTypeName)) {
+                        ClassFileNewExpression ne = (ClassFileNewExpression) expr;
+
                         if (ne.getParameters() == null) {
                             if (!firstParameterHaveGenericType) {
                                 return concatenatedStringExpression;

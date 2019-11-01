@@ -20,6 +20,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeParametersToTypeArgumentsBinder;
 import org.jd.core.v1.util.DefaultList;
 
@@ -31,6 +32,11 @@ import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
 public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
     protected BodyDeclarationsVisitor bodyDeclarationsVisitor = new BodyDeclarationsVisitor();
     protected HashMap<String, HashMap<String, ClassFileMethodDeclaration>> bridgeMethodDeclarations = new HashMap<>();
+    protected TypeMaker typeMaker;
+
+    public UpdateBridgeMethodVisitor(TypeMaker typeMaker) {
+        this.typeMaker = typeMaker;
+    }
 
     public boolean init(ClassFileBodyDeclaration bodyDeclaration) {
         bridgeMethodDeclarations.clear();
@@ -99,35 +105,31 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             return new FieldReferenceExpression(mie1.getLineNumber(), fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor());
         } else if (expClass == ClassFileMethodInvocationExpression.class) {
             MethodInvocationExpression mie2 = (MethodInvocationExpression) exp;
+            TypeMaker.MethodTypes methodTypes = typeMaker.makeMethodTypes(mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor());
 
-            if ((mie2.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {
-                return new ClassFileMethodInvocationExpression(null, mie1.getLineNumber(), null, mie2.getType(), mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), mie1.getParameterTypes(), mie1.getParameters());
-            } else {
-                BaseType mie1ParameterTypes = mie1.getParameterTypes();
-                BaseExpression mie1Parameters = mie1.getParameters();
-                BaseType newParameterTypes = null;
-                BaseExpression newParameters = null;
+            if (methodTypes != null) {
+                if ((mie2.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {
+                    // Static method invocation
+                    return new ClassFileMethodInvocationExpression(null, mie1.getLineNumber(), null, methodTypes.returnedType, mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.parameterTypes, mie1.getParameters());
+                } else {
+                    BaseExpression mie1Parameters = mie1.getParameters();
+                    BaseExpression newParameters = null;
 
-                if (mie1Parameters != null) {
                     switch (mie1Parameters.size()) {
                         case 0:
                         case 1:
                             break;
                         case 2:
-                            Expression e = mie1Parameters.getList().get(1);
-                            newParameterTypes = e.getType();
-                            newParameters = e;
+                            newParameters = mie1Parameters.getList().get(1);
                             break;
                         default:
-                            DefaultList<Type> t = mie1ParameterTypes.getList();
-                            newParameterTypes = new Types(t.subList(1, t.size()));
                             DefaultList<Expression> p = mie1Parameters.getList();
                             newParameters = new Expressions(p.subList(1, p.size()));
                             break;
                     }
-                }
 
-                return new ClassFileMethodInvocationExpression(null, mie1.getLineNumber(), null, mie2.getType(), mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), newParameterTypes, newParameters);
+                    return new ClassFileMethodInvocationExpression(mie1.getBinder(), mie1.getLineNumber(), null, methodTypes.returnedType, mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.parameterTypes, newParameters);
+                }
             }
         } else if (expClass == BinaryOperatorExpression.class) {
             BinaryOperatorExpression boe = (BinaryOperatorExpression) exp;

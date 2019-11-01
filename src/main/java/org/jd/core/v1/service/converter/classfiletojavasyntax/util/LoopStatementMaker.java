@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.ListIterator;
 
 import static org.jd.core.v1.model.javasyntax.statement.ContinueStatement.CONTINUE;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_ITERABLE;
 
 public class LoopStatementMaker {
     protected static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
@@ -639,28 +640,32 @@ public class LoopStatementMaker {
         item.setDeclared(true);
         localVariableMaker.removeLocalVariable(syntheticIterator);
 
-        ObjectType listType = (ObjectType)list.getType();
+        Type type = list.getType();
 
-        if (listType.getTypeArguments() == null) {
-            if (item.getType().isObject()) {
-                ObjectType ot = (ObjectType)item.getType();
+        if (type.isObject()) {
+            ObjectType listType = (ObjectType)type;
 
-                if (ot.getTypeArguments() != null) {
-                    TypeParametersToTypeArgumentsBinder.staticBindParameterTypesWithArgumentTypes(ot, list);
+            if (listType.getTypeArguments() == null) {
+                if (item.getType().isObject()) {
+                    ObjectType ot = (ObjectType) item.getType();
+
+                    if (ot.getTypeArguments() != null) {
+                        list = new CastExpression(TYPE_ITERABLE.createType(ot), list);
+                    }
                 }
-            }
-        } else {
-            CreateTypeFromTypeArgumentVisitor visitor2 = new CreateTypeFromTypeArgumentVisitor();
-            listType.getTypeArguments().accept(visitor2);
-            Type type = visitor2.getType();
+            } else {
+                CreateTypeFromTypeArgumentVisitor visitor2 = new CreateTypeFromTypeArgumentVisitor();
+                listType.getTypeArguments().accept(visitor2);
+                type = visitor2.getType();
 
-            if (type != null) {
-                if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
-                    ((ObjectLocalVariable)item).setType(type);
-                } else if (item.getType().isGeneric()) {
-                    ((GenericLocalVariable)item).setType((GenericType)type);
-                } else {
-                    item.typeOnRight(type);
+                if (type != null) {
+                    if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
+                        ((ObjectLocalVariable) item).setType(type);
+                    } else if (item.getType().isGeneric()) {
+                        ((GenericLocalVariable) item).setType((GenericType) type);
+                    } else {
+                        item.typeOnRight(type);
+                    }
                 }
             }
         }

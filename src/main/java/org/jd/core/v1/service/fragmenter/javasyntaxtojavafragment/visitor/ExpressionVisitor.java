@@ -17,10 +17,7 @@ import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.CharacterUtil;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
@@ -462,7 +459,13 @@ public class ExpressionVisitor extends TypeVisitor {
             tokens.add(TextToken.RIGHTANGLEBRACKET);
         }
 
-        BaseType type = expression.getType();
+        ObjectType objectType = expression.getObjectType();
+
+        if ((objectType.getTypeArguments() != null) && (bodyDeclaration == null) && (majorVersion >= 51)) { // (majorVersion >= Java 7)
+            objectType = objectType.createType(DiamondTypeArgument.DIAMOND);
+        }
+
+        BaseType type = objectType;
 
         type.accept(this);
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);

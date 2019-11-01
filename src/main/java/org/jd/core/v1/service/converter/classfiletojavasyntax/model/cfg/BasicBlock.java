@@ -380,7 +380,7 @@ public class BasicBlock {
 
     @Override
     public int hashCode() {
-        return index;
+        return 378887654 + index;
     }
 
     @Override

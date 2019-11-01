@@ -78,7 +78,7 @@ public class InnerObjectType extends ObjectType {
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
+        int result = 111476860 + super.hashCode();
         result = 31 * result + outerType.hashCode();
         return result;
     }

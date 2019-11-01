@@ -18,15 +18,12 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
 
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
-
     protected TypeMaker typeMaker;
     protected Type returnedType;
     protected Type type;
-    protected int extraDimension = 0;
 
     public AddCastExpressionVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -46,11 +43,17 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         VariableInitializer variableInitializer = declarator.getVariableInitializer();
 
         if (variableInitializer != null) {
-            int d = extraDimension;
+            int extraDimension = declarator.getDimension();
 
-            extraDimension = declarator.getDimension();
-            variableInitializer.accept(this);
-            extraDimension = d;
+            if (extraDimension == 0) {
+                variableInitializer.accept(this);
+            } else {
+                Type t = type;
+
+                type = type.createType(type.getDimension() + extraDimension);
+                variableInitializer.accept(this);
+                type = t;
+            }
         }
     }
 
@@ -103,40 +106,38 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         VariableInitializer variableInitializer = declarator.getVariableInitializer();
 
         if (variableInitializer != null) {
-            int d = extraDimension;
+            int extraDimension = declarator.getDimension();
 
-            extraDimension = declarator.getDimension();
-            variableInitializer.accept(this);
-            extraDimension = d;
+            if (extraDimension == 0) {
+                variableInitializer.accept(this);
+            } else {
+                Type t = type;
+
+                type = type.createType(type.getDimension() + extraDimension);
+                variableInitializer.accept(this);
+                type = t;
+            }
         }
+    }
+
+    @Override
+    public void visit(ArrayVariableInitializer declaration) {
+        Type t = type;
+
+        type = type.createType(type.getDimension() - 1);
+        acceptListDeclaration(declaration);
+        type = t;
     }
 
     @Override
     public void visit(ExpressionVariableInitializer declaration) {
         Expression expression = declaration.getExpression();
 
-        if (expression.getClass() == ClassFileMethodInvocationExpression.class) {
-            ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
-
-            if (mie.getTypeParameters() != null) {
-                // Do nor add cast expression if method contains type parameters
-                expression.accept(this);
-                return;
-            }
-        }
-
         if (expression.getClass() == NewInitializedArray.class) {
             ((NewInitializedArray)expression).getArrayInitializer().accept(this);
-            return;
+        } else {
+            declaration.setExpression(updateExpression(type, expression));
         }
-
-        Type t = type;
-
-        if (extraDimension > 0) {
-            t = t.createType(t.getDimension() + extraDimension);
-        }
-
-        declaration.setExpression(updateExpression(t, expression));
     }
 
     @Override
@@ -188,7 +189,6 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             Type t = type;
 
             type = expression.getType();
-            type = type.createType(type.getDimension() - 1);
             arrayInitializer.accept(this);
             type = t;
         }
@@ -218,6 +218,16 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         rightExpression.accept(this);
     }
 
+    @Override
+    public void visit(TernaryOperatorExpression expression) {
+        Type expressionType = expression.getType();
+
+        expression.getCondition().accept(this);
+
+        expression.setExpressionTrue(updateExpression(expressionType, expression.getExpressionTrue()));
+        expression.setExpressionFalse(updateExpression(expressionType, expression.getExpressionFalse()));
+    }
+
     @SuppressWarnings("unchecked")
     protected BaseExpression updateExpressions(BaseType types, BaseExpression expressions) {
         if (expressions != null) {
@@ -245,27 +255,36 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                     if (expressionType.isObject()) {
                         ObjectType objectType = (ObjectType) type;
                         ObjectType expressionObjectType = (ObjectType) expressionType;
-                        String internalName = objectType.getInternalName();
 
-                        if (internalName.equals(expressionObjectType.getInternalName()) || typeMaker.isAssignable(objectType, expressionObjectType)) {
-                            if (expressionObjectType.getTypeArguments() == null) {
-                                if (objectType.getTypeArguments() != null) {
-                                    expression = addCastExpression(type, expression);
-                                }
-                            } else {
-                                if (objectType.getTypeArguments() == null) {
-                                    expression = addCastExpression(type, expression);
-                                } else if (!objectType.getTypeArguments().isTypeArgumentAssignableFrom(expressionObjectType.getTypeArguments())) {
-                                    expression = addCastExpression(objectType.createType(null), expression);
-                                }
+                        if (!typeMaker.isAssignable(objectType, expressionObjectType)) {
+                            BaseTypeArgument ta1 = objectType.getTypeArguments();
+                            BaseTypeArgument ta2 = expressionObjectType.getTypeArguments();
+                            Type t = type;
+
+                            if ((ta1 != null) && (ta2 != null) && !ta1.isTypeArgumentAssignableFrom(ta2)) {
+                                // Incompatible typeArgument arguments => Uses raw typeArgument
+                                t = objectType.createType(null);
                             }
+                            expression = addCastExpression(t, expression);
                         }
+                    } else if (expressionType.isGeneric()) {
+                        expression = addCastExpression(type, expression);
                     }
                 } else if (type.isGeneric()) {
                     if (expressionType.isObject() || expressionType.isGeneric()) {
                         expression = addCastExpression(type, expression);
                     }
                 }
+            }
+        }
+
+        if (expression.getClass() == CastExpression.class) {
+            CastExpression ce = (CastExpression)expression;
+            Type ceExpressionType = ce.getExpression().getType();
+
+            if (type.isObject() && ceExpressionType.isObject() && typeMaker.isAssignable((ObjectType)type, (ObjectType)ceExpressionType)) {
+                // Remove cast expression
+                expression = ce.getExpression();
             }
         }
 
@@ -282,27 +301,18 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             return false;
         }
 
-        if (expressionClass == ClassFileMethodInvocationExpression.class) {
-            ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
-
-            if (mie.getTypeParameters() != null) {
-                // Do not add a cast before parameterized method invocation
-                return false;
-            }
-        }
-
         return true;
     }
 
     private static final Expression addCastExpression(Type type, Expression expression) {
         if (expression.getClass() == CastExpression.class) {
-            CastExpression ca = (CastExpression)expression;
+            CastExpression ce = (CastExpression)expression;
 
-            if (type.equals(ca.getExpression().getType())) {
-                return ca.getExpression();
+            if (type.equals(ce.getExpression().getType())) {
+                return ce.getExpression();
             } else {
-                ca.setType(type);
-                return ca;
+                ce.setType(type);
+                return ce;
             }
         } else {
             return new CastExpression(expression.getLineNumber(), type, expression);

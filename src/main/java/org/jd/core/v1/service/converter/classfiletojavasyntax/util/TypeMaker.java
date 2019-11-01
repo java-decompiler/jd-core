@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 /*
@@ -55,6 +56,9 @@ public class TypeMaker {
     private HashMap<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
     private HashMap<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
     private HashMap<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
+
+    private HashMap<Long, Boolean> assignableRawTypes = new HashMap<>(1024);
+    private HashMap<Long, ObjectType> superParameterizedObjectTypes = new HashMap<>(1024);
 
     private HashMap<String, String[]> hierarchy = new HashMap<>(1024);
     private ClassPathLoader classPathLoader = new ClassPathLoader();
@@ -123,7 +127,7 @@ public class TypeMaker {
                 if (length == 1) {
                     typeTypes.interfaces = makeFromInternalTypeName(interfaceTypeNames[0]);
                 } else {
-                    Types list = new Types(length);
+                    UnmodifiableTypes list = new UnmodifiableTypes(length);
                     for (String interfaceTypeName : interfaceTypeNames) {
                         list.add(makeFromInternalTypeName(interfaceTypeName));
                     }
@@ -145,7 +149,7 @@ public class TypeMaker {
                 if (nextInterface == null) {
                     typeTypes.interfaces = firstInterface;
                 } else {
-                    Types list = new Types(classFile.getInterfaceTypeNames().length);
+                    UnmodifiableTypes list = new UnmodifiableTypes(classFile.getInterfaceTypeNames().length);
 
                     list.add(firstInterface);
 
@@ -252,8 +256,8 @@ public class TypeMaker {
             } else if (mtDescriptor.parameterTypes.size() == mtSignature.parameterTypes.size()) {
                 return mtSignature;
             } else {
-                Types parameterTypes = new Types(mtDescriptor.parameterTypes.getList());
-                parameterTypes.subList(parameterTypes.size() - mtSignature.parameterTypes.size(), parameterTypes.size()).clear();
+                UnmodifiableTypes parameterTypes = new UnmodifiableTypes(mtDescriptor.parameterTypes.getList().subList(
+                    0, mtDescriptor.parameterTypes.size() - mtSignature.parameterTypes.size()));
                 parameterTypes.addAll(mtSignature.parameterTypes.getList());
 
                 MethodTypes mt = new MethodTypes();
@@ -309,7 +313,7 @@ public class TypeMaker {
                 methodTypes.parameterTypes = null;
             } else {
                 Type nextParameterType = parseReferenceTypeSignature(reader);
-                Types types = new Types();
+                UnmodifiableTypes types = new UnmodifiableTypes();
 
                 types.add(firstParameterType);
 
@@ -337,7 +341,7 @@ public class TypeMaker {
                     if (exceptionTypeNames.length == 1) {
                         methodTypes.exceptions = makeFromInternalTypeName(exceptionTypeNames[0]);
                     } else {
-                        Types list = new Types(exceptionTypeNames.length);
+                        UnmodifiableTypes list = new UnmodifiableTypes(exceptionTypeNames.length);
 
                         for (String exceptionTypeName : exceptionTypeNames) {
                             list.add(makeFromInternalTypeName(exceptionTypeName));
@@ -352,7 +356,7 @@ public class TypeMaker {
                 if (nextException == null) {
                     methodTypes.exceptions = firstException;
                 } else {
-                    Types list = new Types();
+                    UnmodifiableTypes list = new UnmodifiableTypes();
 
                     list.add(firstException);
 
@@ -430,7 +434,7 @@ public class TypeMaker {
 
             // Parser bounds
             Type firstBound = null;
-            Types types = null;
+            UnmodifiableTypes types = null;
 
             while (reader.nextEqualsTo(':')) {
                 // Skip ':'
@@ -442,7 +446,7 @@ public class TypeMaker {
                     if (firstBound == null) {
                         firstBound = bound;
                     } else if (types == null) {
-                        types = new Types();
+                        types = new UnmodifiableTypes();
                         types.add(firstBound);
                         types.add(bound);
                     } else {
@@ -859,49 +863,181 @@ public class TypeMaker {
         return ot;
     }
 
-    public boolean isAssignable(ObjectType parent, ObjectType child) {
-        if (parent == TYPE_UNDEFINED_OBJECT) {
+    public ObjectType searchSuperParameterizedType(ObjectType superObjectType, ObjectType objectType) {
+        if ((superObjectType == TYPE_UNDEFINED_OBJECT) || superObjectType.equals(TYPE_OBJECT) || superObjectType.equals(objectType)) {
+            return objectType;
+        } else if ((superObjectType.getDimension() > 0) || (objectType.getDimension() > 0)) {
+            return null;
+        } else {
+            String superInternalTypeName = superObjectType.getInternalName();
+            long superHashCode = superInternalTypeName.hashCode() * 31;
+            return searchSuperParameterizedType(superHashCode, superInternalTypeName, objectType);
+        }
+    }
+
+    public boolean isAssignable(ObjectType left, ObjectType right) {
+        if ((left == TYPE_UNDEFINED_OBJECT) || left.equals(TYPE_OBJECT) || left.equals(right)) {
             return true;
-        } else if (parent.getDimension() > 0) {
-            return (parent.getDimension() == child.getDimension()) && parent.getInternalName().equals(child.getInternalName());
-        } else if (child.getDimension() > 0) {
+        } else if ((left.getDimension() > 0) || (right.getDimension() > 0)) {
             return false;
         } else {
-            String parentInternalName = parent.getInternalName();
-            String childInternalName = child.getInternalName();
+            String leftInternalTypeName = left.getInternalName();
+            long leftHashCode = leftInternalTypeName.hashCode() * 31;
+            ObjectType ot = searchSuperParameterizedType(leftHashCode, leftInternalTypeName, right);
 
-            if (parentInternalName.equals(childInternalName) || parentInternalName.equals("java/lang/Object")) {
-                return true;
+            if ((ot != null) && leftInternalTypeName.equals(ot.getInternalName())) {
+                if ((left.getTypeArguments() == null) || (ot.getTypeArguments() == null)) {
+                    return true;
+                } else {
+                    return left.getTypeArguments().isTypeArgumentAssignableFrom(ot.getTypeArguments());
+                }
             }
 
-            return recursiveIsAssignable(parentInternalName, childInternalName);
+            return false;
+        }
+    }
+
+    private ObjectType searchSuperParameterizedType(long superHashCode, String superInternalTypeName, ObjectType objectType) {
+        if (objectType.equals(TYPE_OBJECT)) {
+            return null;
+        }
+
+        Long key = Long.valueOf(superHashCode + objectType.hashCode());
+
+        if (superParameterizedObjectTypes.containsKey(key)) {
+            return superParameterizedObjectTypes.get(key);
+        }
+
+        String rightInternalName = objectType.getInternalName();
+
+        if (superInternalTypeName.equals(rightInternalName)) {
+            superParameterizedObjectTypes.put(key, objectType);
+            return objectType;
+        }
+
+        TypeTypes rightTypeTypes = makeTypeTypes(rightInternalName);
+
+        if (rightTypeTypes != null) {
+            if ((rightTypeTypes.typeParameters == null) || (objectType.getTypeArguments() == null)) {
+                if (rightTypeTypes.superType != null) {
+                    ObjectType ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, rightTypeTypes.superType.createType(null));
+
+                    if (ot != null) {
+                        superParameterizedObjectTypes.put(key, ot);
+                        return ot;
+                    }
+                }
+                if (rightTypeTypes.interfaces != null) {
+                    for (Type interfaze : rightTypeTypes.interfaces) {
+                        ObjectType ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, ((ObjectType)interfaze).createType(null));
+
+                        if (ot != null) {
+                            superParameterizedObjectTypes.put(key, ot);
+                            return ot;
+                        }
+                    }
+                }
+            } else {
+                BindTypeParametersToTypeArgumentsVisitor bindTypeParametersToTypeArgumentsVisitor = new BindTypeParametersToTypeArgumentsVisitor();
+                HashMap<String, TypeArgument> bindings = new HashMap<>();
+
+                if (rightTypeTypes.typeParameters.isList()) {
+                    Iterator<TypeParameter> iteratorTypeParameter = rightTypeTypes.typeParameters.iterator();
+                    Iterator<TypeArgument> iteratorTypeArgument = objectType.getTypeArguments().getTypeArgumentList().iterator();
+
+                    while (iteratorTypeParameter.hasNext()) {
+                        bindings.put(iteratorTypeParameter.next().getIdentifier(), iteratorTypeArgument.next());
+                    }
+                } else {
+                    bindings.put(rightTypeTypes.typeParameters.getFirst().getIdentifier(), objectType.getTypeArguments().getTypeArgumentFirst());
+                }
+
+                bindTypeParametersToTypeArgumentsVisitor.setBindings(bindings);
+
+                if (rightTypeTypes.superType != null) {
+                    bindTypeParametersToTypeArgumentsVisitor.init();
+                    rightTypeTypes.superType.accept(bindTypeParametersToTypeArgumentsVisitor);
+                    ObjectType ot = (ObjectType) bindTypeParametersToTypeArgumentsVisitor.getType();
+                    ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, ot);
+
+                    if (ot != null) {
+                        superParameterizedObjectTypes.put(key, ot);
+                        return ot;
+                    }
+                }
+                if (rightTypeTypes.interfaces != null) {
+                    for (Type interfaze : rightTypeTypes.interfaces) {
+                        bindTypeParametersToTypeArgumentsVisitor.init();
+                        interfaze.accept(bindTypeParametersToTypeArgumentsVisitor);
+                        ObjectType ot = (ObjectType) bindTypeParametersToTypeArgumentsVisitor.getType();
+                        ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, ot);
+
+                        if (ot != null) {
+                            superParameterizedObjectTypes.put(key, ot);
+                            return ot;
+                        }
+                    }
+                }
+            }
+        }
+
+        superParameterizedObjectTypes.put(key, null);
+        return null;
+    }
+
+    public boolean isRawTypeAssignable(ObjectType left, ObjectType right) {
+        if ((left == TYPE_UNDEFINED_OBJECT) || left.equals(TYPE_OBJECT) || left.equals(right)) {
+            return true;
+        } else if ((left.getDimension() > 0) || (right.getDimension() > 0)) {
+            return false;
+        } else {
+            String leftInternalName = left.getInternalName();
+            String rightInternalName = right.getInternalName();
+
+            if (leftInternalName.equals(rightInternalName)) {
+                return true;
+            } else {
+                return isRawTypeAssignable(leftInternalName.hashCode() * 31, leftInternalName, rightInternalName);
+            }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private boolean recursiveIsAssignable(String parentInternalName, String childInternalName) {
-        if (childInternalName.equals("java/lang/Object"))
+    private boolean isRawTypeAssignable(long leftHashCode, String leftInternalName, String rightInternalName) {
+        if (rightInternalName.equals("java/lang/Object")) {
             return false;
+        }
 
-        String[] superClassAndInterfaceNames = hierarchy.get(childInternalName);
+        Long key = Long.valueOf(leftHashCode + rightInternalName.hashCode());
+
+        if (assignableRawTypes.containsKey(key)) {
+            return assignableRawTypes.get(key).booleanValue();
+        }
+
+        String[] superClassAndInterfaceNames = hierarchy.get(rightInternalName);
 
         if (superClassAndInterfaceNames == null) {
-            loadType(childInternalName);
-            superClassAndInterfaceNames = hierarchy.get(childInternalName);
+            loadType(rightInternalName);
+            superClassAndInterfaceNames = hierarchy.get(rightInternalName);
         }
 
         if (superClassAndInterfaceNames != null) {
             for (String name : superClassAndInterfaceNames) {
-                if (parentInternalName.equals(name))
+                if (leftInternalName.equals(name)) {
+                    assignableRawTypes.put(key, Boolean.TRUE);
                     return true;
+                }
             }
 
             for (String name : superClassAndInterfaceNames) {
-                if (recursiveIsAssignable(parentInternalName, name))
+                if (isRawTypeAssignable(leftHashCode, leftInternalName, name)) {
+                    assignableRawTypes.put(key, Boolean.TRUE);
                     return true;
+                }
             }
         }
 
+        assignableRawTypes.put(key, Boolean.FALSE);
         return false;
     }
 
@@ -974,7 +1110,7 @@ public class TypeMaker {
                     break;
                 default:
                     int length = superClassAndInterfaceNames.length;
-                    Types list = new Types(length-1);
+                    UnmodifiableTypes list = new UnmodifiableTypes(length-1);
                     for (int i=1; i<length; i++) {
                         list.add(makeFromInternalTypeName(superClassAndInterfaceNames[i]));
                     }
@@ -997,7 +1133,7 @@ public class TypeMaker {
                     typeTypes.interfaces = firstInterface;
                 } else {
                     int length = superClassAndInterfaceNames.length;
-                    Types list = new Types(length-1);
+                    UnmodifiableTypes list = new UnmodifiableTypes(length-1);
 
                     list.add(firstInterface);
 
@@ -1185,7 +1321,13 @@ public class TypeMaker {
                 } else {
                     bindTypeParametersToTypeArgumentsVisitor.init();
                     methodTypes.parameterTypes.accept(bindTypeParametersToTypeArgumentsVisitor);
-                    newMethodTypes.parameterTypes = bindTypeParametersToTypeArgumentsVisitor.getType();
+                    BaseType baseType = bindTypeParametersToTypeArgumentsVisitor.getType();
+
+                    if (baseType.isList() && (baseType.getClass() == Types.class)) {
+                        baseType = new UnmodifiableTypes(baseType.getList());
+                    }
+
+                    newMethodTypes.parameterTypes = baseType;
                 }
 
                 bindTypeParametersToTypeArgumentsVisitor.init();

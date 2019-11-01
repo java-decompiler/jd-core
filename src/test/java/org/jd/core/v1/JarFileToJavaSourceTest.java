@@ -25,8 +25,7 @@ import org.junit.Test;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class JarFileToJavaSourceTest extends TestCase {
     protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
@@ -72,6 +71,9 @@ public class JarFileToJavaSourceTest extends TestCase {
             for (String path : loader.getMap().keySet()) {
                 if (path.endsWith(".class") && (path.indexOf('$') == -1)) {
                     String internalTypeName = path.substring(0, path.length() - 6); // 6 = ".class".length()
+
+                    if (!internalTypeName.endsWith("/ListOrderedMap")) continue; // TODO
+
                     message.setHeader("mainInternalTypeName", internalTypeName);
                     printer.init();
 
@@ -137,7 +139,7 @@ public class JarFileToJavaSourceTest extends TestCase {
 
             assertTrue(exceptionCounter == 0);
             assertTrue(assertFailedCounter == 0);
-            // TODO assertTrue(recompilationFailedCounter == 0);
+            assertTrue(recompilationFailedCounter == 0);
         }
     }
 

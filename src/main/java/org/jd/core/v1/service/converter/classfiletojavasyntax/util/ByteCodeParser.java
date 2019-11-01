@@ -48,7 +48,6 @@ public class ByteCodeParser {
 
     private TypeMaker typeMaker;
     private LocalVariableMaker localVariableMaker;
-    private ClassFile classFile;
     private String internalTypeName;
     private TypeParametersToTypeArgumentsBinder typeParametersToTypeArgumentsBinder;
     private AttributeBootstrapMethods attributeBootstrapMethods;
@@ -60,7 +59,6 @@ public class ByteCodeParser {
             ClassFileBodyDeclaration bodyDeclaration, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
         this.localVariableMaker = localVariableMaker;
-        this.classFile = classFile;
         this.internalTypeName = classFile.getInternalTypeName();
         this.typeParametersToTypeArgumentsBinder = new TypeParametersToTypeArgumentsBinder(typeMaker, this.internalTypeName, bodyDeclaration, comd);
         this.attributeBootstrapMethods = classFile.getAttribute("BootstrapMethods");
@@ -728,6 +726,7 @@ public class ByteCodeParser {
                     if (opcode == 184) { // INVOKESTATIC
                         expression1 = typeParametersToTypeArgumentsBinder.newMethodInvocationExpression(lineNumber, new ObjectTypeReferenceExpression(lineNumber, ot), ot, name, descriptor, methodTypes, parameters);
                         if (TYPE_VOID.equals(methodTypes.returnedType)) {
+                            typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_VOID, expression1);
                             statements.add(new ExpressionStatement(expression1));
                         } else {
                             stack.push(expression1);
@@ -745,7 +744,7 @@ public class ByteCodeParser {
                                 "<init>".equals(name)) {
 
                                 if (expression1.getClass() == ClassFileNewExpression.class) {
-                                    typeParametersToTypeArgumentsBinder.updateNewExpression(expression1, descriptor, methodTypes, parameters);
+                                    typeParametersToTypeArgumentsBinder.updateNewExpression((ClassFileNewExpression)expression1, descriptor, methodTypes, parameters);
                                 } else if (ot.getDescriptor().equals(expression1.getType().getDescriptor())) {
                                     statements.add(new ExpressionStatement(typeParametersToTypeArgumentsBinder.newConstructorInvocationExpression(
                                         lineNumber, ot, descriptor, methodTypes, parameters)));
@@ -806,16 +805,20 @@ public class ByteCodeParser {
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                     type1 = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
                     expression1 = stack.pop();
-                    typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(type1, expression1);
-                    if (expression1.getClass() == CastExpression.class) {
-                        // Skip double cast
-                        ((CastExpression)expression1).setType(type1);
+                    if (type1.isObject() && expression1.getType().isObject() && typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) expression1.getType())) {
+                        // Ignore cast
+                        stack.push(expression1);
                     } else {
-                        searchFirstLineNumberVisitor.init();
-                        expression1.accept(searchFirstLineNumberVisitor);
-                        expression1 = new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, expression1);
+                        if (expression1.getClass() == CastExpression.class) {
+                            // Skip double cast
+                            ((CastExpression) expression1).setType(type1);
+                        } else {
+                            searchFirstLineNumberVisitor.init();
+                            expression1.accept(searchFirstLineNumberVisitor);
+                            expression1 = new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, expression1);
+                        }
+                        stack.push(expression1);
                     }
-                    stack.push(expression1);
                     break;
                 case 193: // INSTANCEOF
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
@@ -970,23 +973,15 @@ public class ByteCodeParser {
         } else if (valueClass == ClassFileLocalVariableReferenceExpression.class) {
             return localVariableMaker.getLocalVariableInAssignment(index, offset, ((ClassFileLocalVariableReferenceExpression)value).getLocalVariable());
         } else if (valueClass == ClassFileMethodInvocationExpression.class) {
-            ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)value;
-
-            if (valueType.isObject() && (mie.getTypeParameters() != null)) {
-                // Remove type parameters
+            if (valueType.isObject()) {
+                // Remove type arguments
                 valueType = ((ObjectType)valueType).createType(null);
+            } else if (valueType.isGeneric()) {
+                valueType = TYPE_UNDEFINED_OBJECT;
             }
 
             return localVariableMaker.getLocalVariableInAssignment(index, offset, valueType);
         } else {
-            if (valueClass == CastExpression.class) {
-                Type type = ((CastExpression)value).getExpression().getType();
-
-                if (type.isGeneric()) {
-                    return localVariableMaker.getLocalVariableInCastAssignment(index, offset, valueType, type);
-                }
-            }
-
             return localVariableMaker.getLocalVariableInAssignment(index, offset, valueType);
         }
     }
@@ -1429,10 +1424,10 @@ public class ByteCodeParser {
     }
 
     private void parseASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, AbstractLocalVariable localVariable, Expression valueRef) {
+        typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(localVariable.getType(), valueRef);
+        localVariable.typeOnRight(valueRef.getType());
+
         ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable);
-
-        typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(vre.getType(), valueRef);
-
         Expression oldValueRef = valueRef;
 
         if (valueRef.getClass() == NewArray.class) {
@@ -1577,14 +1572,20 @@ public class ByteCodeParser {
         statements.add(new ExpressionStatement(expression));
     }
 
-    private static void parseIF(DefaultStack<Expression> stack, int lineNumber, BasicBlock basicBlock, String operator1, String operator2, int priority) {
+    private void parseIF(DefaultStack<Expression> stack, int lineNumber, BasicBlock basicBlock, String operator1, String operator2, int priority) {
         Expression expression = stack.pop();
 
         if (expression.getClass() == ClassFileCmpExpression.class) {
             ClassFileCmpExpression cmp = (ClassFileCmpExpression)expression;
+
+            typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(cmp.getLeftExpression().getType(), cmp.getLeftExpression());
+            typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(cmp.getRightExpression().getType(), cmp.getRightExpression());
+
             stack.push(new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, cmp.getLeftExpression(), (basicBlock.mustInverseCondition() ? operator1 : operator2), cmp.getRightExpression(), priority));
         } else if (expression.getType().isPrimitive()) {
             PrimitiveType pt = (PrimitiveType)expression.getType();
+
+            typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(pt, expression);
 
             switch (pt.getJavaPrimitiveFlags()) {
                 case FLAG_BOOLEAN:
@@ -1837,7 +1838,7 @@ public class ByteCodeParser {
      * Operators = { "==", "!=" }
      * See "Numerical Equality Operators == and !=": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.21.1
      */
-    private static Expression newIntegerOrBooleanComparisonOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
+    private Expression newIntegerOrBooleanComparisonOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
         Class leftClass = leftExpression.getClass();
         Class rightClass = rightExpression.getClass();
 
@@ -1865,6 +1866,9 @@ public class ByteCodeParser {
                 }
             }
         }
+
+        typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(leftExpression.getType(), rightExpression);
+        typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(rightExpression.getType(), leftExpression);
 
         return new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, leftExpression, operator, rightExpression, priority);
     }

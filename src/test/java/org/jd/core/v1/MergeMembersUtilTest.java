@@ -255,7 +255,7 @@ public class MergeMembersUtilTest {
         DefaultList<ClassFileFieldDeclaration> fields = new DefaultList<>();
         fields.add(new ClassFileFieldDeclaration(0, PrimitiveType.TYPE_INT, new FieldDeclarator("d"), lineNumber));
 
-        ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration("A", null, null);
+        ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration("A", null, null, null);
         bodyDeclaration.setFieldDeclarations(fields);
 
         innerTypes.add(new ClassFileClassDeclaration(null, 0, "A", "A", null, null, null, bodyDeclaration));

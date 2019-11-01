@@ -18,12 +18,12 @@ public class WildcardTypeArgument implements TypeArgument {
     }
 
     @Override
-    public String toString() {
-        return "Wildcard{?}";
+    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+        return true;
     }
 
     @Override
-    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
-        return true;
+    public String toString() {
+        return "Wildcard{?}";
     }
 }

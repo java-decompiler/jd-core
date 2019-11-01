@@ -79,27 +79,11 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
 
     @Override
     public boolean isAssignableFrom(Type type) {
-        if (!type.isPrimitive()) {
-            if ((type == TYPE_UNDEFINED_OBJECT) || (this.type == TYPE_UNDEFINED_OBJECT) || TYPE_OBJECT.equals(this.type) || this.type.equals(type)) {
+        if (type.isObject()) {
+            return typeMaker.isAssignable((ObjectType) this.type, (ObjectType) type);
+        } else if (type.isGeneric()) {
+            if (this.type.equals(TYPE_OBJECT)) {
                 return true;
-            } else if ((this.type.getDimension() == type.getDimension()) && this.type.isObject()) {
-                ObjectType thisObjectType = (ObjectType) this.type;
-
-                if (type.isObject()) {
-                    ObjectType otherObjectType = (ObjectType) type;
-
-                    if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName()) && (thisObjectType.getTypeArguments() != null) && (otherObjectType.getTypeArguments() != null)) {
-                        return thisObjectType.getTypeArguments().isTypeArgumentAssignableFrom(otherObjectType.getTypeArguments());
-                    }
-
-                    if (type.getDimension() == 0) {
-                        if ((thisObjectType.getTypeArguments() == null) ? (otherObjectType.getTypeArguments() == null) : thisObjectType.getTypeArguments().equals(otherObjectType.getTypeArguments())) {
-                            return typeMaker.isAssignable(thisObjectType, otherObjectType);
-                        }
-                    }
-                } else if (thisObjectType.getInternalName().equals(TYPE_OBJECT.getInternalName())) {
-                    return true;
-                }
             }
         }
 

@@ -347,7 +347,7 @@ public class LocalVariableMaker {
                 BaseTypeArgument valueTypeArguments = valueObjectType.getTypeArguments();
 
                 if ((lvTypeArguments == null) || (valueTypeArguments == null)) {
-                    return typeMaker.isAssignable(lvObjectType, valueObjectType);
+                    return typeMaker.isRawTypeAssignable(lvObjectType, valueObjectType);
                 }
 
                 searchInTypeArgumentVisitor.init();
@@ -358,7 +358,7 @@ public class LocalVariableMaker {
                     valueTypeArguments.accept(searchInTypeArgumentVisitor);
 
                     if (searchInTypeArgumentVisitor.containsGeneric()) {
-                        return typeMaker.isAssignable(lvObjectType, valueObjectType);
+                        return typeMaker.isRawTypeAssignable(lvObjectType, valueObjectType);
                     }
                 }
             } else if (lv.getType().isGeneric() && valueObjectType.getInternalName().equals(ObjectType.TYPE_OBJECT.getInternalName())) {

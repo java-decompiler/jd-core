@@ -35,6 +35,21 @@ public class WildcardExtendsTypeArgument implements TypeArgument {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WildcardExtendsTypeArgument that = (WildcardExtendsTypeArgument) o;
+
+        return type != null ? type.equals(that.type) : that.type == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return 957014778 + (type != null ? type.hashCode() : 0);
+    }
+
+    @Override
     public String toString() {
         return "WildcardExtendsTypeArgument{? extends " + type + "}";
     }

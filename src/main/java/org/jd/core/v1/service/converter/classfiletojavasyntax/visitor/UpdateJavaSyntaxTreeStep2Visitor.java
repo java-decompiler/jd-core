@@ -21,14 +21,15 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
     protected InitInstanceFieldVisitor initInstanceFieldVisitor = new InitInstanceFieldVisitor();
     protected InitEnumVisitor initEnumVisitor = new InitEnumVisitor();
     protected RemoveDefaultConstructorVisitor removeDefaultConstructorVisitor = new RemoveDefaultConstructorVisitor();
-    protected UpdateBridgeMethodVisitor replaceBridgeMethodVisitor = new UpdateBridgeMethodVisitor();
 
+    protected UpdateBridgeMethodVisitor replaceBridgeMethodVisitor;
     protected InitInnerClassVisitor.UpdateNewExpressionVisitor initInnerClassStep2Visitor;
     protected AddCastExpressionVisitor addCastExpressionVisitor;
 
     protected TypeDeclaration typeDeclaration;
 
     public UpdateJavaSyntaxTreeStep2Visitor(TypeMaker typeMaker) {
+        this.replaceBridgeMethodVisitor = new UpdateBridgeMethodVisitor(typeMaker);
         this.initInnerClassStep2Visitor = new InitInnerClassVisitor.UpdateNewExpressionVisitor(typeMaker);
         this.addCastExpressionVisitor = new AddCastExpressionVisitor(typeMaker);
     }

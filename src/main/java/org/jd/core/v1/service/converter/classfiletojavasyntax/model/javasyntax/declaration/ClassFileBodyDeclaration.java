@@ -11,6 +11,7 @@ import org.jd.core.v1.model.javasyntax.declaration.BaseMemberDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import org.jd.core.v1.util.DefaultList;
@@ -28,13 +29,14 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     protected int firstLineNumber;
     protected ObjectType outerType;
     protected DefaultList<String> syntheticInnerFieldNames;
-    protected Map<String, List<FieldReferenceExpression>> syntheticInnerFieldNameToSyntheticInnerFieldReferences;
     protected ClassFileBodyDeclaration outerBodyDeclaration;
     protected Map<String, TypeArgument> bindings;
+    protected Map<String, BaseType> typeBounds;
 
-    public ClassFileBodyDeclaration(String internalTypeName, Map<String, TypeArgument> bindings, ClassFileBodyDeclaration outerBodyDeclaration) {
+    public ClassFileBodyDeclaration(String internalTypeName, Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, ClassFileBodyDeclaration outerBodyDeclaration) {
         super(internalTypeName, null);
         this.bindings = bindings;
+        this.typeBounds = typeBounds;
         this.outerBodyDeclaration = outerBodyDeclaration;
     }
 
@@ -132,20 +134,16 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
         this.syntheticInnerFieldNames = syntheticInnerFieldNames;
     }
 
-    public Map<String, List<FieldReferenceExpression>> getSyntheticInnerFieldNameToSyntheticInnerFieldReferences() {
-        return syntheticInnerFieldNameToSyntheticInnerFieldReferences;
-    }
-
-    public void setSyntheticInnerFieldNameToSyntheticInnerFieldReferences(Map<String, List<FieldReferenceExpression>> map) {
-        this.syntheticInnerFieldNameToSyntheticInnerFieldReferences = map;
-    }
-
     public ClassFileBodyDeclaration getOuterBodyDeclaration() {
         return outerBodyDeclaration;
     }
 
     public Map<String, TypeArgument> getBindings() {
         return bindings;
+    }
+
+    public Map<String, BaseType> getTypeBounds() {
+        return typeBounds;
     }
 
     @Override

@@ -56,7 +56,7 @@ public class Loop {
 
     @Override
     public int hashCode() {
-        int result = start.hashCode();
+        int result = 258190310 + start.hashCode();
         result = 31 * result + members.hashCode();
         result = 31 * result + (end != null ? end.hashCode() : 0);
         return result;

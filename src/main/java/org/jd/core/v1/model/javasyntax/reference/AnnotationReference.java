@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -63,7 +63,7 @@ public class AnnotationReference implements BaseAnnotationReference {
 
     @Override
     public int hashCode() {
-        int result = type.hashCode();
+        int result = 970748295 + type.hashCode();
         result = 31 * result + (elementValue != null ? elementValue.hashCode() : 0);
         result = 31 * result + (elementValuePairs != null ? elementValuePairs.hashCode() : 0);
         return result;

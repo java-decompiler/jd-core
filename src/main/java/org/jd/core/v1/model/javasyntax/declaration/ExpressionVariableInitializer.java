@@ -43,7 +43,7 @@ public class ExpressionVariableInitializer implements VariableInitializer {
 
     @Override
     public int hashCode() {
-        return expression != null ? expression.hashCode() : 0;
+        return 25107399 + (expression != null ? expression.hashCode() : 0);
     }
 
     @Override

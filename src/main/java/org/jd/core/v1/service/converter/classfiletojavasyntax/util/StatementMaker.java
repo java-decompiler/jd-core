@@ -889,7 +889,7 @@ public class StatementMaker {
             } else if ((flags & FLAG_LONG) != 0) {
                 type = TYPE_LONG;
             } else {
-                type = TYPE_INT;
+                type = MAYBE_BOOLEAN_TYPE;
             }
         } else if (expressionTrueType.isObject() && expressionFalseType.isObject()) {
             ObjectType ot1 = (ObjectType)expressionTrueType;

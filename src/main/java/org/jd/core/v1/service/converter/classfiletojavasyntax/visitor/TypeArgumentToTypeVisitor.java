@@ -23,7 +23,6 @@ public class TypeArgumentToTypeVisitor extends AbstractTypeArgumentVisitor {
         return type;
     }
 
-    @Override public void visit(TypeArguments arguments) { type = TYPE_UNDEFINED_OBJECT; }
 
     @Override public void visit(DiamondTypeArgument argument) { type = TYPE_OBJECT; }
     @Override public void visit(WildcardTypeArgument argument) { type = TYPE_OBJECT; }
@@ -35,4 +34,11 @@ public class TypeArgumentToTypeVisitor extends AbstractTypeArgumentVisitor {
 
     @Override public void visit(WildcardExtendsTypeArgument argument) { argument.getType().accept(this); }
     @Override public void visit(WildcardSuperTypeArgument argument) { argument.getType().accept(this); }
+    @Override public void visit(TypeArguments arguments) {
+        if (arguments.isEmpty()) {
+            type = TYPE_UNDEFINED_OBJECT;
+        } else {
+            arguments.getFirst().accept(this);
+        }
+    }
 }

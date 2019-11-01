@@ -8,13 +8,11 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
-import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
-import org.jd.core.v1.model.javasyntax.type.GenericType;
-import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariableSet;
 
 public class UpdateTypeVisitor extends AbstractNopTypeArgumentVisitor {
+    protected UpdateClassTypeArgumentsVisitor updateClassTypeArgumentsVisitor = new UpdateClassTypeArgumentsVisitor();
     protected LocalVariableSet localVariableSet;
     protected LocalVariableType localVariableType;
 
@@ -28,16 +26,31 @@ public class UpdateTypeVisitor extends AbstractNopTypeArgumentVisitor {
 
     @Override
     public void visit(ObjectType type) {
-        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), type);
+        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), updateType(type));
     }
 
     @Override
     public void visit(InnerObjectType type) {
-        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), type);
+        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), updateType(type));
     }
 
     @Override
     public void visit(GenericType type) {
         localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), type);
+    }
+
+    protected ObjectType updateType(ObjectType type) {
+        BaseTypeArgument typeArguments = type.getTypeArguments();
+
+        if (typeArguments != null) {
+            updateClassTypeArgumentsVisitor.init();
+            typeArguments.accept(updateClassTypeArgumentsVisitor);
+
+            if (typeArguments != updateClassTypeArgumentsVisitor.getTypeArgument()) {
+                type = type.createType(updateClassTypeArgumentsVisitor.getTypeArgument());
+            }
+        }
+
+        return type;
     }
 }

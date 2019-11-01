@@ -23,4 +23,8 @@ public class ClassFileConstructorInvocationExpression extends ConstructorInvocat
     public BaseType getParameterTypes() {
         return parameterTypes;
     }
+
+    public void setParameterTypes(BaseType parameterTypes) {
+        this.parameterTypes = parameterTypes;
+    }
 }

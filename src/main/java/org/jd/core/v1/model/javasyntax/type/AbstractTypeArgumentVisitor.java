@@ -10,8 +10,9 @@ package org.jd.core.v1.model.javasyntax.type;
 public abstract class AbstractTypeArgumentVisitor implements TypeArgumentVisitor {
     @Override
     public void visit(TypeArguments arguments) {
-        for (TypeArgument typeArgument : arguments)
+        for (TypeArgument typeArgument : arguments) {
             typeArgument.accept(this);
+        }
     }
 
     @Override
@@ -47,7 +48,8 @@ public abstract class AbstractTypeArgumentVisitor implements TypeArgumentVisitor
     public void visit(WildcardTypeArgument argument) {}
 
     protected void safeAccept(TypeArgumentVisitable visitable) {
-        if (visitable != null)
+        if (visitable != null) {
             visitable.accept(this);
+        }
     }
 }

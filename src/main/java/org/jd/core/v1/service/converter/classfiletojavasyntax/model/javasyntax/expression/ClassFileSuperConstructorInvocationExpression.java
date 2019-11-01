@@ -23,4 +23,8 @@ public class ClassFileSuperConstructorInvocationExpression extends SuperConstruc
     public BaseType getParameterTypes() {
         return parameterTypes;
     }
+
+    public void setParameterTypes(BaseType parameterTypes) {
+        this.parameterTypes = parameterTypes;
+    }
 }

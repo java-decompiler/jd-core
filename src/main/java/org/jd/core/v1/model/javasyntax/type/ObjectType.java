@@ -11,11 +11,13 @@ public class ObjectType implements Type {
     public static final ObjectType TYPE_BOOLEAN           = new ObjectType("java/lang/Boolean", "java.lang.Boolean", "Boolean");
     public static final ObjectType TYPE_BYTE              = new ObjectType("java/lang/Byte", "java.lang.Byte", "Byte");
     public static final ObjectType TYPE_CHARACTER         = new ObjectType("java/lang/Character", "java.lang.Character", "Character");
-    public static final ObjectType TYPE_CLASS             = new ObjectType("java/lang/Class", "java.lang.Class", "Class", WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);
+    public static final ObjectType TYPE_CLASS             = new ObjectType("java/lang/Class", "java.lang.Class", "Class");
+    public static final ObjectType TYPE_CLASS_WILDCARD    = TYPE_CLASS.createType(WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);
     public static final ObjectType TYPE_DOUBLE            = new ObjectType("java/lang/Double", "java.lang.Double", "Double");
     public static final ObjectType TYPE_EXCEPTION         = new ObjectType("java/lang/Exception", "java.lang.Exception", "Exception");
     public static final ObjectType TYPE_FLOAT             = new ObjectType("java/lang/Float", "java.lang.Float", "Float");
     public static final ObjectType TYPE_INTEGER           = new ObjectType("java/lang/Integer", "java.lang.Integer", "Integer");
+    public static final ObjectType TYPE_ITERABLE          = new ObjectType("java/lang/Iterable", "java.lang.Iterable", "Iterable");
     public static final ObjectType TYPE_LONG              = new ObjectType("java/lang/Long", "java.lang.Long", "Long");
     public static final ObjectType TYPE_MATH              = new ObjectType("java/lang/Math", "java.lang.Math", "Math");
     public static final ObjectType TYPE_OBJECT            = new ObjectType("java/lang/Object", "java.lang.Object", "Object");
@@ -153,7 +155,11 @@ public class ObjectType implements Type {
     }
 
     public ObjectType createType(BaseTypeArgument typeArguments) {
-        return new ObjectType(internalName, qualifiedName, name, typeArguments, dimension);
+        if (this.typeArguments == typeArguments) {
+            return this;
+        } else {
+            return new ObjectType(internalName, qualifiedName, name, typeArguments, dimension);
+        }
     }
 
     @Override
@@ -180,7 +186,7 @@ public class ObjectType implements Type {
 
     @Override
     public int hashCode() {
-        int result = internalName.hashCode();
+        int result = 735485092 + internalName.hashCode();
         result = 31 * result + (typeArguments != null ? typeArguments.hashCode() : 0);
         result = 31 * result + dimension;
         return result;
@@ -198,7 +204,9 @@ public class ObjectType implements Type {
 
     @Override
     public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
-        if (typeArgument.getClass() != ObjectType.class) {
+        Class typeArgumentClass = typeArgument.getClass();
+
+        if ((typeArgumentClass != ObjectType.class) && (typeArgumentClass != InnerObjectType.class)) {
             return false;
         }
 

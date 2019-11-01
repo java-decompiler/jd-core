@@ -70,7 +70,7 @@ public class FieldDeclarator implements BaseFieldDeclarator {
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
+        int result = 544278669 + name.hashCode();
         result = 31 * result + dimension;
         result = 31 * result + (variableInitializer != null ? variableInitializer.hashCode() : 0);
         return result;
