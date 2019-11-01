@@ -137,7 +137,7 @@ public class ObjectType implements Type {
 
     @Override
     public Type createType(int dimension) {
-        assert dimension >= 0 : "ObjectType.createType(dim) : create type with zero or negative dimension";
+        assert dimension >= 0 : "ObjectType.createType(dim) : create type with negative dimension";
 
         if (this.dimension == dimension) {
             return this;

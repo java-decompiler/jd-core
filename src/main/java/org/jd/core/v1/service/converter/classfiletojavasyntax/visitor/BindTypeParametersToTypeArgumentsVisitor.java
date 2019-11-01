@@ -104,7 +104,8 @@ public class BindTypeParametersToTypeArgumentsVisitor extends AbstractNopTypeVis
         } else {
             typeArgumentToTypeVisitor.init();
             ta.accept(typeArgumentToTypeVisitor);
-            result = typeArgumentToTypeVisitor.getType().createType(type.getDimension());
+            Type t = typeArgumentToTypeVisitor.getType();
+            result = t.createType(t.getDimension() + type.getDimension());
         }
     }
 

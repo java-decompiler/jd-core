@@ -79,11 +79,15 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
 
     @Override
     public boolean isAssignableFrom(Type type) {
-        if (type.isObject()) {
-            return typeMaker.isAssignable((ObjectType) this.type, (ObjectType) type);
-        } else if (type.isGeneric()) {
+        if (this.type.isObject()) {
             if (this.type.equals(TYPE_OBJECT)) {
-                return true;
+                if ((type.getDimension() > 0) || !type.isPrimitive()) {
+                    return true;
+                }
+            }
+
+            if (type.isObject()) {
+                return typeMaker.isAssignable((ObjectType) this.type, (ObjectType) type);
             }
         }
 

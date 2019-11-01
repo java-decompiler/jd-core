@@ -122,11 +122,15 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ArrayVariableInitializer declaration) {
-        Type t = type;
+        if (type.getDimension() == 0) {
+            acceptListDeclaration(declaration);
+        } else {
+            Type t = type;
 
-        type = type.createType(type.getDimension() - 1);
-        acceptListDeclaration(declaration);
-        type = t;
+            type = type.createType(type.getDimension() - 1);
+            acceptListDeclaration(declaration);
+            type = t;
+        }
     }
 
     @Override
@@ -134,7 +138,12 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         Expression expression = declaration.getExpression();
 
         if (expression.getClass() == NewInitializedArray.class) {
-            ((NewInitializedArray)expression).getArrayInitializer().accept(this);
+            NewInitializedArray nia = (NewInitializedArray)expression;
+            Type t = type;
+
+            type = nia.getType();
+            nia.getArrayInitializer().accept(this);
+            type = t;
         } else {
             declaration.setExpression(updateExpression(type, expression));
         }

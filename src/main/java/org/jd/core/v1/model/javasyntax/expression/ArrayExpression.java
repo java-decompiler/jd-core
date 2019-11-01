@@ -52,8 +52,6 @@ public class ArrayExpression extends AbstractLineNumberTypeExpression {
         Type type = expression.getType();
         int dimension = type.getDimension();
 
-        assert (type == TYPE_UNDEFINED_OBJECT) || (dimension > 0) : "ArrayExpression.createItemType(exp) : zero or negative dimension";
-
         return type.createType((dimension > 0) ? dimension-1 : 0);
     }
 

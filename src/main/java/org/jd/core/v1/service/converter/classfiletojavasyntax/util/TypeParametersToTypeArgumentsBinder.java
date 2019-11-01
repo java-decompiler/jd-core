@@ -18,6 +18,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class TypeParametersToTypeArgumentsBinder {
     protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
@@ -75,7 +76,7 @@ public class TypeParametersToTypeArgumentsBinder {
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
 
         BaseType parameterTypes = clone(methodTypes.parameterTypes);
-        Map<String, TypeArgument> bindings = createBindings(null, null, null, methodTypes.typeParameters, PrimitiveType.TYPE_VOID, null, parameterTypes, parameters);
+        Map<String, TypeArgument> bindings = createBindings(null, null, null, methodTypes.typeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
 
         parameterTypes = bindParameterTypesWithArgumentTypes(bindings, parameterTypes);
         bindParameterTypesWithArgumentTypes(parameterTypes, parameters);
@@ -99,7 +100,7 @@ public class TypeParametersToTypeArgumentsBinder {
                 BaseTypeArgument typeArguments = typeTypes.superType.getTypeArguments();
                 BaseTypeParameter methodTypeParameters = methodTypes.typeParameters;
 
-                bindings = createBindings(null, typeParameters, typeArguments, methodTypeParameters, PrimitiveType.TYPE_VOID, null, parameterTypes, parameters);
+                bindings = createBindings(null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
             }
         }
 
@@ -139,7 +140,7 @@ public class TypeParametersToTypeArgumentsBinder {
                             BaseTypeParameter typeParameters = typeTypes.typeParameters;
                             BaseTypeArgument typeArguments = expressionObjectType.getTypeArguments();
 
-                            bindings = createBindings(expression, typeParameters, typeArguments, null, PrimitiveType.TYPE_VOID, null, null, null);
+                            bindings = createBindings(expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
                         }
 
                         type = (Type)bindParameterTypesWithArgumentTypes(bindings, type);
@@ -303,7 +304,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
     protected void bindParameterTypesWithArgumentTypes(BaseType types, BaseExpression expressions) {
         if (types != null) {
-            if (types.isList()) {
+            if (types.isList() && expressions.isList()) {
                 Iterator<Type> parameterTypesIterator = types.iterator();
                 Iterator<Expression> parametersIterator = expressions.iterator();
 
@@ -344,7 +345,7 @@ public class TypeParametersToTypeArgumentsBinder {
                 typeParameters.accept(populateBindingsWithTypeParameterVisitor);
 
                 if (typeArguments != null) {
-                    if (typeParameters.isList()) {
+                    if (typeParameters.isList() && typeArguments.isTypeArgumentList()) {
                         Iterator<TypeParameter> iteratorTypeParameter = typeParameters.iterator();
                         Iterator<TypeArgument> iteratorTypeArgument = typeArguments.getTypeArgumentList().iterator();
 
@@ -363,13 +364,13 @@ public class TypeParametersToTypeArgumentsBinder {
             methodTypeParameters.accept(populateBindingsWithTypeParameterVisitor);
         }
 
-        if ((returnType != PrimitiveType.TYPE_VOID) && (returnExpressionType != null)) {
+        if (!TYPE_OBJECT.equals(returnType) && (returnExpressionType != null)) {
             populateBindingsWithTypeArgumentVisitor.init(contextualTypeBounds, bindings, typeBounds, returnType);
             returnExpressionType.accept(populateBindingsWithTypeArgumentVisitor);
         }
 
         if (parameterTypes != null) {
-            if (parameterTypes.isList()) {
+            if (parameterTypes.isList() && parameters.isList()) {
                 Iterator<Type> parameterTypesIterator = parameterTypes.iterator();
                 Iterator<Expression> parametersIterator = parameters.iterator();
 
@@ -548,7 +549,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
         @Override
         public void visit(CastExpression expression) {
-            assert (type.getDimension() == expression.getType().getDimension()) : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid array type";
+            assert TYPE_OBJECT.equals(type) || (type.getDimension() == expression.getType().getDimension()) : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid array type";
 
             if (type.isObject()) {
                 ObjectType objectType = (ObjectType)type;
@@ -582,15 +583,19 @@ public class TypeParametersToTypeArgumentsBinder {
 
         @Override
         public void visit(TernaryOperatorExpression expression) {
-            expression.setType(type);
-            bindParameterTypesWithArgumentTypes(type, expression.getExpressionTrue());
-            bindParameterTypesWithArgumentTypes(type, expression.getExpressionFalse());
+            Type t = type;
+
+            expression.setType(t);
+            bindParameterTypesWithArgumentTypes(t, expression.getExpressionTrue());
+            bindParameterTypesWithArgumentTypes(t, expression.getExpressionFalse());
         }
 
         @Override
         public void visit(BinaryOperatorExpression expression) {
-            bindParameterTypesWithArgumentTypes(type, expression.getLeftExpression());
-            bindParameterTypesWithArgumentTypes(type, expression.getRightExpression());
+            Type t = type;
+
+            bindParameterTypesWithArgumentTypes(t, expression.getLeftExpression());
+            bindParameterTypesWithArgumentTypes(t, expression.getRightExpression());
         }
     }
 }

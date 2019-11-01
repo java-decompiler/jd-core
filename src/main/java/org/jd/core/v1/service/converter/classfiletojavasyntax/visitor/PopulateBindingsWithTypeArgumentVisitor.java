@@ -10,9 +10,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
@@ -63,7 +61,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
                 }
 
                 if (typeArgument == null) {
-                    bindings.put(typeName, convertCurrentTypeArgument());
+                    bindings.put(typeName, checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(type));
                 } else if (!current.equals(typeArgument)) {
                     typeArgumentToTypeVisitor.init();
                     typeArgument.accept(typeArgumentToTypeVisitor);
@@ -76,14 +74,14 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
                     if (!t1.createType(0).equals(t2.createType(0))) {
                         if (t1.isObject() && t2.isObject()) {
                             ObjectType ot1 = (ObjectType)t1;
-                            ObjectType ot2 = (ObjectType)t2;
+                            ObjectType ot2 = (ObjectType)t2.createType(t2.getDimension() - type.getDimension());
 
-                            if (typeMaker.isAssignable(ot1, ot2)) {
-                                bindings.put(typeName, typeArgument);
-                            } else if (typeMaker.isAssignable(ot2, ot1)) {
-                                bindings.put(typeName, convertCurrentTypeArgument());
-                            } else {
-                                bindings.put(typeName, WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);
+                            if (!typeMaker.isAssignable(ot1, ot2)) {
+                                if (typeMaker.isAssignable(ot2, ot1)) {
+                                    bindings.put(typeName, checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(type));
+                                } else {
+                                    bindings.put(typeName, WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);
+                                }
                             }
                         }
                     }
@@ -100,16 +98,25 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
         }
     }
 
-    protected TypeArgument convertCurrentTypeArgument() {
-        if ((current != null) && (current.getClass() == ObjectType.class)) {
-            ObjectType ot = (ObjectType)current;
+    protected TypeArgument checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(GenericType type) {
+        if (current != null) {
+            Class currentClass = current.getClass();
 
-            if ((ot.getTypeArguments() == null) && ot.getInternalName().equals(TYPE_CLASS.getInternalName())) {
-                return TYPE_CLASS_WILDCARD;
+            if (currentClass == ObjectType.class) {
+                ObjectType ot = (ObjectType) current;
+
+                if ((ot.getTypeArguments() == null) && ot.getInternalName().equals(TYPE_CLASS.getInternalName())) {
+                    return TYPE_CLASS_WILDCARD.createType(ot.getDimension());
+                }
+
+                return ot.createType(ot.getDimension() - type.getDimension());
+            } else if ((currentClass == InnerObjectType.class) || (currentClass == GenericType.class) || (currentClass == PrimitiveType.class)) {
+                Type t = (Type)current;
+                return t.createType(t.getDimension() - type.getDimension());
             }
         }
 
-        return (TypeArgument)current;
+        return current.getTypeArgumentFirst();
     }
 
     @Override

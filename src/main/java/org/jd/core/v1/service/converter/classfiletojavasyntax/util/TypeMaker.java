@@ -941,7 +941,7 @@ public class TypeMaker {
                 BindTypeParametersToTypeArgumentsVisitor bindTypeParametersToTypeArgumentsVisitor = new BindTypeParametersToTypeArgumentsVisitor();
                 HashMap<String, TypeArgument> bindings = new HashMap<>();
 
-                if (rightTypeTypes.typeParameters.isList()) {
+                if (rightTypeTypes.typeParameters.isList() && objectType.getTypeArguments().isTypeArgumentList()) {
                     Iterator<TypeParameter> iteratorTypeParameter = rightTypeTypes.typeParameters.iterator();
                     Iterator<TypeArgument> iteratorTypeArgument = objectType.getTypeArguments().getTypeArgumentList().iterator();
 
@@ -1213,7 +1213,7 @@ public class TypeMaker {
                 BindTypeParametersToTypeArgumentsVisitor bindTypeParametersToTypeArgumentsVisitor = new BindTypeParametersToTypeArgumentsVisitor();
                 HashMap<String, TypeArgument> bindings = new HashMap<>();
 
-                if (typeTypes.typeParameters.isList()) {
+                if (typeTypes.typeParameters.isList() && typeArguments.isTypeArgumentList()) {
                     Iterator<TypeParameter> iteratorTypeParameter = typeTypes.typeParameters.iterator();
                     Iterator<TypeArgument> iteratorTypeArgument = typeArguments.getTypeArgumentList().iterator();
 
@@ -1303,7 +1303,7 @@ public class TypeMaker {
                 HashMap<String, TypeArgument> bindings = new HashMap<>();
                 MethodTypes newMethodTypes = new MethodTypes();
 
-                if (typeTypes.typeParameters.isList()) {
+                if (typeTypes.typeParameters.isList() && typeArguments.isTypeArgumentList()) {
                     Iterator<TypeParameter> iteratorTypeParameter = typeTypes.typeParameters.iterator();
                     Iterator<TypeArgument> iteratorTypeArgument = typeArguments.getTypeArgumentList().iterator();
 

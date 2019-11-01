@@ -37,6 +37,7 @@ import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_PRIVA
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
 import static org.jd.core.v1.model.javasyntax.statement.ReturnStatement.RETURN;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
@@ -261,7 +262,7 @@ public class ByteCodeParser {
                     expression1 = stack.pop();
                     Class clazz = expression1.getClass();
                     if ((clazz != ClassFileLocalVariableReferenceExpression.class) && (clazz != FieldReferenceExpression.class)) {
-                        typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_VOID, expression1);
+                        typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
                         statements.add(new ExpressionStatement(expression1));
                     }
                     break;
@@ -726,7 +727,7 @@ public class ByteCodeParser {
                     if (opcode == 184) { // INVOKESTATIC
                         expression1 = typeParametersToTypeArgumentsBinder.newMethodInvocationExpression(lineNumber, new ObjectTypeReferenceExpression(lineNumber, ot), ot, name, descriptor, methodTypes, parameters);
                         if (TYPE_VOID.equals(methodTypes.returnedType)) {
-                            typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_VOID, expression1);
+                            typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
                             statements.add(new ExpressionStatement(expression1));
                         } else {
                             stack.push(expression1);
@@ -755,7 +756,7 @@ public class ByteCodeParser {
                             } else {
                                 expression1 = typeParametersToTypeArgumentsBinder.newMethodInvocationExpression(
                                     lineNumber, getMethodInstanceReference(expression1, ot,  name, descriptor), ot,  name, descriptor, methodTypes, parameters);
-                                typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_VOID, expression1);
+                                typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
                                 statements.add(new ExpressionStatement(expression1));
                             }
                         } else {
