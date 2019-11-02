@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
 
 @SuppressWarnings("unchecked")
 public class DefaultList<E> extends ArrayList<E> {
-    protected static EmptyList EMPTY_LIST = new EmptyList();
+    protected static final EmptyList EMPTY_LIST = new EmptyList();
 
     public DefaultList() {}
 
