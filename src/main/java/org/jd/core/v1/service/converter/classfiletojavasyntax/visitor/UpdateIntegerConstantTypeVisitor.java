@@ -99,16 +99,23 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
         Expression left = expression.getLeftExpression();
         Expression right = expression.getRightExpression();
 
+        Type leftType = left.getType();
+        Type rightType = right.getType();
+
         switch (expression.getOperator()) {
             case "&":
             case "|":
             case "^":
-                left.accept(this);
-                right.accept(this);
+                Type type = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType)leftType, (PrimitiveType)rightType);
+                if (type == null) {
+                    type = TYPE_INT;
+                }
+                expression.setLeftExpression(updateExpression(type, left));
+                expression.setRightExpression(updateExpression(type, right));
                 break;
             case "=":
                 left.accept(this);
-                expression.setRightExpression(updateExpression(left.getType(), right));
+                expression.setRightExpression(updateExpression(leftType, right));
                 break;
             case ">":
             case ">=":
@@ -116,14 +123,9 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
             case "<=":
             case "==":
             case "!=":
-                Type leftType = left.getType();
-                Type rightType = right.getType();
-
                 if ((leftType.getDimension() == 0) && (rightType.getDimension() == 0)) {
                     if (leftType.isPrimitive()) {
                         if (rightType.isPrimitive()) {
-                            Type type;
-
                             if (leftType == rightType) {
                                 type = leftType;
                             } else {
@@ -132,7 +134,6 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                                     type = TYPE_INT;
                                 }
                             }
-
                             expression.setLeftExpression(updateExpression(type, left));
                             expression.setRightExpression(updateExpression(type, right));
                         } else {
@@ -421,6 +422,9 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                                 }
                                 break;
                         }
+                        break;
+                    case FLAG_LONG:
+                        ice.setType(TYPE_LONG);
                         break;
                 }
 
