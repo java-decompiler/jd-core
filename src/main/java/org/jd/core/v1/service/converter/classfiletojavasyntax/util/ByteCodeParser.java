@@ -1401,6 +1401,7 @@ public class ByteCodeParser {
 
     private static Expression createAssignment(BinaryOperatorExpression boe, String operator) {
         boe.setOperator(operator);
+        boe.setPriority(16);
         return boe;
     }
 

@@ -61,6 +61,10 @@ public class BinaryOperatorExpression extends AbstractLineNumberTypeExpression {
         return priority;
     }
 
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
     @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
