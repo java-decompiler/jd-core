@@ -91,10 +91,10 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
     public void visit(EnumDeclaration declaration) {
         this.typeDeclaration = declaration;
 
-        // Remove 'static' and 'final' flags
+        // Remove 'static', 'final' and 'abstract' flags
         ClassFileEnumDeclaration cfed = (ClassFileEnumDeclaration)declaration;
 
-        cfed.setFlags(cfed.getFlags() ^ (Declaration.FLAG_STATIC|Declaration.FLAG_FINAL));
+        cfed.setFlags(cfed.getFlags() & ~(Declaration.FLAG_STATIC|Declaration.FLAG_FINAL|Declaration.FLAG_ABSTRACT));
         cfed.getBodyDeclaration().accept(this);
         initEnumVisitor.visit(cfed.getBodyDeclaration());
         cfed.setConstants(initEnumVisitor.getConstants());
