@@ -424,8 +424,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                         }
                         break;
                     case FLAG_LONG:
-                        ice.setType(TYPE_LONG);
-                        break;
+                        return new LongConstantExpression(ice.getLineNumber(), ice.getValue());
                 }
 
                 return expression;

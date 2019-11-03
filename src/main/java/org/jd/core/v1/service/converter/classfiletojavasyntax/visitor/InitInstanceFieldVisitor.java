@@ -7,7 +7,6 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
@@ -17,17 +16,21 @@ import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
 
+import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
+
 public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
     protected HashMap<String, FieldDeclarator> fieldDeclarators = new HashMap<>();
     protected DefaultList<Data> datas = new DefaultList<>();
     protected DefaultList<BinaryOperatorExpression> putFields = new DefaultList<>();
+    protected int lineNumber = UNKNOWN_LINE_NUMBER;
     protected boolean containsLocalVariableReference;
 
     @Override
@@ -89,7 +92,27 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
                 datas.add(new Data(cfcd, statements, iterator.nextIndex()));
 
                 if (datas.size() == 1) {
-                    int firstLineNumber = superConstructorCall.getDescriptor().equals("()V") ? Printer.UNKNOWN_LINE_NUMBER : superConstructorCall.getLineNumber();
+                    int firstLineNumber = superConstructorCall.getLineNumber();
+
+                    if (superConstructorCall.getDescriptor().equals("()V") && (firstLineNumber != UNKNOWN_LINE_NUMBER)) {
+                        if ((lineNumber == UNKNOWN_LINE_NUMBER) || (lineNumber >= firstLineNumber)) {
+                            ListIterator<Statement> li = statements.listIterator(iterator.nextIndex());
+
+                            while (li.hasNext()) {
+                                searchFirstLineNumberVisitor.init();
+                                li.next().accept(searchFirstLineNumberVisitor);
+                                int ln = searchFirstLineNumberVisitor.getLineNumber();
+                                if ((ln != UNKNOWN_LINE_NUMBER) && (ln < firstLineNumber)) {
+                                    break;
+                                }
+                            }
+
+                            if (!li.hasNext()) {
+                                firstLineNumber = UNKNOWN_LINE_NUMBER;
+                            }
+                        }
+                    }
+
                     initPutFields(internalTypeName, firstLineNumber, iterator);
                 } else {
                     filterPutFields(internalTypeName, iterator);
@@ -99,7 +122,9 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    public void visit(MethodDeclaration declaration) {}
+    public void visit(MethodDeclaration declaration) {
+        lineNumber = ((ClassFileMethodDeclaration)declaration).getFirstLineNumber();
+    }
 
     @Override
     public void visit(NewExpression expression) {
@@ -190,7 +215,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
         int lastLineNumber;
 
         if (expression == null) {
-            lastLineNumber = (firstLineNumber == Printer.UNKNOWN_LINE_NUMBER) ? Printer.UNKNOWN_LINE_NUMBER : firstLineNumber+1;
+            lastLineNumber = (firstLineNumber == UNKNOWN_LINE_NUMBER) ? UNKNOWN_LINE_NUMBER : firstLineNumber+1;
         } else {
             lastLineNumber = expression.getLineNumber();
         }
