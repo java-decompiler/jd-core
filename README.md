@@ -28,10 +28,10 @@ generate _"build/libs/jd-core-x.y.z.jar"_
 ## How to use JD-Core ?
 
 1. Implement the
-_[jd.core.loader.Loader](https://github.com/java-decompiler/jd-core/blob/master/src/main/java/org/jd/core/v1/api/loader/Loader.java)_
+_[org.jd.core.loader.Loader](https://github.com/java-decompiler/jd-core/blob/master/src/main/java/org/jd/core/v1/api/loader/Loader.java)_
 interface,
 2. Implement the
-_[jd.core.printer.Printer](https://github.com/java-decompiler/jd-core/blob/master/src/main/java/org/jd/core/v1/api/printer/Printer.java)_
+_[org.jd.core.printer.Printer](https://github.com/java-decompiler/jd-core/blob/master/src/main/java/org/jd/core/v1/api/printer/Printer.java)_
 interface,
 3. And call the method _"decompile(loader, printer, internalTypeName);"_
 
