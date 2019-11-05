@@ -94,20 +94,15 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
                 if (datas.size() == 1) {
                     int firstLineNumber = superConstructorCall.getLineNumber();
 
-                    if (superConstructorCall.getDescriptor().equals("()V") && (firstLineNumber != UNKNOWN_LINE_NUMBER)) {
+                    if (superConstructorCall.getDescriptor().equals("()V") && (firstLineNumber != UNKNOWN_LINE_NUMBER) && iterator.hasNext()) {
                         if ((lineNumber == UNKNOWN_LINE_NUMBER) || (lineNumber >= firstLineNumber)) {
-                            ListIterator<Statement> li = statements.listIterator(iterator.nextIndex());
+                            searchFirstLineNumberVisitor.init();
+                            iterator.next().accept(searchFirstLineNumberVisitor);
+                            iterator.previous();
 
-                            while (li.hasNext()) {
-                                searchFirstLineNumberVisitor.init();
-                                li.next().accept(searchFirstLineNumberVisitor);
-                                int ln = searchFirstLineNumberVisitor.getLineNumber();
-                                if ((ln != UNKNOWN_LINE_NUMBER) && (ln < firstLineNumber)) {
-                                    break;
-                                }
-                            }
+                            int ln = searchFirstLineNumberVisitor.getLineNumber();
 
-                            if (!li.hasNext()) {
+                            if ((ln != UNKNOWN_LINE_NUMBER) && (ln >= firstLineNumber)) {
                                 firstLineNumber = UNKNOWN_LINE_NUMBER;
                             }
                         }
