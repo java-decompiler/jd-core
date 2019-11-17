@@ -36,10 +36,23 @@ public class JarFileToJavaSourceTest extends TestCase {
     protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
     protected WriteTokenProcessor writer = new WriteTokenProcessor();
 
+    // TODO In progress
+//    @Test
+//    public void testCommonsLang3() throws Exception {
+//        // Decompile and recompile 'commons-lang3-3.9.jar'
+//        test(org.apache.commons.lang3.JavaVersion.class);
+//    }
+
     @Test
     public void testCommonsCollections4() throws Exception {
-        // Test 'commons-collections4-4.1.jar'
+        // Decompile and recompile 'commons-collections4-4.1.jar'
         test(org.apache.commons.collections4.CollectionUtils.class);
+    }
+
+    @Test
+    public void testCommonsCodec() throws Exception {
+        // Decompile and recompile 'commons-codec-1.13.jar'
+        test(org.apache.commons.codec.Charsets.class);
     }
 
     protected void test(Class clazz) throws Exception {
@@ -71,6 +84,8 @@ public class JarFileToJavaSourceTest extends TestCase {
             for (String path : loader.getMap().keySet()) {
                 if (path.endsWith(".class") && (path.indexOf('$') == -1)) {
                     String internalTypeName = path.substring(0, path.length() - 6); // 6 = ".class".length()
+
+                    // TODO DEBUG if (!internalTypeName.endsWith("/Rule")) continue;
 
                     message.setHeader("mainInternalTypeName", internalTypeName);
                     printer.init();
