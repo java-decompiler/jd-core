@@ -50,6 +50,8 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
             } else if (lastStatementClass == ThrowStatement.class) {
                 statementCountToRemove = 0;
                 i--;
+            } else if ((lastStatementClass == ContinueStatement.class) ||(lastStatementClass == BreakStatement.class)) {
+                i--;
             } else {
                 WhileStatement whileStatement = getInfiniteWhileStatement(lastStatement);
 
