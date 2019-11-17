@@ -24,6 +24,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.*;
 
 import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
+import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
 
 public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
@@ -92,18 +93,24 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
                 datas.add(new Data(cfcd, statements, iterator.nextIndex()));
 
                 if (datas.size() == 1) {
-                    int firstLineNumber = superConstructorCall.getLineNumber();
+                    int firstLineNumber;
 
-                    if (superConstructorCall.getDescriptor().equals("()V") && (firstLineNumber != UNKNOWN_LINE_NUMBER) && iterator.hasNext()) {
-                        if ((lineNumber == UNKNOWN_LINE_NUMBER) || (lineNumber >= firstLineNumber)) {
-                            searchFirstLineNumberVisitor.init();
-                            iterator.next().accept(searchFirstLineNumberVisitor);
-                            iterator.previous();
+                    if ((cfcd.getFlags() & FLAG_SYNTHETIC) != 0) {
+                        firstLineNumber = UNKNOWN_LINE_NUMBER;
+                    } else {
+                        firstLineNumber = superConstructorCall.getLineNumber();
 
-                            int ln = searchFirstLineNumberVisitor.getLineNumber();
+                        if (superConstructorCall.getDescriptor().equals("()V") && (firstLineNumber != UNKNOWN_LINE_NUMBER) && iterator.hasNext()) {
+                            if ((lineNumber == UNKNOWN_LINE_NUMBER) || (lineNumber >= firstLineNumber)) {
+                                searchFirstLineNumberVisitor.init();
+                                iterator.next().accept(searchFirstLineNumberVisitor);
+                                iterator.previous();
 
-                            if ((ln != UNKNOWN_LINE_NUMBER) && (ln >= firstLineNumber)) {
-                                firstLineNumber = UNKNOWN_LINE_NUMBER;
+                                int ln = searchFirstLineNumberVisitor.getLineNumber();
+
+                                if ((ln != UNKNOWN_LINE_NUMBER) && (ln >= firstLineNumber)) {
+                                    firstLineNumber = UNKNOWN_LINE_NUMBER;
+                                }
                             }
                         }
                     }
