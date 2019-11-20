@@ -759,6 +759,11 @@ public class ControlFlowGraphReducer {
                     exceptionHandler.setBasicBlock(END);
                 } else {
                     int offset = (bb.getFromOffset() == maxOffset) ? end.getFromOffset() : maxOffset;
+
+                    if (offset == 0) {
+                        offset = Integer.MAX_VALUE;
+                    }
+
                     BasicBlock last = updateBlock(bb, end, offset);
 
                     if (toOffset < last.getToOffset()) {
@@ -847,11 +852,17 @@ public class ControlFlowGraphReducer {
     }
 
     protected static BasicBlock searchEndBlock(BasicBlock basicBlock, int maxOffset) {
+        BasicBlock end = null;
         BasicBlock last = splitSequence(basicBlock.getNext(), maxOffset);
-        BasicBlock next = last.getNext();
 
-        if (!next.matchType(TYPE_END|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END|TYPE_JUMP) && ((next.getFromOffset() >= maxOffset) || (next.getToOffset() < basicBlock.getFromOffset()))) {
-            return next;
+        if (!last.matchType(GROUP_END)) {
+            BasicBlock next = last.getNext();
+
+            if ((next.getFromOffset() >= maxOffset) || (!next.matchType(TYPE_END|TYPE_RETURN|TYPE_SWITCH_BREAK|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END) && (next.getToOffset() < basicBlock.getFromOffset()))) {
+                return next;
+            }
+
+            end = next;
         }
 
         for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
@@ -859,19 +870,28 @@ public class ControlFlowGraphReducer {
 
             if (bb.getFromOffset() < maxOffset) {
                 last = splitSequence(bb, maxOffset);
-                next = last.getNext();
 
-                if (!next.matchType(TYPE_END|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END|TYPE_JUMP) && ((next.getFromOffset() >= maxOffset) || (next.getToOffset() < basicBlock.getFromOffset()))) {
-                    return next;
+                if (!last.matchType(GROUP_END)) {
+                    BasicBlock next = last.getNext();
+
+                    if ((next.getFromOffset() >= maxOffset) || (!next.matchType(TYPE_END | TYPE_RETURN | TYPE_SWITCH_BREAK | TYPE_LOOP_START | TYPE_LOOP_CONTINUE | TYPE_LOOP_END) && (next.getToOffset() < basicBlock.getFromOffset()))) {
+                        return next;
+                    }
+
+                    if (end == null) {
+                        end = next;
+                    } else if (end != next) {
+                        end = END;
+                    }
                 }
             } else {
                 // Last handler block
                 ControlFlowGraph cfg = bb.getControlFlowGraph();
                 int lineNumber = cfg.getLineNumber(bb.getFromOffset());
                 WatchDog watchdog = new WatchDog();
+                BasicBlock next = bb.getNext();
 
                 last = bb;
-                next = bb.getNext();
 
                 while ((last != next) && last.matchType(GROUP_SINGLE_SUCCESSOR) && (next.getPredecessors().size() == 1) && (lineNumber <= cfg.getLineNumber(next.getFromOffset()))) {
                     watchdog.check(next, next.getNext());
@@ -879,10 +899,20 @@ public class ControlFlowGraphReducer {
                     next = next.getNext();
                 }
 
-                if ((last != next) && ((next.getPredecessors().size() > 1) || !next.matchType(GROUP_END))) {
-                    return next;
+                if (!last.matchType(GROUP_END)) {
+                    if ((last != next) && ((next.getPredecessors().size() > 1) || !next.matchType(GROUP_END))) {
+                        return next;
+                    }
+
+                    if ((end != next) && (exceptionHandler.getInternalThrowableName() != null)) {
+                        end = END;
+                    }
                 }
             }
+        }
+
+        if ((end != null) && end.matchType(TYPE_SWITCH_BREAK|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END)) {
+            return end;
         }
 
         return END;
@@ -920,24 +950,17 @@ public class ControlFlowGraphReducer {
     protected static BasicBlock updateBlock(BasicBlock basicBlock, BasicBlock end, int maxOffset) {
         WatchDog watchdog = new WatchDog();
 
-        if (end == END) {
-            while (basicBlock.matchType(GROUP_SINGLE_SUCCESSOR)) {
-                watchdog.check(basicBlock, basicBlock.getNext());
-                basicBlock = basicBlock.getNext();
-            }
-        } else {
-            while (basicBlock.matchType(GROUP_SINGLE_SUCCESSOR)) {
-                watchdog.check(basicBlock, basicBlock.getNext());
-                BasicBlock next = basicBlock.getNext();
+        while (basicBlock.matchType(GROUP_SINGLE_SUCCESSOR)) {
+            watchdog.check(basicBlock, basicBlock.getNext());
+            BasicBlock next = basicBlock.getNext();
 
-                if ((next == end) || (next.getFromOffset() > maxOffset)) {
-                    next.getPredecessors().remove(basicBlock);
-                    basicBlock.setNext(END);
-                    break;
-                }
-
-                basicBlock = next;
+            if ((next == end) || (next.getFromOffset() > maxOffset)) {
+                next.getPredecessors().remove(basicBlock);
+                basicBlock.setNext(END);
+                break;
             }
+
+            basicBlock = next;
         }
 
         return basicBlock;
