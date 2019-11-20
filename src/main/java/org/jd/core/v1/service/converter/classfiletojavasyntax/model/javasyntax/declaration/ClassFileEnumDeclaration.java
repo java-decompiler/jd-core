@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration;
 
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
@@ -43,8 +44,8 @@ public class ClassFileEnumDeclaration extends EnumDeclaration implements ClassFi
     public static class ClassFileConstant extends Constant {
         protected int index;
 
-        public ClassFileConstant(int lineNumber, String name, int index, BaseExpression arguments) {
-            super(lineNumber, name, arguments);
+        public ClassFileConstant(int lineNumber, String name, int index, BaseExpression arguments, BodyDeclaration bodyDeclaration) {
+            super(lineNumber, name, arguments, bodyDeclaration);
             this.index = index;
         }
 

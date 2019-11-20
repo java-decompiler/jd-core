@@ -20,6 +20,8 @@ import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
 
 
 public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
+    protected ClassFileBodyDeclaration bodyDeclaration = null;
+    protected BodyDeclaration constantBodyDeclaration = null;
     protected DefaultList<ClassFileEnumDeclaration.ClassFileConstant> constants = new DefaultList<>();
     protected int lineNumber;
     protected int index;
@@ -36,10 +38,13 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(BodyDeclaration declaration) {
-        ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
+        ClassFileBodyDeclaration bd = bodyDeclaration;
+
+        bodyDeclaration = (ClassFileBodyDeclaration)declaration;
         constants.clear();
         safeAcceptListDeclaration(bodyDeclaration.getFieldDeclarations());
         safeAcceptListDeclaration(bodyDeclaration.getMethodDeclarations());
+        bodyDeclaration = bd;
     }
 
     @Override
@@ -89,8 +94,9 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(FieldDeclarator declaration) {
+        constantBodyDeclaration = null;
         safeAccept(declaration.getVariableInitializer());
-        constants.add(new ClassFileEnumDeclaration.ClassFileConstant(lineNumber, declaration.getName(), index, arguments));
+        constants.add(new ClassFileEnumDeclaration.ClassFileConstant(lineNumber, declaration.getName(), index, arguments, constantBodyDeclaration));
     }
 
     @Override
@@ -114,6 +120,15 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
         } else {
             parameters.subList(0, 2).clear();
             arguments = parameters;
+        }
+
+        String enumInternalTypeName = expression.getObjectType().getInternalName();
+
+        if (!enumInternalTypeName.equals(bodyDeclaration.getInternalTypeName())) {
+            ClassFileMemberDeclaration md = bodyDeclaration.getInnerTypeDeclaration(enumInternalTypeName);
+            if (md != null) {
+                constantBodyDeclaration = ((ClassFileEnumDeclaration)md).getBodyDeclaration();
+            }
         }
     }
 

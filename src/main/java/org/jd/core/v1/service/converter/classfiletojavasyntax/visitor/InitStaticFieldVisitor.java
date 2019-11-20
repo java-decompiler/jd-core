@@ -12,6 +12,7 @@ import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
@@ -84,27 +85,25 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(StaticInitializerDeclaration declaration) {
         staticDeclaration = (ClassFileStaticInitializerDeclaration) declaration;
 
-        if (!staticDeclaration.getStatements().isList()) {
-            return;
-        }
+        BaseStatement statements = staticDeclaration.getStatements();
 
-        DefaultList<Statement> statements = staticDeclaration.getStatements().getList();
+        if ((statements != null) && (statements.size() > 0)) {
+            if (statements.isList()) {
+                Statement statement = statements.getFirst();
 
-        if ((statements != null) && !statements.isEmpty()) {
-            Statement statement = statements.getFirst();
+                if ((statement.getClass() == ExpressionStatement.class)) {
+                    ExpressionStatement cdes = (ExpressionStatement) statement;
 
-            if (statement.getClass() == ExpressionStatement.class) {
-                ExpressionStatement cdes = (ExpressionStatement) statement;
+                    if (cdes.getExpression().getClass() == BinaryOperatorExpression.class) {
+                        BinaryOperatorExpression cfboe = (BinaryOperatorExpression) cdes.getExpression();
 
-                if (cdes.getExpression().getClass() == BinaryOperatorExpression.class) {
-                    BinaryOperatorExpression cfboe = (BinaryOperatorExpression) cdes.getExpression();
+                        if (cfboe.getLeftExpression().getClass() == FieldReferenceExpression.class) {
+                            FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
 
-                    if (cfboe.getLeftExpression().getClass() == FieldReferenceExpression.class) {
-                        FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
-
-                        if ((fre.getType() == PrimitiveType.TYPE_BOOLEAN) && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
-                            // Remove assert initialization statement
-                            statements.remove(0);
+                            if ((fre.getType() == PrimitiveType.TYPE_BOOLEAN) && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
+                                // Remove assert initialization statement
+                                statements.getList().removeFirst();
+                            }
                         }
                     }
                 }
@@ -114,7 +113,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
             Iterator<FieldDeclarator> fieldDeclaratorIterator = fields.iterator();
 
             while (statementIterator.hasNext()) {
-                statement = statementIterator.next();
+                Statement statement = statementIterator.next();
 
                 if (statement.getClass() != ExpressionStatement.class) {
                     break;
@@ -161,7 +160,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                 }
             }
 
-            if (statements.isEmpty()) {
+            if (statements.size() == 0) {
                 staticDeclaration.setStatements(null);
                 staticDeclaration.setFirstLineNumber(0);
             } else {
