@@ -98,7 +98,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         int parameterTypesCount = (parameterTypes == null) ? 0 : parameterTypes.size();
 
         if (expClass == FieldReferenceExpression.class) {
-            FieldReferenceExpression fre = (FieldReferenceExpression) exp;
+            FieldReferenceExpression fre = getFieldReferenceExpression(exp);
 
             expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
 
@@ -133,7 +133,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             }
         } else if (expClass == BinaryOperatorExpression.class) {
             BinaryOperatorExpression boe = (BinaryOperatorExpression) exp;
-            FieldReferenceExpression fre = (FieldReferenceExpression) boe.getLeftExpression();
+            FieldReferenceExpression fre = getFieldReferenceExpression(boe.getLeftExpression());
 
             if (parameterTypesCount == 1) {
                 return new BinaryOperatorExpression(
@@ -154,7 +154,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             }
         } else if (expClass == PostOperatorExpression.class) {
             PostOperatorExpression poe = (PostOperatorExpression)exp;
-            FieldReferenceExpression fre = (FieldReferenceExpression) poe.getExpression();
+            FieldReferenceExpression fre = getFieldReferenceExpression(poe.getExpression());
 
             expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
 
@@ -164,7 +164,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                     poe.getOperator());
         } else if (expClass == PreOperatorExpression.class) {
             PreOperatorExpression poe = (PreOperatorExpression)exp;
-            FieldReferenceExpression fre = (FieldReferenceExpression) poe.getExpression();
+            FieldReferenceExpression fre = getFieldReferenceExpression(poe.getExpression());
 
             expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
 
@@ -177,6 +177,16 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         }
 
         return expression;
+    }
+
+    protected static FieldReferenceExpression getFieldReferenceExpression(Expression expression) {
+        FieldReferenceExpression fre = (FieldReferenceExpression) expression;
+
+        if (fre.getExpression().getClass() == ObjectTypeReferenceExpression.class) {
+            ((ObjectTypeReferenceExpression)fre.getExpression()).setExplicit(true);
+        }
+
+        return fre;
     }
 
     protected class BodyDeclarationsVisitor extends AbstractJavaSyntaxVisitor {

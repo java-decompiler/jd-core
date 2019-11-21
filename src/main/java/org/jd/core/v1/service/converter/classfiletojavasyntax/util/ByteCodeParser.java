@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
@@ -76,6 +77,7 @@ public class ByteCodeParser {
         Method method = cfg.getMethod();
         ConstantPool constants = method.getConstants();
         byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
+        boolean syntheticFlag = (method.getAccessFlags() & FLAG_SYNTHETIC) != 0;
 
         Expression indexRef, arrayRef, valueRef, expression1, expression2, expression3;
         Type type1, type2, type3;
@@ -88,7 +90,7 @@ public class ByteCodeParser {
 
         for (int offset=fromOffset; offset<toOffset; offset++) {
             int opcode = code[offset] & 255;
-            int lineNumber = cfg.getLineNumber(offset);
+            int lineNumber = syntheticFlag ? Printer.UNKNOWN_LINE_NUMBER : cfg.getLineNumber(offset);
 
             switch (opcode) {
                 case 0: // NOP

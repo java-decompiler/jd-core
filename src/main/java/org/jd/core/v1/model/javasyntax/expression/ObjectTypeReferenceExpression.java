@@ -55,6 +55,10 @@ public class ObjectTypeReferenceExpression implements Expression {
         return explicit;
     }
 
+    public void setExplicit(boolean explicit) {
+        this.explicit = explicit;
+    }
+
     @Override
     public int getPriority() {
         return 0;
