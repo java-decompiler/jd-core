@@ -181,9 +181,10 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
     protected static FieldReferenceExpression getFieldReferenceExpression(Expression expression) {
         FieldReferenceExpression fre = (FieldReferenceExpression) expression;
+        Expression freExpression = fre.getExpression();
 
-        if (fre.getExpression().getClass() == ObjectTypeReferenceExpression.class) {
-            ((ObjectTypeReferenceExpression)fre.getExpression()).setExplicit(true);
+        if ((freExpression != null) && (freExpression.getClass() == ObjectTypeReferenceExpression.class)) {
+            ((ObjectTypeReferenceExpression)freExpression).setExplicit(true);
         }
 
         return fre;

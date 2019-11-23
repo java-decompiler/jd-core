@@ -59,8 +59,6 @@ public class LocalVariableMaker {
                 if (descriptor.charAt(descriptor.length() - 1) == ';') {
                     typeMaker.makeFromDescriptor(descriptor).accept(populateBlackListNamesVisitor);
                 }
-
-                blackListNames.add(field.getName());
             }
         }
 
@@ -96,7 +94,6 @@ public class LocalVariableMaker {
             if (localVariableSet.root(0) == null) {
                 // Local variable missing
                 localVariableSet.add(0, new ObjectLocalVariable(typeMaker, 0, 0, typeMaker.makeFromInternalTypeName(classFile.getInternalTypeName()), "this"));
-                blackListNames.add("this");
             }
             firstVariableIndex = 1;
         }
@@ -106,23 +103,20 @@ public class LocalVariableMaker {
                 if (localVariableSet.root(1) == null) {
                     // Local variable missing
                     localVariableSet.add(1, new ObjectLocalVariable(typeMaker, 1, 0, ObjectType.TYPE_STRING, "this$enum$name"));
-                    blackListNames.add("this$enum$name");
                 }
                 if (localVariableSet.root(2) == null) {
                     // Local variable missing
                     localVariableSet.add(2, new PrimitiveLocalVariable(2, 0, PrimitiveType.TYPE_INT, "this$enum$index"));
-                    blackListNames.add("this$enum$index");
                 }
             } else if ((classFile.getOuterClassFile() != null) && ((classFile.getAccessFlags() & FLAG_STATIC) == 0)) {
                 if (localVariableSet.root(1) == null) {
                     // Local variable missing
                     localVariableSet.add(1, new ObjectLocalVariable(typeMaker, 1, 0, typeMaker.makeFromInternalTypeName(classFile.getOuterClassFile().getInternalTypeName()), "this$0"));
-                    blackListNames.add("this$0");
                 }
             }
         }
 
-        if ((parameterTypes != null) && (parameterTypes != null)) {
+        if (parameterTypes != null) {
             int lastParameterIndex = parameterTypes.size() - 1;
             boolean varargs = ((method.getAccessFlags() & FLAG_VARARGS) != 0);
 
@@ -199,7 +193,6 @@ public class LocalVariableMaker {
                     }
 
                     localVariableSet.add(index, lv);
-                    blackListNames.add(name);
                     names.add(name);
                 }
             }
@@ -272,13 +265,13 @@ public class LocalVariableMaker {
 
                 String name = sb.toString();
 
-                while (blackListNames.contains(name)) {
+                while (names.contains(name)) {
                     sb.setLength(length);
                     sb.append(counter++);
                     name = sb.toString();
                 }
 
-                blackListNames.add(name);
+                names.add(name);
                 createParameterVisitor.init(variableIndex, name);
                 type.accept(createParameterVisitor);
 
@@ -326,11 +319,11 @@ public class LocalVariableMaker {
         } else {
             AbstractLocalVariable lv2 = currentFrame.getLocalVariable(index);
 
-            if ((lv2 != null) && (lv.getFromOffset() < lv2.getFromOffset())) {
+            if ((lv2 != null) && ((lv.getName() == null) ? (lv2.getName() == null) : lv.getName().equals(lv2.getName())) && lv.getType().equals(lv2.getType())) {
                 lv = lv2;
-            } else {
-                localVariableSet.remove(index, offset);
             }
+
+            localVariableSet.remove(index, offset);
         }
 
         return lv;

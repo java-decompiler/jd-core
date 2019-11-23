@@ -713,7 +713,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 245 */", "for (int i = 0, j = i, size = 10; i < size; j += ++i);")));
         assertTrue(source.matches(PatternMaker.make("/* 253:   0 */", "while (true) {")));
         assertTrue(source.matches(PatternMaker.make(": 264 */", "for (String s : list)")));
-        assertTrue(source.matches(PatternMaker.make(": 310 */", "for (int i : new int[] { 4 })")));
+        assertTrue(source.matches(PatternMaker.make(": 310 */", "for (int j : new int[] { 4 })")));
         assertTrue(source.matches(PatternMaker.make(": 389 */", "for (String s : array)")));
         assertTrue(source.matches(PatternMaker.make(": 403 */", "for (String s : list)")));
         assertTrue(source.matches(PatternMaker.make(": 411 */", "Iterator<Class<?>> iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
@@ -839,7 +839,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(":  16 */", "for (int i = 0; i < 10; i++)")));
         assertTrue(source.matches(PatternMaker.make(":  84 */", "while (i < 10)")));
         assertTrue(source.matches(PatternMaker.make(": 269 */", "for (i = 0; i < 10; i++)")));
-        assertTrue(source.matches(PatternMaker.make(": 306 */", "for (int i : new int[] { 4 })")));
+        assertTrue(source.matches(PatternMaker.make(": 306 */", "for (int j : new int[] { 4 })")));
         assertTrue(source.matches(PatternMaker.make("/* 343:   0 */", "do {")));
         assertTrue(source.matches(PatternMaker.make(": 345 */", "while (i < 10);")));
         assertTrue(source.matches(PatternMaker.make(": 381 */", "for (String s : array)")));
@@ -882,7 +882,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  84 */", "while (i < 10)")));
         assertTrue(source.matches(PatternMaker.make(": 269 */", "for (i = 0; i < 10; i++)")));
-        assertTrue(source.matches(PatternMaker.make(": 306 */", "for (int i : new int[] { 4 })")));
+        assertTrue(source.matches(PatternMaker.make(": 306 */", "for (int j : new int[] { 4 })")));
         assertTrue(source.matches(PatternMaker.make("/* 343:   0 */", "do")));
         assertTrue(source.matches(PatternMaker.make(": 345 */", "while (i < 10);")));
         assertTrue(source.matches(PatternMaker.make(": 381 */", "for (String s : array)")));

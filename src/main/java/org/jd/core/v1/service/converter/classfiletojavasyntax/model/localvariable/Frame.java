@@ -196,16 +196,19 @@ public class Frame {
             AbstractLocalVariable lv = localVariableArray[i];
 
             while (lv != null) {
-                if (lv.name == null) {
-                    if (types.containsKey(lv.getType())) {
-                        // Non unique type
-                        types.put(lv.getType(), Boolean.TRUE);
-                    } else {
-                        // Unique type
-                        types.put(lv.getType(), Boolean.FALSE);
-                    }
+                if (types.containsKey(lv.getType())) {
+                    // Non unique type
+                    types.put(lv.getType(), Boolean.TRUE);
                 } else {
-                    names.add(lv.name);
+                    // Unique type
+                    types.put(lv.getType(), Boolean.FALSE);
+                }
+                if (lv.name != null) {
+                    if (names.contains(lv.name)) {
+                        lv.name = null;
+                    } else {
+                        names.add(lv.name);
+                    }
                 }
                 assert lv != lv.getNext();
                 lv = lv.getNext();
@@ -318,6 +321,7 @@ public class Frame {
                             for (AbstractLocalVariable lv : sorted) {
                                 // Add declaration before current statement
                                 iterator.add(new LocalVariableDeclarationStatement(lv.getType(), new LocalVariableDeclarator(lv.getName())));
+                                lv.setDeclared(true);
                                 undeclaredLocalVariables.remove(lv);
                             }
 
