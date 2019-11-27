@@ -274,46 +274,24 @@ public class ControlFlowGraphLoopReducer {
 
         if (end == END) {
             // Not found, check all member blocks
-            for (BasicBlock member : members) {
-                switch (member.getType()) {
-                    case TYPE_CONDITIONAL_BRANCH:
-                        BasicBlock bb = member.getBranch();
-                        if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
-                            end = bb;
-                            maxOffset = bb.getFromOffset();
-                            break;
+            end = searchEndBasicBlock(memberIndexes, maxOffset, members);
+
+            if (!end.matchType(TYPE_END|TYPE_RETURN|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END) &&
+                (end.getPredecessors().size() == 1) &&
+                (end.getPredecessors().iterator().next().getLastLineNumber() + 1 >= end.getFirstLineNumber()))
+            {
+                HashSet<BasicBlock> set = new HashSet<>();
+
+                if (recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, end, null)) {
+                    members.addAll(set);
+
+                    for (BasicBlock member : set) {
+                        if (member.getIndex() >= 0) {
+                            memberIndexes.set(member.getIndex());
                         }
-                    case TYPE_STATEMENTS:
-                    case TYPE_GOTO:
-                        bb = member.getNext();
-                        if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
-                            end = bb;
-                            maxOffset = bb.getFromOffset();
-                        }
-                        break;
-                    case TYPE_SWITCH_DECLARATION:
-                        for (SwitchCase switchCase : member.getSwitchCases()) {
-                            bb = switchCase.getBasicBlock();
-                            if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
-                                end = bb;
-                                maxOffset = bb.getFromOffset();
-                            }
-                        }
-                        break;
-                    case TYPE_TRY_DECLARATION:
-                        bb = member.getNext();
-                        if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
-                            end = bb;
-                            maxOffset = bb.getFromOffset();
-                        }
-                        for (ExceptionHandler exceptionHandler : member.getExceptionHandlers()) {
-                            bb = exceptionHandler.getBasicBlock();
-                            if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
-                                end = bb;
-                                maxOffset = bb.getFromOffset();
-                            }
-                        }
-                        break;
+                    }
+
+                    end = searchEndBasicBlock(memberIndexes, maxOffset, set);
                 }
             }
         }
@@ -338,6 +316,55 @@ public class ControlFlowGraphLoopReducer {
         }
 
         return new Loop(start, members, end);
+    }
+
+    private static BasicBlock searchEndBasicBlock(BitSet memberIndexes, int maxOffset, Set<BasicBlock> members) {
+        BasicBlock end = END;
+
+        for (BasicBlock member : members) {
+            switch (member.getType()) {
+                case TYPE_CONDITIONAL_BRANCH:
+                    BasicBlock bb = member.getBranch();
+                    if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                        end = bb;
+                        maxOffset = bb.getFromOffset();
+                        break;
+                    }
+                case TYPE_STATEMENTS:
+                case TYPE_GOTO:
+                    bb = member.getNext();
+                    if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                        end = bb;
+                        maxOffset = bb.getFromOffset();
+                    }
+                    break;
+                case TYPE_SWITCH_DECLARATION:
+                    for (SwitchCase switchCase : member.getSwitchCases()) {
+                        bb = switchCase.getBasicBlock();
+                        if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                            end = bb;
+                            maxOffset = bb.getFromOffset();
+                        }
+                    }
+                    break;
+                case TYPE_TRY_DECLARATION:
+                    bb = member.getNext();
+                    if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                        end = bb;
+                        maxOffset = bb.getFromOffset();
+                    }
+                    for (ExceptionHandler exceptionHandler : member.getExceptionHandlers()) {
+                        bb = exceptionHandler.getBasicBlock();
+                        if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                            end = bb;
+                            maxOffset = bb.getFromOffset();
+                        }
+                    }
+                    break;
+            }
+        }
+
+        return end;
     }
 
     private static int checkMaxOffset(BasicBlock basicBlock) {

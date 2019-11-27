@@ -1319,7 +1319,7 @@ public class ControlFlowGraphReducer {
                         int stackDepth = ByteCodeParser.evalStackDepth(subBasicBlock);
 
                         while (stackDepth != 0) {
-                            Set<BasicBlock> predecessors = basicBlock.getPredecessors();
+                            Set<BasicBlock> predecessors = subBasicBlock.getPredecessors();
                             if (predecessors.size() != 1) {
                                 break;
                             }
