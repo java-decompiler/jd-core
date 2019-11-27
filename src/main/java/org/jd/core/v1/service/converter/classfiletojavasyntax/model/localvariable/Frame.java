@@ -93,8 +93,12 @@ public class Frame {
             alvToMerge = null;
         }
 
-        if ((alvToMerge != null) && (alvToMerge.getClass() != lv.getClass())) {
-            alvToMerge = null;
+        if (alvToMerge != null) {
+            if (!lv.isAssignableFrom(alvToMerge) && !alvToMerge.isAssignableFrom(lv)) {
+                alvToMerge = null;
+            } else if ((lv.getName() != null) && (alvToMerge.getName() != null) && !lv.getName().equals(alvToMerge.getName())) {
+                alvToMerge = null;
+            }
         }
 
         if (alvToMerge == null) {

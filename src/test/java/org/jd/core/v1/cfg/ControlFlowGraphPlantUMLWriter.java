@@ -28,6 +28,8 @@ import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.B
  * http://plantuml.com/plantuml
  */
 public class ControlFlowGraphPlantUMLWriter {
+    protected static final int MAX_OFFSET = Integer.MAX_VALUE;
+
     //protected static final String PLANTUML_URL_PREFIX   = "http://plantuml.com/plantuml/png/";
     protected static final String PLANTUML_URL_PREFIX   = "http://plantuml.com/plantuml/svg/";
     protected static final char[] PLANTUML_ENCODE_6_BIT = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_".toCharArray();
@@ -82,11 +84,13 @@ public class ControlFlowGraphPlantUMLWriter {
 
             Method method = cfg.getMethod();
 
-            for (BasicBlock basicBlock : list)
+            for (BasicBlock basicBlock : list) {
                 writeState(sb, method, basicBlock);
+            }
 
-            for (BasicBlock basicBlock : list)
+            for (BasicBlock basicBlock : list) {
                 writeLink(sb, basicBlock);
+            }
 
             return sb.toString();
         }
@@ -112,8 +116,9 @@ public class ControlFlowGraphPlantUMLWriter {
                 case TYPE_SWITCH:
                     search(set, basicBlock.getNext());
                 case TYPE_SWITCH_DECLARATION:
-                    for (SwitchCase switchCase : basicBlock.getSwitchCases())
+                    for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
                         search(set, switchCase.getBasicBlock());
+                    }
                     break;
                 case TYPE_TRY:
                 case TYPE_TRY_JSR:
@@ -121,8 +126,9 @@ public class ControlFlowGraphPlantUMLWriter {
                     search(set, basicBlock.getSub1());
                 case TYPE_TRY_DECLARATION:
                     search(set, basicBlock.getNext());
-                    for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers())
+                    for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
                         search(set, exceptionHandler.getBasicBlock());
+                    }
                     break;
                 case TYPE_IF:
                     search(set, basicBlock.getCondition());
@@ -144,6 +150,10 @@ public class ControlFlowGraphPlantUMLWriter {
     }
 
     protected static void writeState(StringBuilder sb, Method method, BasicBlock basicBlock) {
+        if (basicBlock.getFromOffset() > MAX_OFFSET) {
+            return;
+        }
+
         String id = getStateId(basicBlock);
 
         switch (basicBlock.getType()) {
@@ -300,6 +310,10 @@ public class ControlFlowGraphPlantUMLWriter {
     }
 
     protected static void writeLink(StringBuilder sb, BasicBlock basicBlock) {
+        if (basicBlock.getFromOffset() > MAX_OFFSET) {
+            return;
+        }
+
         String id = getStateId(basicBlock);
 
         switch (basicBlock.getType()) {
@@ -399,6 +413,10 @@ public class ControlFlowGraphPlantUMLWriter {
     }
 
     protected static void writeLink(StringBuilder sb, String fromId, BasicBlock to, String label) {
+        if (to.getFromOffset() > MAX_OFFSET) {
+            return;
+        }
+
         if (to == SWITCH_BREAK) {
             sb.append("state \"SWITCH_BREAK\" as switch_break_").append(fromId).append('\n');
             sb.append(fromId).append(" --> switch_break_").append(fromId).append(" : ").append(label).append('\n');
