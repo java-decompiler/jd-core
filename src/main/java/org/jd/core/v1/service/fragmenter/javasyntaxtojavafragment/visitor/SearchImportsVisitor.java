@@ -23,6 +23,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     protected String internalPackagePrefix;
     protected ImportsFragment importsFragment = JavaFragmentFactory.newImportsFragment();
     protected int maxLineNumber = 0;
+    protected HashSet<String> mainTypeNames = new HashSet<>();
     protected HashSet<String> internalTypeNames = new HashSet<>();
 
     public SearchImportsVisitor(String mainInternalName) {
@@ -44,10 +45,25 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(BodyDeclaration declaration) {
+        if (mainTypeNames.isEmpty()) {
+            mainTypeNames.add(getTypeName(declaration.getInternalTypeName()));
+            declaration.accept(new MainTypeVisitor(mainTypeNames));
+        }
         if (!internalTypeNames.contains(declaration.getInternalTypeName())) {
-            internalTypeNames.add(declaration.getInternalTypeName());
             safeAccept(declaration.getMemberDeclarations());
         }
+    }
+
+    protected static String getTypeName(String internalTypeName) {
+        int index = internalTypeName.lastIndexOf('$');
+        if (index != -1) {
+            return internalTypeName.substring(index + 1);
+        }
+        index = internalTypeName.lastIndexOf('/');
+        if (index != -1) {
+            return internalTypeName.substring(index + 1);
+        }
+        return internalTypeName;
     }
 
     public ImportsFragment getImportsFragment() {
@@ -67,8 +83,9 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ArrayExpression expression) {
-        if (maxLineNumber < expression.getLineNumber())
+        if (maxLineNumber < expression.getLineNumber()) {
             maxLineNumber = expression.getLineNumber();
+        }
         expression.getExpression().accept(this);
         expression.getIndex().accept(this);
     }
@@ -288,9 +305,45 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
                 if (internalName.indexOf('/', internalPackagePrefix.length()) != -1) {
                     importsFragment.addImport(internalName, qualifiedName);
                 }
-            } else {
+            } else if (!mainTypeNames.contains(getTypeName(internalName))) {
                 importsFragment.addImport(internalName, qualifiedName);
             }
         }
+    }
+
+    protected static class MainTypeVisitor extends AbstractJavaSyntaxVisitor {
+        HashSet<String> mainTypeNames;
+
+        public MainTypeVisitor(HashSet<String> mainTypeNames) {
+            this.mainTypeNames = mainTypeNames;
+        }
+
+        @Override
+        public void visit(AnnotationDeclaration declaration) {
+            mainTypeNames.add(getTypeName(declaration.getInternalTypeName()));
+            safeAccept(declaration.getBodyDeclaration());
+        }
+
+        @Override
+        public void visit(ClassDeclaration declaration) {
+            mainTypeNames.add(getTypeName(declaration.getInternalTypeName()));
+            safeAccept(declaration.getBodyDeclaration());
+        }
+
+        @Override
+        public void visit(EnumDeclaration declaration) {
+            mainTypeNames.add(getTypeName(declaration.getInternalTypeName()));
+            safeAccept(declaration.getBodyDeclaration());
+        }
+
+        @Override
+        public void visit(InterfaceDeclaration declaration) {
+            mainTypeNames.add(getTypeName(declaration.getInternalTypeName()));
+            safeAccept(declaration.getBodyDeclaration());
+        }
+
+        @Override public void visit(FieldDeclaration declaration) {}
+        @Override public void visit(ConstructorDeclaration declaration) {}
+        @Override public void visit(MethodDeclaration declaration) {}
     }
 }
