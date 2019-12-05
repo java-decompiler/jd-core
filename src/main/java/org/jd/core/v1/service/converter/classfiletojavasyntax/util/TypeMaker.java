@@ -238,7 +238,7 @@ public class TypeMaker {
         if (signature == null) {
             return parseMethodSignature(descriptor, exceptionTypeNames);
         } else {
-            // Signature does not contain synthetic parameterTypes like outer type name, for example.
+            // Signature does not contain synthetic parameters like outer type name, for example.
             MethodTypes mtDescriptor = parseMethodSignature(descriptor, exceptionTypeNames);
             MethodTypes mtSignature  = parseMethodSignature(signature, exceptionTypeNames);
 
@@ -298,7 +298,7 @@ public class TypeMaker {
         if (methodTypes == null) {
             SignatureReader reader = new SignatureReader(signature);
 
-            // Type parameterTypes
+            // Type parameters
             methodTypes = new MethodTypes();
             methodTypes.typeParameters = parseTypeParameters(reader);
 

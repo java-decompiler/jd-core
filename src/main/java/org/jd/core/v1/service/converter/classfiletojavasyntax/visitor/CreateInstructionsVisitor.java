@@ -56,7 +56,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                     if (method.getParameterTypes().isList()) {
                         for (Type type : method.getParameterTypes()) {
                             if (type.isObject() && (type.getName() == null)) {
-                                // Synthetic type in parameterTypes -> synthetic method
+                                // Synthetic type in parameters -> synthetic method
                                 method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
                                 method.accept(this);
                                 break;
@@ -65,7 +65,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                     } else {
                         Type type = method.getParameterTypes().getFirst();
                         if (type.isObject() && (type.getName() == null)) {
-                            // Synthetic type in parameterTypes -> synthetic method
+                            // Synthetic type in parameters -> synthetic method
                             method.setFlags(method.getFlags() | FLAG_SYNTHETIC);
                             method.accept(this);
                             break;

@@ -404,7 +404,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     BaseType parameterTypes = ne.getParameterTypes();
 
                     if (parameters != null) {
-                        // Remove synthetic parameterTypes
+                        // Remove synthetic parameters
                         DefaultList<String> syntheticInnerFieldNames = cfbd.getSyntheticInnerFieldNames();
 
                         if (parameters.isList()) {
