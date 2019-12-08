@@ -9,8 +9,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.
 
 import org.jd.core.v1.model.javasyntax.declaration.BaseMemberDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
-import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
-import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.TypeArgument;
@@ -24,8 +22,8 @@ import java.util.Map;
 public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFileMemberDeclaration {
     protected List<ClassFileFieldDeclaration> fieldDeclarations;
     protected List<ClassFileConstructorOrMethodDeclaration> methodDeclarations;
-    protected List<ClassFileMemberDeclaration> innerTypeDeclarations;
-    protected Map<String, ClassFileMemberDeclaration> innerTypeMap = Collections.emptyMap();
+    protected List<ClassFileTypeDeclaration> innerTypeDeclarations;
+    protected Map<String, ClassFileTypeDeclaration> innerTypeMap = Collections.emptyMap();
     protected int firstLineNumber;
     protected ObjectType outerType;
     protected DefaultList<String> syntheticInnerFieldNames;
@@ -64,25 +62,24 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
         }
     }
 
-    public List<ClassFileMemberDeclaration> getInnerTypeDeclarations() {
+    public List<ClassFileTypeDeclaration> getInnerTypeDeclarations() {
         return innerTypeDeclarations;
     }
 
-    public void setInnerTypeDeclarations(List<ClassFileMemberDeclaration> innerTypeDeclarations) {
+    public void setInnerTypeDeclarations(List<ClassFileTypeDeclaration> innerTypeDeclarations) {
         if (innerTypeDeclarations != null) {
             updateFirstLineNumber(this.innerTypeDeclarations = innerTypeDeclarations);
 
             innerTypeMap = new HashMap<>();
 
-            for (ClassFileMemberDeclaration innerType : innerTypeDeclarations) {
-                TypeDeclaration td = (TypeDeclaration) innerType;
-                innerTypeMap.put(td.getInternalTypeName(), innerType);
+            for (ClassFileTypeDeclaration innerType : innerTypeDeclarations) {
+                innerTypeMap.put(innerType.getInternalTypeName(), innerType);
             }
         }
     }
 
-    public ClassFileMemberDeclaration getInnerTypeDeclaration(String internalName) {
-        ClassFileMemberDeclaration declaration = innerTypeMap.get(internalName);
+    public ClassFileTypeDeclaration getInnerTypeDeclaration(String internalName) {
+        ClassFileTypeDeclaration declaration = innerTypeMap.get(internalName);
 
         if ((declaration == null) && (outerBodyDeclaration != null)) {
             return outerBodyDeclaration.getInnerTypeDeclaration(internalName);

@@ -18,7 +18,7 @@ public class ModuleDeclaration extends TypeDeclaration {
     protected List<ServiceInfo> provides;
 
     public ModuleDeclaration(int flags, String internalName, String name, String version, List<ModuleInfo> requires, List<PackageInfo> exports, List<PackageInfo> opens, List<String> uses, List<ServiceInfo> provides) {
-        super(null, flags, internalName, name);
+        super(null, flags, internalName, name, null);
         this.version = version;
         this.requires = requires;
         this.exports = exports;

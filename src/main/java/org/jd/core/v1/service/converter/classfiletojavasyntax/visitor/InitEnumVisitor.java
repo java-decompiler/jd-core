@@ -125,9 +125,9 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
         String enumInternalTypeName = expression.getObjectType().getInternalName();
 
         if (!enumInternalTypeName.equals(bodyDeclaration.getInternalTypeName())) {
-            ClassFileMemberDeclaration md = bodyDeclaration.getInnerTypeDeclaration(enumInternalTypeName);
-            if (md != null) {
-                constantBodyDeclaration = ((ClassFileEnumDeclaration)md).getBodyDeclaration();
+            ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(enumInternalTypeName);
+            if (typeDeclaration != null) {
+                constantBodyDeclaration = typeDeclaration.getBodyDeclaration();
             }
         }
     }

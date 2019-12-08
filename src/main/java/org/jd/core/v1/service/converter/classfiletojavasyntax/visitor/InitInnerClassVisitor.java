@@ -222,13 +222,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     expression.setExpression(new ObjectTypeReferenceExpression(exp.getLineNumber(), outerType.createType(null)));
                     expression.setName("this");
                 } else {
-                    ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(expression.getInternalTypeName());
+                    ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(expression.getInternalTypeName());
 
-                    if ((memberDeclaration != null) && (memberDeclaration.getClass() == ClassFileClassDeclaration.class)) {
-                        ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) memberDeclaration;
-
-                        if (cfcd.getInternalTypeName().equals(expression.getInternalTypeName())) {
-                            ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) cfcd.getBodyDeclaration();
+                    if ((typeDeclaration != null) && (typeDeclaration.getClass() == ClassFileClassDeclaration.class)) {
+                        if (typeDeclaration.getInternalTypeName().equals(expression.getInternalTypeName())) {
+                            ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) typeDeclaration.getBodyDeclaration();
                             String outerInternalTypeName = cfbd.getOuterBodyDeclaration().getInternalTypeName();
                             ObjectType objectType = (ObjectType)expression.getType();
 
@@ -380,10 +378,23 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 if (ne.getBodyDeclaration() == null) {
                     ObjectType type = ne.getObjectType();
                     String internalName = type.getInternalName();
-                    ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalName);
+                    ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalName);
 
-                    if ((memberDeclaration != null) && (memberDeclaration.getClass() == ClassFileClassDeclaration.class)) {
-                        ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) memberDeclaration;
+                    if (typeDeclaration == null) {
+                        ClassFileBodyDeclaration bd = bodyDeclaration;
+
+                        for (;;) {
+                            if (bd.getInternalTypeName().equals(internalName)) {
+                                cfbd = bd;
+                                break;
+                            }
+                            bd = bd.getOuterBodyDeclaration();
+                            if (bd == null) {
+                                break;
+                            }
+                        }
+                    } else if (typeDeclaration.getClass() == ClassFileClassDeclaration.class) {
+                        ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) typeDeclaration;
                         cfbd = (ClassFileBodyDeclaration) cfcd.getBodyDeclaration();
 
                         if ((type.getQualifiedName() == null) && (type.getName() != null)) {

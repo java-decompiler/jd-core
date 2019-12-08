@@ -15,7 +15,7 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 
 import java.util.List;
 
-public class ClassFileEnumDeclaration extends EnumDeclaration implements ClassFileMemberDeclaration {
+public class ClassFileEnumDeclaration extends EnumDeclaration implements ClassFileTypeDeclaration {
     protected int firstLineNumber;
 
     public ClassFileEnumDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseType interfaces, ClassFileBodyDeclaration bodyDeclaration) {

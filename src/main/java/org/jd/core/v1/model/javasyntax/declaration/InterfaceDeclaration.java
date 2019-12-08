@@ -14,18 +14,16 @@ import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 public class InterfaceDeclaration extends TypeDeclaration {
     protected BaseTypeParameter typeParameters;
     protected BaseType interfaces;
-    protected BodyDeclaration bodyDeclaration;
 
     public InterfaceDeclaration(int flags, String internalName, String name, BaseType interfaces) {
-        super(null, flags, internalName, name);
+        super(null, flags, internalName, name, null);
         this.interfaces = interfaces;
     }
 
     public InterfaceDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseTypeParameter typeParameters, BaseType interfaces, BodyDeclaration bodyDeclaration) {
-        super(annotationReferences, flags, internalName, name);
+        super(annotationReferences, flags, internalName, name, bodyDeclaration);
         this.typeParameters = typeParameters;
         this.interfaces = interfaces;
-        this.bodyDeclaration = bodyDeclaration;
     }
 
     public BaseTypeParameter getTypeParameters() {
@@ -34,10 +32,6 @@ public class InterfaceDeclaration extends TypeDeclaration {
 
     public BaseType getInterfaces() {
         return interfaces;
-    }
-
-    public BodyDeclaration getBodyDeclaration() {
-        return bodyDeclaration;
     }
 
     @Override

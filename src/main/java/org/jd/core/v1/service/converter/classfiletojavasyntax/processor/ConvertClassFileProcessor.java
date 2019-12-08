@@ -228,17 +228,17 @@ public class ConvertClassFileProcessor implements Processor {
         }
     }
 
-    protected List<ClassFileMemberDeclaration> convertInnerTypes(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
+    protected List<ClassFileTypeDeclaration> convertInnerTypes(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         List<ClassFile> innerClassFiles = classFile.getInnerClassFiles();
 
         if (innerClassFiles == null) {
             return null;
         } else {
-            DefaultList<ClassFileMemberDeclaration> list = new DefaultList<>(innerClassFiles.size());
+            DefaultList<ClassFileTypeDeclaration> list = new DefaultList<>(innerClassFiles.size());
 
             for (ClassFile innerClassFile : innerClassFiles) {
                 int flags = innerClassFile.getAccessFlags();
-                ClassFileMemberDeclaration innerTypeDeclaration;
+                ClassFileTypeDeclaration innerTypeDeclaration;
 
                 if ((flags & Constants.ACC_ENUM) != 0) {
                     innerTypeDeclaration = convertEnumDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);

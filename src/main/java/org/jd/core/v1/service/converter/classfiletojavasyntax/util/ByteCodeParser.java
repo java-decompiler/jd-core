@@ -1745,12 +1745,12 @@ public class ByteCodeParser {
         ObjectType objectType = typeMaker.makeFromInternalTypeName(internalTypeName);
 
         if ((objectType.getQualifiedName() == null) && (objectType.getName() == null)) {
-            ClassFileMemberDeclaration memberDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalTypeName);
+            ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalTypeName);
 
-            if (memberDeclaration == null) {
+            if (typeDeclaration == null) {
                 return new ClassFileNewExpression(lineNumber, ObjectType.TYPE_OBJECT);
-            } else if (memberDeclaration.getClass() == ClassFileClassDeclaration.class) {
-                ClassFileClassDeclaration declaration = (ClassFileClassDeclaration) memberDeclaration;
+            } else if (typeDeclaration.getClass() == ClassFileClassDeclaration.class) {
+                ClassFileClassDeclaration declaration = (ClassFileClassDeclaration) typeDeclaration;
                 BodyDeclaration bodyDeclaration;
 
                 if (this.internalTypeName.equals(internalTypeName)) {

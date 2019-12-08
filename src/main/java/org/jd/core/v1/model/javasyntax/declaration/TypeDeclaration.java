@@ -14,12 +14,14 @@ public abstract class TypeDeclaration implements BaseTypeDeclaration, MemberDecl
     protected int flags;
     protected String internalTypeName;
     protected String name;
+    protected BodyDeclaration bodyDeclaration;
 
-    protected TypeDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalTypeName, String name) {
+    protected TypeDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalTypeName, String name, BodyDeclaration bodyDeclaration) {
         this.annotationReferences = annotationReferences;
         this.flags = flags;
         this.internalTypeName = internalTypeName;
         this.name = name;
+        this.bodyDeclaration = bodyDeclaration;
     }
 
     public BaseAnnotationReference getAnnotationReferences() {
@@ -36,5 +38,9 @@ public abstract class TypeDeclaration implements BaseTypeDeclaration, MemberDecl
 
     public String getName() {
         return name;
+    }
+
+    public BodyDeclaration getBodyDeclaration() {
+        return bodyDeclaration;
     }
 }

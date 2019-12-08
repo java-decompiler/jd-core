@@ -11,6 +11,7 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMemberDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.MergeMembersUtil;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class SortMembersVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
-        List<ClassFileMemberDeclaration> innerTypes = bodyDeclaration.getInnerTypeDeclarations();
+        List<ClassFileTypeDeclaration> innerTypes = bodyDeclaration.getInnerTypeDeclarations();
         // Merge fields, getters & inner types
         BaseMemberDeclaration members = MergeMembersUtil.merge(bodyDeclaration.getFieldDeclarations(), bodyDeclaration.getMethodDeclarations(), innerTypes);
         bodyDeclaration.setMemberDeclarations(members);

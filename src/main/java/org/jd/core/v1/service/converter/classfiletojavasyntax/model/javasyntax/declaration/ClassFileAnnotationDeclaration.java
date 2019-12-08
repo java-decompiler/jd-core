@@ -10,7 +10,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.
 import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 
-public class ClassFileAnnotationDeclaration extends AnnotationDeclaration implements ClassFileMemberDeclaration {
+public class ClassFileAnnotationDeclaration extends AnnotationDeclaration implements ClassFileTypeDeclaration {
     protected int firstLineNumber;
 
     public ClassFileAnnotationDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, ClassFileBodyDeclaration bodyDeclaration) {

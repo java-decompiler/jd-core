@@ -16,19 +16,16 @@ import java.util.List;
 public class EnumDeclaration extends TypeDeclaration {
     protected BaseType interfaces;
     protected List<Constant> constants;
-    protected BodyDeclaration bodyDeclaration;
 
     public EnumDeclaration(int flags, String internalName, String name, List<Constant> constants, BodyDeclaration bodyDeclaration) {
-        super(null, flags, internalName, name);
+        super(null, flags, internalName, name, bodyDeclaration);
         this.constants = constants;
-        this.bodyDeclaration = bodyDeclaration;
     }
 
     public EnumDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseType interfaces, List<Constant> constants, BodyDeclaration bodyDeclaration) {
-        super(annotationReferences, flags, internalName, name);
+        super(annotationReferences, flags, internalName, name, bodyDeclaration);
         this.interfaces = interfaces;
         this.constants = constants;
-        this.bodyDeclaration = bodyDeclaration;
     }
 
     public BaseType getInterfaces() {
@@ -37,10 +34,6 @@ public class EnumDeclaration extends TypeDeclaration {
 
     public List<Constant> getConstants() {
         return constants;
-    }
-
-    public BodyDeclaration getBodyDeclaration() {
-        return bodyDeclaration;
     }
 
     @Override

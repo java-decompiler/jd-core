@@ -11,8 +11,8 @@ import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
@@ -187,11 +187,11 @@ public class SwitchStatementMaker {
             FieldReferenceExpression fre = (FieldReferenceExpression)ae.getExpression();
 
             if (fre.getDescriptor().equals("[I") && fre.getName().startsWith("$SwitchMap$")) {
-                ClassFileClassDeclaration syntheticClass = (ClassFileClassDeclaration)bodyDeclaration.getInnerTypeDeclaration(fre.getInternalTypeName());
+                ClassFileTypeDeclaration syntheticClassDeclaration = bodyDeclaration.getInnerTypeDeclaration(fre.getInternalTypeName());
 
-                if (syntheticClass != null) {
+                if (syntheticClassDeclaration != null) {
                     // Javac switch-enum pattern
-                    bodyDeclaration = (ClassFileBodyDeclaration) syntheticClass.getBodyDeclaration();
+                    bodyDeclaration = (ClassFileBodyDeclaration) syntheticClassDeclaration.getBodyDeclaration();
                     DefaultList<Statement> statements = bodyDeclaration.getMethodDeclarations().get(0).getStatements().getList();
                     updateSwitchStatement(switchStatement, statements.listIterator(1));
                 }

@@ -11,20 +11,14 @@ import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 
 public class AnnotationDeclaration extends TypeDeclaration {
     protected BaseFieldDeclarator annotationDeclarators;
-    protected BodyDeclaration bodyDeclaration;
 
     public AnnotationDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseFieldDeclarator annotationDeclarators, BodyDeclaration bodyDeclaration) {
-        super(annotationReferences, flags, internalName, name);
+        super(annotationReferences, flags, internalName, name, bodyDeclaration);
         this.annotationDeclarators = annotationDeclarators;
-        this.bodyDeclaration = bodyDeclaration;
     }
 
     public BaseFieldDeclarator getAnnotationDeclarators() {
         return annotationDeclarators;
-    }
-
-    public BodyDeclaration getBodyDeclaration() {
-        return bodyDeclaration;
     }
 
     @Override
