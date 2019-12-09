@@ -339,7 +339,7 @@ public class LocalVariableMaker {
                 BaseTypeArgument lvTypeArguments = lvObjectType.getTypeArguments();
                 BaseTypeArgument valueTypeArguments = valueObjectType.getTypeArguments();
 
-                if ((lvTypeArguments == null) || (valueTypeArguments == null)) {
+                if ((lvTypeArguments == null) || (valueTypeArguments == null) || (valueTypeArguments == WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT)) {
                     return typeMaker.isRawTypeAssignable(lvObjectType, valueObjectType);
                 }
 
