@@ -381,15 +381,9 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                     ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalName);
 
                     if (typeDeclaration == null) {
-                        ClassFileBodyDeclaration bd = bodyDeclaration;
-
-                        for (;;) {
+                        for (ClassFileBodyDeclaration bd = bodyDeclaration; bd != null; bd = bd.getOuterBodyDeclaration()) {
                             if (bd.getInternalTypeName().equals(internalName)) {
                                 cfbd = bd;
-                                break;
-                            }
-                            bd = bd.getOuterBodyDeclaration();
-                            if (bd == null) {
                                 break;
                             }
                         }
