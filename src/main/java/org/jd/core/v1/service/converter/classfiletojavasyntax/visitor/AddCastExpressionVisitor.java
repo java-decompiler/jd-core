@@ -21,6 +21,8 @@ import org.jd.core.v1.util.DefaultList;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
+    protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+
     protected TypeMaker typeMaker;
     protected Type returnedType;
     protected Type type;
@@ -177,7 +179,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             parameters.accept(this);
             expression.setParameters(updateExpressions(mie.getParameterTypes(), parameters));
         }
-
+        
         expression.getExpression().accept(this);
     }
 
@@ -200,6 +202,19 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             type = expression.getType();
             arrayInitializer.accept(this);
             type = t;
+        }
+    }
+
+    @Override
+    public void visit(FieldReferenceExpression expression) {
+        Expression exp = expression.getExpression();
+
+        if ((exp != null) && (exp.getClass() != ObjectTypeReferenceExpression.class)) {
+            Type type = typeMaker.makeFromInternalTypeName(expression.getInternalTypeName());
+
+            if (type.getName() != null) {
+                expression.setExpression(updateExpression(type, exp));
+            }
         }
     }
 
@@ -313,7 +328,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         return true;
     }
 
-    private static final Expression addCastExpression(Type type, Expression expression) {
+    private Expression addCastExpression(Type type, Expression expression) {
         if (expression.getClass() == CastExpression.class) {
             CastExpression ce = (CastExpression)expression;
 
@@ -324,7 +339,9 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                 return ce;
             }
         } else {
-            return new CastExpression(expression.getLineNumber(), type, expression);
+            searchFirstLineNumberVisitor.init();
+            expression.accept(searchFirstLineNumberVisitor);
+            return new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type, expression);
         }
     }
 
