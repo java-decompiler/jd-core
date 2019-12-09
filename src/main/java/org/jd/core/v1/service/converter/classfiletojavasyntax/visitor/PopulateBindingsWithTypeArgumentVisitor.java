@@ -90,12 +90,8 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
         }
     }
 
-    protected boolean equals(BaseType bt1, BaseType bt2) {
-        if (bt1 == null) {
-            return (bt2 == null);
-        } else {
-            return (bt2 != null) && bt1.equals(bt2);
-        }
+    private static boolean equals(BaseType bt1, BaseType bt2) {
+        return (bt2 == null) || bt2.equals(bt1);
     }
 
     protected TypeArgument checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(GenericType type) {
