@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
+import java.util.Map;
+
 public class ObjectType implements Type {
     public static final ObjectType TYPE_BOOLEAN           = new ObjectType("java/lang/Boolean", "java.lang.Boolean", "Boolean");
     public static final ObjectType TYPE_BYTE              = new ObjectType("java/lang/Byte", "java.lang.Byte", "Byte");
@@ -203,25 +205,60 @@ public class ObjectType implements Type {
     }
 
     @Override
-    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+    public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         Class typeArgumentClass = typeArgument.getClass();
 
-        if ((typeArgumentClass != ObjectType.class) && (typeArgumentClass != InnerObjectType.class)) {
+        if ((typeArgumentClass == ObjectType.class) || (typeArgumentClass == InnerObjectType.class)) {
+            ObjectType ot = (ObjectType)typeArgument;
+
+            if ((dimension != ot.getDimension()) || !internalName.equals(ot.getInternalName())) {
+                return false;
+            }
+
+            if (ot.getTypeArguments() == null) {
+                return (typeArguments == null);
+            } else if (typeArguments == null) {
+                return false;
+            } else {
+                return typeArguments.isTypeArgumentAssignableFrom(typeBounds, ot.getTypeArguments());
+            }
+        }
+
+        if (typeArgumentClass == GenericType.class) {
+            GenericType gt = (GenericType)typeArgument;
+            BaseType bt = typeBounds.get(gt.getName());
+
+            if (bt != null) {
+                for (Type type : bt) {
+                    if (dimension == type.getDimension()) {
+                        Class typeClass = type.getClass();
+
+                        if ((typeClass == ObjectType.class) || (typeClass == InnerObjectType.class)) {
+                            ObjectType ot = (ObjectType) type;
+
+                            if (internalName.equals(ot.getInternalName())) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, ObjectType objectType) {
+        if ((dimension != objectType.getDimension()) || !internalName.equals(objectType.getInternalName())) {
             return false;
         }
 
-        ObjectType ot = (ObjectType)typeArgument;
-
-        if ((dimension != ot.getDimension()) || !internalName.equals(ot.getInternalName())) {
-            return false;
-        }
-
-        if (ot.getTypeArguments() == null) {
+        if (objectType.getTypeArguments() == null) {
             return (typeArguments == null);
         } else if (typeArguments == null) {
             return false;
         } else {
-            return typeArguments.isTypeArgumentAssignableFrom(ot.getTypeArguments());
+            return typeArguments.isTypeArgumentAssignableFrom(typeBounds, objectType.getTypeArguments());
         }
     }
 

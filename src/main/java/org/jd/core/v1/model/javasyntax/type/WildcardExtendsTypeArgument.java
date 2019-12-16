@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
+import java.util.Map;
+
 public class WildcardExtendsTypeArgument implements TypeArgument {
     protected Type type;
 
@@ -24,11 +26,11 @@ public class WildcardExtendsTypeArgument implements TypeArgument {
     }
 
     @Override
-    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+    public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         if (typeArgument.getClass() == WildcardExtendsTypeArgument.class) {
-            return type.isTypeArgumentAssignableFrom(((WildcardExtendsTypeArgument)typeArgument).getType());
+            return type.isTypeArgumentAssignableFrom(typeBounds, ((WildcardExtendsTypeArgument)typeArgument).getType());
         } else if (typeArgument instanceof Type) {
-            return type.isTypeArgumentAssignableFrom(typeArgument);
+            return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument);
         }
 
         return false;

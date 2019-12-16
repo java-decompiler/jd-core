@@ -24,6 +24,7 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration.*;
 
@@ -35,6 +36,7 @@ public class LocalVariableMaker {
     protected AbstractLocalVariable[] localVariableCache;
 
     protected TypeMaker typeMaker;
+    protected Map<String, BaseType> typeBounds;
     protected FormalParameters formalParameters;
 
     protected PopulateBlackListNamesVisitor populateBlackListNamesVisitor = new PopulateBlackListNamesVisitor(blackListNames);
@@ -48,6 +50,7 @@ public class LocalVariableMaker {
         Method method = comd.getMethod();
 
         this.typeMaker = typeMaker;
+        this.typeBounds = comd.getTypeBounds();
         this.createParameterVisitor = new CreateParameterVisitor(typeMaker);
         this.createLocalVariableVisitor = new CreateLocalVariableVisitor(typeMaker);
 
@@ -298,7 +301,7 @@ public class LocalVariableMaker {
             }
         } else if (lv.getFrame() != currentFrame) {
             Frame frame = searchCommonParentFrame(lv.getFrame(), currentFrame);
-            frame.mergeLocalVariable(this, lv);
+            frame.mergeLocalVariable(typeBounds, this, lv);
 
             if (lv.getFrame() != frame) {
                 lv.getFrame().removeLocalVariable(lv);
@@ -362,7 +365,7 @@ public class LocalVariableMaker {
         return false;
     }
 
-    public AbstractLocalVariable getLocalVariableInAssignment(int index, int offset, Type valueType) {
+    public AbstractLocalVariable getLocalVariableInAssignment(Map<String, BaseType> typeBounds, int index, int offset, Type valueType) {
         AbstractLocalVariable lv = searchLocalVariable(index, offset);
 
         if (lv == null) {
@@ -370,9 +373,9 @@ public class LocalVariableMaker {
             createLocalVariableVisitor.init(index, offset);
             valueType.accept(createLocalVariableVisitor);
             lv = createLocalVariableVisitor.getLocalVariable();
-        } else if (lv.isAssignableFrom(valueType) || isCompatible(lv, valueType)) {
+        } else if (lv.isAssignableFrom(typeBounds, valueType) || isCompatible(lv, valueType)) {
             // Assignable, reduce type
-            lv.typeOnRight(valueType);
+            lv.typeOnRight(typeBounds, valueType);
         } else if (!lv.getType().isGeneric() || (ObjectType.TYPE_OBJECT != valueType)) {
             // Not assignable -> Create a new local variable
             createLocalVariableVisitor.init(index, offset);
@@ -386,7 +389,7 @@ public class LocalVariableMaker {
         return lv;
     }
 
-    public AbstractLocalVariable getLocalVariableInCastAssignment(int index, int offset, Type castType, Type valueType) {
+    public AbstractLocalVariable getLocalVariableInCastAssignment(Map<String, BaseType> typeBounds, int index, int offset, Type castType, Type valueType) {
         AbstractLocalVariable lv = searchLocalVariable(index, offset);
 
         if (lv == null) {
@@ -394,12 +397,12 @@ public class LocalVariableMaker {
             createLocalVariableVisitor.init(index, offset);
             valueType.accept(createLocalVariableVisitor);
             lv = createLocalVariableVisitor.getLocalVariable();
-        } else if (lv.isAssignableFrom(castType) || isCompatible(lv, castType)) {
+        } else if (lv.isAssignableFrom(typeBounds, castType) || isCompatible(lv, castType)) {
             // Assignable, reduce type
-            lv.typeOnRight(castType);
-        } else if (lv.isAssignableFrom(valueType) || isCompatible(lv, valueType)) {
+            lv.typeOnRight(typeBounds, castType);
+        } else if (lv.isAssignableFrom(typeBounds, valueType) || isCompatible(lv, valueType)) {
             // Assignable, reduce type
-            lv.typeOnRight(valueType);
+            lv.typeOnRight(typeBounds, valueType);
         } else if (!lv.getType().isGeneric() || (ObjectType.TYPE_OBJECT != valueType)) {
             // Not assignable -> Create a new local variable
             createLocalVariableVisitor.init(index, offset);
@@ -438,7 +441,7 @@ public class LocalVariableMaker {
         return lv;
     }
 
-    public AbstractLocalVariable getLocalVariableInAssignment(int index, int offset, AbstractLocalVariable valueLocalVariable) {
+    public AbstractLocalVariable getLocalVariableInAssignment(Map<String, BaseType> typeBounds, int index, int offset, AbstractLocalVariable valueLocalVariable) {
         AbstractLocalVariable lv = searchLocalVariable(index, offset);
 
         if (lv == null) {
@@ -446,7 +449,7 @@ public class LocalVariableMaker {
             createLocalVariableVisitor.init(index, offset);
             valueLocalVariable.accept(createLocalVariableVisitor);
             lv = createLocalVariableVisitor.getLocalVariable();
-        } else if (lv.isAssignableFrom(valueLocalVariable) || isCompatible(lv, valueLocalVariable.getType())) {
+        } else if (lv.isAssignableFrom(typeBounds, valueLocalVariable) || isCompatible(lv, valueLocalVariable.getType())) {
             // Assignable
         } else if (!lv.getType().isGeneric() || (ObjectType.TYPE_OBJECT != valueLocalVariable.getType())) {
             // Not assignable -> Create a new local variable
@@ -455,7 +458,7 @@ public class LocalVariableMaker {
             lv = createLocalVariableVisitor.getLocalVariable();
         }
 
-        lv.variableOnRight(valueLocalVariable);
+        lv.variableOnRight(typeBounds, valueLocalVariable);
         lv.setToOffset(offset);
         store(lv);
 

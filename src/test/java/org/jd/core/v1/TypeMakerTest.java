@@ -19,10 +19,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.PrimitiveIterator;
+import java.util.*;
 
 public class TypeMakerTest extends TestCase {
     protected TypeMaker typeMaker = new TypeMaker(new ClassPathLoader());
@@ -137,7 +134,7 @@ public class TypeMakerTest extends TestCase {
 
         assertNotNull(parent);
         assertNotNull(child);
-        assertTrue(typeMaker.isAssignable(parent, child));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), parent, child));
     }
 
     @Test
@@ -147,7 +144,7 @@ public class TypeMakerTest extends TestCase {
 
         assertNotNull(parent);
         assertNotNull(child);
-        assertFalse(typeMaker.isAssignable(parent, child));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), parent, child));
     }
 
     @Test
@@ -159,7 +156,7 @@ public class TypeMakerTest extends TestCase {
 
         assertNotNull(parent);
         assertNotNull(child);
-        assertTrue(typeMaker.isAssignable(parent, child));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), parent, child));
     }
 
     @Test
@@ -171,7 +168,7 @@ public class TypeMakerTest extends TestCase {
 
         assertNotNull(parent);
         assertNotNull(child);
-        assertTrue(typeMaker.isAssignable(parent, child));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), parent, child));
     }
 
     @Test
@@ -183,7 +180,7 @@ public class TypeMakerTest extends TestCase {
 
         assertNotNull(parent);
         assertNotNull(child);
-        assertTrue(typeMaker.isAssignable(parent, child));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), parent, child));
     }
 
     @Test
@@ -195,7 +192,7 @@ public class TypeMakerTest extends TestCase {
 
         assertNotNull(parent);
         assertNotNull(child);
-        assertFalse(typeMaker.isAssignable(parent, child));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), parent, child));
     }
     @Test
     public void testListAssignment() throws Exception {
@@ -206,10 +203,10 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otList;
 
         // Valid:   list1 = list2;
-        assertTrue(typeMaker.isAssignable(ot1, ot2));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
 
         // Valid:   list2 = list1;
-        assertTrue(typeMaker.isAssignable(ot2, ot1));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), ot2, ot1));
     }
 
     @Test
@@ -221,10 +218,10 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otArrayList;
 
         // Valid:   list1 = list2;
-        assertTrue(typeMaker.isAssignable(ot1, ot2));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
 
         // Invalid: list2 = list1;
-        assertFalse(typeMaker.isAssignable(ot2, ot1));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), ot2, ot1));
     }
 
     @Test
@@ -236,10 +233,10 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otArrayList.createType(otNumber);
 
         // Valid:   list1 = list2;
-        assertTrue(typeMaker.isAssignable(ot1, ot2));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
 
         // Invalid: list2 = list1;
-        assertFalse(typeMaker.isAssignable(ot2, ot1));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), ot2, ot1));
     }
 
     @Test
@@ -251,10 +248,10 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otList.createType(otInteger);
 
         // Invalid:   list1 = list2;
-        assertFalse(typeMaker.isAssignable(ot1, ot2));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
 
         // Invalid: list2 = list1;
-        assertFalse(typeMaker.isAssignable(ot2, ot1));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), ot2, ot1));
     }
 
     @Test
@@ -266,10 +263,10 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otList.createType(new WildcardExtendsTypeArgument(otNumber));
 
         // Invalid:   list1 = list2;
-        assertFalse(typeMaker.isAssignable(ot1, ot2));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
 
         // Valid: list2 = list1;
-        assertTrue(typeMaker.isAssignable(ot2, ot1));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), ot2, ot1));
     }
 
     @Test
@@ -281,10 +278,10 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otList.createType(new WildcardSuperTypeArgument(otNumber));
 
         // Invalid:   list1 = list2;
-        assertFalse(typeMaker.isAssignable(ot1, ot2));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
 
         // Valid: list2 = list1;
-        assertTrue(typeMaker.isAssignable(ot2, ot1));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), ot2, ot1));
     }
 
     @Test
@@ -296,10 +293,10 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otArrayList.createType(otInteger);
 
         // Invalid:   list1 = list2;
-        assertFalse(typeMaker.isAssignable(ot1, ot2));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
 
         // Invalid: list2 = list1;
-        assertFalse(typeMaker.isAssignable(ot2, ot1));
+        assertFalse(typeMaker.isAssignable(Collections.emptyMap(), ot2, ot1));
     }
 
     @Test
@@ -315,7 +312,7 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otPrimitiveIterator.createType(tas);
 
         // Valid:   iterator1 = iterator2;
-        assertTrue(typeMaker.isAssignable(ot1, ot2));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
     }
 
     @Test
@@ -331,6 +328,6 @@ public class TypeMakerTest extends TestCase {
         ObjectType ot2 = otAbstractUntypedIteratorDecorator.createType(tas);
 
         // Valid:   iterator1 = iterator2;
-        assertTrue(typeMaker.isAssignable(ot1, ot2));
+        assertTrue(typeMaker.isAssignable(Collections.emptyMap(), ot1, ot2));
     }
 }

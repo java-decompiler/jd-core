@@ -41,7 +41,17 @@ import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
  * Output: {@link org.jd.core.v1.model.javasyntax.CompilationUnit}<br>
  */
 public class ConvertClassFileProcessor implements Processor {
-    protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
+    protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor() {
+        @Override
+        public void visit(TypeParameter type) {
+            bindings.put(type.getIdentifier(), new GenericType(type.getIdentifier()));
+        }
+        @Override
+        public void visit(TypeParameterWithTypeBounds type) {
+            bindings.put(type.getIdentifier(), new GenericType(type.getIdentifier()));
+            typeBounds.put(type.getIdentifier(), type.getTypeBounds());
+        }
+    };
 
     @Override
     public void process(Message message) throws Exception {
@@ -116,31 +126,20 @@ public class ConvertClassFileProcessor implements Processor {
     }
 
     protected ClassFileBodyDeclaration convertBodyDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, BaseTypeParameter typeParameters, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
-        Map<String, TypeArgument> bindings = Collections.emptyMap();
-        Map<String, BaseType> typeBounds = Collections.emptyMap();
+        Map<String, TypeArgument> bindings;
+        Map<String, BaseType> typeBounds;
 
-        if (typeParameters == null) {
-            if (((classFile.getAccessFlags() & ACC_STATIC) == 0) && (outerClassFileBodyDeclaration != null)) {
-                bindings = outerClassFileBodyDeclaration.getBindings();
-                typeBounds = outerClassFileBodyDeclaration.getTypeBounds();
-            }
+        if (((classFile.getAccessFlags() & ACC_STATIC) == 0) && (outerClassFileBodyDeclaration != null)) {
+            bindings = outerClassFileBodyDeclaration.getBindings();
+            typeBounds = outerClassFileBodyDeclaration.getTypeBounds();
         } else {
-            bindings = new HashMap<>();
-            typeBounds = new HashMap<>();
+            bindings = Collections.emptyMap();
+            typeBounds = Collections.emptyMap();
+        }
 
-            populateBindingsWithTypeParameterVisitor.init(bindings, typeBounds);
+        if (typeParameters != null) {
+            populateBindingsWithTypeParameterVisitor.init(bindings=new HashMap<>(bindings), typeBounds=new HashMap<>(typeBounds));
             typeParameters.accept(populateBindingsWithTypeParameterVisitor);
-
-            for (Map.Entry<String, TypeArgument> entry : bindings.entrySet()) {
-                if (entry.getValue() == null) {
-                    entry.setValue(new GenericType(entry.getKey()));
-                }
-            }
-
-            if (((classFile.getAccessFlags() & ACC_STATIC) == 0) && (outerClassFileBodyDeclaration != null)) {
-                bindings.putAll(outerClassFileBodyDeclaration.getBindings());
-                typeBounds.putAll(outerClassFileBodyDeclaration.getTypeBounds());
-            }
         }
 
         ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile.getInternalTypeName(), bindings, typeBounds, outerClassFileBodyDeclaration);
@@ -191,6 +190,23 @@ public class ConvertClassFileProcessor implements Processor {
                     defaultAnnotationValue = converter.convert(annotationDefault.getDefaultValue());
                 }
 
+                TypeMaker.MethodTypes methodTypes = parser.parseMethodSignature(classFile, method);
+                Map<String, TypeArgument> bindings;
+                Map<String, BaseType> typeBounds;
+
+                if ((method.getAccessFlags() & ACC_STATIC) == 0) {
+                    bindings = bodyDeclaration.getBindings();
+                    typeBounds = bodyDeclaration.getTypeBounds();
+                } else {
+                    bindings = Collections.emptyMap();
+                    typeBounds = Collections.emptyMap();
+                }
+
+                if (methodTypes.typeParameters != null) {
+                    populateBindingsWithTypeParameterVisitor.init(bindings=new HashMap<>(bindings), typeBounds=new HashMap<>(typeBounds));
+                    methodTypes.typeParameters.accept(populateBindingsWithTypeParameterVisitor);
+               }
+
                 AttributeCode code = method.getAttribute("Code");
                 int firstLineNumber = 0;
 
@@ -202,25 +218,23 @@ public class ConvertClassFileProcessor implements Processor {
                 }
 
                 if ("<init>".equals(name)) {
-                    TypeMaker.MethodTypes methodTypes = parser.parseMethodSignature(classFile, method);
                     list.add(new ClassFileConstructorDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, methodTypes.typeParameters,
-                            methodTypes.parameterTypes, methodTypes.exceptions, firstLineNumber));
+                            methodTypes.parameterTypes, methodTypes.exceptions, bindings, typeBounds, firstLineNumber));
                 } else if ("<clinit>".equals(name)) {
-                    list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, firstLineNumber));
+                    list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, bindings, typeBounds, firstLineNumber));
                 } else {
-                    ClassFileMethodDeclaration methodDeclaration;
-                    TypeMaker.MethodTypes methodTypes = parser.parseMethodSignature(classFile, method);
-                    list.add(methodDeclaration = new ClassFileMethodDeclaration(
+                    ClassFileMethodDeclaration methodDeclaration = new ClassFileMethodDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
                             methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptions, defaultAnnotationValue,
-                            firstLineNumber));
+                            bindings, typeBounds, firstLineNumber);
                     if ((classFile.getAccessFlags() & Constants.ACC_INTERFACE) != 0) {
                         if (methodDeclaration.getFlags() == Constants.ACC_PUBLIC) {
                             // For interfaces, add 'default' access flag on public methods
                             methodDeclaration.setFlags(Declaration.FLAG_PUBLIC|Declaration.FLAG_DEFAULT);
                         }
                     }
+                    list.add(methodDeclaration);
                 }
             }
 

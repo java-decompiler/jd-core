@@ -7,9 +7,12 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
+
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
@@ -119,7 +122,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
     }
 
     @Override
-    public boolean isAssignableFrom(Type type) {
+    public boolean isAssignableFrom(Map<String, BaseType> typeBounds, Type type) {
         if ((type.getDimension() == 0) && type.isPrimitive()) {
             return (flags & ((PrimitiveType)type).getRightFlags()) != 0;
         }
@@ -128,7 +131,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
     }
 
     @Override
-    public void typeOnRight(Type type) {
+    public void typeOnRight(Map<String, BaseType> typeBounds, Type type) {
         if (type.isPrimitive()) {
             assert (type.getDimension() == 0);
 
@@ -140,14 +143,14 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
                 flags &= f;
 
                 if (old != flags) {
-                    fireChangeEvent();
+                    fireChangeEvent(typeBounds);
                 }
             }
         }
     }
 
     @Override
-    public void typeOnLeft(Type type) {
+    public void typeOnLeft(Map<String, BaseType> typeBounds, Type type) {
         if (type.isPrimitive()) {
             assert (type.getDimension() == 0);
 
@@ -159,14 +162,14 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
                 flags &= f;
 
                 if (old != flags) {
-                    fireChangeEvent();
+                    fireChangeEvent(typeBounds);
                 }
             }
         }
     }
 
     @Override
-    public boolean isAssignableFrom(AbstractLocalVariable variable) {
+    public boolean isAssignableFrom(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) {
         if (variable.getClass() == PrimitiveLocalVariable.class) {
             int variableFlags = ((PrimitiveLocalVariable)variable).flags;
             PrimitiveType type = PrimitiveTypeUtil.getPrimitiveTypeFromFlags(variableFlags);
@@ -182,7 +185,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
     }
 
     @Override
-    public void variableOnRight(AbstractLocalVariable variable) {
+    public void variableOnRight(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) {
         assert variable.getDimension() == 0;
 
         addVariableOnRight(variable);
@@ -199,12 +202,12 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         assert flags != 0 : "PrimitiveLocalVariable.variableOnRight(var) : flags = 0 after type reduction";
 
         if (old != flags) {
-            fireChangeEvent();
+            fireChangeEvent(typeBounds);
         }
     }
 
     @Override
-    public void variableOnLeft(AbstractLocalVariable variable) {
+    public void variableOnLeft(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) {
         assert variable.getDimension() == 0;
 
         addVariableOnLeft(variable);
@@ -221,7 +224,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         assert flags != 0 : "PrimitiveLocalVariable.variableOnLeft(var) : flags = 0 after type reduction";
 
         if (old != flags) {
-            fireChangeEvent();
+            fireChangeEvent(typeBounds);
         }
     }
 }

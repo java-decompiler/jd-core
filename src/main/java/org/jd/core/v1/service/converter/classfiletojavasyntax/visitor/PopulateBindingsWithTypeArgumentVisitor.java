@@ -76,8 +76,8 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
                             ObjectType ot1 = (ObjectType)t1;
                             ObjectType ot2 = (ObjectType)t2.createType(t2.getDimension() - type.getDimension());
 
-                            if (!typeMaker.isAssignable(ot1, ot2)) {
-                                if (typeMaker.isAssignable(ot2, ot1)) {
+                            if (!typeMaker.isAssignable(typeBounds, ot1, ot2)) {
+                                if (typeMaker.isAssignable(typeBounds, ot2, ot1)) {
                                     bindings.put(typeName, checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(type));
                                 } else {
                                     bindings.put(typeName, WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);

@@ -14,9 +14,15 @@ import org.jd.core.v1.model.javasyntax.reference.InnerObjectReference;
 import org.jd.core.v1.model.javasyntax.reference.ObjectReference;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
+
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
@@ -24,11 +30,25 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
 
     protected TypeMaker typeMaker;
+    protected Map<String, BaseType> typeBounds;
     protected Type returnedType;
     protected Type type;
 
     public AddCastExpressionVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
+    }
+
+    @Override
+    public void visit(BodyDeclaration declaration) {
+        BaseMemberDeclaration memberDeclarations = declaration.getMemberDeclarations();
+
+        if (memberDeclarations != null) {
+            Map<String, BaseType> tb = typeBounds;
+
+            typeBounds = ((ClassFileBodyDeclaration)declaration).getTypeBounds();
+            memberDeclarations.accept(this);
+            typeBounds = tb;
+        }
     }
 
     @Override
@@ -59,9 +79,31 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
+
+    @Override
+    public void visit(StaticInitializerDeclaration declaration) {
+        BaseStatement statements = declaration.getStatements();
+
+        if (statements != null) {
+            Map<String, BaseType> tb = typeBounds;
+
+            typeBounds = ((ClassFileStaticInitializerDeclaration)declaration).getTypeBounds();
+            statements.accept(this);
+            typeBounds = tb;
+        }
+    }
+
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        safeAccept(declaration.getStatements());
+        BaseStatement statements = declaration.getStatements();
+
+        if (statements != null) {
+            Map<String, BaseType> tb = typeBounds;
+
+            typeBounds = ((ClassFileConstructorDeclaration)declaration).getTypeBounds();
+            statements.accept(this);
+            typeBounds = tb;
+        }
     }
 
     @Override
@@ -69,10 +111,13 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseStatement statements = declaration.getStatements();
 
         if (statements != null) {
+            Map<String, BaseType> tb = typeBounds;
             Type t = returnedType;
 
+            typeBounds = ((ClassFileMethodDeclaration)declaration).getTypeBounds();
             returnedType = declaration.getReturnedType();
             statements.accept(this);
+            typeBounds = tb;
             returnedType = t;
         }
     }
@@ -280,12 +325,12 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                         ObjectType objectType = (ObjectType) type;
                         ObjectType expressionObjectType = (ObjectType) expressionType;
 
-                        if (!typeMaker.isAssignable(objectType, expressionObjectType)) {
+                        if (!typeMaker.isAssignable(typeBounds, objectType, expressionObjectType)) {
                             BaseTypeArgument ta1 = objectType.getTypeArguments();
                             BaseTypeArgument ta2 = expressionObjectType.getTypeArguments();
                             Type t = type;
 
-                            if ((ta1 != null) && (ta2 != null) && !ta1.isTypeArgumentAssignableFrom(ta2)) {
+                            if ((ta1 != null) && (ta2 != null) && !ta1.isTypeArgumentAssignableFrom(typeBounds, ta2)) {
                                 // Incompatible typeArgument arguments => Uses raw typeArgument
                                 t = objectType.createType(null);
                             }
@@ -306,7 +351,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             CastExpression ce = (CastExpression)expression;
             Type ceExpressionType = ce.getExpression().getType();
 
-            if (type.isObject() && ceExpressionType.isObject() && typeMaker.isAssignable((ObjectType)type, (ObjectType)ceExpressionType)) {
+            if (type.isObject() && ceExpressionType.isObject() && typeMaker.isAssignable(typeBounds, (ObjectType)type, (ObjectType)ceExpressionType)) {
                 // Remove cast expression
                 expression = ce.getExpression();
             }

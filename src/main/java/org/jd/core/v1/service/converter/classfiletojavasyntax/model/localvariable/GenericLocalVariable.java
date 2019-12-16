@@ -7,8 +7,11 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.Type;
+
+import java.util.Map;
 
 public class GenericLocalVariable extends AbstractLocalVariable {
     protected GenericType type;
@@ -62,13 +65,13 @@ public class GenericLocalVariable extends AbstractLocalVariable {
         return sb.append("}").toString();
     }
 
-    @Override public boolean isAssignableFrom(Type otherType) {
+    @Override public boolean isAssignableFrom(Map<String, BaseType> typeBounds, Type otherType) {
         return type.equals(otherType);
     }
-    @Override public void typeOnRight(Type type) {}
-    @Override public void typeOnLeft(Type type) {}
+    @Override public void typeOnRight(Map<String, BaseType> typeBounds, Type type) {}
+    @Override public void typeOnLeft(Map<String, BaseType> typeBounds, Type type) {}
 
-    @Override public boolean isAssignableFrom(AbstractLocalVariable variable) { return isAssignableFrom(variable.getType()); }
-    @Override public void variableOnRight(AbstractLocalVariable variable) {}
-    @Override public void variableOnLeft(AbstractLocalVariable variable) {}
+    @Override public boolean isAssignableFrom(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) { return isAssignableFrom(typeBounds, variable.getType()); }
+    @Override public void variableOnRight(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) {}
+    @Override public void variableOnLeft(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) {}
 }

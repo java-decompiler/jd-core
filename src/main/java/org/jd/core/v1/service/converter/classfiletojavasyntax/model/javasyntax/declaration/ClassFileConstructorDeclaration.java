@@ -16,23 +16,31 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+
+import java.util.Map;
 
 public class ClassFileConstructorDeclaration extends ConstructorDeclaration implements ClassFileConstructorOrMethodDeclaration {
     protected ClassFileBodyDeclaration bodyDeclaration;
     protected ClassFile classFile;
     protected Method method;
     protected BaseType parameterTypes;
+    protected Map<String, TypeArgument> bindings;
+    protected Map<String, BaseType> typeBounds;
     protected int firstLineNumber;
 
     public ClassFileConstructorDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, BaseAnnotationReference annotationReferences,
-            BaseTypeParameter typeParameters, BaseType parameterTypes, BaseType exceptions, int firstLineNumber) {
+            BaseTypeParameter typeParameters, BaseType parameterTypes, BaseType exceptions, Map<String, TypeArgument> bindings,
+            Map<String, BaseType> typeBounds, int firstLineNumber) {
         super(annotationReferences, method.getAccessFlags(), typeParameters, null, exceptions, method.getDescriptor(), null);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
-        this.firstLineNumber = firstLineNumber;
-        this.parameterTypes = parameterTypes;
         this.method = method;
+        this.parameterTypes = parameterTypes;
+        this.bindings = bindings;
+        this.typeBounds = typeBounds;
+        this.firstLineNumber = firstLineNumber;
     }
 
     @Override
@@ -73,6 +81,16 @@ public class ClassFileConstructorDeclaration extends ConstructorDeclaration impl
     @Override
     public Type getReturnedType() {
         return null;
+    }
+
+    @Override
+    public Map<String, TypeArgument> getBindings() {
+        return bindings;
+    }
+
+    @Override
+    public Map<String, BaseType> getTypeBounds() {
+        return typeBounds;
     }
 
     @Override

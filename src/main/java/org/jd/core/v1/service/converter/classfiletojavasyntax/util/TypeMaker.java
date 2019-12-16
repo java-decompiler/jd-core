@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
@@ -875,7 +876,7 @@ public class TypeMaker {
         }
     }
 
-    public boolean isAssignable(ObjectType left, ObjectType right) {
+    public boolean isAssignable(Map<String, BaseType> typeBounds, ObjectType left, ObjectType right) {
         if ((left == TYPE_UNDEFINED_OBJECT) || left.equals(TYPE_OBJECT) || left.equals(right)) {
             return true;
         } else if ((left.getDimension() > 0) || (right.getDimension() > 0)) {
@@ -889,7 +890,7 @@ public class TypeMaker {
                 if ((left.getTypeArguments() == null) || (ot.getTypeArguments() == null)) {
                     return true;
                 } else {
-                    return left.getTypeArguments().isTypeArgumentAssignableFrom(ot.getTypeArguments());
+                    return left.getTypeArguments().isTypeArgumentAssignableFrom(typeBounds, ot.getTypeArguments());
                 }
             }
 

@@ -7,10 +7,12 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashSet;
+import java.util.Map;
 
 public abstract class AbstractLocalVariable {
     protected Frame frame;
@@ -79,23 +81,23 @@ public abstract class AbstractLocalVariable {
      * Determines if the local variable represented by this object is either the same as, or is a super type variable
      * of, the local variable represented by the specified parameter.
      */
-    public abstract boolean isAssignableFrom(Type type);
-    public abstract void typeOnRight(Type type);
-    public abstract void typeOnLeft(Type type);
+    public abstract boolean isAssignableFrom(Map<String, BaseType> typeBounds, Type type);
+    public abstract void typeOnRight(Map<String, BaseType> typeBounds, Type type);
+    public abstract void typeOnLeft(Map<String, BaseType> typeBounds, Type type);
 
-    public abstract boolean isAssignableFrom(AbstractLocalVariable variable);
-    public abstract void variableOnRight(AbstractLocalVariable variable);
-    public abstract void variableOnLeft(AbstractLocalVariable variable);
+    public abstract boolean isAssignableFrom(Map<String, BaseType> typeBounds, AbstractLocalVariable variable);
+    public abstract void variableOnRight(Map<String, BaseType> typeBounds, AbstractLocalVariable variable);
+    public abstract void variableOnLeft(Map<String, BaseType> typeBounds, AbstractLocalVariable variable);
 
-    protected void fireChangeEvent() {
+    protected void fireChangeEvent(Map<String, BaseType> typeBounds) {
         if (variablesOnLeft != null) {
             for (AbstractLocalVariable v : variablesOnLeft) {
-                v.variableOnRight(this);
+                v.variableOnRight(typeBounds, this);
             }
         }
         if (variablesOnRight != null) {
             for (AbstractLocalVariable v : variablesOnRight) {
-                v.variableOnLeft(this);
+                v.variableOnLeft(typeBounds, this);
             }
         }
     }

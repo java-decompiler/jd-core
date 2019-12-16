@@ -15,18 +15,27 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+
+import java.util.Map;
 
 public class ClassFileStaticInitializerDeclaration extends StaticInitializerDeclaration implements ClassFileConstructorOrMethodDeclaration {
     protected ClassFileBodyDeclaration bodyDeclaration;
     protected ClassFile classFile;
     protected Method method;
+    protected Map<String, TypeArgument> bindings;
+    protected Map<String, BaseType> typeBounds;
     protected int firstLineNumber = 0;
 
-    public ClassFileStaticInitializerDeclaration(ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, int firstLineNumber) {
+    public ClassFileStaticInitializerDeclaration(
+            ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, Map<String, TypeArgument> bindings,
+            Map<String, BaseType> typeBounds, int firstLineNumber) {
         super(method.getDescriptor(), null);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;
+        this.bindings = bindings;
+        this.typeBounds = typeBounds;
         this.firstLineNumber = firstLineNumber;
     }
 
@@ -70,6 +79,16 @@ public class ClassFileStaticInitializerDeclaration extends StaticInitializerDecl
     @Override
     public ClassFileBodyDeclaration getBodyDeclaration() {
         return bodyDeclaration;
+    }
+
+    @Override
+    public Map<String, TypeArgument> getBindings() {
+        return bindings;
+    }
+
+    @Override
+    public Map<String, BaseType> getTypeBounds() {
+        return typeBounds;
     }
 
     @Override

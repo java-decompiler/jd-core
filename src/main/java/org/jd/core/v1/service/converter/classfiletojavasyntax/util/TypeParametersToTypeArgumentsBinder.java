@@ -35,40 +35,13 @@ public class TypeParametersToTypeArgumentsBinder {
     protected Map<String, TypeArgument> contextualBindings;
     protected Map<String, BaseType> contextualTypeBounds;
 
-    public TypeParametersToTypeArgumentsBinder(
-            TypeMaker typeMaker, String internalTypeName, ClassFileBodyDeclaration bodyDeclaration, ClassFileConstructorOrMethodDeclaration comd) {
+    public TypeParametersToTypeArgumentsBinder(TypeMaker typeMaker, String internalTypeName, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
         this.internalTypeName = internalTypeName;
         this.staticMethod = ((comd.getFlags() & FLAG_STATIC) != 0);
         this.populateBindingsWithTypeArgumentVisitor = new PopulateBindingsWithTypeArgumentVisitor(typeMaker);
-
-        if (this.staticMethod) {
-            this.contextualBindings = Collections.emptyMap();
-            this.contextualTypeBounds = Collections.emptyMap();
-        } else {
-            this.contextualBindings = bodyDeclaration.getBindings();
-            this.contextualTypeBounds = bodyDeclaration.getTypeBounds();
-        }
-
-        if (comd.getTypeParameters() != null) {
-            HashMap<String, TypeArgument> bindings = new HashMap<>();
-            Map<String, BaseType> typeBounds = new HashMap<>();
-
-            bindings.putAll(this.contextualBindings);
-            typeBounds.putAll(this.contextualTypeBounds);
-
-            populateBindingsWithTypeParameterVisitor.init(bindings, typeBounds);
-            comd.getTypeParameters().accept(populateBindingsWithTypeParameterVisitor);
-
-            for (HashMap.Entry<String, TypeArgument> entry : bindings.entrySet()) {
-                if (entry.getValue() == null) {
-                    entry.setValue(new GenericType(entry.getKey()));
-                }
-            }
-
-            this.contextualBindings = bindings;
-            this.contextualTypeBounds = typeBounds;
-        }
+        this.contextualBindings = comd.getBindings();
+        this.contextualTypeBounds = comd.getTypeBounds();
     }
 
     public ClassFileConstructorInvocationExpression newConstructorInvocationExpression(
@@ -537,7 +510,7 @@ public class TypeParametersToTypeArgumentsBinder {
         public void visit(LocalVariableReferenceExpression expression) {
             if (!type.isPrimitive()) {
                 AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable();
-                localVariable.typeOnLeft(checkTypeArguments(type, localVariable));
+                localVariable.typeOnLeft(contextualTypeBounds, checkTypeArguments(type, localVariable));
             }
         }
 
@@ -567,7 +540,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
                             if (expressionExpressionObjectType.getTypeArguments() == null) {
                                 expression.setType(objectType);
-                            } else if (objectType.getTypeArguments().isTypeArgumentAssignableFrom(expressionExpressionObjectType.getTypeArguments())) {
+                            } else if (objectType.getTypeArguments().isTypeArgumentAssignableFrom(contextualTypeBounds, expressionExpressionObjectType.getTypeArguments())) {
                                 expression.setType(objectType);
                             }
                         } else if (expressionExpressionType.isGeneric()) {

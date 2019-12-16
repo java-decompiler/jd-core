@@ -83,7 +83,7 @@ public class Frame {
         this.exceptionLocalVariable = exceptionLocalVariable;
     }
 
-    public void mergeLocalVariable(LocalVariableMaker localVariableMaker, AbstractLocalVariable lv) {
+    public void mergeLocalVariable(Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, AbstractLocalVariable lv) {
         int index = lv.getIndex();
         AbstractLocalVariable alvToMerge;
 
@@ -94,7 +94,7 @@ public class Frame {
         }
 
         if (alvToMerge != null) {
-            if (!lv.isAssignableFrom(alvToMerge) && !alvToMerge.isAssignableFrom(lv)) {
+            if (!lv.isAssignableFrom(typeBounds, alvToMerge) && !alvToMerge.isAssignableFrom(typeBounds, lv)) {
                 alvToMerge = null;
             } else if ((lv.getName() != null) && (alvToMerge.getName() != null) && !lv.getName().equals(alvToMerge.getName())) {
                 alvToMerge = null;
@@ -104,7 +104,7 @@ public class Frame {
         if (alvToMerge == null) {
             if (children != null) {
                 for (Frame frame : children) {
-                    frame.mergeLocalVariable(localVariableMaker, lv);
+                    frame.mergeLocalVariable(typeBounds, localVariableMaker, lv);
                 }
             }
         } else if (lv != alvToMerge) {
@@ -115,24 +115,24 @@ public class Frame {
             lv.getReferences().addAll(alvToMerge.getReferences());
             lv.setFromOffset(alvToMerge.getFromOffset());
 
-            if (!lv.isAssignableFrom(alvToMerge) && !localVariableMaker.isCompatible(lv, alvToMerge.getType())) {
+            if (!lv.isAssignableFrom(typeBounds, alvToMerge) && !localVariableMaker.isCompatible(lv, alvToMerge.getType())) {
                 Type type = lv.getType();
                 Type alvToMergeType = alvToMerge.getType();
 
                 assert (type.isPrimitive() == alvToMergeType.isPrimitive()) && (type.isObject() == alvToMergeType.isObject()) && (type.isGeneric() == alvToMergeType.isGeneric()) : "Frame.mergeLocalVariable(lv) : merge local variable failed";
 
                 if (type.isPrimitive()) {
-                    if (alvToMerge.isAssignableFrom(lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
+                    if (alvToMerge.isAssignableFrom(typeBounds, lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
                         ((PrimitiveLocalVariable)lv).setType((PrimitiveType)alvToMergeType);
                     } else {
                         ((PrimitiveLocalVariable)lv).setType(PrimitiveType.TYPE_INT);
                     }
                 } else if (type.isObject()) {
-                    if (alvToMerge.isAssignableFrom(lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
-                        ((ObjectLocalVariable)lv).setType(alvToMergeType);
+                    if (alvToMerge.isAssignableFrom(typeBounds, lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
+                        ((ObjectLocalVariable)lv).setType(typeBounds, alvToMergeType);
                     } else {
                         int dimension = Math.max(lv.getDimension(), alvToMerge.getDimension());
-                        ((ObjectLocalVariable)lv).setType(ObjectType.TYPE_OBJECT.createType(dimension));
+                        ((ObjectLocalVariable)lv).setType(typeBounds, ObjectType.TYPE_OBJECT.createType(dimension));
                     }
                 }
             }

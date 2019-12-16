@@ -15,6 +15,7 @@ import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
@@ -41,12 +42,14 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
+
 public class StatementMaker {
     protected static final SwitchCaseComparator SWITCH_CASE_COMPARATOR = new SwitchCaseComparator();
     protected static final NullExpression FINALLY_EXCEPTION_EXPRESSION = new NullExpression(new ObjectType("java/lang/Exception", "java.lang.Exception", "Exception"));
     protected static final MergeTryWithResourcesStatementVisitor MERGE_TRY_WITH_RESOURCES_STATEMENT_VISITOR = new MergeTryWithResourcesStatementVisitor();
 
     protected TypeMaker typeMaker;
+    protected Map<String, BaseType> typeBounds;
     protected LocalVariableMaker localVariableMaker;
     protected ByteCodeParser byteCodeParser;
     protected int majorVersion;
@@ -65,6 +68,7 @@ public class StatementMaker {
             TypeMaker typeMaker, LocalVariableMaker localVariableMaker,
             ClassFile classFile, ClassFileBodyDeclaration bodyDeclaration, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
+        this.typeBounds = comd.getTypeBounds();
         this.localVariableMaker = localVariableMaker;
         this.majorVersion = classFile.getMajorVersion();
         this.internalTypeName = classFile.getInternalTypeName();
@@ -622,7 +626,8 @@ public class StatementMaker {
                 // 'while' or 'for' loop
                 makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
                 statements.add(LoopStatementMaker.makeLoop(
-                    localVariableMaker, basicBlock, statements, stack.pop(), makeSubStatements(watchdog, ifBB.getSub1(), statements, jumps, updateStatements), jumps));
+                    typeBounds, localVariableMaker, basicBlock, statements, stack.pop(),
+                    makeSubStatements(watchdog, ifBB.getSub1(), statements, jumps, updateStatements), jumps));
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
                 return;
             }
@@ -641,7 +646,9 @@ public class StatementMaker {
                     // 'while' or 'for' loop
                     ifBB.getCondition().inverseCondition();
                     makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
-                    statements.add(LoopStatementMaker.makeLoop(localVariableMaker, basicBlock, statements, stack.pop(), makeSubStatements(watchdog, ifBB.getNext(), statements, jumps, updateStatements), jumps));
+                    statements.add(LoopStatementMaker.makeLoop(
+                        typeBounds, localVariableMaker, basicBlock, statements, stack.pop(),
+                        makeSubStatements(watchdog, ifBB.getNext(), statements, jumps, updateStatements), jumps));
                 }
 
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
@@ -895,9 +902,9 @@ public class StatementMaker {
             ObjectType ot1 = (ObjectType)expressionTrueType;
             ObjectType ot2 = (ObjectType)expressionFalseType;
 
-            if (typeMaker.isAssignable(ot1, ot2)) {
+            if (typeMaker.isAssignable(typeBounds, ot1, ot2)) {
                 type = getTernaryOperatorExpressionType(ot1, ot2);
-            } else if (typeMaker.isAssignable(ot2, ot1)) {
+            } else if (typeMaker.isAssignable(typeBounds, ot2, ot1)) {
                 type = getTernaryOperatorExpressionType(ot2, ot1);
             } else {
                 type = TYPE_OBJECT;
@@ -914,9 +921,9 @@ public class StatementMaker {
             return ot1;
         } else if (ot2.getTypeArguments() == null) {
             return ot1.createType(null);
-        } else if (ot1.isTypeArgumentAssignableFrom(ot2)) {
+        } else if (ot1.isTypeArgumentAssignableFrom(typeBounds, ot2)) {
             return ot1;
-        } else if (ot2.isTypeArgumentAssignableFrom(ot1)) {
+        } else if (ot2.isTypeArgumentAssignableFrom(typeBounds, ot1)) {
             return ot1.createType(ot2.getTypeArguments());
         } else {
             return ot1.createType(null);

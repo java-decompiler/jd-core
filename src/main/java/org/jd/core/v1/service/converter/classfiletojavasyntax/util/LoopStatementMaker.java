@@ -9,6 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
@@ -29,6 +30,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLoca
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.statement.ContinueStatement.CONTINUE;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_ITERABLE;
@@ -36,8 +38,10 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_ITERABLE;
 public class LoopStatementMaker {
     protected static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
 
-    public static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements statements, Expression condition, Statements subStatements, Statements jumps) {
-        Statement loop = makeLoop(localVariableMaker, loopBasicBlock, statements, condition, subStatements);
+    public static Statement makeLoop(
+            Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock,
+            Statements statements, Expression condition, Statements subStatements, Statements jumps) {
+        Statement loop = makeLoop(typeBounds, localVariableMaker, loopBasicBlock, statements, condition, subStatements);
         int continueOffset = loopBasicBlock.getSub1().getFromOffset();
         int breakOffset = loopBasicBlock.getNext().getFromOffset();
 
@@ -48,16 +52,18 @@ public class LoopStatementMaker {
         return makeLabels(loopBasicBlock.getIndex(), continueOffset, breakOffset, loop, jumps);
     }
 
-    protected static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements statements, Expression condition, Statements subStatements) {
+    protected static Statement makeLoop(
+            Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock,
+            Statements statements, Expression condition, Statements subStatements) {
         subStatements.accept(REMOVE_LAST_CONTINUE_STATEMENT_VISITOR);
 
-        Statement statement = makeForEachArray(localVariableMaker, statements, condition, subStatements);
+        Statement statement = makeForEachArray(typeBounds, localVariableMaker, statements, condition, subStatements);
 
         if (statement != null) {
             return statement;
         }
 
-        statement = makeForEachList(localVariableMaker, statements, condition, subStatements);
+        statement = makeForEachList(typeBounds, localVariableMaker, statements, condition, subStatements);
 
         if (statement != null) {
             return statement;
@@ -345,7 +351,9 @@ public class LoopStatementMaker {
         return new WhileStatement(condition, subStatements);
     }
 
-    protected static Statement makeForEachArray(LocalVariableMaker localVariableMaker, Statements statements, Expression condition, Statements subStatements) {
+    protected static Statement makeForEachArray(
+            Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, Statements statements,
+            Expression condition, Statements subStatements) {
         if (condition == null) {
             return null;
         }
@@ -510,11 +518,11 @@ public class LoopStatementMaker {
         Type type = arrayType.createType(arrayType.getDimension()-1);
 
         if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
-            ((ObjectLocalVariable)item).setType(type);
+            ((ObjectLocalVariable)item).setType(typeBounds, type);
         } else if (item.getType().isGeneric()) {
             ((GenericLocalVariable)item).setType((GenericType)type);
         } else {
-            item.typeOnRight(type);
+            item.typeOnRight(typeBounds, type);
         }
 
         localVariableMaker.removeLocalVariable(syntheticArray);
@@ -524,7 +532,9 @@ public class LoopStatementMaker {
         return new ClassFileForEachStatement(item, array, subStatements);
     }
 
-    protected static Statement makeForEachList(LocalVariableMaker localVariableMaker, Statements statements, Expression condition, Statements subStatements) {
+    protected static Statement makeForEachList(
+            Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, Statements statements,
+            Expression condition, Statements subStatements) {
         if (condition == null) {
             return null;
         }
@@ -660,11 +670,11 @@ public class LoopStatementMaker {
 
                 if (type != null) {
                     if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
-                        ((ObjectLocalVariable) item).setType(type);
+                        ((ObjectLocalVariable) item).setType(typeBounds, type);
                     } else if (item.getType().isGeneric()) {
                         ((GenericLocalVariable) item).setType((GenericType) type);
                     } else {
-                        item.typeOnRight(type);
+                        item.typeOnRight(typeBounds, type);
                     }
                 }
             }

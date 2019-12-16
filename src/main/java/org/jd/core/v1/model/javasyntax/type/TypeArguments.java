@@ -11,6 +11,7 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 public class TypeArguments extends DefaultList<TypeArgument> implements BaseTypeArgument {
     public TypeArguments() {}
@@ -29,7 +30,7 @@ public class TypeArguments extends DefaultList<TypeArgument> implements BaseType
     }
 
     @Override
-    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+    public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         if (typeArgument.getClass() != TypeArguments.class) {
             return false;
         }
@@ -44,7 +45,7 @@ public class TypeArguments extends DefaultList<TypeArgument> implements BaseType
         Iterator<TypeArgument> iterator2 = ata.iterator();
 
         while (iterator1.hasNext()) {
-            if (!iterator1.next().isTypeArgumentAssignableFrom(iterator2.next())) {
+            if (!iterator1.next().isTypeArgumentAssignableFrom(typeBounds, iterator2.next())) {
                 return false;
             }
         }

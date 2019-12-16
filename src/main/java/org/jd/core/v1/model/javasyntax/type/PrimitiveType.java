@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
+import java.util.Map;
+
 public class PrimitiveType implements Type {
     public static final int FLAG_BOOLEAN = 1;
     public static final int FLAG_CHAR    = 2;
@@ -159,7 +161,7 @@ public class PrimitiveType implements Type {
     }
 
     @Override
-    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+    public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         return equals(typeArgument);
     }
 

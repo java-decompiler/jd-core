@@ -7,9 +7,12 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
+import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
@@ -40,10 +43,10 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(Map<String, BaseType> typeBounds, Type type) {
         if (!this.type.equals(type)) {
             this.type = type;
-            fireChangeEvent();
+            fireChangeEvent(typeBounds);
         }
     }
 
@@ -78,7 +81,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
     }
 
     @Override
-    public boolean isAssignableFrom(Type type) {
+    public boolean isAssignableFrom(Map<String, BaseType> typeBounds, Type type) {
         if (this.type.isObject()) {
             if (this.type.equals(TYPE_OBJECT)) {
                 if ((type.getDimension() > 0) || !type.isPrimitive()) {
@@ -87,18 +90,19 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
             }
 
             if (type.isObject()) {
-                return typeMaker.isAssignable((ObjectType) this.type, (ObjectType) type);
+                return typeMaker.isAssignable(typeBounds, (ObjectType) this.type, (ObjectType) type);
             }
         }
 
         return false;
     }
 
-    public void typeOnRight(Type type) {
+    @Override
+    public void typeOnRight(Map<String, BaseType> typeBounds, Type type) {
         if (type != TYPE_UNDEFINED_OBJECT) {
             if (this.type == TYPE_UNDEFINED_OBJECT) {
                 this.type = type;
-                fireChangeEvent();
+                fireChangeEvent(typeBounds);
             } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
                 assert !this.type.isPrimitive() && !type.isPrimitive() : "ObjectLocalVariable.typeOnRight(type) : unexpected type";
 
@@ -112,32 +116,33 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                             if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
                                 // Keep type, update type arguments
                                 this.type = otherObjectType;
-                                fireChangeEvent();
+                                fireChangeEvent(typeBounds);
                             }
-                        } else if (typeMaker.isAssignable(thisObjectType, otherObjectType)) {
+                        } else if (typeMaker.isAssignable(typeBounds, thisObjectType, otherObjectType)) {
                             // Assignable types
                             if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
                                 // Keep type, update type arguments
                                 this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
-                                fireChangeEvent();
+                                fireChangeEvent(typeBounds);
                             }
                         }
                     }
                 } else if (this.type.isGeneric()) {
                     if (type.isGeneric()) {
                         this.type = type;
-                        fireChangeEvent();
+                        fireChangeEvent(typeBounds);
                     }
                 }
             }
         }
     }
 
-    public void typeOnLeft(Type type) {
+    @Override
+    public void typeOnLeft(Map<String, BaseType> typeBounds, Type type) {
         if (type != TYPE_UNDEFINED_OBJECT) {
             if (this.type == TYPE_UNDEFINED_OBJECT) {
                 this.type = type;
-                fireChangeEvent();
+                fireChangeEvent(typeBounds);
             } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
                 assert !this.type.isPrimitive() && !type.isPrimitive() : "unexpected type in ObjectLocalVariable.typeOnLeft(type)";
 
@@ -151,14 +156,14 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                             if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
                                 // Keep type, update type arguments
                                 this.type = otherObjectType;
-                                fireChangeEvent();
+                                fireChangeEvent(typeBounds);
                             }
-                        } else if (typeMaker.isAssignable(otherObjectType, thisObjectType)) {
+                        } else if (typeMaker.isAssignable(typeBounds, otherObjectType, thisObjectType)) {
                             // Assignable types
                             if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
                                 // Keep type, update type arguments
                                 this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
-                                fireChangeEvent();
+                                fireChangeEvent(typeBounds);
                             }
                         }
                     }
@@ -168,17 +173,19 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
     }
 
     @Override
-    public boolean isAssignableFrom(AbstractLocalVariable variable) {
-        return isAssignableFrom(variable.getType());
+    public boolean isAssignableFrom(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) {
+        return isAssignableFrom(typeBounds, variable.getType());
     }
 
-    public void variableOnRight(AbstractLocalVariable variable) {
+    @Override
+    public void variableOnRight(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) {
         addVariableOnRight(variable);
-        typeOnRight(variable.getType());
+        typeOnRight(typeBounds, variable.getType());
     }
 
-    public void variableOnLeft(AbstractLocalVariable variable) {
+    @Override
+    public void variableOnLeft(Map<String, BaseType> typeBounds, AbstractLocalVariable variable) {
         addVariableOnLeft(variable);
-        typeOnLeft(variable.getType());
+        typeOnLeft(typeBounds, variable.getType());
     }
 }

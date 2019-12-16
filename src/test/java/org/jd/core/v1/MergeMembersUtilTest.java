@@ -19,6 +19,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
@@ -235,16 +236,16 @@ public class MergeMembersUtilTest {
         ClassFile classFile = null;
         Method method = new Method(0, "method", "()V", null, null);
 
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "a", PrimitiveType.TYPE_VOID, null));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "b", PrimitiveType.TYPE_VOID, null));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "c", PrimitiveType.TYPE_VOID, null, 20));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "d", PrimitiveType.TYPE_VOID, null, 21));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "e", PrimitiveType.TYPE_VOID, null));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "f", PrimitiveType.TYPE_VOID, null));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "g", PrimitiveType.TYPE_VOID, null, 40));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "h", PrimitiveType.TYPE_VOID, null));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "i", PrimitiveType.TYPE_VOID, null));
-        methods.add(new ClassFileMethodDeclaration(null, classFile, method, "j", PrimitiveType.TYPE_VOID, null));
+        methods.add(newMethodDeclaration(classFile, method, "a"));
+        methods.add(newMethodDeclaration(classFile, method, "b"));
+        methods.add(newMethodDeclaration(classFile, method, "c", 20));
+        methods.add(newMethodDeclaration(classFile, method, "d", 21));
+        methods.add(newMethodDeclaration(classFile, method, "e"));
+        methods.add(newMethodDeclaration(classFile, method, "f"));
+        methods.add(newMethodDeclaration(classFile, method, "g", 40));
+        methods.add(newMethodDeclaration(classFile, method, "h"));
+        methods.add(newMethodDeclaration(classFile, method, "i"));
+        methods.add(newMethodDeclaration(classFile, method, "j"));
 
         return methods;
     }
@@ -261,5 +262,13 @@ public class MergeMembersUtilTest {
         innerTypes.add(new ClassFileClassDeclaration(null, 0, "A", "A", null, null, null, bodyDeclaration));
 
         return innerTypes;
+    }
+
+    protected static ClassFileMethodDeclaration newMethodDeclaration(ClassFile classFile, Method method, String name) {
+        return newMethodDeclaration(classFile, method, name, 0);
+    }
+
+    protected static ClassFileMethodDeclaration newMethodDeclaration(ClassFile classFile, Method method, String name, int firstLineNumber) {
+        return new ClassFileMethodDeclaration(null, classFile, method, name, PrimitiveType.TYPE_VOID, null, Collections.emptyMap(), Collections.emptyMap(), firstLineNumber);
     }
 }

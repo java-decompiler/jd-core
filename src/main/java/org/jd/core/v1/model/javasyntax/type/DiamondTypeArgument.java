@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
+import java.util.Map;
+
 public class DiamondTypeArgument implements TypeArgument {
     public static final DiamondTypeArgument DIAMOND = new DiamondTypeArgument();
 
@@ -18,7 +20,7 @@ public class DiamondTypeArgument implements TypeArgument {
     }
 
     @Override
-    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+    public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         return true;
     }
 }

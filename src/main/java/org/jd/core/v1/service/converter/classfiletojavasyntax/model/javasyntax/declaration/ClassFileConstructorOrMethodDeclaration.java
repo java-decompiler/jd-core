@@ -14,6 +14,9 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+
+import java.util.Map;
 
 public interface ClassFileConstructorOrMethodDeclaration extends ClassFileMemberDeclaration {
     int getFlags();
@@ -30,6 +33,10 @@ public interface ClassFileConstructorOrMethodDeclaration extends ClassFileMember
     Type getReturnedType();
 
     ClassFileBodyDeclaration getBodyDeclaration();
+
+    Map<String, TypeArgument> getBindings();
+
+    Map<String, BaseType> getTypeBounds();
 
     void setFormalParameters(BaseFormalParameter formalParameters);
 

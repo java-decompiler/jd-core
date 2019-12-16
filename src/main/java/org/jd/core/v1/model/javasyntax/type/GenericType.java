@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
+import java.util.Map;
+
 public class GenericType implements Type {
     protected String name;
     protected int  dimension;
@@ -76,7 +78,7 @@ public class GenericType implements Type {
     }
 
     @Override
-    public boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+    public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         Class typeArgumentClass = typeArgument.getClass();
 
         if (typeArgumentClass == GenericType.class) {

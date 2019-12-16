@@ -9,9 +9,11 @@ package org.jd.core.v1.model.javasyntax.type;
 
 import org.jd.core.v1.util.DefaultList;
 
+import java.util.Map;
+
 @SuppressWarnings("unchecked")
 public interface BaseTypeArgument extends TypeArgumentVisitable {
-    default boolean isTypeArgumentAssignableFrom(BaseTypeArgument typeArgument) {
+    default boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         return false;
     }
 

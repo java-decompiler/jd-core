@@ -53,6 +53,7 @@ public class ByteCodeParser {
     private TypeParametersToTypeArgumentsBinder typeParametersToTypeArgumentsBinder;
     private AttributeBootstrapMethods attributeBootstrapMethods;
     private ClassFileBodyDeclaration bodyDeclaration;
+    private Map<String, BaseType> typeBounds;
     private Type returnedType;
 
     public ByteCodeParser(
@@ -61,10 +62,11 @@ public class ByteCodeParser {
         this.typeMaker = typeMaker;
         this.localVariableMaker = localVariableMaker;
         this.internalTypeName = classFile.getInternalTypeName();
-        this.typeParametersToTypeArgumentsBinder = new TypeParametersToTypeArgumentsBinder(typeMaker, this.internalTypeName, bodyDeclaration, comd);
+        this.typeParametersToTypeArgumentsBinder = new TypeParametersToTypeArgumentsBinder(typeMaker, this.internalTypeName, comd);
         this.attributeBootstrapMethods = classFile.getAttribute("BootstrapMethods");
         this.bodyDeclaration = bodyDeclaration;
         this.returnedType = comd.getReturnedType();
+        this.typeBounds = comd.getTypeBounds();
     }
 
     @SuppressWarnings("unchecked")
@@ -736,7 +738,7 @@ public class ByteCodeParser {
                     } else {
                         expression1 = stack.pop();
                         if (expression1.getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                            ((ClassFileLocalVariableReferenceExpression)expression1).getLocalVariable().typeOnLeft(ot);
+                            ((ClassFileLocalVariableReferenceExpression)expression1).getLocalVariable().typeOnLeft(typeBounds, ot);
                         }
                         if (opcode == 185) { // INVOKEINTERFACE
                             offset += 2; // Skip 'count' and one byte
@@ -806,20 +808,16 @@ public class ByteCodeParser {
                 case 192: // CHECKCAST
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                     type1 = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
-                    expression1 = stack.pop();
+                    expression1 = stack.peek();
                     if (type1.isObject() && expression1.getType().isObject() && typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) expression1.getType())) {
                         // Ignore cast
-                        stack.push(expression1);
+                    } else if (expression1.getClass() == CastExpression.class) {
+                        // Skip double cast
+                        ((CastExpression) expression1).setType(type1);
                     } else {
-                        if (expression1.getClass() == CastExpression.class) {
-                            // Skip double cast
-                            ((CastExpression) expression1).setType(type1);
-                        } else {
-                            searchFirstLineNumberVisitor.init();
-                            expression1.accept(searchFirstLineNumberVisitor);
-                            expression1 = new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, expression1);
-                        }
-                        stack.push(expression1);
+                        searchFirstLineNumberVisitor.init();
+                        expression1.accept(searchFirstLineNumberVisitor);
+                        stack.push(new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, stack.pop()));
                     }
                     break;
                 case 193: // INSTANCEOF
@@ -973,7 +971,7 @@ public class ByteCodeParser {
         if (valueClass == NullExpression.class) {
             return localVariableMaker.getLocalVariableInNullAssignment(index, offset, valueType);
         } else if (valueClass == ClassFileLocalVariableReferenceExpression.class) {
-            return localVariableMaker.getLocalVariableInAssignment(index, offset, ((ClassFileLocalVariableReferenceExpression)value).getLocalVariable());
+            return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, ((ClassFileLocalVariableReferenceExpression)value).getLocalVariable());
         } else if (valueClass == ClassFileMethodInvocationExpression.class) {
             if (valueType.isObject()) {
                 // Remove type arguments
@@ -982,9 +980,9 @@ public class ByteCodeParser {
                 valueType = TYPE_UNDEFINED_OBJECT;
             }
 
-            return localVariableMaker.getLocalVariableInAssignment(index, offset, valueType);
+            return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueType);
         } else {
-            return localVariableMaker.getLocalVariableInAssignment(index, offset, valueType);
+            return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueType);
         }
     }
 
@@ -1428,7 +1426,7 @@ public class ByteCodeParser {
 
     private void parseASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, AbstractLocalVariable localVariable, Expression valueRef) {
         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(localVariable.getType(), valueRef);
-        localVariable.typeOnRight(valueRef.getType());
+        localVariable.typeOnRight(typeBounds, valueRef.getType());
 
         ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable);
         Expression oldValueRef = valueRef;
@@ -1531,7 +1529,7 @@ public class ByteCodeParser {
     }
 
     @SuppressWarnings("unchecked")
-    private static void parseIINC(Statements statements, DefaultStack<Expression> stack, int lineNumber, AbstractLocalVariable localVariable, int count) {
+    private void parseIINC(Statements statements, DefaultStack<Expression> stack, int lineNumber, AbstractLocalVariable localVariable, int count) {
         Expression expression;
 
         if (!stack.isEmpty()) {
@@ -1777,20 +1775,20 @@ public class ByteCodeParser {
      * See "Additive Operators (+ and -) for Numeric Types": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.18.2
      * See "Shift Operators":                                https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.19
      */
-    private static Expression newIntegerBinaryOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
+    private Expression newIntegerBinaryOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
         Class leftClass = leftExpression.getClass();
         Class rightClass = rightExpression.getClass();
 
         if (leftClass == ClassFileLocalVariableReferenceExpression.class) {
             AbstractLocalVariable leftVariable = ((ClassFileLocalVariableReferenceExpression)leftExpression).getLocalVariable();
 
-            leftVariable.typeOnLeft(MAYBE_BYTE_TYPE);
+            leftVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
 
         if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
             AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
-            rightVariable.typeOnLeft(MAYBE_BYTE_TYPE);
+            rightVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
 
         return new BinaryOperatorExpression(lineNumber, TYPE_INT, leftExpression, operator, rightExpression, priority);
@@ -1800,7 +1798,7 @@ public class ByteCodeParser {
      * Operators = { "&", "|", "^" }
      * See "Binary Numeric Promotion": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.22.1
      */
-    private static Expression newIntegerOrBooleanBinaryOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
+    private Expression newIntegerOrBooleanBinaryOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
         Class leftClass = leftExpression.getClass();
         Class rightClass = rightExpression.getClass();
         Type type = TYPE_INT;
@@ -1811,9 +1809,9 @@ public class ByteCodeParser {
             if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
                 AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
-                if (leftVariable.isAssignableFrom(TYPE_BOOLEAN) || rightVariable.isAssignableFrom(TYPE_BOOLEAN)) {
-                    leftVariable.variableOnRight(rightVariable);
-                    rightVariable.variableOnLeft(leftVariable);
+                if (leftVariable.isAssignableFrom(typeBounds, TYPE_BOOLEAN) || rightVariable.isAssignableFrom(typeBounds, TYPE_BOOLEAN)) {
+                    leftVariable.variableOnRight(typeBounds, rightVariable);
+                    rightVariable.variableOnLeft(typeBounds, leftVariable);
 
                     if ((leftVariable.getType() == TYPE_BOOLEAN) || (rightVariable.getType() == TYPE_BOOLEAN)) {
                         type = TYPE_BOOLEAN;
@@ -1821,7 +1819,7 @@ public class ByteCodeParser {
                 }
             } else {
                 if (rightExpression.getType() == TYPE_BOOLEAN) {
-                    leftVariable.typeOnRight(type = TYPE_BOOLEAN);
+                    leftVariable.typeOnRight(typeBounds, type = TYPE_BOOLEAN);
                 }
             }
         } else {
@@ -1829,7 +1827,7 @@ public class ByteCodeParser {
                 if (leftExpression.getType() == TYPE_BOOLEAN) {
                     AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
-                    rightVariable.typeOnRight(type = TYPE_BOOLEAN);
+                    rightVariable.typeOnRight(typeBounds, type = TYPE_BOOLEAN);
                 }
             }
         }
@@ -1851,13 +1849,13 @@ public class ByteCodeParser {
             if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
                 AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
-                if (leftVariable.isAssignableFrom(TYPE_BOOLEAN) || rightVariable.isAssignableFrom(TYPE_BOOLEAN)) {
-                    leftVariable.variableOnRight(rightVariable);
-                    rightVariable.variableOnLeft(leftVariable);
+                if (leftVariable.isAssignableFrom(typeBounds, TYPE_BOOLEAN) || rightVariable.isAssignableFrom(typeBounds, TYPE_BOOLEAN)) {
+                    leftVariable.variableOnRight(typeBounds, rightVariable);
+                    rightVariable.variableOnLeft(typeBounds, leftVariable);
                 }
             } else {
                 if (rightExpression.getType() == TYPE_BOOLEAN) {
-                    leftVariable.typeOnRight(TYPE_BOOLEAN);
+                    leftVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
                 }
             }
         } else {
@@ -1865,7 +1863,7 @@ public class ByteCodeParser {
                 if (leftExpression.getType() == TYPE_BOOLEAN) {
                     AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
-                    rightVariable.typeOnRight(TYPE_BOOLEAN);
+                    rightVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
                 }
             }
         }
@@ -1880,43 +1878,43 @@ public class ByteCodeParser {
      * Operators = { "==", "!=" }
      * See "Numerical Equality Operators == and !=": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.21.1
      */
-    private static Expression newIntegerComparisonOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
+    private Expression newIntegerComparisonOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
         Class leftClass = leftExpression.getClass();
         Class rightClass = rightExpression.getClass();
 
         if (leftClass == ClassFileLocalVariableReferenceExpression.class) {
             AbstractLocalVariable leftVariable = ((ClassFileLocalVariableReferenceExpression)leftExpression).getLocalVariable();
 
-            leftVariable.typeOnLeft(MAYBE_BYTE_TYPE);
+            leftVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
 
         if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
             AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
-            rightVariable.typeOnLeft(MAYBE_BYTE_TYPE);
+            rightVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
 
         return new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, leftExpression, operator, rightExpression, priority);
     }
 
-    private static Expression newPreArithmeticOperatorExpression(int lineNumber, String operator, Expression expression) {
+    private Expression newPreArithmeticOperatorExpression(int lineNumber, String operator, Expression expression) {
         reduceIntegerLocalVariableType(expression);
         return new PreOperatorExpression(lineNumber, operator, expression);
     }
 
-    private static Expression newPostArithmeticOperatorExpression(int lineNumber, Expression expression, String operator) {
+    private Expression newPostArithmeticOperatorExpression(int lineNumber, Expression expression, String operator) {
         reduceIntegerLocalVariableType(expression);
         return new PostOperatorExpression(lineNumber, expression, operator);
     }
 
-    private static void reduceIntegerLocalVariableType(Expression expression) {
+    private void reduceIntegerLocalVariableType(Expression expression) {
         if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
             ClassFileLocalVariableReferenceExpression lvre = (ClassFileLocalVariableReferenceExpression)expression;
 
             if (lvre.getLocalVariable().getClass() == PrimitiveLocalVariable.class) {
                 PrimitiveLocalVariable plv = (PrimitiveLocalVariable)lvre.getLocalVariable();
-                if (plv.isAssignableFrom(MAYBE_BOOLEAN_TYPE)) {
-                    plv.typeOnRight(MAYBE_BYTE_TYPE);
+                if (plv.isAssignableFrom(typeBounds, MAYBE_BOOLEAN_TYPE)) {
+                    plv.typeOnRight(typeBounds, MAYBE_BYTE_TYPE);
                 }
             }
         }
