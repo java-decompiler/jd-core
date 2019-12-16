@@ -31,9 +31,9 @@ public class ClassFileConstructorDeclaration extends ConstructorDeclaration impl
 
     public ClassFileConstructorDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, BaseAnnotationReference annotationReferences,
-            BaseTypeParameter typeParameters, BaseType parameterTypes, BaseType exceptions, Map<String, TypeArgument> bindings,
+            BaseTypeParameter typeParameters, BaseType parameterTypes, BaseType exceptionTypes, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber) {
-        super(annotationReferences, method.getAccessFlags(), typeParameters, null, exceptions, method.getDescriptor(), null);
+        super(annotationReferences, method.getAccessFlags(), typeParameters, null, exceptionTypes, method.getDescriptor(), null);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;

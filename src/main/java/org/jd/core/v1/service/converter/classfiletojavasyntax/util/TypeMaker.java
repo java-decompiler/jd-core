@@ -251,7 +251,7 @@ public class TypeMaker {
                 mt.typeParameters = mtSignature.typeParameters;
                 mt.parameterTypes = mtDescriptor.parameterTypes;
                 mt.returnedType = mtSignature.returnedType;
-                mt.exceptions = mtSignature.exceptions;
+                mt.exceptionTypes = mtSignature.exceptionTypes;
 
                 return mt;
             } else if (mtDescriptor.parameterTypes.size() == mtSignature.parameterTypes.size()) {
@@ -266,7 +266,7 @@ public class TypeMaker {
                 mt.typeParameters = mtSignature.typeParameters;
                 mt.parameterTypes = parameterTypes;
                 mt.returnedType = mtSignature.returnedType;
-                mt.exceptions = mtSignature.exceptions;
+                mt.exceptionTypes = mtSignature.exceptionTypes;
 
                 return mt;
             }
@@ -340,7 +340,7 @@ public class TypeMaker {
                 // Signature does not contain exceptions
                 if (exceptionTypeNames != null) {
                     if (exceptionTypeNames.length == 1) {
-                        methodTypes.exceptions = makeFromInternalTypeName(exceptionTypeNames[0]);
+                        methodTypes.exceptionTypes = makeFromInternalTypeName(exceptionTypeNames[0]);
                     } else {
                         UnmodifiableTypes list = new UnmodifiableTypes(exceptionTypeNames.length);
 
@@ -348,14 +348,14 @@ public class TypeMaker {
                             list.add(makeFromInternalTypeName(exceptionTypeName));
                         }
 
-                        methodTypes.exceptions = list;
+                        methodTypes.exceptionTypes = list;
                     }
                 }
             } else {
                 Type nextException = parseExceptionSignature(reader);
 
                 if (nextException == null) {
-                    methodTypes.exceptions = firstException;
+                    methodTypes.exceptionTypes = firstException;
                 } else {
                     UnmodifiableTypes list = new UnmodifiableTypes();
 
@@ -366,7 +366,7 @@ public class TypeMaker {
                         nextException = parseExceptionSignature(reader);
                     } while (nextException != null);
 
-                    methodTypes.exceptions = list;
+                    methodTypes.exceptionTypes = list;
                 }
             }
 
@@ -1336,7 +1336,7 @@ public class TypeMaker {
                 newMethodTypes.returnedType = (Type)bindTypeParametersToTypeArgumentsVisitor.getType();
 
                 newMethodTypes.typeParameters = null;
-                newMethodTypes.exceptions = methodTypes.exceptions;
+                newMethodTypes.exceptionTypes = methodTypes.exceptionTypes;
 
                 methodTypes = newMethodTypes;
             }
@@ -1774,6 +1774,6 @@ public class TypeMaker {
         public BaseTypeParameter typeParameters;
         public BaseType parameterTypes;
         public Type returnedType;
-        public BaseType exceptions;
+        public BaseType exceptionTypes;
     }
 }

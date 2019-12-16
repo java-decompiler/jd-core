@@ -59,10 +59,10 @@ public class ClassFileMethodDeclaration extends MethodDeclaration implements Cla
 
     public ClassFileMethodDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, BaseAnnotationReference annotationReferences,
-            String name, BaseTypeParameter typeParameters, Type returnedType, BaseType parameterTypes, BaseType exceptions,
+            String name, BaseTypeParameter typeParameters, Type returnedType, BaseType parameterTypes, BaseType exceptionTypes,
             ElementValue defaultAnnotationValue, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber) {
-        super(annotationReferences, method.getAccessFlags(), name, typeParameters, returnedType, null, exceptions, method.getDescriptor(), null, defaultAnnotationValue);
+        super(annotationReferences, method.getAccessFlags(), name, typeParameters, returnedType, null, exceptionTypes, method.getDescriptor(), null, defaultAnnotationValue);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;

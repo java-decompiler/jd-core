@@ -102,7 +102,7 @@ public class SignatureParserTest extends TestCase {
         Assert.assertEquals("int", source);
 
         // Check exceptions
-        assertNull(methodTypes.exceptions);
+        assertNull(methodTypes.exceptionTypes);
 
         // Check method 'ping'
         //  public void ping(String host) throws UnknownHostException, UnsatisfiedLinkError
@@ -133,10 +133,10 @@ public class SignatureParserTest extends TestCase {
         Assert.assertEquals("void", source);
 
         // Check exceptions
-        assertNotNull(methodTypes.exceptions);
+        assertNotNull(methodTypes.exceptionTypes);
 
         visitor.reset();
-        methodTypes.exceptions.accept(visitor);
+        methodTypes.exceptionTypes.accept(visitor);
         source = visitor.toString();
 
         Assert.assertEquals("java.net.UnknownHostException, java.lang.UnsatisfiedLinkError", source);
@@ -248,10 +248,10 @@ public class SignatureParserTest extends TestCase {
         Assert.assertEquals("java.util.List<? extends java.lang.Number>", source);
 
         // Check exceptions
-        assertNotNull(methodTypes.exceptions);
+        assertNotNull(methodTypes.exceptionTypes);
 
         visitor.reset();
-        methodTypes.exceptions.accept(visitor);
+        methodTypes.exceptionTypes.accept(visitor);
         source = visitor.toString();
 
         Assert.assertEquals("java.security.InvalidParameterException, java.lang.ClassCastException", source);
@@ -290,10 +290,10 @@ public class SignatureParserTest extends TestCase {
         Assert.assertEquals("java.util.List<? extends java.lang.Number>", source);
 
         // Check exceptions
-        assertNotNull(methodTypes.exceptions);
+        assertNotNull(methodTypes.exceptionTypes);
 
         visitor.reset();
-        methodTypes.exceptions.accept(visitor);
+        methodTypes.exceptionTypes.accept(visitor);
         source = visitor.toString();
 
         Assert.assertEquals("T2, java.security.InvalidParameterException", source);

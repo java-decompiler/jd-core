@@ -32,6 +32,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     protected TypeMaker typeMaker;
     protected Map<String, BaseType> typeBounds;
     protected Type returnedType;
+    protected BaseType exceptionTypes;
     protected Type type;
 
     public AddCastExpressionVisitor(TypeMaker typeMaker) {
@@ -99,10 +100,13 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
         if (statements != null) {
             Map<String, BaseType> tb = typeBounds;
+            BaseType et = exceptionTypes;
 
             typeBounds = ((ClassFileConstructorDeclaration)declaration).getTypeBounds();
+            exceptionTypes = declaration.getExceptionTypes();
             statements.accept(this);
             typeBounds = tb;
+            exceptionTypes = et;
         }
     }
 
@@ -112,13 +116,16 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
         if (statements != null) {
             Map<String, BaseType> tb = typeBounds;
-            Type t = returnedType;
+            Type rt = returnedType;
+            BaseType et = exceptionTypes;
 
             typeBounds = ((ClassFileMethodDeclaration)declaration).getTypeBounds();
             returnedType = declaration.getReturnedType();
+            exceptionTypes = declaration.getExceptionTypes();
             statements.accept(this);
             typeBounds = tb;
-            returnedType = t;
+            returnedType = rt;
+            exceptionTypes = et;
         }
     }
 
@@ -127,16 +134,28 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseStatement statements = expression.getStatements();
 
         if (statements != null) {
-            Type t = returnedType;
+            Type rt = returnedType;
 
             returnedType = expression.getReturnedType();
             statements.accept(this);
-            returnedType = t;
+            returnedType = rt;
         }
     }
 
-    @Override public void visit(ReturnExpressionStatement statement) {
+    @Override
+    public void visit(ReturnExpressionStatement statement) {
         statement.setExpression(updateExpression(returnedType, statement.getExpression()));
+    }
+
+    @Override
+    public void visit(ThrowStatement statement) {
+        if ((exceptionTypes != null) && (exceptionTypes.size() == 1)) {
+            Type exceptionType = exceptionTypes.getFirst();
+
+            if (exceptionType.isGeneric() && !statement.getExpression().getType().equals(exceptionType)) {
+                statement.setExpression(addCastExpression(exceptionType, statement.getExpression()));
+            }
+        }
     }
 
     @Override

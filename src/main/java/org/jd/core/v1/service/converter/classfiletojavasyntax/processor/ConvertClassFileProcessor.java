@@ -220,13 +220,13 @@ public class ConvertClassFileProcessor implements Processor {
                 if ("<init>".equals(name)) {
                     list.add(new ClassFileConstructorDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, methodTypes.typeParameters,
-                            methodTypes.parameterTypes, methodTypes.exceptions, bindings, typeBounds, firstLineNumber));
+                            methodTypes.parameterTypes, methodTypes.exceptionTypes, bindings, typeBounds, firstLineNumber));
                 } else if ("<clinit>".equals(name)) {
                     list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, bindings, typeBounds, firstLineNumber));
                 } else {
                     ClassFileMethodDeclaration methodDeclaration = new ClassFileMethodDeclaration(
                             bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
-                            methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptions, defaultAnnotationValue,
+                            methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptionTypes, defaultAnnotationValue,
                             bindings, typeBounds, firstLineNumber);
                     if ((classFile.getAccessFlags() & Constants.ACC_INTERFACE) != 0) {
                         if (methodDeclaration.getFlags() == Constants.ACC_PUBLIC) {

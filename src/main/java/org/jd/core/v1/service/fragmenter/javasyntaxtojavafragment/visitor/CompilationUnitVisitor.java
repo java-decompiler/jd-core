@@ -368,13 +368,13 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
             }
 
-            BaseType exceptions = declaration.getExceptions();
+            BaseType exceptionTypes = declaration.getExceptionTypes();
 
-            if (exceptions != null) {
+            if (exceptionTypes != null) {
                 tokens.add(TextToken.SPACE);
                 tokens.add(THROWS);
                 tokens.add(TextToken.SPACE);
-                exceptions.accept(this);
+                exceptionTypes.accept(this);
             }
 
             BaseStatement statements = declaration.getStatements();

@@ -17,7 +17,7 @@ public class ConstructorDeclaration implements MemberDeclaration {
     protected int flags;
     protected BaseTypeParameter typeParameters;
     protected BaseFormalParameter formalParameters;
-    protected BaseType exceptions;
+    protected BaseType exceptionTypes;
     protected String descriptor;
     protected BaseStatement statements;
 
@@ -28,12 +28,12 @@ public class ConstructorDeclaration implements MemberDeclaration {
         this.statements = statements;
     }
 
-    public ConstructorDeclaration(BaseAnnotationReference annotationReferences, int flags, BaseTypeParameter typeParameters, BaseFormalParameter formalParameters, BaseType exceptions, String descriptor, BaseStatement statements) {
+    public ConstructorDeclaration(BaseAnnotationReference annotationReferences, int flags, BaseTypeParameter typeParameters, BaseFormalParameter formalParameters, BaseType exceptionTypes, String descriptor, BaseStatement statements) {
         this.annotationReferences = annotationReferences;
         this.flags = flags;
         this.typeParameters = typeParameters;
         this.formalParameters = formalParameters;
-        this.exceptions = exceptions;
+        this.exceptionTypes = exceptionTypes;
         this.descriptor = descriptor;
         this.statements = statements;
     }
@@ -54,8 +54,8 @@ public class ConstructorDeclaration implements MemberDeclaration {
         return formalParameters;
     }
 
-    public BaseType getExceptions() {
-        return exceptions;
+    public BaseType getExceptionTypes() {
+        return exceptionTypes;
     }
 
     public String getDescriptor() {

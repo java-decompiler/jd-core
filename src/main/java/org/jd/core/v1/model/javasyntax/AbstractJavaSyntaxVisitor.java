@@ -68,7 +68,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     public void visit(ConstructorDeclaration declaration) {
         safeAccept(declaration.getAnnotationReferences());
         safeAccept(declaration.getFormalParameters());
-        safeAccept(declaration.getExceptions());
+        safeAccept(declaration.getExceptionTypes());
         safeAccept(declaration.getStatements());
     }
 
