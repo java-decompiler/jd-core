@@ -144,7 +144,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ReturnExpressionStatement statement) {
-        statement.setExpression(updateExpression(returnedType, statement.getExpression()));
+        statement.setExpression(updateExpression(returnedType, statement.getExpression(), false));
     }
 
     @Override
@@ -211,7 +211,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             nia.getArrayInitializer().accept(this);
             type = t;
         } else {
-            declaration.setExpression(updateExpression(type, expression));
+            declaration.setExpression(updateExpression(type, expression, false));
         }
     }
 
@@ -220,7 +220,8 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            expression.setParameters(updateExpressions(((ClassFileSuperConstructorInvocationExpression)expression).getParameterTypes(), parameters));
+            boolean force = containsNullExpression(parameters) && typeMaker.multipleMethods(expression.getObjectType().getInternalName(), "<init>", parameters.size());
+            expression.setParameters(updateExpressions(((ClassFileSuperConstructorInvocationExpression)expression).getParameterTypes(), parameters, force));
         }
     }
 
@@ -229,7 +230,8 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            expression.setParameters(updateExpressions(((ClassFileConstructorInvocationExpression)expression).getParameterTypes(), parameters));
+            boolean force = containsNullExpression(parameters) && typeMaker.multipleMethods(expression.getObjectType().getInternalName(), "<init>", parameters.size());
+            expression.setParameters(updateExpressions(((ClassFileConstructorInvocationExpression)expression).getParameterTypes(), parameters, force));
         }
     }
 
@@ -238,13 +240,27 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
-
-            parameters.accept(this);
-            expression.setParameters(updateExpressions(mie.getParameterTypes(), parameters));
+            boolean force = containsNullExpression(parameters) && typeMaker.multipleMethods(expression.getInternalTypeName(), expression.getName(), parameters.size());
+            expression.setParameters(updateExpressions(((ClassFileMethodInvocationExpression)expression).getParameterTypes(), parameters, force));
         }
         
         expression.getExpression().accept(this);
+    }
+
+    protected boolean containsNullExpression(BaseExpression parameters) {
+        switch (parameters.size()) {
+            case 0:
+                return false;
+            case 1:
+                return parameters.getFirst().getClass() == NullExpression.class;
+            default:
+                for (Expression parameter : parameters) {
+                    if (parameter.getClass() == NullExpression.class) {
+                        return true;
+                    }
+                }
+                return false;
+        }
     }
 
     @Override
@@ -252,7 +268,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            expression.setParameters(updateExpressions(((ClassFileNewExpression)expression).getParameterTypes(), parameters));
+            expression.setParameters(updateExpressions(((ClassFileNewExpression)expression).getParameterTypes(), parameters, false));
         }
     }
 
@@ -277,7 +293,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             Type type = typeMaker.makeFromInternalTypeName(expression.getInternalTypeName());
 
             if (type.getName() != null) {
-                expression.setExpression(updateExpression(type, exp));
+                expression.setExpression(updateExpression(type, exp, false));
             }
         }
     }
@@ -299,7 +315,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                 }
             }
 
-            expression.setRightExpression(updateExpression(expression.getLeftExpression().getType(), rightExpression));
+            expression.setRightExpression(updateExpression(expression.getLeftExpression().getType(), rightExpression, false));
             return;
         }
 
@@ -312,30 +328,38 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
         expression.getCondition().accept(this);
 
-        expression.setExpressionTrue(updateExpression(expressionType, expression.getExpressionTrue()));
-        expression.setExpressionFalse(updateExpression(expressionType, expression.getExpressionFalse()));
+        expression.setExpressionTrue(updateExpression(expressionType, expression.getExpressionTrue(), false));
+        expression.setExpressionFalse(updateExpression(expressionType, expression.getExpressionFalse(), false));
     }
 
     @SuppressWarnings("unchecked")
-    protected BaseExpression updateExpressions(BaseType types, BaseExpression expressions) {
+    protected BaseExpression updateExpressions(BaseType types, BaseExpression expressions, boolean force) {
         if (expressions != null) {
             if (expressions.isList()) {
                 DefaultList<Type> t = types.getList();
                 DefaultList<Expression> e = expressions.getList();
 
                 for (int i = e.size() - 1; i >= 0; i--) {
-                    e.set(i, updateExpression(t.get(i), e.get(i)));
+                    e.set(i, updateExpression(t.get(i), e.get(i), force));
                 }
             } else {
-                expressions = updateExpression(types.getFirst(), (Expression) expressions);
+                expressions = updateExpression(types.getFirst(), (Expression) expressions, force);
             }
         }
 
         return expressions;
     }
 
-    private Expression updateExpression(Type type, Expression expression) {
-        if (match(expression)) {
+    private Expression updateExpression(Type type, Expression expression, boolean force) {
+        Class expressionClass = expression.getClass();
+
+        if (expressionClass == NullExpression.class) {
+            if (force) {
+                searchFirstLineNumberVisitor.init();
+                expression.accept(searchFirstLineNumberVisitor);
+                expression = new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type, expression);
+            }
+        } else {
             Type expressionType = expression.getType();
 
             if (!expressionType.equals(type) && !TYPE_OBJECT.equals(type)) {
@@ -364,32 +388,21 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                     }
                 }
             }
-        }
 
-        if (expression.getClass() == CastExpression.class) {
-            CastExpression ce = (CastExpression)expression;
-            Type ceExpressionType = ce.getExpression().getType();
+            if (expression.getClass() == CastExpression.class) {
+                CastExpression ce = (CastExpression)expression;
+                Type ceExpressionType = ce.getExpression().getType();
 
-            if (type.isObject() && ceExpressionType.isObject() && typeMaker.isAssignable(typeBounds, (ObjectType)type, (ObjectType)ceExpressionType)) {
-                // Remove cast expression
-                expression = ce.getExpression();
+                if (type.isObject() && ceExpressionType.isObject() && typeMaker.isAssignable(typeBounds, (ObjectType)type, (ObjectType)ceExpressionType)) {
+                    // Remove cast expression
+                    expression = ce.getExpression();
+                }
             }
-        }
 
-        expression.accept(this);
+            expression.accept(this);
+        }
 
         return expression;
-    }
-
-    private static final boolean match(Expression expression) {
-        Class expressionClass = expression.getClass();
-
-        if (expressionClass == NullExpression.class) {
-            // Do not add a cast before a null value
-            return false;
-        }
-
-        return true;
     }
 
     private Expression addCastExpression(Type type, Expression expression) {

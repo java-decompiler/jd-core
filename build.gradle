@@ -5,10 +5,10 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.apache.commons:commons-lang3:3.9'
-    testCompile 'org.apache.commons:commons-collections4:4.1'
     testCompile 'commons-codec:commons-codec:1.13'
+    testCompile 'org.apache.commons:commons-collections4:4.1'
+    testCompile 'org.apache.commons:commons-lang3:3.9'
+    testCompile 'junit:junit:4.12'
 }
 
 version='1.1.2'

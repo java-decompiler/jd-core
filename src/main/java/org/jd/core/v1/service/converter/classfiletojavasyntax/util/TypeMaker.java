@@ -55,6 +55,7 @@ public class TypeMaker {
     private HashMap<String, ObjectType> descriptorToObjectType = new HashMap<>(1024);
     private HashMap<String, ObjectType> internalTypeNameToObjectType = new HashMap<>(1024);
     private HashMap<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
+    private HashMap<String, Boolean> internalTypeNameMethodNameParameterCountToBoolean = new HashMap<>(1024);
     private HashMap<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
     private HashMap<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
 
@@ -1550,11 +1551,23 @@ public class TypeMaker {
                 String name = (String)constants[nameIndex];
                 String descriptor = (String)constants[descriptorIndex];
                 String key = internalTypeName + ':' + name + descriptor;
+                MethodTypes methodTypes;
 
                 if (signature == null) {
-                    internalTypeNameMethodNameDescriptorToMethodTypes.put(key, parseMethodSignature(descriptor, exceptionTypeNames));
+                    methodTypes = parseMethodSignature(descriptor, exceptionTypeNames);
                 } else {
-                    internalTypeNameMethodNameDescriptorToMethodTypes.put(key, parseMethodSignature(descriptor, signature, exceptionTypeNames));
+                    methodTypes = parseMethodSignature(descriptor, signature, exceptionTypeNames);
+                }
+
+                internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
+
+                int parameterCount = (methodTypes.parameterTypes == null) ? 0 : methodTypes.parameterTypes.size();
+                key = internalTypeName + ':' + name + ':' + parameterCount;
+
+                if (internalTypeNameMethodNameParameterCountToBoolean.containsKey(key)) {
+                    internalTypeNameMethodNameParameterCountToBoolean.put(key, Boolean.TRUE);
+                } else {
+                    internalTypeNameMethodNameParameterCountToBoolean.put(key, Boolean.FALSE);
                 }
             }
         }
@@ -1761,6 +1774,52 @@ public class TypeMaker {
         public String toString() {
             return "SignatureReader{index=" + index + ", nextChars=" + (new String(array, index, length-index)) + "}";
         }
+    }
+
+    public boolean multipleMethods(String internalTypeName, String name, int parameterCount) {
+        String suffixKey = ":" + name + ':' + parameterCount;
+        Boolean bool = multipleMethods(internalTypeName, suffixKey);
+        return (bool == null) ? false : bool.booleanValue();
+    }
+
+    private Boolean multipleMethods(String internalTypeName, String suffixKey) {
+        String key = internalTypeName + suffixKey;
+        Boolean bool = internalTypeNameMethodNameParameterCountToBoolean.get(key);
+
+        if (bool == null) {
+            // Load methods
+            if (loadFieldsAndMethods(internalTypeName)) {
+                bool = internalTypeNameMethodNameParameterCountToBoolean.get(key);
+
+                if (bool == null) {
+                    TypeTypes typeTypes = makeTypeTypes(internalTypeName);
+
+                    if (typeTypes != null) {
+                        if (typeTypes.superType != null) {
+                            bool = multipleMethods(typeTypes.superType.getInternalName(), suffixKey);
+                        }
+
+                        if ((bool == null) && (typeTypes.interfaces != null)) {
+                            if (typeTypes.interfaces.isList()) {
+                                for (Type interfaze : typeTypes.interfaces) {
+                                    bool = multipleMethods(((ObjectType)interfaze).getInternalName(), suffixKey);
+                                    if (bool != null)
+                                        break;
+                                }
+                            } else {
+                                bool = multipleMethods(((ObjectType)typeTypes.interfaces.getFirst()).getInternalName(), suffixKey);
+                            }
+                        }
+                    }
+                }
+
+                if (bool != null) {
+                    internalTypeNameMethodNameParameterCountToBoolean.put(key, bool);
+                }
+            }
+        }
+
+        return bool;
     }
 
     public static class TypeTypes {
