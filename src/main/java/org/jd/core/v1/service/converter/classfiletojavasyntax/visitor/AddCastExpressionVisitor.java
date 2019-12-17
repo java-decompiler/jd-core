@@ -220,7 +220,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            boolean force = containsNullExpression(parameters) && typeMaker.multipleMethods(expression.getObjectType().getInternalName(), "<init>", parameters.size());
+            boolean force = (parameters.size() > 0) && typeMaker.multipleMethods(expression.getObjectType().getInternalName(), "<init>", parameters.size());
             expression.setParameters(updateExpressions(((ClassFileSuperConstructorInvocationExpression)expression).getParameterTypes(), parameters, force));
         }
     }
@@ -230,7 +230,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            boolean force = containsNullExpression(parameters) && typeMaker.multipleMethods(expression.getObjectType().getInternalName(), "<init>", parameters.size());
+            boolean force = (parameters.size() > 0) && typeMaker.multipleMethods(expression.getObjectType().getInternalName(), "<init>", parameters.size());
             expression.setParameters(updateExpressions(((ClassFileConstructorInvocationExpression)expression).getParameterTypes(), parameters, force));
         }
     }
@@ -240,27 +240,11 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         BaseExpression parameters = expression.getParameters();
 
         if (parameters != null) {
-            boolean force = containsNullExpression(parameters) && typeMaker.multipleMethods(expression.getInternalTypeName(), expression.getName(), parameters.size());
+            boolean force = (parameters.size() > 0) && typeMaker.multipleMethods(expression.getInternalTypeName(), expression.getName(), parameters.size());
             expression.setParameters(updateExpressions(((ClassFileMethodInvocationExpression)expression).getParameterTypes(), parameters, force));
         }
         
         expression.getExpression().accept(this);
-    }
-
-    protected boolean containsNullExpression(BaseExpression parameters) {
-        switch (parameters.size()) {
-            case 0:
-                return false;
-            case 1:
-                return parameters.getFirst().getClass() == NullExpression.class;
-            default:
-                for (Expression parameter : parameters) {
-                    if (parameter.getClass() == NullExpression.class) {
-                        return true;
-                    }
-                }
-                return false;
-        }
     }
 
     @Override
