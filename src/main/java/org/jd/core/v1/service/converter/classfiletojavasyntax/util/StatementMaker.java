@@ -38,7 +38,7 @@ import org.jd.core.v1.util.DefaultStack;
 
 import java.util.*;
 
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
@@ -907,10 +907,10 @@ public class StatementMaker {
             } else if (typeMaker.isAssignable(typeBounds, ot2, ot1)) {
                 type = getTernaryOperatorExpressionType(ot2, ot1);
             } else {
-                type = TYPE_OBJECT;
+                type = TYPE_UNDEFINED_OBJECT;
             }
         } else {
-            type = TYPE_OBJECT;
+            type = TYPE_UNDEFINED_OBJECT;
         }
 
         return new TernaryOperatorExpression(lineNumber, type, condition, expressionTrue, expressionFalse);
