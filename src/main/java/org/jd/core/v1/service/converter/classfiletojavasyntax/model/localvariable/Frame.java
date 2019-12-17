@@ -15,6 +15,7 @@ import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
@@ -168,13 +169,6 @@ public class Frame {
             children = new DefaultList<>();
         }
         children.add(child);
-    }
-
-    public void addNewExpression(NewExpression ne, AbstractLocalVariable lv) {
-        if (newExpressions == null) {
-            newExpressions = new HashMap<>();
-        }
-        newExpressions.put(ne, lv);
     }
 
     public void close() {
@@ -338,17 +332,6 @@ public class Frame {
 
                     if (undeclaredLocalVariables.isEmpty()) {
                         break;
-                    }
-                }
-
-                if (!undeclaredLocalVariables.isEmpty()) {
-                    DefaultList<AbstractLocalVariable> sorted = new DefaultList<>(undeclaredLocalVariables);
-                    sorted.sort(ABSTRACT_LOCAL_VARIABLE_COMPARATOR);
-
-                    for (AbstractLocalVariable lv : sorted) {
-                        // Create start-block declarations
-                        statements.add(0, new LocalVariableDeclarationStatement(lv.getType(), new LocalVariableDeclarator(lv.getName())));
-                        lv.setDeclared(true);
                     }
                 }
             }
@@ -610,20 +593,49 @@ public class Frame {
 
     @SuppressWarnings("unchecked")
     protected void createStartBlockDeclarations() {
+        int addIndex = -1;
         int i = localVariableArray.length;
 
         while (i-- > 0) {
             AbstractLocalVariable lv = localVariableArray[i];
 
             while (lv != null) {
-                if ((this != lv.getFrame()) && !lv.isDeclared()) {
-                    statements.add(0, new LocalVariableDeclarationStatement(lv.getType(), new LocalVariableDeclarator(lv.getName())));
+                if (!lv.isDeclared()) {
+                    if (addIndex == -1) {
+                        addIndex = getAddIndex();
+                    }
+                    statements.add(addIndex, new LocalVariableDeclarationStatement(lv.getType(), new LocalVariableDeclarator(lv.getName())));
                     lv.setDeclared(true);
                 }
 
                 lv = lv.getNext();
             }
         }
+    }
+
+    protected int getAddIndex() {
+        int addIndex = 0;
+
+        if (parent.parent == null) {
+            // Insert declarations after 'super' call invocation => Search index of SuperConstructorInvocationExpression.
+            int len = statements.size();
+
+            while (addIndex < len) {
+                Statement statement = statements.get(addIndex++);
+                if (statement.getClass() == ExpressionStatement.class) {
+                    Expression expression = ((ExpressionStatement)statement).getExpression();
+                    if (expression.getClass() == ClassFileSuperConstructorInvocationExpression.class) {
+                        break;
+                    }
+                }
+            }
+
+            if (addIndex >= len) {
+                addIndex = 0;
+            }
+        }
+
+        return addIndex;
     }
 
     @SuppressWarnings("unchecked")
