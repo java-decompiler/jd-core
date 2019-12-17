@@ -14,6 +14,7 @@ import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStateme
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
@@ -623,8 +624,8 @@ public class Frame {
             while (addIndex < len) {
                 Statement statement = statements.get(addIndex++);
                 if (statement.getClass() == ExpressionStatement.class) {
-                    Expression expression = ((ExpressionStatement)statement).getExpression();
-                    if (expression.getClass() == ClassFileSuperConstructorInvocationExpression.class) {
+                    Class expressionClass = ((ExpressionStatement)statement).getExpression().getClass();
+                    if ((expressionClass == ClassFileSuperConstructorInvocationExpression.class) || (expressionClass == ClassFileConstructorInvocationExpression.class)) {
                         break;
                     }
                 }
