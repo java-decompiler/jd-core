@@ -19,6 +19,7 @@ import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class TypeParametersToTypeArgumentsBinder {
     protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
@@ -407,7 +408,7 @@ public class TypeParametersToTypeArgumentsBinder {
     protected void populateBindingsWithTypeArgument(Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, Type type, Expression expression) {
         Type t = getExpressionType(expression);
 
-        if (t != null) {
+        if ((t != null) && (t != TYPE_UNDEFINED_OBJECT)) {
             populateBindingsWithTypeArgumentVisitor.init(contextualTypeBounds, bindings, typeBounds, t);
             type.accept(populateBindingsWithTypeArgumentVisitor);
         }

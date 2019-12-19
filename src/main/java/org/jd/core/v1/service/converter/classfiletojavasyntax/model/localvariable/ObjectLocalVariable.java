@@ -139,7 +139,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
 
     @Override
     public void typeOnLeft(Map<String, BaseType> typeBounds, Type type) {
-        if (type != TYPE_UNDEFINED_OBJECT) {
+        if ((type != TYPE_UNDEFINED_OBJECT) && !type.equals(TYPE_OBJECT)) {
             if (this.type == TYPE_UNDEFINED_OBJECT) {
                 this.type = type;
                 fireChangeEvent(typeBounds);

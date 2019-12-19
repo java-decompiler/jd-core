@@ -891,12 +891,14 @@ public class ByteCodeParser {
                     break;
                 case 198: // IFNULL
                     expression1 = stack.pop();
+                    typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
                     stack.push(new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, expression1, basicBlock.mustInverseCondition() ? "!=" : "==", new NullExpression(expression1.getLineNumber(), expression1.getType()), 9));
                     offset += 2; // Skip branch offset
                     checkStack(stack, code, offset);
                     break;
                 case 199: // IFNONNULL
                     expression1 = stack.pop();
+                    typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
                     stack.push(new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, expression1, basicBlock.mustInverseCondition() ? "==" : "!=", new NullExpression(expression1.getLineNumber(), expression1.getType()), 9));
                     offset += 2; // Skip branch offset
                     checkStack(stack, code, offset);
