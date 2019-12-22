@@ -16,8 +16,8 @@ public class SearchLocalVariableReferenceVisitor extends AbstractJavaSyntaxVisit
     protected int index;
     protected boolean found;
 
-    public SearchLocalVariableReferenceVisitor(AbstractLocalVariable alv) {
-        this.index = alv.getIndex();
+    public void init(int index) {
+        this.index = index;
         this.found = false;
     }
 
@@ -27,7 +27,11 @@ public class SearchLocalVariableReferenceVisitor extends AbstractJavaSyntaxVisit
 
     @Override
     public void visit(LocalVariableReferenceExpression expression) {
-        ClassFileLocalVariableReferenceExpression referenceExpression = (ClassFileLocalVariableReferenceExpression)expression;
-        found |= referenceExpression.getLocalVariable().getIndex() == index;
+        if (index < 0) {
+            found = true;
+        } else {
+            ClassFileLocalVariableReferenceExpression referenceExpression = (ClassFileLocalVariableReferenceExpression) expression;
+            found |= referenceExpression.getLocalVariable().getIndex() == index;
+        }
     }
 }

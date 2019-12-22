@@ -1206,7 +1206,6 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             tokens = new Tokens();
             tokens.add(STATIC);
-            tokens.add(TextToken.SPACE);
             fragments.addTokensFragment(tokens);
 
             StartBodyFragment start = JavaFragmentFactory.addStartMethodBody(fragments);

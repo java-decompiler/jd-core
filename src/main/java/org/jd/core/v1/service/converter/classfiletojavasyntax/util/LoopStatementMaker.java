@@ -511,7 +511,7 @@ public class LoopStatementMaker {
         statements.removeLast();
         statements.removeLast();
 
-        subStatements.remove(0);
+        subStatements.removeFirst();
         subStatements.removeLast();
 
         item.setDeclared(true);
@@ -632,7 +632,9 @@ public class LoopStatementMaker {
         }
 
         // Check if 'i$' is not used in sub-statements
-        SearchLocalVariableReferenceVisitor visitor1 = new SearchLocalVariableReferenceVisitor(syntheticIterator);
+        SearchLocalVariableReferenceVisitor visitor1 = new SearchLocalVariableReferenceVisitor();
+
+        visitor1.init(syntheticIterator.getIndex());
 
         for (int i=1, len=subStatements.size(); i<len; i++) {
             subStatements.get(i).accept(visitor1);

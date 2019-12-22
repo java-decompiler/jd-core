@@ -25,12 +25,24 @@ public class ClassFileStaticInitializerDeclaration extends StaticInitializerDecl
     protected Method method;
     protected Map<String, TypeArgument> bindings;
     protected Map<String, BaseType> typeBounds;
-    protected int firstLineNumber = 0;
+    protected int firstLineNumber;
 
     public ClassFileStaticInitializerDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber) {
         super(method.getDescriptor(), null);
+        this.bodyDeclaration = bodyDeclaration;
+        this.classFile = classFile;
+        this.method = method;
+        this.bindings = bindings;
+        this.typeBounds = typeBounds;
+        this.firstLineNumber = firstLineNumber;
+    }
+
+    public ClassFileStaticInitializerDeclaration(
+            ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, Map<String, TypeArgument> bindings,
+            Map<String, BaseType> typeBounds, int firstLineNumber, BaseStatement statements) {
+        super(method.getDescriptor(), statements);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;

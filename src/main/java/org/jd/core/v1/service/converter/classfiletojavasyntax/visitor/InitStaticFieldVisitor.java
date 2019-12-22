@@ -15,19 +15,24 @@ import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.Iterator;
+import java.util.List;
 
 public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    protected SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
     protected String internalTypeName;
     protected DefaultList<FieldDeclarator> fields = new DefaultList<>();
-    protected ClassFileStaticInitializerDeclaration staticDeclaration;
+    protected List<ClassFileConstructorOrMethodDeclaration> methods;
+    protected Boolean deleteStaticDeclaration;
 
     public void setInternalTypeName(String internalTypeName) {
         this.internalTypeName = internalTypeName;
@@ -35,6 +40,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(AnnotationDeclaration declaration) {
+        this.internalTypeName = declaration.getInternalTypeName();
         safeAccept(declaration.getBodyDeclaration());
     }
 
@@ -59,19 +65,36 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
+
         // Store field declarations
         fields.clear();
-        staticDeclaration = null;
         safeAcceptListDeclaration(bodyDeclaration.getFieldDeclarations());
 
         if (!fields.isEmpty()) {
-            // Visit methods
-            safeAcceptListDeclaration(bodyDeclaration.getMethodDeclarations());
+            methods = bodyDeclaration.getMethodDeclarations();
+
+            if (methods != null) {
+                deleteStaticDeclaration = null;
+
+                for (int i=0, len=methods.size(); i<len; i++) {
+                    methods.get(i).accept(this);
+
+                    if (deleteStaticDeclaration != null) {
+                        if (deleteStaticDeclaration.booleanValue()) {
+                            methods.remove(i);
+                        }
+                        break;
+                    }
+                }
+            }
         }
 
-        if ((staticDeclaration != null) && (staticDeclaration.getStatements() == null)) {
-            bodyDeclaration.getMethodDeclarations().remove(staticDeclaration);
-        }
+        safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
+    }
+
+    @Override
+    public void visit(FieldDeclarator declaration) {
+        fields.add(declaration);
     }
 
     @Override
@@ -81,100 +104,172 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(MethodDeclaration declaration) {}
 
     @Override
+    public void visit(InstanceInitializerDeclaration declaration) {}
+
+    @Override
     @SuppressWarnings("unchecked")
     public void visit(StaticInitializerDeclaration declaration) {
-        staticDeclaration = (ClassFileStaticInitializerDeclaration) declaration;
+        ClassFileStaticInitializerDeclaration sid = (ClassFileStaticInitializerDeclaration) declaration;
 
-        BaseStatement statements = staticDeclaration.getStatements();
+        BaseStatement statements = sid.getStatements();
 
-        if ((statements != null) && (statements.size() > 0)) {
+        if (statements != null) {
             if (statements.isList()) {
-                Statement statement = statements.getFirst();
+                // Multiple statements
+                if ((statements.size() > 0) && isAssertionsDisabled(statements.getFirst())) {
+                    // Remove assert initialization statement
+                    statements.getList().removeFirst();
+                }
 
-                if ((statement.getClass() == ExpressionStatement.class)) {
-                    ExpressionStatement cdes = (ExpressionStatement) statement;
+                if (statements.size() > 0) {
+                    DefaultList<Statement> list = statements.getList();
+                    Iterator<FieldDeclarator> fieldDeclaratorIterator = fields.iterator();
+//                    int lastLineNumber = 0;
 
-                    if (cdes.getExpression().getClass() == BinaryOperatorExpression.class) {
-                        BinaryOperatorExpression cfboe = (BinaryOperatorExpression) cdes.getExpression();
+                    for (int i=0, len=list.size(); i<len; i++) {
+                        Statement statement = list.get(i);
 
-                        if (cfboe.getLeftExpression().getClass() == FieldReferenceExpression.class) {
-                            FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
+                        if (setStaticFieldInitializer(statement, fieldDeclaratorIterator)) {
+                            if (i > 0) {
+                                // Split 'static' block
+                                BaseStatement newStatements;
 
-                            if ((fre.getType() == PrimitiveType.TYPE_BOOLEAN) && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
-                                // Remove assert initialization statement
-                                statements.getList().removeFirst();
+                                if (i == 1) {
+                                    newStatements = list.removeFirst();
+                                } else {
+                                    List<Statement> subList = list.subList(0, i);
+                                    newStatements = new Statements(subList);
+                                    subList.clear();
+                                }
+
+                                // Removes statements from original list
+                                len -= newStatements.size();
+                                i = 0;
+
+                                addStaticInitializerDeclaration(sid, getFirstLineNumber(newStatements), newStatements);
+                            }
+
+                            // Remove field initialization statement
+                            list.remove(i--);
+                            len--;
+// TODO Fix problem with local variable declarations before split static block
+//                            lastLineNumber = 0;
+//                        } else {
+//                            int newLineNumber = getFirstLineNumber(statement);
+//
+//                            if ((lastLineNumber > 0) && (newLineNumber > 0) && (lastLineNumber + 3 < newLineNumber)) {
+//                                // Split 'static' block
+//                                BaseStatement newStatements;
+//
+//                                if (i == 1) {
+//                                    newStatements = list.removeFirst();
+//                                } else {
+//                                    List<Statement> subList = list.subList(0, i);
+//                                    newStatements = new Statements(subList);
+//                                    subList.clear();
+//                                }
+//
+//                                // Removes statements from original list
+//                                len -= newStatements.size();
+//                                i = 0;
+//
+//                                addStaticInitializerDeclaration(sid, newLineNumber, newStatements);
+//                            }
+//
+//                            lastLineNumber = newLineNumber;
+                        }
+                    }
+                }
+            } else {
+                // Single statement
+                if (isAssertionsDisabled(statements.getFirst())) {
+                    // Remove assert initialization statement
+                    statements = null;
+                }
+                if ((statements != null) && setStaticFieldInitializer(statements.getFirst(), fields.iterator())) {
+                    // Remove field initialization statement
+                    statements = null;
+                }
+            }
+
+            if ((statements == null) || (statements.size() == 0)) {
+                deleteStaticDeclaration = Boolean.TRUE;
+            } else {
+                int firstLineNumber = getFirstLineNumber(statements);
+                sid.setFirstLineNumber((firstLineNumber==-1) ? 0 : firstLineNumber);
+                deleteStaticDeclaration = Boolean.FALSE;
+            }
+        }
+    }
+
+    protected boolean isAssertionsDisabled(Statement statement) {
+        if ((statement.getClass() == ExpressionStatement.class)) {
+            ExpressionStatement cdes = (ExpressionStatement) statement;
+
+            if (cdes.getExpression().getClass() == BinaryOperatorExpression.class) {
+                BinaryOperatorExpression cfboe = (BinaryOperatorExpression) cdes.getExpression();
+
+                if (cfboe.getLeftExpression().getClass() == FieldReferenceExpression.class) {
+                    FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
+
+                    if ((fre.getType() == PrimitiveType.TYPE_BOOLEAN) && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    protected boolean setStaticFieldInitializer(Statement statement, Iterator<FieldDeclarator> fieldDeclaratorIterator) {
+        if (statement.getClass() == ExpressionStatement.class) {
+            ExpressionStatement cdes = (ExpressionStatement) statement;
+
+            if (cdes.getExpression().getClass() == BinaryOperatorExpression.class) {
+                BinaryOperatorExpression cfboe = (BinaryOperatorExpression) cdes.getExpression();
+
+                if (cfboe.getLeftExpression().getClass() == FieldReferenceExpression.class) {
+                    FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
+
+                    if (fre.getInternalTypeName().equals(internalTypeName)) {
+                        while (fieldDeclaratorIterator.hasNext()) {
+                            FieldDeclarator fdr = fieldDeclaratorIterator.next();
+                            FieldDeclaration fdn = fdr.getFieldDeclaration();
+
+                            if (((fdn.getFlags() & Declaration.FLAG_STATIC) != 0) && fdr.getName().equals(fre.getName()) && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
+                                Expression expression = cfboe.getRightExpression();
+
+                                searchLocalVariableReferenceVisitor.init(-1);
+                                expression.accept(searchLocalVariableReferenceVisitor);
+
+                                if (searchLocalVariableReferenceVisitor.containsReference()) {
+                                    return false;
+                                }
+
+                                fdr.setVariableInitializer(new ExpressionVariableInitializer(expression));
+                                ((ClassFileFieldDeclaration)fdr.getFieldDeclaration()).setFirstLineNumber(expression.getLineNumber());
+
+                                return true;
                             }
                         }
                     }
                 }
             }
-
-            Iterator<Statement> statementIterator = statements.iterator();
-            Iterator<FieldDeclarator> fieldDeclaratorIterator = fields.iterator();
-
-            while (statementIterator.hasNext()) {
-                Statement statement = statementIterator.next();
-
-                if (statement.getClass() != ExpressionStatement.class) {
-                    break;
-                }
-
-                ExpressionStatement cdes = (ExpressionStatement) statement;
-
-                if (cdes.getExpression().getClass() != BinaryOperatorExpression.class) {
-                    break;
-                }
-
-                BinaryOperatorExpression cfboe = (BinaryOperatorExpression) cdes.getExpression();
-
-                if (cfboe.getLeftExpression().getClass() != FieldReferenceExpression.class) {
-                    break;
-                }
-
-                FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
-
-                if (!fre.getInternalTypeName().equals(internalTypeName)) {
-                    break;
-                }
-
-                FieldDeclarator fieldDeclarator = null;
-
-                while (fieldDeclaratorIterator.hasNext()) {
-                    FieldDeclarator fdr = fieldDeclaratorIterator.next();
-                    FieldDeclaration fdn = fdr.getFieldDeclaration();
-
-                    if (((fdn.getFlags() & Declaration.FLAG_STATIC) != 0) && fdr.getName().equals(fre.getName()) && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
-                        fieldDeclarator = fdr;
-                        break;
-                    }
-                }
-
-                if (fieldDeclarator == null) {
-                    break;
-                } else {
-                    Expression expression = cfboe.getRightExpression();
-
-                    fieldDeclarator.setVariableInitializer(new ExpressionVariableInitializer(expression));
-                    ((ClassFileFieldDeclaration)fieldDeclarator.getFieldDeclaration()).setFirstLineNumber(expression.getLineNumber());
-                    statementIterator.remove();
-                }
-            }
-
-            if (statements.size() == 0) {
-                staticDeclaration.setStatements(null);
-                staticDeclaration.setFirstLineNumber(0);
-            } else {
-                searchFirstLineNumberVisitor.init();
-                staticDeclaration.getStatements().accept(searchFirstLineNumberVisitor);
-                int firstLineNumber = searchFirstLineNumberVisitor.getLineNumber();
-
-                staticDeclaration.setFirstLineNumber((firstLineNumber==-1) ? 0 : firstLineNumber);
-            }
         }
+
+        return false;
     }
 
-    @Override
-    public void visit(FieldDeclarator declaration) {
-        fields.add(declaration);
+    protected int getFirstLineNumber(BaseStatement baseStatement) {
+        searchFirstLineNumberVisitor.init();
+        baseStatement.accept(searchFirstLineNumberVisitor);
+        return searchFirstLineNumberVisitor.getLineNumber();
+    }
+
+    protected void addStaticInitializerDeclaration(ClassFileStaticInitializerDeclaration sid, int lineNumber, BaseStatement statements) {
+        methods.add(new ClassFileStaticInitializerDeclaration(
+            sid.getBodyDeclaration(), sid.getClassFile(), sid.getMethod(), sid.getBindings(),
+            sid.getTypeBounds(), lineNumber, statements));
     }
 }
