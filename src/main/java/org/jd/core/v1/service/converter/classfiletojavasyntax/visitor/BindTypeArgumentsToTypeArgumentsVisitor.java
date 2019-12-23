@@ -111,9 +111,7 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
         } else {
             typeArguments.accept(this);
 
-            if (typeArguments == WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT) {
-                result = WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT;
-            } else if (typeArguments == result) {
+            if (typeArguments == result) {
                 result = type;
             } else if (result != null) {
                 result = type.createType(result);
@@ -133,9 +131,7 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
             } else {
                 typeArguments.accept(this);
 
-                if (typeArguments == WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT) {
-                    result = WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT;
-                } else if (typeArguments == result) {
+                if (typeArguments == result) {
                     result = type;
                 } else if (result != null) {
                     result = type.createType(result);
@@ -149,11 +145,7 @@ public class BindTypeArgumentsToTypeArgumentsVisitor extends AbstractTypeArgumen
                 typeArguments = result;
             }
 
-            if (typeArguments == WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT) {
-                result = WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT;
-            } else {
-                result = new InnerObjectType(type.getInternalName(), type.getQualifiedName(), type.getName(), typeArguments, type.getDimension(), outerObjectType);
-            }
+            result = new InnerObjectType(type.getInternalName(), type.getQualifiedName(), type.getName(), typeArguments, type.getDimension(), outerObjectType);
         }
     }
 
