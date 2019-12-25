@@ -38,7 +38,7 @@ public class LayoutFragmentProcessor implements Processor {
         boolean showBridgeAndSynthetic = message.getHeader("showBridgeAndSynthetic", Boolean.FALSE);
         Map<String, Object> configuration = message.getHeader("configuration");
         Object realignLineNumbersConfiguration = (configuration == null) ? "false" : configuration.get("realignLineNumbers");
-        boolean realignLineNumbers = (realignLineNumbersConfiguration == null) ? false : !"false".equals(realignLineNumbersConfiguration.toString());
+        boolean realignLineNumbers = (realignLineNumbersConfiguration == null) ? false : "true".equals(realignLineNumbersConfiguration.toString());
 
         List<Fragment> fragments = message.getBody();
 
