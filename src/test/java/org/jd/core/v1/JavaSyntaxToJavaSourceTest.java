@@ -87,6 +87,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                                                         new NewExpression(
                                                                                                 13,
                                                                                                 new ObjectType("java/util/Enumeration", "java.util.Enumeration", "Enumeration"),
+                                                                                                "()V",
                                                                                                 new BodyDeclaration(
                                                                                                         "java/util/Enumeration",
                                                                                                         new MemberDeclarations(

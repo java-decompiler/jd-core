@@ -355,7 +355,9 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(MethodInvocationExpression expression) {
         Expression exp = expression.getExpression();
+        BaseTypeArgument nonWildcardTypeArguments = expression.getNonWildcardTypeArguments();
         BaseExpression parameters = expression.getParameters();
+        boolean dot = false;
 
         if (exp.getClass() == ThisExpression.class) {
             // Nothing to do : do not print 'this.method(...)'
@@ -366,14 +368,23 @@ public class ExpressionVisitor extends TypeVisitor {
                 visit(expression, exp);
                 tokens.addLineNumberToken(expression);
                 tokens.add(TextToken.DOT);
+                dot = true;
             }
         } else {
             visit(expression, exp);
             tokens.addLineNumberToken(expression);
             tokens.add(TextToken.DOT);
+            dot = true;
         }
 
         tokens.addLineNumberToken(expression);
+
+        if ((nonWildcardTypeArguments != null) && dot) {
+            tokens.add(TextToken.LEFTANGLEBRACKET);
+            nonWildcardTypeArguments.accept(this);
+            tokens.add(TextToken.RIGHTANGLEBRACKET);
+        }
+
         tokens.add(new ReferenceToken(ReferenceToken.METHOD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
@@ -446,18 +457,11 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(NewExpression expression) {
-        BaseTypeArgument nonWildcardTypeArguments = expression.getNonWildcardTypeArguments();
         BodyDeclaration bodyDeclaration = expression.getBodyDeclaration();
 
         tokens.addLineNumberToken(expression);
         tokens.add(NEW);
         tokens.add(TextToken.SPACE);
-
-        if (nonWildcardTypeArguments != null) {
-            tokens.add(TextToken.LEFTANGLEBRACKET);
-            nonWildcardTypeArguments.accept(this);
-            tokens.add(TextToken.RIGHTANGLEBRACKET);
-        }
 
         ObjectType objectType = expression.getObjectType();
 
@@ -502,11 +506,6 @@ public class ExpressionVisitor extends TypeVisitor {
 
             tokens = new Tokens();
         }
-    }
-
-    @Override
-    public void visit(NewInnerExpression expression) {
-        visit((NewExpression) expression);
     }
 
     @Override
@@ -731,7 +730,6 @@ public class ExpressionVisitor extends TypeVisitor {
         @Override public void visit(NewArray expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(NewExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(NewInitializedArray expression) { ExpressionVisitor.this.visit(expression); }
-        @Override public void visit(NewInnerExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(NullExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(ObjectTypeReferenceExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(ParenthesesExpression expression) { ExpressionVisitor.this.visit(expression); }

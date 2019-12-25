@@ -9,7 +9,7 @@ package org.jd.core.v1;
 
 import junit.framework.TestCase;
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypeParametersToTypeArgumentsVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class BindTypeParametersToTypeArgumentsVisitorTest extends TestCase {
 
         GenericType genericType = new GenericType("I", 0);
 
-        BindTypeParametersToTypeArgumentsVisitor visitor = new BindTypeParametersToTypeArgumentsVisitor();
+        BindTypesToTypesVisitor visitor = new BindTypesToTypesVisitor();
 
         visitor.setBindings(bindings);
         visitor.init();
@@ -44,7 +44,7 @@ public class BindTypeParametersToTypeArgumentsVisitorTest extends TestCase {
 
         GenericType genericType = new GenericType("I", 3);
 
-        BindTypeParametersToTypeArgumentsVisitor visitor = new BindTypeParametersToTypeArgumentsVisitor();
+        BindTypesToTypesVisitor visitor = new BindTypesToTypesVisitor();
 
         visitor.setBindings(bindings);
         visitor.init();

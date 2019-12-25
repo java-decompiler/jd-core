@@ -204,7 +204,6 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(NewExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
-        safeAccept(expression.getNonWildcardTypeArguments());
 
         BaseType type = expression.getType();
 
@@ -217,19 +216,6 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(NewInitializedArray expression) {
         if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
         super.visit(expression);
-    }
-
-    @Override
-    public void visit(NewInnerExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
-        expression.getExpression().accept(this);
-        safeAccept(expression.getNonWildcardTypeArguments());
-
-        BaseType type = expression.getType();
-
-        type.accept(this);
-        safeAccept(expression.getParameters());
-        safeAccept(expression.getBodyDeclaration());
     }
 
     @Override

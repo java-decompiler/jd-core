@@ -17,11 +17,11 @@ public class ClassFileNewExpression extends NewExpression {
     protected BaseType parameterTypes;
 
     public ClassFileNewExpression(int lineNumber, ObjectType type) {
-        super(lineNumber, type);
+        super(lineNumber, type, null);
     }
 
     public ClassFileNewExpression(int lineNumber, ObjectType type, BodyDeclaration bodyDeclaration) {
-        super(lineNumber, type, bodyDeclaration);
+        super(lineNumber, type, null, bodyDeclaration);
     }
 
     public BaseType getParameterTypes() {

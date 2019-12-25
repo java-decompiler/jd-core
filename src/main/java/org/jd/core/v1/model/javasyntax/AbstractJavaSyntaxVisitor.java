@@ -297,8 +297,9 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(MethodInvocationExpression expression) {
-        safeAccept(expression.getParameters());
         expression.getExpression().accept(this);
+        safeAccept(expression.getNonWildcardTypeArguments());
+        safeAccept(expression.getParameters());
     }
 
     @Override
@@ -319,7 +320,6 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
         BaseType type = expression.getType();
 
         type.accept(this);
-        safeAccept(expression.getNonWildcardTypeArguments());
         safeAccept(expression.getParameters());
         // safeAccept(expression.getBodyDeclaration());
     }
@@ -330,17 +330,6 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
         type.accept(this);
         safeAccept(expression.getArrayInitializer());
-    }
-
-    @Override
-    public void visit(NewInnerExpression expression) {
-        BaseType type = expression.getType();
-
-        type.accept(this);
-        expression.getExpression().accept(this);
-        safeAccept(expression.getNonWildcardTypeArguments());
-        safeAccept(expression.getParameters());
-        //safeAccept(expression.getBodyDeclaration());
     }
 
     @Override
@@ -627,16 +616,16 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     }
 
     @Override
-    public void visit(TypeParameter type) {}
+    public void visit(TypeParameter parameter) {}
 
     @Override
-    public void visit(TypeParameterWithTypeBounds type) {
-        type.getTypeBounds().accept(this);
+    public void visit(TypeParameterWithTypeBounds parameter) {
+        parameter.getTypeBounds().accept(this);
     }
 
     @Override
-    public void visit(TypeParameters types) {
-        Iterator<TypeParameter> iterator = types.iterator();
+    public void visit(TypeParameters parameters) {
+        Iterator<TypeParameter> iterator = parameters.iterator();
 
         while (iterator.hasNext())
             iterator.next().accept(this);

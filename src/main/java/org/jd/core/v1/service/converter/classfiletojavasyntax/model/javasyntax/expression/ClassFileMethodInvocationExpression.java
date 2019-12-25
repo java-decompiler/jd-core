@@ -16,9 +16,9 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeParametersToTypeArgumentsBinder;
 
 public class ClassFileMethodInvocationExpression extends MethodInvocationExpression {
+    protected TypeParametersToTypeArgumentsBinder binder;
     protected BaseTypeParameter typeParameters;
     protected BaseType parameterTypes;
-    protected TypeParametersToTypeArgumentsBinder binder;
 
     public ClassFileMethodInvocationExpression(
             TypeParametersToTypeArgumentsBinder binder,

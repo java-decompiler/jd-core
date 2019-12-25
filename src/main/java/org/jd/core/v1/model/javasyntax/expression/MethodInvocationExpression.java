@@ -7,9 +7,11 @@
 
 package org.jd.core.v1.model.javasyntax.expression;
 
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class MethodInvocationExpression extends MethodReferenceExpression {
+    protected BaseTypeArgument nonWildcardTypeArguments;
     protected BaseExpression parameters;
 
     public MethodInvocationExpression(Type type, Expression expression, String internalTypeName, String name, String descriptor) {
@@ -28,6 +30,14 @@ public class MethodInvocationExpression extends MethodReferenceExpression {
     public MethodInvocationExpression(int lineNumber, Type type, Expression expression, String internalTypeName, String name, String descriptor, BaseExpression parameters) {
         super(lineNumber, type, expression, internalTypeName, name, descriptor);
         this.parameters = parameters;
+    }
+
+    public BaseTypeArgument getNonWildcardTypeArguments() {
+        return nonWildcardTypeArguments;
+    }
+
+    public void setNonWildcardTypeArguments(BaseTypeArgument nonWildcardTypeArguments) {
+        this.nonWildcardTypeArguments = nonWildcardTypeArguments;
     }
 
     public BaseExpression getParameters() {

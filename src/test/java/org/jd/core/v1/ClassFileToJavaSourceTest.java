@@ -24,7 +24,6 @@ import org.jd.core.v1.regex.PatternMaker;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -716,7 +715,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 310 */", "for (int j : new int[] { 4 })")));
         assertTrue(source.matches(PatternMaker.make(": 389 */", "for (String s : array)")));
         assertTrue(source.matches(PatternMaker.make(": 403 */", "for (String s : list)")));
-        assertTrue(source.matches(PatternMaker.make(": 411 */", "Iterator<Class<?>> iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
+        assertTrue(source.matches(PatternMaker.make(": 411 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
 
         assertTrue(source.indexOf("/* 489: 489 */") != -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
@@ -800,7 +799,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 345 */", "while (b < 10);")));
         assertTrue(source.matches(PatternMaker.make(": 381 */", "for (String str : paramArrayOfString)")));
         assertTrue(source.matches(PatternMaker.make(": 395 */", "for (String str : paramList)")));
-        assertTrue(source.matches(PatternMaker.make(": 407 */", "Iterator<Class<?>> iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
+        assertTrue(source.matches(PatternMaker.make(": 407 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
         assertTrue(source.matches(PatternMaker.make(": 423 */", "for (byte b = 0; b < 3; b++)")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
@@ -844,7 +843,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 345 */", "while (i < 10);")));
         assertTrue(source.matches(PatternMaker.make(": 381 */", "for (String s : array)")));
         assertTrue(source.matches(PatternMaker.make(": 395 */", "for (String s : list)")));
-        assertTrue(source.matches(PatternMaker.make(": 407 */", "Iterator<Class<?>> iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
+        assertTrue(source.matches(PatternMaker.make(": 407 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
         assertTrue(source.matches(PatternMaker.make(": 423 */", "for (int i = 0; i < 3; i++)")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
@@ -887,7 +886,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 345 */", "while (i < 10);")));
         assertTrue(source.matches(PatternMaker.make(": 381 */", "for (String s : array)")));
         assertTrue(source.matches(PatternMaker.make(": 395 */", "for (String s : list)")));
-        assertTrue(source.matches(PatternMaker.make(": 407 */", "Iterator<Class<?>> iterator = Arrays.asList(getClass().getInterfaces()).iterator()")));
+        assertTrue(source.matches(PatternMaker.make(": 407 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
         assertTrue(source.matches(PatternMaker.make(": 423 */", "for (int i = 0; i < 3; i++)")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);

@@ -199,13 +199,6 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
     @Override public void visit(NewInitializedArray expression) {}
 
     @Override
-    public void visit(NewInnerExpression expression) {
-        expression.setExpression(updateExpression(expression.getExpression()));
-        expression.getExpression().accept(this);
-        visit((NewExpression)expression);
-    }
-
-    @Override
     public void visit(ParenthesesExpression expression) {
         expression.setExpression(updateExpression(expression.getExpression()));
         expression.getExpression().accept(this);

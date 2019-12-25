@@ -94,7 +94,6 @@ public class DeclaredSyntheticLocalVariableVisitor extends AbstractJavaSyntaxVis
 
     @Override
     public void visit(NewExpression expression) {
-        safeAccept(expression.getNonWildcardTypeArguments());
         safeAccept(expression.getParameters());
         safeAccept(expression.getBodyDeclaration());
     }

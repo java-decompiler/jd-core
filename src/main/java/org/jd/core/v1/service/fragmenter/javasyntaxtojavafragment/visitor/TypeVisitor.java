@@ -19,7 +19,6 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
 public class TypeVisitor extends AbstractJavaSyntaxVisitor {
@@ -204,15 +203,15 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void visit(TypeParameters list) {
-        int size = list.size();
+    public void visit(TypeParameters parameters) {
+        int size = parameters.size();
 
         if (size > 0) {
-            list.get(0).accept(this);
+            parameters.get(0).accept(this);
 
             for (int i=1; i<size; i++) {
                 tokens.add(TextToken.COMMA_SPACE);
-                list.get(i).accept(this);
+                parameters.get(i).accept(this);
             }
         }
     }

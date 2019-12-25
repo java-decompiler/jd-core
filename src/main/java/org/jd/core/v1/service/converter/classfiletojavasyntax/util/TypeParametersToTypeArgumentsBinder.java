@@ -9,7 +9,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
@@ -22,11 +21,14 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class TypeParametersToTypeArgumentsBinder {
+    protected static final RemoveNonWildcardTypeArgumentsVisitor REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR = new RemoveNonWildcardTypeArgumentsVisitor();
+
     protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
-    protected BindTypeParametersToTypeArgumentsVisitor bindTypeParametersToTypeArgumentsVisitor = new BindTypeParametersToTypeArgumentsVisitor();
+    protected BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
     protected SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
     protected TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
     protected BaseTypeToTypeArgumentVisitor baseTypeToTypeArgumentVisitor = new BaseTypeToTypeArgumentVisitor();
+    protected BindTypeParametersToNonWildcardTypeArgumentsVisitor bindTypeParametersToNonWildcardTypeArgumentsVisitor = new BindTypeParametersToNonWildcardTypeArgumentsVisitor();
     protected BindVisitor bindVisitor = new BindVisitor();
 
     protected TypeMaker typeMaker;
@@ -52,8 +54,8 @@ public class TypeParametersToTypeArgumentsBinder {
         BaseType parameterTypes = clone(methodTypes.parameterTypes);
         Map<String, TypeArgument> bindings = createBindings(null, null, null, methodTypes.typeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
 
-        parameterTypes = bindParameterTypesWithArgumentTypes(bindings, parameterTypes);
-        bindParameterTypesWithArgumentTypes(parameterTypes, parameters);
+        parameterTypes = bind(bindings, parameterTypes);
+        bindParameters(parameterTypes, parameters);
 
         return new ClassFileConstructorInvocationExpression(lineNumber, objectType, descriptor, parameterTypes, parameters);
     }
@@ -78,8 +80,8 @@ public class TypeParametersToTypeArgumentsBinder {
             }
         }
 
-        parameterTypes = bindParameterTypesWithArgumentTypes(bindings, parameterTypes);
-        bindParameterTypesWithArgumentTypes(parameterTypes, parameters);
+        parameterTypes = bind(bindings, parameterTypes);
+        bindParameters(parameterTypes, parameters);
 
         return new ClassFileSuperConstructorInvocationExpression(lineNumber, objectType, descriptor, parameterTypes, parameters);
     }
@@ -117,7 +119,7 @@ public class TypeParametersToTypeArgumentsBinder {
                             bindings = createBindings(expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
                         }
 
-                        type = (Type)bindParameterTypesWithArgumentTypes(bindings, type);
+                        type = (Type) bind(bindings, type);
                     }
                 }
             }
@@ -133,6 +135,7 @@ public class TypeParametersToTypeArgumentsBinder {
     public void bindParameterTypesWithArgumentTypes(Type type, Expression expression) {
         bindVisitor.init(type);
         expression.accept(bindVisitor);
+        expression.accept(REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR);
     }
 
     protected Type checkTypeArguments(Type type, AbstractLocalVariable localVariable) {
@@ -156,7 +159,7 @@ public class TypeParametersToTypeArgumentsBinder {
         return type;
     }
 
-    protected void bindParameterTypesWithArgumentTypes(Type type, ClassFileMethodInvocationExpression mie) {
+    protected void bind(Type type, ClassFileMethodInvocationExpression mie) {
         BaseType parameterTypes = mie.getParameterTypes();
         BaseExpression parameters = mie.getParameters();
         Expression expression = mie.getExpression();
@@ -195,14 +198,21 @@ public class TypeParametersToTypeArgumentsBinder {
                 }
 
                 Map<String, TypeArgument> bindings = createBindings(expression, typeParameters, typeArguments, methodTypeParameters, type, t, parameterTypes, parameters);
+                boolean bindingsContainsNull = bindings.containsValue(null);
 
-                mie.setParameterTypes(parameterTypes = bindParameterTypesWithArgumentTypes(bindings, parameterTypes));
-                mie.setType((Type) bindParameterTypesWithArgumentTypes(bindings, mie.getType()));
+                mie.setParameterTypes(parameterTypes = bind(bindings, parameterTypes));
+                mie.setType((Type) bind(bindings, mie.getType()));
+
+                if ((methodTypeParameters != null) && !bindingsContainsNull) {
+                    bindTypeParametersToNonWildcardTypeArgumentsVisitor.init(bindings);
+                    methodTypeParameters.accept(bindTypeParametersToNonWildcardTypeArgumentsVisitor);
+                    mie.setNonWildcardTypeArguments(bindTypeParametersToNonWildcardTypeArgumentsVisitor.getTypeArgument());
+                }
 
                 if (expressionType.isObject()) {
                     ObjectType expressionObjectType = (ObjectType) expressionType;
 
-                    if (bindings.containsValue(null)) {
+                    if (bindingsContainsNull) {
                         expressionType = expressionObjectType.createType(null);
                     } else {
                         boolean statik = (expression.getClass() == ObjectTypeReferenceExpression.class);
@@ -223,11 +233,13 @@ public class TypeParametersToTypeArgumentsBinder {
             }
         }
 
-        bindParameterTypesWithArgumentTypes(expressionType, expression);
-        bindParameterTypesWithArgumentTypes(parameterTypes, parameters);
+        bindVisitor.init(expressionType);
+        expression.accept(bindVisitor);
+
+        bindParameters(parameterTypes, parameters);
     }
 
-    protected void bindParameterTypesWithArgumentTypes(Type type, ClassFileNewExpression ne) {
+    protected void bind(Type type, ClassFileNewExpression ne) {
         BaseType parameterTypes = ne.getParameterTypes();
         BaseExpression parameters = ne.getParameters();
         ObjectType neObjectType = ne.getObjectType();
@@ -260,7 +272,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
                 Map<String, TypeArgument> bindings = createBindings(null, typeParameters, typeArguments, null, type, t, parameterTypes, parameters);
 
-                ne.setParameterTypes(parameterTypes = bindParameterTypesWithArgumentTypes(bindings, parameterTypes));
+                ne.setParameterTypes(parameterTypes = bind(bindings, parameterTypes));
 
                 // Replace wildcards
                 for (Map.Entry<String, TypeArgument> entry : bindings.entrySet()) {
@@ -269,24 +281,30 @@ public class TypeParametersToTypeArgumentsBinder {
                     entry.setValue(typeArgumentToTypeVisitor.getType());
                 }
 
-                ne.setType((ObjectType) bindParameterTypesWithArgumentTypes(bindings, neObjectType));
+                ne.setType((ObjectType) bind(bindings, neObjectType));
             }
         }
 
-        bindParameterTypesWithArgumentTypes(parameterTypes, parameters);
+        bindParameters(parameterTypes, parameters);
     }
 
-    protected void bindParameterTypesWithArgumentTypes(BaseType types, BaseExpression expressions) {
-        if (types != null) {
-            if (types.isList() && expressions.isList()) {
-                Iterator<Type> parameterTypesIterator = types.iterator();
-                Iterator<Expression> parametersIterator = expressions.iterator();
+    protected void bindParameters(BaseType parameterTypes, BaseExpression parameters) {
+        if (parameterTypes != null) {
+            if (parameterTypes.isList() && parameters.isList()) {
+                Iterator<Type> parameterTypesIterator = parameterTypes.iterator();
+                Iterator<Expression> parametersIterator = parameters.iterator();
 
                 while (parametersIterator.hasNext()) {
-                    bindParameterTypesWithArgumentTypes(parameterTypesIterator.next(), parametersIterator.next());
+                    Expression parameter = parametersIterator.next();
+                    bindVisitor.init(parameterTypesIterator.next());
+                    parameter.accept(bindVisitor);
+                    parameter.accept(REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR);
                 }
             } else {
-                bindParameterTypesWithArgumentTypes(types.getFirst(), expressions.getFirst());
+                Expression parameter = parameters.getFirst();
+                bindVisitor.init(parameterTypes.getFirst());
+                parameter.accept(bindVisitor);
+                parameter.accept(REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR);
             }
         }
     }
@@ -369,10 +387,10 @@ public class TypeParametersToTypeArgumentsBinder {
                         if (baseType == null) {
                             entry.setValue(WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);
                         } else {
-                            bindTypeParametersToTypeArgumentsVisitor.setBindings(bindings);
-                            bindTypeParametersToTypeArgumentsVisitor.init();
-                            baseType.accept(bindTypeParametersToTypeArgumentsVisitor);
-                            baseType = bindTypeParametersToTypeArgumentsVisitor.getType();
+                            bindTypesToTypesVisitor.setBindings(bindings);
+                            bindTypesToTypesVisitor.init();
+                            baseType.accept(bindTypesToTypesVisitor);
+                            baseType = bindTypesToTypesVisitor.getType();
 
                             baseTypeToTypeArgumentVisitor.init();
                             baseType.accept(baseTypeToTypeArgumentVisitor);
@@ -414,12 +432,12 @@ public class TypeParametersToTypeArgumentsBinder {
         }
     }
 
-    protected BaseType bindParameterTypesWithArgumentTypes(Map<String, TypeArgument> bindings, BaseType parameterTypes) {
+    protected BaseType bind(Map<String, TypeArgument> bindings, BaseType parameterTypes) {
         if ((parameterTypes != null) && !bindings.isEmpty()) {
-            bindTypeParametersToTypeArgumentsVisitor.setBindings(bindings);
-            bindTypeParametersToTypeArgumentsVisitor.init();
-            parameterTypes.accept(bindTypeParametersToTypeArgumentsVisitor);
-            parameterTypes = bindTypeParametersToTypeArgumentsVisitor.getType();
+            bindTypesToTypesVisitor.setBindings(bindings);
+            bindTypesToTypesVisitor.init();
+            parameterTypes.accept(bindTypesToTypesVisitor);
+            parameterTypes = bindTypesToTypesVisitor.getType();
         }
 
         return parameterTypes;
@@ -504,7 +522,7 @@ public class TypeParametersToTypeArgumentsBinder {
         @Override
         public void visit(MethodInvocationExpression expression) {
             ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
-            bindParameterTypesWithArgumentTypes(type, mie);
+            bind(type, mie);
         }
 
         @Override
@@ -518,7 +536,7 @@ public class TypeParametersToTypeArgumentsBinder {
         @Override
         public void visit(NewExpression expression) {
             ClassFileNewExpression ne = (ClassFileNewExpression)expression;
-            bindParameterTypesWithArgumentTypes(type, ne);
+            bind(type, ne);
         }
 
         @Override
@@ -560,16 +578,25 @@ public class TypeParametersToTypeArgumentsBinder {
             Type t = type;
 
             expression.setType(t);
-            bindParameterTypesWithArgumentTypes(t, expression.getExpressionTrue());
-            bindParameterTypesWithArgumentTypes(t, expression.getExpressionFalse());
+            expression.getExpressionTrue().accept(this);
+            type = t;
+            expression.getExpressionFalse().accept(this);
         }
 
         @Override
         public void visit(BinaryOperatorExpression expression) {
             Type t = type;
 
-            bindParameterTypesWithArgumentTypes(t, expression.getLeftExpression());
-            bindParameterTypesWithArgumentTypes(t, expression.getRightExpression());
+            expression.getLeftExpression().accept(this);
+            type = t;
+            expression.getRightExpression().accept(this);
+        }
+    }
+
+    protected static class RemoveNonWildcardTypeArgumentsVisitor extends AbstractNopExpressionVisitor {
+        @Override
+        public void visit(MethodInvocationExpression expression) {
+            expression.setNonWildcardTypeArguments(null);
         }
     }
 }

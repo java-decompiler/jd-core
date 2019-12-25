@@ -43,13 +43,13 @@ import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
 public class ConvertClassFileProcessor implements Processor {
     protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor() {
         @Override
-        public void visit(TypeParameter type) {
-            bindings.put(type.getIdentifier(), new GenericType(type.getIdentifier()));
+        public void visit(TypeParameter parameter) {
+            bindings.put(parameter.getIdentifier(), new GenericType(parameter.getIdentifier()));
         }
         @Override
-        public void visit(TypeParameterWithTypeBounds type) {
-            bindings.put(type.getIdentifier(), new GenericType(type.getIdentifier()));
-            typeBounds.put(type.getIdentifier(), type.getTypeBounds());
+        public void visit(TypeParameterWithTypeBounds parameter) {
+            bindings.put(parameter.getIdentifier(), new GenericType(parameter.getIdentifier()));
+            typeBounds.put(parameter.getIdentifier(), parameter.getTypeBounds());
         }
     };
 

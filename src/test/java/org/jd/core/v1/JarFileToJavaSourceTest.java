@@ -36,12 +36,11 @@ public class JarFileToJavaSourceTest extends TestCase {
     protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
     protected WriteTokenProcessor writer = new WriteTokenProcessor();
 
-    // TODO In progress
-//    @Test
-//    public void testCommonsLang3() throws Exception {
-//        // Decompile and recompile 'commons-lang3-3.9.jar'
-//        test(org.apache.commons.lang3.JavaVersion.class);
-//    }
+    @Test
+    public void testCommonsCodec() throws Exception {
+        // Decompile and recompile 'commons-codec-1.13.jar'
+        test(org.apache.commons.codec.Charsets.class);
+    }
 
     @Test
     public void testCommonsCollections4() throws Exception {
@@ -50,10 +49,17 @@ public class JarFileToJavaSourceTest extends TestCase {
     }
 
     @Test
-    public void testCommonsCodec() throws Exception {
-        // Decompile and recompile 'commons-codec-1.13.jar'
-        test(org.apache.commons.codec.Charsets.class);
+    public void testCommonsLang3() throws Exception {
+        // Decompile and recompile 'commons-lang3-3.9.jar'
+        test(org.apache.commons.lang3.JavaVersion.class);
     }
+
+    // TODO In progress
+//    @Test
+//    public void testJUnit4() throws Exception {
+//        // Decompile and recompile 'junit:junit:4.12'
+//        test(org.junit.Test.class);
+//    }
 
     protected void test(Class clazz) throws Exception {
         test(new FileInputStream(Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile()));

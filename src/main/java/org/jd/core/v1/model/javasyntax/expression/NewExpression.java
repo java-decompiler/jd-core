@@ -8,39 +8,26 @@
 package org.jd.core.v1.model.javasyntax.expression;
 
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
-import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class NewExpression extends AbstractLineNumberExpression {
-    protected BaseTypeArgument nonWildcardTypeArguments;
     protected ObjectType type;
     protected String descriptor;
     protected BaseExpression parameters;
     protected BodyDeclaration bodyDeclaration;
 
-    public NewExpression(int lineNumber, ObjectType type) {
+    public NewExpression(int lineNumber, ObjectType type, String descriptor) {
         super(lineNumber);
-        this.type = type;
-    }
-
-    public NewExpression(int lineNumber, ObjectType type, BodyDeclaration bodyDeclaration) {
-        super(lineNumber);
-        this.type = type;
-        this.bodyDeclaration = bodyDeclaration;
-    }
-
-    public NewExpression(int lineNumber, BaseTypeArgument nonWildcardTypeArguments, ObjectType type, String descriptor, BaseExpression parameters, BodyDeclaration bodyDeclaration) {
-        super(lineNumber);
-        this.nonWildcardTypeArguments = nonWildcardTypeArguments;
         this.type = type;
         this.descriptor = descriptor;
-        this.parameters = parameters;
-        this.bodyDeclaration = bodyDeclaration;
     }
 
-    public BaseTypeArgument getNonWildcardTypeArguments() {
-        return nonWildcardTypeArguments;
+    public NewExpression(int lineNumber, ObjectType type, String descriptor, BodyDeclaration bodyDeclaration) {
+        super(lineNumber);
+        this.type = type;
+        this.descriptor = descriptor;
+        this.bodyDeclaration = bodyDeclaration;
     }
 
     public ObjectType getObjectType() {

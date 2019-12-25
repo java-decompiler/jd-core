@@ -66,7 +66,6 @@ public class SearchFirstLineNumberVisitor extends AbstractJavaSyntaxVisitor {
     @Override public void visit(NewArray expression) { lineNumber = expression.getLineNumber(); }
     @Override public void visit(NewExpression expression) { lineNumber = expression.getLineNumber(); }
     @Override public void visit(NewInitializedArray expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(NewInnerExpression expression) { lineNumber = expression.getLineNumber(); }
     @Override public void visit(NullExpression expression) { lineNumber = expression.getLineNumber(); }
     @Override public void visit(ObjectTypeReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
     @Override public void visit(ParenthesesExpression expression) { lineNumber = expression.getLineNumber(); }

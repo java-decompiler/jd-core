@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
-public class BindTypeParametersToTypeArgumentsVisitor extends AbstractNopTypeVisitor {
+public class BindTypesToTypesVisitor extends AbstractNopTypeVisitor {
     protected TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
     protected BindTypeArgumentsToTypeArgumentsVisitor bindTypeArgumentsToTypeArgumentsVisitor = new BindTypeArgumentsToTypeArgumentsVisitor();
 

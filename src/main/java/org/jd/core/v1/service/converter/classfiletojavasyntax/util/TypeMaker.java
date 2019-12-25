@@ -14,7 +14,7 @@ import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.*;
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypeParametersToTypeArgumentsVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileFormatException;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileReader;
 
@@ -940,7 +940,7 @@ public class TypeMaker {
                     }
                 }
             } else {
-                BindTypeParametersToTypeArgumentsVisitor bindTypeParametersToTypeArgumentsVisitor = new BindTypeParametersToTypeArgumentsVisitor();
+                BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
                 HashMap<String, TypeArgument> bindings = new HashMap<>();
 
                 if (rightTypeTypes.typeParameters.isList() && objectType.getTypeArguments().isTypeArgumentList()) {
@@ -954,12 +954,12 @@ public class TypeMaker {
                     bindings.put(rightTypeTypes.typeParameters.getFirst().getIdentifier(), objectType.getTypeArguments().getTypeArgumentFirst());
                 }
 
-                bindTypeParametersToTypeArgumentsVisitor.setBindings(bindings);
+                bindTypesToTypesVisitor.setBindings(bindings);
 
                 if (rightTypeTypes.superType != null) {
-                    bindTypeParametersToTypeArgumentsVisitor.init();
-                    rightTypeTypes.superType.accept(bindTypeParametersToTypeArgumentsVisitor);
-                    ObjectType ot = (ObjectType) bindTypeParametersToTypeArgumentsVisitor.getType();
+                    bindTypesToTypesVisitor.init();
+                    rightTypeTypes.superType.accept(bindTypesToTypesVisitor);
+                    ObjectType ot = (ObjectType) bindTypesToTypesVisitor.getType();
                     ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, ot);
 
                     if (ot != null) {
@@ -969,9 +969,9 @@ public class TypeMaker {
                 }
                 if (rightTypeTypes.interfaces != null) {
                     for (Type interfaze : rightTypeTypes.interfaces) {
-                        bindTypeParametersToTypeArgumentsVisitor.init();
-                        interfaze.accept(bindTypeParametersToTypeArgumentsVisitor);
-                        ObjectType ot = (ObjectType) bindTypeParametersToTypeArgumentsVisitor.getType();
+                        bindTypesToTypesVisitor.init();
+                        interfaze.accept(bindTypesToTypesVisitor);
+                        ObjectType ot = (ObjectType) bindTypesToTypesVisitor.getType();
                         ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, ot);
 
                         if (ot != null) {
@@ -1212,7 +1212,7 @@ public class TypeMaker {
             TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
             if (typeTypes.typeParameters != null) {
-                BindTypeParametersToTypeArgumentsVisitor bindTypeParametersToTypeArgumentsVisitor = new BindTypeParametersToTypeArgumentsVisitor();
+                BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
                 HashMap<String, TypeArgument> bindings = new HashMap<>();
 
                 if (typeTypes.typeParameters.isList() && typeArguments.isTypeArgumentList()) {
@@ -1226,11 +1226,11 @@ public class TypeMaker {
                     bindings.put(typeTypes.typeParameters.getFirst().getIdentifier(), typeArguments.getTypeArgumentFirst());
                 }
 
-                bindTypeParametersToTypeArgumentsVisitor.setBindings(bindings);
+                bindTypesToTypesVisitor.setBindings(bindings);
 
-                bindTypeParametersToTypeArgumentsVisitor.init();
-                type.accept(bindTypeParametersToTypeArgumentsVisitor);
-                type = (Type) bindTypeParametersToTypeArgumentsVisitor.getType();
+                bindTypesToTypesVisitor.init();
+                type.accept(bindTypesToTypesVisitor);
+                type = (Type) bindTypesToTypesVisitor.getType();
             }
         }
 
@@ -1301,7 +1301,7 @@ public class TypeMaker {
             TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
             if ((typeTypes != null) && (typeTypes.typeParameters != null)) {
-                BindTypeParametersToTypeArgumentsVisitor bindTypeParametersToTypeArgumentsVisitor = new BindTypeParametersToTypeArgumentsVisitor();
+                BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
                 HashMap<String, TypeArgument> bindings = new HashMap<>();
                 MethodTypes newMethodTypes = new MethodTypes();
 
@@ -1316,14 +1316,14 @@ public class TypeMaker {
                     bindings.put(typeTypes.typeParameters.getFirst().getIdentifier(), typeArguments.getTypeArgumentFirst());
                 }
 
-                bindTypeParametersToTypeArgumentsVisitor.setBindings(bindings);
+                bindTypesToTypesVisitor.setBindings(bindings);
 
                 if (methodTypes.parameterTypes == null) {
                     newMethodTypes.parameterTypes = null;
                 } else {
-                    bindTypeParametersToTypeArgumentsVisitor.init();
-                    methodTypes.parameterTypes.accept(bindTypeParametersToTypeArgumentsVisitor);
-                    BaseType baseType = bindTypeParametersToTypeArgumentsVisitor.getType();
+                    bindTypesToTypesVisitor.init();
+                    methodTypes.parameterTypes.accept(bindTypesToTypesVisitor);
+                    BaseType baseType = bindTypesToTypesVisitor.getType();
 
                     if (baseType.isList() && (baseType.getClass() == Types.class)) {
                         baseType = new UnmodifiableTypes(baseType.getList());
@@ -1332,9 +1332,9 @@ public class TypeMaker {
                     newMethodTypes.parameterTypes = baseType;
                 }
 
-                bindTypeParametersToTypeArgumentsVisitor.init();
-                methodTypes.returnedType.accept(bindTypeParametersToTypeArgumentsVisitor);
-                newMethodTypes.returnedType = (Type)bindTypeParametersToTypeArgumentsVisitor.getType();
+                bindTypesToTypesVisitor.init();
+                methodTypes.returnedType.accept(bindTypesToTypesVisitor);
+                newMethodTypes.returnedType = (Type)bindTypesToTypesVisitor.getType();
 
                 newMethodTypes.typeParameters = null;
                 newMethodTypes.exceptionTypes = methodTypes.exceptionTypes;

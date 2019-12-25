@@ -21,20 +21,20 @@ public class PopulateBindingsWithTypeParameterVisitor implements TypeParameterVi
     }
 
     @Override
-    public void visit(TypeParameter type) {
-        bindings.put(type.getIdentifier(), null);
+    public void visit(TypeParameter parameter) {
+        bindings.put(parameter.getIdentifier(), null);
     }
 
     @Override
-    public void visit(TypeParameterWithTypeBounds type) {
-        bindings.put(type.getIdentifier(), null);
-        typeBounds.put(type.getIdentifier(), type.getTypeBounds());
+    public void visit(TypeParameterWithTypeBounds parameter) {
+        bindings.put(parameter.getIdentifier(), null);
+        typeBounds.put(parameter.getIdentifier(), parameter.getTypeBounds());
     }
 
     @Override
-    public void visit(TypeParameters types) {
-        for (TypeParameter typeParameter : types) {
-            typeParameter.accept(this);
+    public void visit(TypeParameters parameters) {
+        for (TypeParameter parameter : parameters) {
+            parameter.accept(this);
         }
     }
 }

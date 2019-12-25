@@ -284,11 +284,6 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override
-    public void visit(NewInnerExpression expression) {
-        visit((NewExpression)expression);
-    }
-
     protected void acceptListExpression(List<? extends Expression> list) {
         int size = list.size();
 
