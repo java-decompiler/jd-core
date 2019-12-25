@@ -58,6 +58,7 @@ publishing {
 }
 
 bintray {
+    // Command: gradlew -Dbintray.user=XXX -Dbintray.key=YYY bintrayUpload
     user = System.getProperty('bintray.user')
     key = System.getProperty('bintray.key')
     publications = ['publicationJdCore']
