@@ -2637,9 +2637,12 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 24 */", "return unsafeGetZoneId(zoneString);")));
         assertTrue(source.matches(PatternMaker.make(": 26 */", "System.err.println(\"Invalid time zone: \" + zoneString + \"; using default time zone instead.\");")));
         assertTrue(source.matches(PatternMaker.make(": 27 */", "return ZoneId.systemDefault();")));
-        assertTrue(source.matches(PatternMaker.make(": 32 */", "default ZonedDateTime getZonedDateTime(String zoneString) { return getZonedDateTime(getLocalDateTime(), getZoneId(zoneString)); }")));
-        assertTrue(source.matches(PatternMaker.make(": 36 */", "private static ZoneId unsafeGetZoneId(String zoneString) { return ZoneId.of(zoneString); }")));
-        assertTrue(source.matches(PatternMaker.make(": 40 */", "private ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId) { return ZonedDateTime.of(localDateTime, zoneId); }")));
+        assertTrue(source.matches(PatternMaker.make("default ZonedDateTime getZonedDateTime(String zoneString)")));
+        assertTrue(source.matches(PatternMaker.make(": 32 */", "return getZonedDateTime(getLocalDateTime(), getZoneId(zoneString));")));
+        assertTrue(source.matches(PatternMaker.make("private static ZoneId unsafeGetZoneId(String zoneString)")));
+        assertTrue(source.matches(PatternMaker.make(": 36 */", "return ZoneId.of(zoneString);")));
+        assertTrue(source.matches(PatternMaker.make("private ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId)")));
+        assertTrue(source.matches(PatternMaker.make(": 40 */", "return ZonedDateTime.of(localDateTime, zoneId);")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
 
