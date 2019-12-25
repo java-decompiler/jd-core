@@ -6,8 +6,6 @@ JD-Core is a JAVA decompiler written in JAVA.
 [http://java-decompiler.github.io](http://java-decompiler.github.io)
 - JD-Core source code:
 [https://github.com/java-decompiler/jd-core](https://github.com/java-decompiler/jd-core)
-- JD Maven repository:
-[https://raw.github.com/java-decompiler/mvn-repo/master](https://raw.github.com/java-decompiler/mvn-repo/master)
 - JCenter Maven repository:
 [https://jcenter.bintray.com/](https://jcenter.bintray.com/)
 
