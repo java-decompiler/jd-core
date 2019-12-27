@@ -170,6 +170,7 @@ public class ExpressionVisitor extends TypeVisitor {
             int size = list.size();
 
             if (size > 0) {
+                boolean ief = inExpressionFlag;
                 Iterator<Expression> iterator = list.iterator();
 
                 for (int i=size-1; i>0; i--) {
@@ -183,6 +184,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
                 inExpressionFlag = false;
                 iterator.next().accept(this);
+                inExpressionFlag = ief;
             }
         }
     }
