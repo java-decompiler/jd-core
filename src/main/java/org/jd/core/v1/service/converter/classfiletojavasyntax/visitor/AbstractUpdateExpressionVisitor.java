@@ -196,7 +196,9 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
         // safeAccept(expression.getBodyDeclaration());
     }
 
-    @Override public void visit(NewInitializedArray expression) {}
+    @Override public void visit(NewInitializedArray expression) {
+        safeAccept(expression.getArrayInitializer());
+    }
 
     @Override
     public void visit(ParenthesesExpression expression) {
