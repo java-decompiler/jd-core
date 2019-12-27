@@ -131,8 +131,14 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         // Build token for type reference
         tokens.add(new ReferenceToken(ReferenceToken.TYPE, type.getInternalName(), type.getName(), null, currentInternalTypeName));
 
-        // Build token for type arguments
-        visitTypeArgumentList(type.getTypeArguments());
+        if (majorVersion >= 49) { // (majorVersion >= Java 5)
+            // Build token for type arguments
+            BaseTypeArgument typeArguments = type.getTypeArguments();
+
+            if (typeArguments != null) {
+                visitTypeArgumentList(typeArguments);
+            }
+        }
 
         // Build token for dimension
         visitDimension(type.getDimension());

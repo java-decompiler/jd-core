@@ -15,7 +15,6 @@ import org.jd.core.v1.model.javafragment.TokensFragment;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 
@@ -610,17 +609,17 @@ public class StatementVisitor extends ExpressionVisitor {
             for (TryStatement.CatchClause cc : statement.getCatchClauses()) {
                 JavaFragmentFactory.addEndStatementsBlock(fragments, group);
 
-                ObjectType type = cc.getType();
+                BaseType type = cc.getType();
 
                 tokens = new Tokens();
                 tokens.add(CATCH);
                 tokens.add(TextToken.SPACE_LEFTROUNDBRACKET);
-                tokens.add(newTypeReferenceToken(type, currentInternalTypeName));
+                type.accept(this);
 
                 if (cc.getOtherTypes() != null) {
-                    for (ObjectType otherType : cc.getOtherTypes()) {
+                    for (BaseType otherType : cc.getOtherTypes()) {
                         tokens.add(TextToken.VERTICALLINE);
-                        tokens.add(newTypeReferenceToken(otherType, currentInternalTypeName));
+                        otherType.accept(this);
                     }
                 }
 
