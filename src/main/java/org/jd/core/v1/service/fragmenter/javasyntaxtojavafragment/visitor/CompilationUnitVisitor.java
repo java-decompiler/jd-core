@@ -13,8 +13,6 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
-import org.jd.core.v1.model.javasyntax.expression.Expression;
-import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
 import org.jd.core.v1.model.javasyntax.reference.*;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.*;
@@ -115,7 +113,10 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     public void visitAnnotationReference(AnnotationReference reference) {
         tokens.add(TextToken.AT);
-        tokens.add(newTypeReferenceToken(reference.getType(), currentInternalTypeName));
+
+        BaseType type = reference.getType();
+
+        type.accept(this);
 
         ElementValue elementValue = reference.getElementValue();
 
