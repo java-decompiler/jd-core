@@ -278,22 +278,25 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
         if (descriptor.charAt(descriptor.length()-1) == ';') {
             String internalTypeName = type.getInternalName();
-            String typeName = getTypeName(internalTypeName);
 
-            if (!importTypeNames.contains(typeName)) {
-                if (internalTypeName.startsWith("java/lang/")) {
-                    if (internalTypeName.indexOf('/', 10) != -1) { // 10 = "java/lang/".length()
+            if (!importsFragment.incCounter(internalTypeName)) {
+                String typeName = getTypeName(internalTypeName);
+
+                if (!importTypeNames.contains(typeName)) {
+                    if (internalTypeName.startsWith("java/lang/")) {
+                        if (internalTypeName.indexOf('/', 10) != -1) { // 10 = "java/lang/".length()
+                            importsFragment.addImport(internalTypeName, type.getQualifiedName());
+                            importTypeNames.add(typeName);
+                        }
+                    } else if (internalTypeName.startsWith(internalPackagePrefix)) {
+                        if ((internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1) && !typeNames.contains(typeName)) {
+                            importsFragment.addImport(internalTypeName, type.getQualifiedName());
+                            importTypeNames.add(typeName);
+                        }
+                    } else if (!typeNames.contains(typeName)) {
                         importsFragment.addImport(internalTypeName, type.getQualifiedName());
                         importTypeNames.add(typeName);
                     }
-                } else if (internalTypeName.startsWith(internalPackagePrefix)) {
-                    if ((internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1) && !typeNames.contains(typeName)) {
-                        importsFragment.addImport(internalTypeName, type.getQualifiedName());
-                        importTypeNames.add(typeName);
-                    }
-                } else if (!typeNames.contains(typeName)) {
-                    importsFragment.addImport(internalTypeName, type.getQualifiedName());
-                    importTypeNames.add(typeName);
                 }
             }
         }

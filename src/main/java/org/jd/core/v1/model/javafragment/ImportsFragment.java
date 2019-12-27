@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Emmanuel Dupuy.
+ * Copyright (c) 2008, 2019 Emmanuel Dupuy.
  * This project is distributed under the GPLv3 license.
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
@@ -13,7 +13,6 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-
 
 public class ImportsFragment extends FlexibleFragment implements JavaFragment {
     protected static final ImportCountComparator COUNT_COMPARATOR = new ImportCountComparator();
@@ -31,6 +30,17 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
             importMap.put(internalName, new Import(internalName, qualifiedName));
         } else {
             imp.incCounter();
+        }
+    }
+
+    public boolean incCounter(String internalName) {
+        Import imp = importMap.get(internalName);
+
+        if (imp == null) {
+            return false;
+        } else {
+            imp.incCounter();
+            return true;
         }
     }
 
