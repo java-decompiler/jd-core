@@ -53,7 +53,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
         String typeName = type.getName();
 
         if (bindings.containsKey(typeName)) {
-            TypeArgument typeArgument = bindings.get(type.getName());
+            TypeArgument typeArgument = bindings.get(typeName);
 
             if (current != null) {
                 if ((current.getClass() == GenericType.class) && !equals(contextualTypeBounds.get(typeName), typeBounds.get(((GenericType)current).getName()))) {
@@ -102,7 +102,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
                 ObjectType ot = (ObjectType) current;
 
                 if ((ot.getTypeArguments() == null) && ot.getInternalName().equals(TYPE_CLASS.getInternalName())) {
-                    return TYPE_CLASS_WILDCARD.createType(ot.getDimension());
+                    return TYPE_CLASS_WILDCARD.createType(ot.getDimension() - type.getDimension());
                 }
 
                 return ot.createType(ot.getDimension() - type.getDimension());
