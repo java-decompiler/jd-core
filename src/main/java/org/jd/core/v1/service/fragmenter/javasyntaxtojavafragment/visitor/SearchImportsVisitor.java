@@ -9,6 +9,7 @@ package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor;
 
 import org.jd.core.v1.model.javafragment.ImportsFragment;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue;
@@ -23,7 +24,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     protected String internalPackagePrefix;
     protected ImportsFragment importsFragment = JavaFragmentFactory.newImportsFragment();
     protected int maxLineNumber = 0;
-    protected HashSet<String> mainTypeNames = new HashSet<>();
+    protected HashSet<String> typeNames = new HashSet<>();
     protected HashSet<String> internalTypeNames = new HashSet<>();
 
     public SearchImportsVisitor(String mainInternalName) {
@@ -31,25 +32,24 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
         this.internalPackagePrefix = (index == -1) ? "" : mainInternalName.substring(0, index + 1);
     }
 
-    @Override
-    public void visit(AnnotationReference reference) {
-        super.visit(reference);
-        add(reference.getType());
+    public ImportsFragment getImportsFragment() {
+        importsFragment.initLineCounts();
+        return importsFragment;
     }
 
-    @Override
-    public void visit(AnnotationElementValue reference) {
-        super.visit(reference);
-        add(reference.getType());
+    public int getMaxLineNumber() {
+        return maxLineNumber;
+    }
+
+    public void visit(CompilationUnit compilationUnit) {
+        compilationUnit.getTypeDeclarations().accept(new TypeVisitor(typeNames));
+        compilationUnit.getTypeDeclarations().accept(this);
     }
 
     @Override
     public void visit(BodyDeclaration declaration) {
-        if (mainTypeNames.isEmpty()) {
-            mainTypeNames.add(getTypeName(declaration.getInternalTypeName()));
-            declaration.accept(new MainTypeVisitor(mainTypeNames));
-        }
         if (!internalTypeNames.contains(declaration.getInternalTypeName())) {
+            internalTypeNames.add(declaration.getInternalTypeName());
             safeAccept(declaration.getMemberDeclarations());
         }
     }
@@ -66,13 +66,16 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
         return internalTypeName;
     }
 
-    public ImportsFragment getImportsFragment() {
-        importsFragment.initLineCounts();
-        return importsFragment;
+    @Override
+    public void visit(AnnotationReference reference) {
+        super.visit(reference);
+        add(reference.getType());
     }
 
-    public int getMaxLineNumber() {
-        return maxLineNumber;
+    @Override
+    public void visit(AnnotationElementValue reference) {
+        super.visit(reference);
+        add(reference.getType());
     }
 
     @Override
@@ -123,13 +126,6 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(DoubleConstantExpression expression) {
         if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
-    }
-
-    @Override
-    public void visit(EnumDeclaration declaration) {
-        safeAccept(declaration.getInterfaces());
-        safeAccept(declaration.getAnnotationReferences());
-        safeAccept(declaration.getBodyDeclaration());
     }
 
     @Override
@@ -280,27 +276,26 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
         String descriptor = type.getDescriptor();
 
         if (descriptor.charAt(descriptor.length()-1) == ';') {
-            String internalName = type.getInternalName();
-            String qualifiedName = type.getQualifiedName();
+            String internalTypeName = type.getInternalName();
 
-            if (internalName.startsWith("java/lang/")) {
-                if (internalName.indexOf('/', 10) != -1) { // 10 = "java/lang/".length()
-                    importsFragment.addImport(internalName, qualifiedName);
+            if (internalTypeName.startsWith("java/lang/")) {
+                if (internalTypeName.indexOf('/', 10) != -1) { // 10 = "java/lang/".length()
+                    importsFragment.addImport(internalTypeName, type.getQualifiedName());
                 }
-            } else if (internalName.startsWith(internalPackagePrefix)) {
-                if (internalName.indexOf('/', internalPackagePrefix.length()) != -1) {
-                    importsFragment.addImport(internalName, qualifiedName);
+            } else if (internalTypeName.startsWith(internalPackagePrefix)) {
+                if ((internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1) && !typeNames.contains(getTypeName(internalTypeName))) {
+                    importsFragment.addImport(internalTypeName, type.getQualifiedName());
                 }
-            } else if (!mainTypeNames.contains(getTypeName(internalName))) {
-                importsFragment.addImport(internalName, qualifiedName);
+            } else if (!typeNames.contains(getTypeName(internalTypeName))) {
+                importsFragment.addImport(internalTypeName, type.getQualifiedName());
             }
         }
     }
 
-    protected static class MainTypeVisitor extends AbstractJavaSyntaxVisitor {
+    protected static class TypeVisitor extends AbstractJavaSyntaxVisitor {
         HashSet<String> mainTypeNames;
 
-        public MainTypeVisitor(HashSet<String> mainTypeNames) {
+        public TypeVisitor(HashSet<String> mainTypeNames) {
             this.mainTypeNames = mainTypeNames;
         }
 
