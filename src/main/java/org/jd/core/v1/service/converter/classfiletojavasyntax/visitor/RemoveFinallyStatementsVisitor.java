@@ -20,6 +20,7 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
     protected LocalVariableMaker localVariableMaker;
     protected int statementCountInFinally;
     protected int statementCountToRemove;
+    protected boolean lastFinallyStatementIsATryStatement;
 
     public RemoveFinallyStatementsVisitor(LocalVariableMaker localVariableMaker) {
         this.localVariableMaker = localVariableMaker;
@@ -28,6 +29,7 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
     public void init() {
         this.statementCountInFinally = 0;
         this.statementCountToRemove = 0;
+        this.lastFinallyStatementIsATryStatement = false;
     }
 
     @Override
@@ -64,34 +66,40 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
             }
 
             // Remove 'finally' statements
-            declaredSyntheticLocalVariableVisitor.init();
-
             if (statementCountToRemove > 0) {
-                // Remove 'finally' statements
-                if (i > statementCountToRemove) {
-                    List<Statement> list = statements.subList(i - statementCountToRemove, i);
-
-                    for (Statement statement : list) {
-                        statement.accept(declaredSyntheticLocalVariableVisitor);
-                    }
-
-                    lastStatement.accept(declaredSyntheticLocalVariableVisitor);
-                    list.clear();
-                    i -= statementCountToRemove;
+                if (!lastFinallyStatementIsATryStatement && (i > 0) && (stmts.get(i-1).getClass() == ClassFileTryStatement.class)) {
+                    stmts.get(i-1).accept(this);
                     statementCountToRemove = 0;
+                    i--;
                 } else {
-                    List<Statement> list = statements;
+                    declaredSyntheticLocalVariableVisitor.init();
 
-                    for (Statement statement : list) {
-                        statement.accept(declaredSyntheticLocalVariableVisitor);
-                    }
+                    // Remove 'finally' statements
+                    if (i > statementCountToRemove) {
+                        List<Statement> list = statements.subList(i - statementCountToRemove, i);
 
-                    list.clear();
-                    if (i < size) {
-                        list.add(lastStatement);
+                        for (Statement statement : list) {
+                            statement.accept(declaredSyntheticLocalVariableVisitor);
+                        }
+
+                        lastStatement.accept(declaredSyntheticLocalVariableVisitor);
+                        list.clear();
+                        i -= statementCountToRemove;
+                        statementCountToRemove = 0;
+                    } else {
+                        List<Statement> list = statements;
+
+                        for (Statement statement : list) {
+                            statement.accept(declaredSyntheticLocalVariableVisitor);
+                        }
+
+                        list.clear();
+                        if (i < size) {
+                            list.add(lastStatement);
+                        }
+                        statementCountToRemove -= i;
+                        i = 0;
                     }
-                    statementCountToRemove -= i;
-                    i = 0;
                 }
             }
 
@@ -152,11 +160,22 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
 
     @Override
     public void visit(TryStatement statement) {
+        boolean oldLastFinallyStatementIsTryStatement = lastFinallyStatementIsATryStatement;
         ClassFileTryStatement ts = (ClassFileTryStatement)statement;
         Statements tryStatements = (Statements)ts.getTryStatements();
         Statements finallyStatements = (Statements)ts.getFinallyStatements();
 
-        safeAccept(finallyStatements);
+        if (finallyStatements != null) {
+            switch (finallyStatements.size()) {
+                case 0: break;
+                case 1: finallyStatements.getFirst().accept(this); break;
+                default: for (Statement stmt : finallyStatements) stmt.accept(this); break;
+            }
+
+            if ((statementCountInFinally == 0) && (finallyStatements.size() > 0)) {
+                lastFinallyStatementIsATryStatement = (finallyStatements.getLast().getClass() == ClassFileTryStatement.class);
+            }
+        }
 
         if (ts.isJsr() || (finallyStatements == null) || (finallyStatements.size() == 0)) {
             tryStatements.accept(this);
@@ -168,13 +187,13 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
 
             statementCountInFinally += finallyStatementsSize;
 
-            removeFinallyStatements(tryStatements);
+            tryStatements.accept(this);
 
             statementCountToRemove = finallyStatementsSize;
 
             if (catchClauses != null) {
                 for (TryStatement.CatchClause cc : catchClauses) {
-                    removeFinallyStatements((Statements)cc.getStatements());
+                    cc.getStatements().accept(this);
                 }
             }
 
@@ -192,11 +211,11 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
             statementCountInFinally += finallyStatementsSize;
             statementCountToRemove += finallyStatementsSize;
 
-            removeFinallyStatements(tryStatements);
+            tryStatements.accept(this);
 
             if (catchClauses != null) {
                 for (TryStatement.CatchClause cc : catchClauses) {
-                    removeFinallyStatements((Statements)cc.getStatements());
+                    cc.getStatements().accept(this);
                 }
             }
 
@@ -207,20 +226,8 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
                 ts.setFinallyStatements(null);
             }
         }
-    }
 
-    public void removeFinallyStatements(Statements list) {
-        if ((list.size() == 1) && (list.get(0).getClass() == ClassFileTryStatement.class)) {
-            int oldStatementCountToRemove = statementCountToRemove;
-
-            assert list.getFirst().getClass() == ClassFileTryStatement.class;
-
-            statementCountToRemove = 0;
-            list.accept(this);
-            statementCountToRemove = oldStatementCountToRemove;
-        } else {
-            list.accept(this);
-        }
+        lastFinallyStatementIsATryStatement = oldLastFinallyStatementIsTryStatement;
     }
 
     @Override public void visit(DoWhileStatement statement) { safeAccept(statement.getStatements()); }
