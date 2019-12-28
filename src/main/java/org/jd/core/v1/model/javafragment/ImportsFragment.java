@@ -13,6 +13,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 public class ImportsFragment extends FlexibleFragment implements JavaFragment {
     protected static final ImportCountComparator COUNT_COMPARATOR = new ImportCountComparator();
@@ -72,9 +73,15 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
             imports.sort(COUNT_COMPARATOR);
 
             // Remove less used imports
-            imports.subList(lineCount, size).clear();
+            List<Import> subList = imports.subList(lineCount, size);
 
-        return imports;
+            for (Import imp0rt : subList) {
+                importMap.remove(imp0rt.getInternalName());
+            }
+
+            subList.clear();
+
+            return imports;
         } else {
             return importMap.values();
         }
