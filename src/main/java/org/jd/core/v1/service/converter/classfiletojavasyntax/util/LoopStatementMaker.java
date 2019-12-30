@@ -22,10 +22,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.s
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.GenericLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.ObjectLocalVariable;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateTypeFromTypeArgumentVisitor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RemoveLastContinueStatementVisitor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableReferenceVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -79,7 +76,7 @@ public class LoopStatementMaker {
                     BaseExpression init = extractInit(statements, lineNumber);
 
                     if (init != null) {
-                        return new ClassFileForStatement(loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, null, null);
+                        return newClassFileForStatement(localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, null, null);
                     }
                 }
                 break;
@@ -93,16 +90,19 @@ public class LoopStatementMaker {
                         Expression subExpression = ((ExpressionStatement) subStatement).getExpression();
 
                         if (subExpression.getLineNumber() == lineNumber) {
-                            return new ClassFileForStatement(loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, subExpression, null);
+                            return newClassFileForStatement(
+                                localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, subExpression, null);
                         } else if (init != null) {
-                            return new ClassFileForStatement(loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, null, subStatement);
+                            return newClassFileForStatement(
+                                localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, null, subStatement);
                         }
                     } else if (init != null) {
-                        return new ClassFileForStatement(loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, null, subStatement);
+                        return newClassFileForStatement(
+                            localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, null, subStatement);
                     }
                 } else {
                     // Unknown line numbers => Just try to find 'for (expression;;expression)'
-                    return createForStatementWithoutLineNumber(loopBasicBlock, statements, condition, subStatements);
+                    return createForStatementWithoutLineNumber(localVariableMaker, loopBasicBlock, statements, condition, subStatements);
                 }
                 break;
             default:
@@ -119,11 +119,12 @@ public class LoopStatementMaker {
                     BaseExpression init = extractInit(statements, lineNumber);
 
                     if ((init != null) || (update.size() > 0)) {
-                        return new ClassFileForStatement(loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, update, subStatements);
+                        return newClassFileForStatement(
+                            localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, update, subStatements);
                     }
                 } else {
                     // Unknown line numbers => Just try to find 'for (expression;;expression)'
-                    return createForStatementWithoutLineNumber(loopBasicBlock, statements, condition, subStatements);
+                    return createForStatementWithoutLineNumber(localVariableMaker, loopBasicBlock, statements, condition, subStatements);
                 }
                 break;
         }
@@ -131,10 +132,10 @@ public class LoopStatementMaker {
         return new WhileStatement(condition, subStatements);
     }
 
-    public static Statement makeLoop(BasicBlock loopBasicBlock, Statements statements, Statements subStatements, Statements jumps) {
+    public static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements statements, Statements subStatements, Statements jumps) {
         subStatements.accept(REMOVE_LAST_CONTINUE_STATEMENT_VISITOR);
 
-        Statement loop = makeLoop(loopBasicBlock, statements, subStatements);
+        Statement loop = makeLoop(localVariableMaker, loopBasicBlock, statements, subStatements);
         int continueOffset = loopBasicBlock.getSub1().getFromOffset();
         int breakOffset = loopBasicBlock.getNext().getFromOffset();
 
@@ -145,7 +146,7 @@ public class LoopStatementMaker {
         return makeLabels(loopBasicBlock.getIndex(), continueOffset, breakOffset, loop, jumps);
     }
 
-    protected static Statement makeLoop(BasicBlock loopBasicBlock, Statements statements, Statements subStatements) {
+    protected static Statement makeLoop(LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock, Statements statements, Statements subStatements) {
         int subStatementsSize = subStatements.size();
 
         if ((subStatementsSize > 0) && (subStatements.getLast() == CONTINUE)) {
@@ -168,7 +169,7 @@ public class LoopStatementMaker {
                         BaseExpression init = extractInit(statements, lineNumber);
 
                         if (init != null) {
-                            return new ClassFileForStatement(loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, null, subExpression, null);
+                            return newClassFileForStatement(localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, null, subExpression, null);
                         }
                     }
                 }
@@ -188,21 +189,22 @@ public class LoopStatementMaker {
                         // Populates 'init'
                         BaseExpression init = extractInit(statements, update.getFirst().getLineNumber());
 
-                        return new ClassFileForStatement(loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, null, update, subStatements);
+                        return newClassFileForStatement(localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, null, update, subStatements);
                     }
                 } else {
                     // Unknown line numbers => Just try to find 'for (expression;;expression)'
-                    Statement statement = createForStatementWithoutLineNumber(loopBasicBlock, statements, BooleanExpression.TRUE, subStatements);
+                    Statement statement = createForStatementWithoutLineNumber(localVariableMaker, loopBasicBlock, statements, BooleanExpression.TRUE, subStatements);
 
-                    if (statement != null)
+                    if (statement != null) {
                         return statement;
+                    }
                 }
         }
 
         return new WhileStatement(BooleanExpression.TRUE, subStatements);
     }
 
-    public static Statement makeDoWhileLoop(BasicBlock loopBasicBlock, BasicBlock lastSubBasicBlock, Expression condition, Statements subStatements, Statements jumps) {
+    public static Statement makeDoWhileLoop(BasicBlock loopBasicBlock, Expression condition, Statements subStatements, Statements jumps) {
         subStatements.accept(REMOVE_LAST_CONTINUE_STATEMENT_VISITOR);
 
         Statement loop = new DoWhileStatement(condition, subStatements);
@@ -300,7 +302,9 @@ public class LoopStatementMaker {
         return update;
     }
 
-    protected static Statement createForStatementWithoutLineNumber(BasicBlock basicBlock, Statements statements, Expression condition, Statements subStatements) {
+    protected static Statement createForStatementWithoutLineNumber(
+            LocalVariableMaker localVariableMaker, BasicBlock basicBlock, Statements statements, Expression condition, Statements subStatements) {
+
         if (!statements.isEmpty()) {
             Statement statement = statements.getLast();
 
@@ -332,7 +336,8 @@ public class LoopStatementMaker {
                                 return new WhileStatement(condition, subStatements);
                             }
 
-                            if ((expression.getClass() == ClassFileLocalVariableReferenceExpression.class) && (((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable() == localVariable)) {
+                            if ((expression.getClass() == ClassFileLocalVariableReferenceExpression.class) &&
+                                    (((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable() == localVariable)) {
                                 statements.removeLast();
                                 subStatements.removeLast();
 
@@ -340,7 +345,8 @@ public class LoopStatementMaker {
                                     condition = null;
                                 }
 
-                                return new ClassFileForStatement(basicBlock.getFromOffset(), basicBlock.getToOffset(), init, condition, update, subStatements);
+                                return newClassFileForStatement(
+                                    localVariableMaker, basicBlock.getFromOffset(), basicBlock.getToOffset(), init, condition, update, subStatements);
                             }
                         }
                     }
@@ -412,13 +418,16 @@ public class LoopStatementMaker {
 
         boe = (BinaryOperatorExpression)expression;
 
-        if ((boe.getRightExpression().getClass() != ArrayExpression.class) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getLineNumber() != condition.getLineNumber())) {
+        if ((boe.getRightExpression().getClass() != ArrayExpression.class) ||
+                (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
+                (boe.getLineNumber() != condition.getLineNumber())) {
             return null;
         }
 
         ArrayExpression arrayExpression = (ArrayExpression)boe.getRightExpression();
 
-        if ((arrayExpression.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (arrayExpression.getIndex().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+        if ((arrayExpression.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
+                (arrayExpression.getIndex().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
             return null;
         }
         if (((ClassFileLocalVariableReferenceExpression)arrayExpression.getExpression()).getLocalVariable() != syntheticArray) {
@@ -472,10 +481,13 @@ public class LoopStatementMaker {
 
         boe = (BinaryOperatorExpression)expression;
 
-        if ((boe.getLineNumber() != lineNumber) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getRightExpression().getClass() != IntegerConstantExpression.class)) {
+        if ((boe.getLineNumber() != lineNumber) ||
+                (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
+                (boe.getRightExpression().getClass() != IntegerConstantExpression.class)) {
             return null;
         }
-        if ((((IntegerConstantExpression)boe.getRightExpression()).getValue() != 0) || (((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticIndex)) {
+        if ((((IntegerConstantExpression)boe.getRightExpression()).getValue() != 0) ||
+                (((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticIndex)) {
             return null;
         }
 
@@ -486,10 +498,12 @@ public class LoopStatementMaker {
 
         boe = (BinaryOperatorExpression)condition;
 
-        if ((boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getRightExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+        if ((boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
+                (boe.getRightExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
             return null;
         }
-        if ((((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticIndex) || (((ClassFileLocalVariableReferenceExpression)boe.getRightExpression()).getLocalVariable() != syntheticLength)) {
+        if ((((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticIndex) ||
+                (((ClassFileLocalVariableReferenceExpression)boe.getRightExpression()).getLocalVariable() != syntheticLength)) {
             return null;
         }
 
@@ -550,7 +564,8 @@ public class LoopStatementMaker {
 
         MethodInvocationExpression mie = (MethodInvocationExpression)condition;
 
-        if (!mie.getName().equals("hasNext") || !mie.getInternalTypeName().equals("java/util/Iterator") || (mie.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+        if (!mie.getName().equals("hasNext") || !mie.getInternalTypeName().equals("java/util/Iterator") ||
+                (mie.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
             return null;
         }
 
@@ -575,7 +590,10 @@ public class LoopStatementMaker {
 
         BinaryOperatorExpression boe = (BinaryOperatorExpression)es.getExpression();
 
-        if ((boe == null) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) || (boe.getRightExpression().getClass() != ClassFileMethodInvocationExpression.class) || (boe.getLineNumber() != condition.getLineNumber())) {
+        if ((boe == null) ||
+                (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
+                (boe.getRightExpression().getClass() != ClassFileMethodInvocationExpression.class) ||
+                (boe.getLineNumber() != condition.getLineNumber())) {
             return null;
         }
 
@@ -624,7 +642,9 @@ public class LoopStatementMaker {
 
         mie = (MethodInvocationExpression)expression;
 
-        if (!mie.getName().equals("next") || !mie.getInternalTypeName().equals("java/util/Iterator") || (mie.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+        if (!mie.getName().equals("next") ||
+                !mie.getInternalTypeName().equals("java/util/Iterator") ||
+                (mie.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
             return null;
         }
         if (((ClassFileLocalVariableReferenceExpression)mie.getExpression()).getLocalVariable() != syntheticIterator) {
@@ -726,5 +746,20 @@ public class LoopStatementMaker {
         }
 
         return loop;
+    }
+
+    protected static ClassFileForStatement newClassFileForStatement(
+            LocalVariableMaker localVariableMaker, int fromOffset, int toOffset, BaseExpression init,
+            Expression condition, BaseExpression update, BaseStatement statements) {
+        ChangeFrameOfLocalVariablesVisitor visitor = new ChangeFrameOfLocalVariablesVisitor(localVariableMaker);
+
+        if (condition != null) {
+            condition.accept(visitor);
+        }
+        if (update != null) {
+            update.accept(visitor);
+        }
+
+        return new ClassFileForStatement(fromOffset, toOffset, init, condition, update, statements);
     }
 }

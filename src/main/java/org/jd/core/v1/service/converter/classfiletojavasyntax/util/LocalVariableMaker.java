@@ -513,7 +513,19 @@ public class LocalVariableMaker {
         currentFrame = currentFrame.getParent();
     }
 
-    protected Frame searchCommonParentFrame(Frame frame1, Frame frame2) {
+    protected static Frame searchCommonParentFrame(Frame frame1, Frame frame2) {
+        if (frame1 == frame2) {
+            return frame1;
+        }
+
+        if (frame2.getParent() == frame1) {
+            return frame1;
+        }
+
+        if (frame1.getParent() == frame2) {
+            return frame2;
+        }
+
         HashSet<Frame> set = new HashSet<>();
 
         while (frame1 != null) {
@@ -529,5 +541,14 @@ public class LocalVariableMaker {
         }
 
         return null;
+    }
+
+    public void changeFrame(AbstractLocalVariable localVariable) {
+        Frame frame = LocalVariableMaker.searchCommonParentFrame(localVariable.getFrame(), currentFrame);
+
+        if (localVariable.getFrame() != frame) {
+            localVariable.getFrame().removeLocalVariable(localVariable);
+            frame.addLocalVariable(localVariable);
+        }
     }
 }

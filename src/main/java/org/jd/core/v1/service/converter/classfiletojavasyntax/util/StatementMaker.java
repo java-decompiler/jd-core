@@ -641,7 +641,7 @@ public class StatementMaker {
 
                     makeStatements(watchdog, ifBB.getCondition(), subStatements, jumps);
                     replacePreOperatorWithPostOperator(subStatements);
-                    statements.add(LoopStatementMaker.makeDoWhileLoop(basicBlock, ifBB, stack.pop(), subStatements, jumps));
+                    statements.add(LoopStatementMaker.makeDoWhileLoop(basicBlock, stack.pop(), subStatements, jumps));
                 } else {
                     // 'while' or 'for' loop
                     ifBB.getCondition().inverseCondition();
@@ -684,10 +684,11 @@ public class StatementMaker {
             }
 
             makeStatements(watchdog, last.getCondition(), subStatements, jumps);
-            statements.add(LoopStatementMaker.makeDoWhileLoop(basicBlock, last, stack.pop(), subStatements, jumps));
+            statements.add(LoopStatementMaker.makeDoWhileLoop(basicBlock, stack.pop(), subStatements, jumps));
         } else {
             // Infinite loop
-            statements.add(LoopStatementMaker.makeLoop(basicBlock, statements, makeSubStatements(watchdog, sub1, statements, jumps, updateBasicBlock), jumps));
+            statements.add(LoopStatementMaker.makeLoop(
+                localVariableMaker, basicBlock, statements, makeSubStatements(watchdog, sub1, statements, jumps, updateBasicBlock), jumps));
         }
 
         makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
