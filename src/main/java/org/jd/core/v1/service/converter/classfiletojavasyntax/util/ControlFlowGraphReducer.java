@@ -141,17 +141,20 @@ public class ControlFlowGraphReducer {
                 if (nextNext == branchNext) {
                     if (nextLast.matchType(TYPE_GOTO_IN_TERNARY_OPERATOR|TYPE_TERNARY_OPERATOR)) {
                         createIfElse(TYPE_TERNARY_OPERATOR, basicBlock, next, nextLast, branch, branchLast, nextNext);
+                        return true;
                     } else {
                         createIfElse(TYPE_IF_ELSE, basicBlock, next, nextLast, branch, branchLast, nextNext);
+                        return true;
                     }
                 } else {
-                    if ((nextNext.getFromOffset() < maxOffset) && (nextNext.getPredecessors().size() == 1)) {
+                    if ((nextNext.getFromOffset() < branch.getFromOffset()) && (nextNext.getPredecessors().size() == 1)) {
                         createIf(basicBlock, next, nextNext, branch);
-                    } else {
-                        createIfElse(TYPE_IF_ELSE, basicBlock, next, nextLast, branch, branchLast.getNext(), nextNext);
+                        return true;
+                    } else if (((nextNext.getFromOffset() > branch.getFromOffset()) && branchNext.matchType(GROUP_END))) {
+                        createIfElse(TYPE_IF_ELSE, basicBlock, next, nextLast, branch, branchNext, nextNext);
+                        return true;
                     }
                 }
-                return true;
             }
         }
 
@@ -1063,6 +1066,8 @@ public class ControlFlowGraphReducer {
             reduced = reduce(visited, basicBlock.getSub1(), jsrTargets);
 
             if (updateBasicBlock != null) {
+                removeLastContinueLoop(basicBlock.getSub1().getSub1());
+
                 BasicBlock ifBasicBlock = basicBlock.getControlFlowGraph().newBasicBlock(TYPE_IF, basicBlock.getSub1().getFromOffset(), basicBlock.getToOffset());
 
                 ifBasicBlock.setCondition(END);
@@ -1101,6 +1106,21 @@ public class ControlFlowGraphReducer {
         }
 
         return reduced & reduce(visited, basicBlock.getNext(), jsrTargets);
+    }
+
+    protected static void removeLastContinueLoop(BasicBlock basicBlock) {
+        BitSet visited = new BitSet();
+        BasicBlock next = basicBlock.getNext();
+
+        while (!next.matchType(GROUP_END) && (visited.get(next.getIndex()) == false)) {
+            visited.set(next.getIndex());
+            basicBlock = next;
+            next = basicBlock.getNext();
+        }
+
+        if (next == LOOP_CONTINUE) {
+            basicBlock.setNext(END);
+        }
     }
 
     protected static BasicBlock getLastConditionalBranch(BitSet visited, BasicBlock basicBlock) {

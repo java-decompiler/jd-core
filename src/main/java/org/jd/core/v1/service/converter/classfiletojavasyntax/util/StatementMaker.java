@@ -266,11 +266,11 @@ public class StatementMaker {
         }
     }
 
-    protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps, Statements updateStatements) {
+    protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps, BasicBlock updateBasicBlock) {
         Statements subStatements = makeSubStatements(watchdog, basicBlock, statements, jumps);
 
-        if (updateStatements != null) {
-            subStatements.addAll(updateStatements);
+        if (updateBasicBlock != null) {
+            subStatements.addAll(makeSubStatements(watchdog, updateBasicBlock, statements, jumps));
         }
 
         return subStatements;
@@ -612,10 +612,10 @@ public class StatementMaker {
     @SuppressWarnings("unchecked")
     protected void parseLoop(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         BasicBlock sub1 = basicBlock.getSub1();
-        Statements updateStatements = null;
+        BasicBlock updateBasicBlock = null;
 
         if ((sub1.getType() == TYPE_IF) && (sub1.getCondition() == END)) {
-            updateStatements = makeSubStatements(watchdog, sub1.getNext(), statements, jumps);
+            updateBasicBlock = sub1.getNext();
             sub1 = sub1.getSub1();
         }
 
@@ -627,7 +627,7 @@ public class StatementMaker {
                 makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
                 statements.add(LoopStatementMaker.makeLoop(
                     typeBounds, localVariableMaker, basicBlock, statements, stack.pop(),
-                    makeSubStatements(watchdog, ifBB.getSub1(), statements, jumps, updateStatements), jumps));
+                    makeSubStatements(watchdog, ifBB.getSub1(), statements, jumps, updateBasicBlock), jumps));
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
                 return;
             }
@@ -648,7 +648,7 @@ public class StatementMaker {
                     makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
                     statements.add(LoopStatementMaker.makeLoop(
                         typeBounds, localVariableMaker, basicBlock, statements, stack.pop(),
-                        makeSubStatements(watchdog, ifBB.getNext(), statements, jumps, updateStatements), jumps));
+                        makeSubStatements(watchdog, ifBB.getNext(), statements, jumps, updateBasicBlock), jumps));
                 }
 
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
@@ -673,21 +673,21 @@ public class StatementMaker {
 
             if ((sub1.getType() == TYPE_LOOP) && (sub1.getNext() == last) && (countStartLoop(sub1.getSub1()) == 0)) {
                 changeEndLoopToStartLoop(new BitSet(), sub1.getSub1());
-                subStatements = makeSubStatements(watchdog, sub1.getSub1(), statements, jumps, updateStatements);
+                subStatements = makeSubStatements(watchdog, sub1.getSub1(), statements, jumps, updateBasicBlock);
 
                 assert subStatements.getLast() == ContinueStatement.CONTINUE : "StatementMaker.parseLoop(...) : unexpected basic block for create a do-while loop";
 
                 subStatements.removeLast();
             } else {
                 createDoWhileContinue(last);
-                subStatements = makeSubStatements(watchdog, sub1, statements, jumps, updateStatements);
+                subStatements = makeSubStatements(watchdog, sub1, statements, jumps, updateBasicBlock);
             }
 
             makeStatements(watchdog, last.getCondition(), subStatements, jumps);
             statements.add(LoopStatementMaker.makeDoWhileLoop(basicBlock, last, stack.pop(), subStatements, jumps));
         } else {
             // Infinite loop
-            statements.add(LoopStatementMaker.makeLoop(basicBlock, statements, makeSubStatements(watchdog, sub1, statements, jumps, updateStatements), jumps));
+            statements.add(LoopStatementMaker.makeLoop(basicBlock, statements, makeSubStatements(watchdog, sub1, statements, jumps, updateBasicBlock), jumps));
         }
 
         makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
@@ -1043,10 +1043,5 @@ public class StatementMaker {
         public void visit(MethodDeclaration declaration) {
             found |= declaration.getName().equals(name);
         }
-    }
-
-    protected static class NopBitSet extends BitSet {
-        @Override public boolean get(int var1) { return false; }
-        @Override public void set(int var1) {}
     }
 }
