@@ -62,7 +62,7 @@ public class PlainTextPrinter implements Printer {
             for(int i=0, len=text.length(); i<len; i++) {
                 char c = text.charAt(i);
 
-                if (c < 128) {
+                if (c < 127) {
                     sb.append(c);
                 } else {
                     int h = (c >> 12);

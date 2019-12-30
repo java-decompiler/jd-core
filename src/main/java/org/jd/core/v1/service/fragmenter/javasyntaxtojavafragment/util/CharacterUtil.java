@@ -26,29 +26,38 @@ public class CharacterUtil {
                 return "\\t";
             case '\'':
                 return "\\'";
+            case 173: // SOFT HYPHEN
+                return unicode(c);
             default:
                 if (c < ' ') {
                     return "\\0" + ((char) ('0' + (c >> 3))) + ((char) ('0' + (c & 7)));
-                } else if (c > 127) {
-                    char[] buffer = new char[6];
-
-                    buffer[0] = '\\';
-                    buffer[1] = 'u';
-
-                    int h = (c >> 12);
-
-                    buffer[2] = (char)((h <= 9) ? (h + '0') : (h + ('A' - 10)));
-                    h = (c >> 8) & 15;
-                    buffer[3] = (char)((h <= 9) ? (h + '0') : (h + ('A' - 10)));
-                    h = (c >> 4) & 15;
-                    buffer[4] = (char)((h <= 9) ? (h + '0') : (h + ('A' - 10)));
-                    h = (c) & 15;
-                    buffer[5] = (char)((h <= 9) ? (h + '0') : (h + ('A' - 10)));
-
-                    return new String(buffer);
-                } else {
+                }
+                if (c < 127) {
                     return String.valueOf((char)c);
                 }
+                if (c < 161) {
+                    return unicode(c);
+                }
+                return String.valueOf((char)c);
         }
+    }
+
+    private static String unicode(int c) {
+        char[] buffer = new char[6];
+
+        buffer[0] = '\\';
+        buffer[1] = 'u';
+
+        int h = (c >> 12);
+
+        buffer[2] = (char) ((h <= 9) ? (h + '0') : (h + ('A' - 10)));
+        h = (c >> 8) & 15;
+        buffer[3] = (char) ((h <= 9) ? (h + '0') : (h + ('A' - 10)));
+        h = (c >> 4) & 15;
+        buffer[4] = (char) ((h <= 9) ? (h + '0') : (h + ('A' - 10)));
+        h = (c) & 15;
+        buffer[5] = (char) ((h <= 9) ? (h + '0') : (h + ('A' - 10)));
+
+        return new String(buffer);
     }
 }
