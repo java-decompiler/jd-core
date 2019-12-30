@@ -65,16 +65,16 @@ public class PlainTextPrinter implements Printer {
                 if (c < 128) {
                     sb.append(c);
                 } else {
-                    int h = (c >> 24);
+                    int h = (c >> 12);
 
                     sb.append("\\u");
-                    sb.append((h <= 9) ? (h + '0') : (h + 'A'));
-                    h = (c >> 16) & 255;
-                    sb.append((h <= 9) ? (h + '0') : (h + 'A'));
-                    h = (c >> 8) & 255;
-                    sb.append((h <= 9) ? (h + '0') : (h + 'A'));
-                    h = (c) & 255;
-                    sb.append((h <= 9) ? (h + '0') : (h + 'A'));
+                    sb.append((char)((h <= 9) ? (h + '0') : (h + ('A' - 10))));
+                    h = (c >> 8) & 15;
+                    sb.append((char)((h <= 9) ? (h + '0') : (h + ('A' - 10))));
+                    h = (c >> 4) & 15;
+                    sb.append((char)((h <= 9) ? (h + '0') : (h + ('A' - 10))));
+                    h = (c) & 15;
+                    sb.append((char)((h <= 9) ? (h + '0') : (h + ('A' - 10))));
                 }
             }
         } else {
