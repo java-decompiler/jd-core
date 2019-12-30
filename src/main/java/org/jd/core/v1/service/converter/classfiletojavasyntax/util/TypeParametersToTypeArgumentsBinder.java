@@ -139,7 +139,7 @@ public class TypeParametersToTypeArgumentsBinder {
     }
 
     protected Type checkTypeArguments(Type type, AbstractLocalVariable localVariable) {
-        if ((type != null) && type.isObject()) {
+        if (type.isObject()) {
             ObjectType objectType = (ObjectType)type;
 
             if (objectType.getTypeArguments() != null) {
@@ -191,7 +191,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
                 Type t = mie.getType();
 
-                if ((type != null) && type.isObject() && t.isObject()) {
+                if (type.isObject() && t.isObject()) {
                     ObjectType objectType = (ObjectType) type;
                     ObjectType mieTypeObjectType = (ObjectType) t;
                     t = typeMaker.searchSuperParameterizedType(objectType, mieTypeObjectType);
@@ -231,7 +231,7 @@ public class TypeParametersToTypeArgumentsBinder {
                     }
                 } else if (expressionType.isGeneric()) {
                     if (bindings.isEmpty() || bindingsContainsNull) {
-                        expressionType = null;
+                        expressionType = ObjectType.TYPE_OBJECT;
                     } else {
                         typeArgumentToTypeVisitor.init();
                         bindings.get(expressionType.getName()).accept(typeArgumentToTypeVisitor);
@@ -273,7 +273,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
                 Type t = neObjectType;
 
-                if ((type != null) && type.isObject()) {
+                if (type.isObject()) {
                     ObjectType objectType = (ObjectType)type;
                     t = typeMaker.searchSuperParameterizedType(objectType, neObjectType);
                 }
@@ -535,7 +535,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
         @Override
         public void visit(LocalVariableReferenceExpression expression) {
-            if ((type != null) && !type.isPrimitive()) {
+            if (!type.isPrimitive()) {
                 AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable();
                 localVariable.typeOnLeft(contextualTypeBounds, checkTypeArguments(type, localVariable));
             }
@@ -549,7 +549,9 @@ public class TypeParametersToTypeArgumentsBinder {
 
         @Override
         public void visit(CastExpression expression) {
-            if ((type != null) && type.isObject()) {
+            assert TYPE_OBJECT.equals(type) || (type.getDimension() == expression.getType().getDimension()) : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid array type";
+
+            if (type.isObject()) {
                 ObjectType objectType = (ObjectType)type;
 
                 if ((objectType.getTypeArguments() != null) && !objectType.getTypeArguments().equals(WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT)) {
