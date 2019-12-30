@@ -473,10 +473,22 @@ public class For {
     public void forIfIfContinue() {
         for (int i=0; i<100; i++) {
             if (i == 1) {
-                // Empty line
                 if (i != 2) {
                     continue;
                 }
+            }
+            i += 42;
+        }
+    }
+
+    public void forIfIfContinue2() {
+        for (int i=0; i<100; i++) {
+            if (i == 1) {
+                if (i != 2) {
+                    i = 3;
+                    continue;
+                }
+                i = 4;
             }
             i += 42;
         }
