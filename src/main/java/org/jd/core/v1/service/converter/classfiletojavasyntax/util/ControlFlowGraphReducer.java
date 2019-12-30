@@ -530,10 +530,8 @@ public class ControlFlowGraphReducer {
         BasicBlock end = END;
 
         for (BasicBlock bb : ends) {
-            if (!bb.matchType(GROUP_END)) {
-                if ((end == END) || (end.getFromOffset() < bb.getFromOffset())) {
-                    end = bb;
-                }
+            if ((end == END) || (end.getFromOffset() < bb.getFromOffset())) {
+                end = bb;
             }
         }
 
@@ -1161,54 +1159,52 @@ public class ControlFlowGraphReducer {
     }
 
     protected static void visit(BitSet visited, BasicBlock basicBlock, int maxOffset, HashSet<BasicBlock> ends) {
-        if (!basicBlock.matchType(GROUP_END)) {
-            if (basicBlock.getFromOffset() >= maxOffset) {
-                ends.add(basicBlock);
-            } else if (visited.get(basicBlock.getIndex()) == false) {
-                visited.set(basicBlock.getIndex());
+        if (basicBlock.getFromOffset() >= maxOffset) {
+            ends.add(basicBlock);
+        } else if ((basicBlock.getIndex() >= 0) && (visited.get(basicBlock.getIndex()) == false)) {
+            visited.set(basicBlock.getIndex());
 
-                switch (basicBlock.getType()) {
-                    case TYPE_CONDITIONAL_BRANCH:
-                    case TYPE_JSR:
-                    case TYPE_CONDITION:
-                        visit(visited, basicBlock.getBranch(), maxOffset, ends);
-                    case TYPE_START:
-                    case TYPE_STATEMENTS:
-                    case TYPE_GOTO:
-                    case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                    case TYPE_LOOP:
-                        visit(visited, basicBlock.getNext(), maxOffset, ends);
-                        break;
-                    case TYPE_TRY:
-                    case TYPE_TRY_JSR:
-                    case TYPE_TRY_ECLIPSE:
-                        visit(visited, basicBlock.getSub1(), maxOffset, ends);
-                    case TYPE_TRY_DECLARATION:
-                        for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
-                            visit(visited, exceptionHandler.getBasicBlock(), maxOffset, ends);
-                        }
-                        visit(visited, basicBlock.getNext(), maxOffset, ends);
-                        break;
-                    case TYPE_IF_ELSE:
-                    case TYPE_TERNARY_OPERATOR:
-                        visit(visited, basicBlock.getSub2(), maxOffset, ends);
-                    case TYPE_IF:
-                        visit(visited, basicBlock.getSub1(), maxOffset, ends);
-                        visit(visited, basicBlock.getNext(), maxOffset, ends);
-                        break;
-                    case TYPE_CONDITION_OR:
-                    case TYPE_CONDITION_AND:
-                        visit(visited, basicBlock.getSub1(), maxOffset, ends);
-                        visit(visited, basicBlock.getSub2(), maxOffset, ends);
-                        break;
-                    case TYPE_SWITCH:
-                        visit(visited, basicBlock.getNext(), maxOffset, ends);
-                    case TYPE_SWITCH_DECLARATION:
-                        for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
-                            visit(visited, switchCase.getBasicBlock(), maxOffset, ends);
-                        }
-                        break;
-                }
+            switch (basicBlock.getType()) {
+                case TYPE_CONDITIONAL_BRANCH:
+                case TYPE_JSR:
+                case TYPE_CONDITION:
+                    visit(visited, basicBlock.getBranch(), maxOffset, ends);
+                case TYPE_START:
+                case TYPE_STATEMENTS:
+                case TYPE_GOTO:
+                case TYPE_GOTO_IN_TERNARY_OPERATOR:
+                case TYPE_LOOP:
+                    visit(visited, basicBlock.getNext(), maxOffset, ends);
+                    break;
+                case TYPE_TRY:
+                case TYPE_TRY_JSR:
+                case TYPE_TRY_ECLIPSE:
+                    visit(visited, basicBlock.getSub1(), maxOffset, ends);
+                case TYPE_TRY_DECLARATION:
+                    for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
+                        visit(visited, exceptionHandler.getBasicBlock(), maxOffset, ends);
+                    }
+                    visit(visited, basicBlock.getNext(), maxOffset, ends);
+                    break;
+                case TYPE_IF_ELSE:
+                case TYPE_TERNARY_OPERATOR:
+                    visit(visited, basicBlock.getSub2(), maxOffset, ends);
+                case TYPE_IF:
+                    visit(visited, basicBlock.getSub1(), maxOffset, ends);
+                    visit(visited, basicBlock.getNext(), maxOffset, ends);
+                    break;
+                case TYPE_CONDITION_OR:
+                case TYPE_CONDITION_AND:
+                    visit(visited, basicBlock.getSub1(), maxOffset, ends);
+                    visit(visited, basicBlock.getSub2(), maxOffset, ends);
+                    break;
+                case TYPE_SWITCH:
+                    visit(visited, basicBlock.getNext(), maxOffset, ends);
+                case TYPE_SWITCH_DECLARATION:
+                    for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
+                        visit(visited, switchCase.getBasicBlock(), maxOffset, ends);
+                    }
+                    break;
             }
         }
     }
