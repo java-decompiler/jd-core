@@ -317,9 +317,12 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                         switch (((PrimitiveType)type).getJavaPrimitiveFlags()) {
                             case FLAG_BYTE:
                             case FLAG_SHORT:
-                                e.set(i, new CastExpression(type, updatedParameter));
+                                updatedParameter = new CastExpression(type, updatedParameter);
+                                break;
                         }
                     }
+
+                    e.set(i, updatedParameter);
                 }
             }
         } else {
@@ -332,10 +335,12 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                     switch (((PrimitiveType)type).getJavaPrimitiveFlags()) {
                         case FLAG_BYTE:
                         case FLAG_SHORT:
-                            expressions = new CastExpression(type, updatedParameter);
+                            updatedParameter = new CastExpression(type, updatedParameter);
                             break;
                     }
                 }
+
+                expressions = updatedParameter;
             }
         }
 
