@@ -173,7 +173,7 @@ public class ExpressionVisitor extends TypeVisitor {
                 boolean ief = inExpressionFlag;
                 Iterator<Expression> iterator = list.iterator();
 
-                for (int i=size-1; i>0; i--) {
+                while (size-- > 1) {
                     inExpressionFlag = true;
                     iterator.next().accept(this);
 
@@ -328,7 +328,11 @@ public class ExpressionVisitor extends TypeVisitor {
                 tokens = new Tokens();
                 statementList.accept(this);
 
-                JavaFragmentFactory.addEndStatementsInLambdaBlock(fragments, start);
+                if (inExpressionFlag) {
+                    JavaFragmentFactory.addEndStatementsInLambdaBlockInParameter(fragments, start);
+                } else {
+                    JavaFragmentFactory.addEndStatementsInLambdaBlock(fragments, start);
+                }
 
                 tokens = new Tokens();
             }

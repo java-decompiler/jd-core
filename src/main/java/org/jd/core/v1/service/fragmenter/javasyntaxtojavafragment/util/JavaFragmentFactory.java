@@ -15,7 +15,7 @@ import java.util.List;
 public class JavaFragmentFactory {
     public static void addSpacerAfterPackage(List<Fragment> fragments) {
         fragments.add(new SpacerFragment(0, 1, 1, 0, "Spacer after package"));
-        fragments.add(new SpacerFragment(0, 1, 1, 1, "Second lastSpacer after package"));
+        fragments.add(new SpacerFragment(0, 1, 1, 1, "Second spacer after package"));
     }
 
     public static void addSpacerAfterImports(List<Fragment> fragments) {
@@ -28,7 +28,7 @@ public class JavaFragmentFactory {
 
     public static void addEndArrayInitializerInParameter(List<Fragment> fragments, StartBlockFragment start) {
         fragments.add(new EndBlockInParameterFragment(0, 0, 1, 20, "End array initializer", start));
-        fragments.add(new SpaceSpacerFragment(0, 0, Integer.MAX_VALUE, 21, "End array initializer lastSpacer in parameter"));
+        fragments.add(new SpaceSpacerFragment(0, 0, Integer.MAX_VALUE, 21, "End array initializer spacer in parameter"));
     }
 
     public static void addEndArrayInitializer(List<Fragment> fragments, StartBlockFragment start) {
@@ -49,7 +49,7 @@ public class JavaFragmentFactory {
 
     public static void addEndSubTypeBodyInParameter(List<Fragment> fragments, StartBodyFragment start) {
         fragments.add(new EndBodyInParameterFragment(0, 1, 1, 10, "End sub type body in parameter", start));
-        fragments.add(new SpaceSpacerFragment(0, 0, Integer.MAX_VALUE, 13, "End sub type body lastSpacer in parameter"));
+        fragments.add(new SpaceSpacerFragment(0, 0, Integer.MAX_VALUE, 13, "End sub type body spacer in parameter"));
     }
 
     public static void addEndSubTypeBody(List<Fragment> fragments, StartBodyFragment start) {
@@ -57,13 +57,13 @@ public class JavaFragmentFactory {
     }
 
     public static void addEndSingleStatementBlock(List<Fragment> fragments, StartSingleStatementBlockFragment start) {
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 19, "End single statement block lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 19, "End single statement block spacer"));
         //fragments.add(new EndSingleStatementBlockFragment(0, 1, 2, 15, "End single statement block", start));
         fragments.add(new EndSingleStatementBlockFragment(0, 0, 1, 6, "End single statement block", start));
     }
 
     public static void addEndStatementsBlock(List<Fragment> fragments, StartStatementsBlockFragment.Group group) {
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 19, "End statement block lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 19, "End statement block spacer"));
         fragments.add(new EndStatementsBlockFragment(0, 1, 2, 15, "End statement block", group));
     }
 
@@ -71,9 +71,14 @@ public class JavaFragmentFactory {
         fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 11, "Spacer after end statement block"));
     }
 
+    public static void addEndStatementsInLambdaBlockInParameter(List<Fragment> fragments, StartBlockFragment start) {
+        fragments.add(new EndBlockInParameterFragment(0, 1, 2, 15, "End statements in lambda block spacer in parameter", start));
+        fragments.add(new SpaceSpacerFragment(0, 0, Integer.MAX_VALUE, 15, "End statements in lambda block spacer in parameter"));
+    }
+
     public static void addEndStatementsInLambdaBlock(List<Fragment> fragments, StartBlockFragment start) {
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 15, "End statements in lambda block lastSpacer"));
-        fragments.add(new EndBlockFragment(0, 1, 2, 15, "End statements in lambda block lastSpacer", start));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 15, "End statements in lambda block spacer"));
+        fragments.add(new EndBlockFragment(0, 1, 2, 15, "End statements in lambda block spacer", start));
     }
 
     public static void addSpacerAfterMemberAnnotations(List<Fragment> fragments) {
@@ -100,7 +105,7 @@ public class JavaFragmentFactory {
     public static void addSpacerBetweenEnumValues(List<Fragment> fragments, int preferredLineCount) {
         fragments.add(TokensFragment.COMMA);
         fragments.add(new SpaceSpacerFragment(0, preferredLineCount, 1, 10, "Spacer between enum values"));
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 24, "Second lastSpacer between enum values"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 24, "Second spacer between enum values"));
     }
 
     public static void addSpacerBetweenFieldDeclarators(List<Fragment> fragments) {
@@ -159,49 +164,49 @@ public class JavaFragmentFactory {
     public static StartBodyFragment addStartTypeBody(List<Fragment> fragments) {
         StartBodyFragment fragment = new StartBodyFragment(0, 1, 2, 4, "Start type body");
         fragments.add(fragment);
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 13, "Start type body lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 13, "Start type body spacer"));
         return fragment;
     }
 
     public static StartSingleStatementBlockFragment addStartSingleStatementBlock(List<Fragment> fragments) {
         StartSingleStatementBlockFragment fragment = new StartSingleStatementBlockFragment(0, 1, 2, 18, "Start single statement block");
         fragments.add(fragment);
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 23, "Start single statement block lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 23, "Start single statement block spacer"));
         return fragment;
     }
 
     public static StartStatementsBlockFragment.Group addStartStatementsBlock(List<Fragment> fragments) {
         StartStatementsBlockFragment fragment = new StartStatementsBlockFragment(0, 1, 2, 14, "Start statements block");
         fragments.add(fragment);
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 19, "Start statements block lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 19, "Start statements block spacer"));
         return fragment.getGroup();
     }
 
     public static StartBlockFragment addStartStatementsInLambdaBlock(List<Fragment> fragments) {
         StartBlockFragment fragment = new StartBlockFragment(0, 1, 2, 14, "Start statements in lambda block");
         fragments.add(fragment);
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 14, "Start statements in lambda block lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 14, "Start statements in lambda block spacer"));
         return fragment;
     }
 
     public static StartStatementsBlockFragment.Group addStartStatementsDoWhileBlock(List<Fragment> fragments) {
         StartStatementsDoWhileBlockFragment fragment = new StartStatementsDoWhileBlockFragment(0, 1, 2, 14, "Start statements do-while block");
         fragments.add(fragment);
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 14, "Start statements do-while block lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 14, "Start statements do-while block spacer"));
         return fragment.getGroup();
     }
 
     public static StartStatementsBlockFragment.Group addStartStatementsTryBlock(List<Fragment> fragments) {
         StartStatementsTryBlockFragment fragment = new StartStatementsTryBlockFragment(0, 1, 2, 14, "Start statements try block");
         fragments.add(fragment);
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 14, "Start statements try block lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 14, "Start statements try block spacer"));
         return fragment.getGroup();
     }
 
     public static void addStartStatementsBlock(List<Fragment> fragments, StartStatementsBlockFragment.Group group) {
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 23, "Start statements block pre lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 23, "Start statements block pre spacer"));
         fragments.add(new StartStatementsBlockFragment(0, 1, 2, 14, "Start statements block", group));
-        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 19, "Start statements block post lastSpacer"));
+        fragments.add(new SpacerFragment(0, 0, Integer.MAX_VALUE, 19, "Start statements block post spacer"));
     }
 
     public static ImportsFragment newImportsFragment() {
