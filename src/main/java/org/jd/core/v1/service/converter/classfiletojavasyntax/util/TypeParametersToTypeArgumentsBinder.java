@@ -195,6 +195,9 @@ public class TypeParametersToTypeArgumentsBinder {
                     ObjectType objectType = (ObjectType) type;
                     ObjectType mieTypeObjectType = (ObjectType) t;
                     t = typeMaker.searchSuperParameterizedType(objectType, mieTypeObjectType);
+                    if (t == null) {
+                        t = mie.getType();
+                    }
                 }
 
                 Map<String, TypeArgument> bindings = createBindings(expression, typeParameters, typeArguments, methodTypeParameters, type, t, parameterTypes, parameters);
@@ -276,6 +279,9 @@ public class TypeParametersToTypeArgumentsBinder {
                 if (type.isObject()) {
                     ObjectType objectType = (ObjectType)type;
                     t = typeMaker.searchSuperParameterizedType(objectType, neObjectType);
+                    if (t == null) {
+                        t = neObjectType;
+                    }
                 }
 
                 Map<String, TypeArgument> bindings = createBindings(null, typeParameters, typeArguments, null, type, t, parameterTypes, parameters);
