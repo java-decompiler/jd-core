@@ -165,7 +165,7 @@ public class TypeParametersToTypeArgumentsBinder {
         Expression expression = mie.getExpression();
         Type expressionType = expression.getType();
 
-        if (staticMethod || (mie.getTypeParameters() != null) || expressionType.isGeneric() || (expression.getClass() != ThisExpression.class)) {
+        if (staticMethod || (mie.getTypeParameters() != null) || !mie.getInternalTypeName().equals(internalTypeName)) {
             TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(mie.getInternalTypeName());
 
             if (typeTypes != null) {
@@ -495,7 +495,7 @@ public class TypeParametersToTypeArgumentsBinder {
             return null;
         }
 
-        if (staticMethod || (mie.getExpression().getClass() != ThisExpression.class)) {
+        if (staticMethod || !mie.getInternalTypeName().equals(internalTypeName)) {
             TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(mie.getInternalTypeName());
 
             if ((typeTypes != null) && (typeTypes.typeParameters != null)) {

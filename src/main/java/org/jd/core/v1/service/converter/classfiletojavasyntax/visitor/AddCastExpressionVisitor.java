@@ -24,6 +24,8 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.Map;
 
+import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_BRIDGE;
+import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
@@ -54,11 +56,13 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(FieldDeclaration declaration) {
-        Type t = type;
+        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
+            Type t = type;
 
-        type = declaration.getType();
-        declaration.getFieldDeclarators().accept(this);
-        type = t;
+            type = declaration.getType();
+            declaration.getFieldDeclarators().accept(this);
+            type = t;
+        }
     }
 
     @Override
@@ -96,36 +100,40 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        BaseStatement statements = declaration.getStatements();
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) == 0) {
+            BaseStatement statements = declaration.getStatements();
 
-        if (statements != null) {
-            Map<String, BaseType> tb = typeBounds;
-            BaseType et = exceptionTypes;
+            if (statements != null) {
+                Map<String, BaseType> tb = typeBounds;
+                BaseType et = exceptionTypes;
 
-            typeBounds = ((ClassFileConstructorDeclaration)declaration).getTypeBounds();
-            exceptionTypes = declaration.getExceptionTypes();
-            statements.accept(this);
-            typeBounds = tb;
-            exceptionTypes = et;
+                typeBounds = ((ClassFileConstructorDeclaration) declaration).getTypeBounds();
+                exceptionTypes = declaration.getExceptionTypes();
+                statements.accept(this);
+                typeBounds = tb;
+                exceptionTypes = et;
+            }
         }
     }
 
     @Override
     public void visit(MethodDeclaration declaration) {
-        BaseStatement statements = declaration.getStatements();
+        if ((declaration.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) == 0) {
+            BaseStatement statements = declaration.getStatements();
 
-        if (statements != null) {
-            Map<String, BaseType> tb = typeBounds;
-            Type rt = returnedType;
-            BaseType et = exceptionTypes;
+            if (statements != null) {
+                Map<String, BaseType> tb = typeBounds;
+                Type rt = returnedType;
+                BaseType et = exceptionTypes;
 
-            typeBounds = ((ClassFileMethodDeclaration)declaration).getTypeBounds();
-            returnedType = declaration.getReturnedType();
-            exceptionTypes = declaration.getExceptionTypes();
-            statements.accept(this);
-            typeBounds = tb;
-            returnedType = rt;
-            exceptionTypes = et;
+                typeBounds = ((ClassFileMethodDeclaration) declaration).getTypeBounds();
+                returnedType = declaration.getReturnedType();
+                exceptionTypes = declaration.getExceptionTypes();
+                statements.accept(this);
+                typeBounds = tb;
+                returnedType = rt;
+                exceptionTypes = et;
+            }
         }
     }
 
@@ -136,7 +144,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if (statements != null) {
             Type rt = returnedType;
 
-            returnedType = expression.getReturnedType();
+            returnedType = ObjectType.TYPE_OBJECT;
             statements.accept(this);
             returnedType = rt;
         }

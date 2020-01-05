@@ -9,13 +9,11 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.GenericType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForEachStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
@@ -31,6 +29,7 @@ import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.statement.ContinueStatement.CONTINUE;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_ITERABLE;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class LoopStatementMaker {
     protected static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
@@ -571,10 +570,6 @@ public class LoopStatementMaker {
 
         AbstractLocalVariable syntheticIterator = ((ClassFileLocalVariableReferenceExpression)mie.getExpression()).getLocalVariable();
 
-        if ((syntheticIterator.getName() != null) && (syntheticIterator.getName().indexOf('$') == -1)) {
-            return null;
-        }
-
         // Iterator i$ = list.iterator();
         Statement lastStatement = statements.getLast();
 
@@ -670,7 +665,11 @@ public class LoopStatementMaker {
         statements.removeLast();
         subStatements.remove(0);
         item.setDeclared(true);
-        localVariableMaker.removeLocalVariable(syntheticIterator);
+
+        if (syntheticIterator.getReferences().size() == 3) {
+            // If local variable is used only for this loop
+            localVariableMaker.removeLocalVariable(syntheticIterator);
+        }
 
         Type type = list.getType();
 
@@ -678,11 +677,12 @@ public class LoopStatementMaker {
             ObjectType listType = (ObjectType)type;
 
             if (listType.getTypeArguments() == null) {
-                if (item.getType().isObject()) {
-                    ObjectType ot = (ObjectType) item.getType();
-
-                    if (ot.getTypeArguments() != null) {
-                        list = new CastExpression(TYPE_ITERABLE.createType(ot), list);
+                if (!TYPE_OBJECT.equals(item.getType())) {
+                    if (list.getClass() == ClassFileNewExpression.class) {
+                        ClassFileNewExpression ne = (ClassFileNewExpression)list;
+                        ne.setType(listType.createType(DiamondTypeArgument.DIAMOND));
+                    } else {
+                        list = new CastExpression(TYPE_ITERABLE.createType(item.getType()), list);
                     }
                 }
             } else {
@@ -691,7 +691,7 @@ public class LoopStatementMaker {
                 type = visitor2.getType();
 
                 if (type != null) {
-                    if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
+                    if (TYPE_OBJECT.equals(item.getType())) {
                         ((ObjectLocalVariable) item).setType(typeBounds, type);
                     } else if (item.getType().isGeneric()) {
                         ((GenericLocalVariable) item).setType((GenericType) type);

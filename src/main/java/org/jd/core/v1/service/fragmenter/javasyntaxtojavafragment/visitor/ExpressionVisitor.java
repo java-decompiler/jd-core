@@ -395,7 +395,10 @@ public class ExpressionVisitor extends TypeVisitor {
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
         if (parameters != null) {
+            boolean ief = inExpressionFlag;
+            inExpressionFlag = false;
             parameters.accept(this);
+            inExpressionFlag = ief;
         }
 
         tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);

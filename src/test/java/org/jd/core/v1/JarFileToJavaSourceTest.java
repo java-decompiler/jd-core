@@ -54,11 +54,29 @@ public class JarFileToJavaSourceTest extends TestCase {
         test(org.apache.commons.lang3.JavaVersion.class);
     }
 
+    @Test
+    public void testJavaPoet() throws Exception {
+        // Decompile and recompile 'com.squareup:javapoet:1.11.1'
+        test(com.squareup.javapoet.JavaFile.class);
+    }
+
+    @Test
+    public void testJSoup() throws Exception {
+        // Decompile and recompile 'org.jsoup:jsoup:1.12.1'
+        test(org.jsoup.Jsoup.class);
+    }
+
+    @Test
+    public void testJUnit4() throws Exception {
+        // Decompile and recompile 'junit:junit:4.12'
+        test(org.junit.Test.class);
+    }
+
     // TODO In progress
 //    @Test
-//    public void testJUnit4() throws Exception {
-//        // Decompile and recompile 'junit:junit:4.12'
-//        test(org.junit.Test.class);
+//    public void testLog4j() throws Exception {
+//        // Decompile and recompile 'log4j:log4j:1.2.17'
+//        test(org.apache.log4j.Category.class);
 //    }
 
     protected void test(Class clazz) throws Exception {
