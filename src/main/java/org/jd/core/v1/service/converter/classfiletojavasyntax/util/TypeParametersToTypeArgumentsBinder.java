@@ -119,7 +119,7 @@ public class TypeParametersToTypeArgumentsBinder {
                             bindings = createBindings(expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
                         }
 
-                        type = (Type) bind(bindings, type);
+                        type = (Type)bind(bindings, type);
                     }
                 }
             }
@@ -457,18 +457,12 @@ public class TypeParametersToTypeArgumentsBinder {
         return parameterTypes;
     }
 
-    protected BaseType clone(BaseType parameterTypes) {
+    protected static BaseType clone(BaseType parameterTypes) {
         if ((parameterTypes != null) && parameterTypes.isList()) {
             switch (parameterTypes.size()) {
-                case 0:
-                    parameterTypes = null;
-                    break;
-                case 1:
-                    parameterTypes = parameterTypes.getFirst();
-                    break;
-                default:
-                    parameterTypes = new Types(parameterTypes.getList());
-                    break;
+                case 0: parameterTypes = null; break;
+                case 1: parameterTypes = parameterTypes.getFirst(); break;
+                default: parameterTypes = new Types(parameterTypes.getList()); break;
             }
         }
 

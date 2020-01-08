@@ -35,9 +35,10 @@ public class LoopStatementMaker {
     protected static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
 
     public static Statement makeLoop(
-            Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock,
-            Statements statements, Expression condition, Statements subStatements, Statements jumps) {
-        Statement loop = makeLoop(typeBounds, localVariableMaker, loopBasicBlock, statements, condition, subStatements);
+            int majorVersion, Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker,
+            BasicBlock loopBasicBlock, Statements statements, Expression condition, Statements subStatements,
+            Statements jumps) {
+        Statement loop = makeLoop(majorVersion, typeBounds, localVariableMaker, loopBasicBlock, statements, condition, subStatements);
         int continueOffset = loopBasicBlock.getSub1().getFromOffset();
         int breakOffset = loopBasicBlock.getNext().getFromOffset();
 
@@ -49,20 +50,24 @@ public class LoopStatementMaker {
     }
 
     protected static Statement makeLoop(
-            Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker, BasicBlock loopBasicBlock,
-            Statements statements, Expression condition, Statements subStatements) {
+            int majorVersion, Map<String, BaseType> typeBounds, LocalVariableMaker localVariableMaker,
+            BasicBlock loopBasicBlock, Statements statements, Expression condition, Statements subStatements) {
+        boolean forEachSupported = (majorVersion >= 49); // (majorVersion >= Java 5)
+
         subStatements.accept(REMOVE_LAST_CONTINUE_STATEMENT_VISITOR);
 
-        Statement statement = makeForEachArray(typeBounds, localVariableMaker, statements, condition, subStatements);
+        if (forEachSupported) {
+            Statement statement = makeForEachArray(typeBounds, localVariableMaker, statements, condition, subStatements);
 
-        if (statement != null) {
-            return statement;
-        }
+            if (statement != null) {
+                return statement;
+            }
 
-        statement = makeForEachList(typeBounds, localVariableMaker, statements, condition, subStatements);
+            statement = makeForEachList(typeBounds, localVariableMaker, statements, condition, subStatements);
 
-        if (statement != null) {
-            return statement;
+            if (statement != null) {
+                return statement;
+            }
         }
 
         int lineNumber = (condition == null) ? Expression.UNKNOWN_LINE_NUMBER : condition.getLineNumber();

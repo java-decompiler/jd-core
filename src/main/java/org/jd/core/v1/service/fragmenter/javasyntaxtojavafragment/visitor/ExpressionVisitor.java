@@ -46,6 +46,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
     protected LinkedList<Context> contextStack = new LinkedList<>();
     protected Fragments fragments = new Fragments();
+    protected boolean diamondOperatorSupported;
     protected boolean inExpressionFlag = false;
     protected HashSet<String> currentMethodParamNames = new HashSet<>();
     protected String currentTypeName;
@@ -53,6 +54,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
     public ExpressionVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         super(loader, mainInternalTypeName, majorVersion, importsFragment);
+        this.diamondOperatorSupported = (majorVersion >= 51); // (majorVersion >= Java 7)
     }
 
     public DefaultList<Fragment> getFragments() {
@@ -474,7 +476,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         ObjectType objectType = expression.getObjectType();
 
-        if ((objectType.getTypeArguments() != null) && (bodyDeclaration == null) && (majorVersion >= 51)) { // (majorVersion >= Java 7)
+        if ((objectType.getTypeArguments() != null) && (bodyDeclaration == null) && diamondOperatorSupported) {
             objectType = objectType.createType(DiamondTypeArgument.DIAMOND);
         }
 

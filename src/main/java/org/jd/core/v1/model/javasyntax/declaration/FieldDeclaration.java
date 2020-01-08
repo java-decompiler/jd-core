@@ -35,6 +35,10 @@ public class FieldDeclaration implements MemberDeclaration {
         return flags;
     }
 
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
     public BaseAnnotationReference getAnnotationReferences() {
         return annotationReferences;
     }
@@ -45,6 +49,10 @@ public class FieldDeclaration implements MemberDeclaration {
 
     public BaseFieldDeclarator getFieldDeclarators() {
         return fieldDeclarators;
+    }
+
+    public void setFieldDeclarators(BaseFieldDeclarator fieldDeclarators) {
+        this.fieldDeclarators = fieldDeclarators;
     }
 
     @Override

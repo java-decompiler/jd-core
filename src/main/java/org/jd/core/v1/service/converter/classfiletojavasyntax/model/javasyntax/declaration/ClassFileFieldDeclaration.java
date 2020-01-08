@@ -33,14 +33,6 @@ public class ClassFileFieldDeclaration extends FieldDeclaration implements Class
         this.firstLineNumber = firstLineNumber;
     }
 
-    public void setFlags(int flags) {
-        this.flags = flags;
-    }
-
-    public void setFieldDeclarators(BaseFieldDeclarator fieldDeclarators) {
-        this.fieldDeclarators = fieldDeclarators;
-    }
-
     @Override
     public int getFirstLineNumber() {
         return firstLineNumber;

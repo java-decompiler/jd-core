@@ -48,7 +48,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     protected Loader loader;
     protected String internalPackageName;
-    protected int majorVersion;
+    protected boolean genericTypesSupported;
     protected ImportsFragment importsFragment;
     protected Tokens tokens;
     protected int maxLineNumber = 0;
@@ -57,7 +57,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     public TypeVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         this.loader = loader;
-        this.majorVersion = majorVersion;
+        this.genericTypesSupported = (majorVersion >= 49); // (majorVersion >= Java 5)
         this.importsFragment = importsFragment;
 
         int index = mainInternalTypeName.lastIndexOf('/');
@@ -106,7 +106,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         // Build token for type reference
         tokens.add(newTypeReferenceToken(type, currentInternalTypeName));
 
-        if (majorVersion >= 49) { // (majorVersion >= Java 5)
+        if (genericTypesSupported) {
             // Build token for type arguments
             BaseTypeArgument typeArguments = type.getTypeArguments();
 
@@ -131,7 +131,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         // Build token for type reference
         tokens.add(new ReferenceToken(ReferenceToken.TYPE, type.getInternalName(), type.getName(), null, currentInternalTypeName));
 
-        if (majorVersion >= 49) { // (majorVersion >= Java 5)
+        if (genericTypesSupported) {
             // Build token for type arguments
             BaseTypeArgument typeArguments = type.getTypeArguments();
 
@@ -154,16 +154,10 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     protected void visitDimension(int dimension) {
         switch (dimension) {
-            case 0:
-                break;
-            case 1:
-                tokens.add(TextToken.DIMENSION_1);
-                break;
-            case 2:
-                tokens.add(TextToken.DIMENSION_2);
-                break;
-            default:
-                tokens.add(newTextToken(new String(new char[dimension]).replaceAll("\0", "[]")));
+            case 0: break;
+            case 1: tokens.add(TextToken.DIMENSION_1); break;
+            case 2: tokens.add(TextToken.DIMENSION_2); break;
+            default: tokens.add(newTextToken(new String(new char[dimension]).replaceAll("\0", "[]"))); break;
         }
     }
 

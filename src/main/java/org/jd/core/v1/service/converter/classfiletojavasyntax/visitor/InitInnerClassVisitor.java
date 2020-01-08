@@ -29,9 +29,10 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.*;
 
 import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
+import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
 
 public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
-    protected UpdateFieldReferencesVisitor updateFieldReferencesVisitor = new UpdateFieldReferencesVisitor();
+    protected UpdateFieldDeclarationsAndReferencesVisitor updateFieldDeclarationsAndReferencesVisitor = new UpdateFieldDeclarationsAndReferencesVisitor();
     protected DefaultList<String> syntheticInnerFieldNames = new DefaultList<>();
     protected ObjectType outerType;
 
@@ -72,7 +73,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         if ((outerType != null) || !syntheticInnerFieldNames.isEmpty()) {
-            updateFieldReferencesVisitor.visit(bodyDeclaration);
+            updateFieldDeclarationsAndReferencesVisitor.visit(bodyDeclaration);
         }
     }
 
@@ -189,13 +190,34 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
     @Override public void visit(MethodDeclaration declaration) {}
     @Override public void visit(StaticInitializerDeclaration declaration) {}
 
-    protected class UpdateFieldReferencesVisitor extends AbstractUpdateExpressionVisitor {
+    protected class UpdateFieldDeclarationsAndReferencesVisitor extends AbstractUpdateExpressionVisitor {
         protected ClassFileBodyDeclaration bodyDeclaration;
+        protected boolean syntheticField;
 
         @Override
         public void visit(BodyDeclaration declaration) {
             bodyDeclaration = (ClassFileBodyDeclaration)declaration;
+            safeAcceptListDeclaration(bodyDeclaration.getFieldDeclarations());
             safeAcceptListDeclaration(bodyDeclaration.getMethodDeclarations());
+        }
+
+        @Override
+        public void visit(FieldDeclaration declaration) {
+            syntheticField = false;
+            declaration.getFieldDeclarators().accept(this);
+
+            if (syntheticField) {
+                declaration.setFlags(declaration.getFlags()|FLAG_SYNTHETIC);
+            }
+        }
+
+        @Override
+        public void visit(FieldDeclarator declarator) {
+            String name = declarator.getName();
+
+            if (name.startsWith("this$") || syntheticInnerFieldNames.contains(name)) {
+                syntheticField = true;
+            }
         }
 
         @Override public void visit(StaticInitializerDeclaration declaration) {}
@@ -393,7 +415,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
                         if ((type.getQualifiedName() == null) && (type.getName() != null)) {
                             // Local class
-                            cfcd.setFlags(cfcd.getFlags() & (~Declaration.FLAG_SYNTHETIC));
+                            cfcd.setFlags(cfcd.getFlags() & (~FLAG_SYNTHETIC));
                             localClassDeclarations.add(cfcd);
                             bodyDeclaration.removeInnerType(internalName);
                             lineNumber = ne.getLineNumber();
