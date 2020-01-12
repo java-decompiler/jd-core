@@ -35,9 +35,11 @@ public class PlainTextPrinter implements Printer {
         indentationCount = 0;
     }
 
+    @Override
     public String toString() { return sb.toString(); }
 
     // --- Printer --- //
+    @Override
     public void start(int maxLineNumber, int majorVersion, int minorVersion) {
         this.indentationCount = 0;
 
@@ -55,8 +57,10 @@ public class PlainTextPrinter implements Printer {
         }
     }
 
+    @Override
     public void end() {}
 
+    @Override
     public void printText(String text) {
         if (escapeUnicodeCharacters) {
             for(int i=0, len=text.length(); i<len; i++) {
@@ -82,24 +86,32 @@ public class PlainTextPrinter implements Printer {
         }
     }
 
+    @Override
     public void printNumericConstant(String constant) { sb.append(constant); }
 
+    @Override
     public void printStringConstant(String constant, String ownerInternalName) { printText(constant); }
 
+    @Override
     public void printKeyword(String keyword) { sb.append(keyword); }
 
+    @Override
     public void printDeclaration(int type, String internalTypeName, String name, String descriptor) { printText(name); }
 
+    @Override
     public void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) { printText(name); }
 
+    @Override
     public void indent() {
         this.indentationCount++;
     }
+    @Override
     public void unindent() {
         if (this.indentationCount > 0)
             this.indentationCount--;
     }
 
+    @Override
     public void startLine(int lineNumber) {
         printLineNumber(lineNumber);
 
@@ -107,10 +119,12 @@ public class PlainTextPrinter implements Printer {
             sb.append(TAB);
     }
 
+    @Override
     public void endLine() {
         sb.append(NEWLINE);
     }
 
+    @Override
     public void extraLine(int count) {
         while (count-- > 0) {
             printLineNumber(0);
@@ -118,8 +132,10 @@ public class PlainTextPrinter implements Printer {
         }
     }
 
+    @Override
     public void startMarker(int type) {}
 
+    @Override
     public void endMarker(int type) {}
 
     protected void printLineNumber(int lineNumber) {
