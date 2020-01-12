@@ -60,6 +60,19 @@ public class PlainTextPrinter implements Printer {
     @Override
     public void end() {}
 
+    private static char hexChar(int v, int halfByteIndex) {
+        int halfByte = (v >> halfByteIndex * 4) & 15;
+        return halfByte <= 9 ? (char)('0' + halfByte) : (char)('A' + halfByte - 10);
+    }
+
+    private static void writeUnicodeEscape(StringBuilder sb, char c) {
+        sb.append("\\u");
+
+        for (int index = 3; index >= 0; index--) {
+            sb.append(hexChar(c, index));
+        }
+    }
+
     @Override
     public void printText(String text) {
         if (escapeUnicodeCharacters) {
@@ -69,16 +82,7 @@ public class PlainTextPrinter implements Printer {
                 if (c < 128) {
                     sb.append(c);
                 } else {
-                    int h = (c >> 24);
-
-                    sb.append("\\u");
-                    sb.append((h <= 9) ? (h + '0') : (h + 'A'));
-                    h = (c >> 16) & 255;
-                    sb.append((h <= 9) ? (h + '0') : (h + 'A'));
-                    h = (c >> 8) & 255;
-                    sb.append((h <= 9) ? (h + '0') : (h + 'A'));
-                    h = (c) & 255;
-                    sb.append((h <= 9) ? (h + '0') : (h + 'A'));
+                    writeUnicodeEscape(sb, c);
                 }
             }
         } else {
