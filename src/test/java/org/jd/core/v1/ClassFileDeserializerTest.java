@@ -8,6 +8,9 @@
 package org.jd.core.v1;
 
 import junit.framework.TestCase;
+
+import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Field;
@@ -17,12 +20,36 @@ import org.jd.core.v1.model.classfile.attribute.ElementValuePrimitiveType;
 import org.jd.core.v1.model.classfile.constant.ConstantInteger;
 import org.jd.core.v1.model.classfile.constant.ConstantUtf8;
 import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
 import org.junit.Test;
 
 import java.io.InputStream;
 
 public class ClassFileDeserializerTest extends TestCase {
+    @Test
+    public void testMissingClass() throws Exception {
+        class NoOpLoader implements Loader {
+            @Override
+            public boolean canLoad(String internalName) {
+                return false;
+            }
+
+            @Override
+            public byte[] load(String internalName) throws LoaderException {
+                fail("Loader cannot load anything");
+                return null;
+            }
+        }
+
+        ClassFileDeserializer deserializer = new ClassFileDeserializer();
+        try {
+            deserializer.loadClassFile(new NoOpLoader(), "DoesNotExist");
+            fail("Expected exception");
+        }
+        // Expecting exception because class cannot be loaded
+        catch (IllegalArgumentException expected) { }
+    }
 
     @Test
     public void testAnnotatedClass() throws Exception {
