@@ -517,11 +517,9 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
     }
 
     protected static class ImportNameComparator implements Comparator<ImportsFragment.Import> {
+        @Override
         public int compare(ImportsFragment.Import tr1, ImportsFragment.Import tr2) {
             return tr1.getQualifiedName().compareTo(tr2.getQualifiedName());
-        }
-        public boolean equals(Object obj) {
-            return this.equals(obj);
         }
     }
 

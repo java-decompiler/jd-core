@@ -111,11 +111,9 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
     }
 
     protected static class ImportCountComparator implements Comparator<Import> {
+        @Override
         public int compare(Import tr1, Import tr2) {
             return tr2.getCounter() - tr1.getCounter();
-        }
-        public boolean equals(Object obj) {
-            return this.equals(obj);
         }
     }
 }
