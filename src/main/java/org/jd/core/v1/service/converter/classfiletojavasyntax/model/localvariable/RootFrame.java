@@ -20,10 +20,10 @@ public class RootFrame extends Frame {
         return null;
     }
 
-    public void createDeclarations() {
+    public void createDeclarations(boolean containsLineNumber) {
         if (children != null) {
             for (Frame child : children) {
-                child.createDeclarations();
+                child.createDeclarations(containsLineNumber);
             }
         }
     }

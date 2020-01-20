@@ -29,7 +29,7 @@ public class JavaSyntaxToJavaFragmentProcessor implements Processor {
         int majorVersion = message.getHeader("majorVersion");
         CompilationUnit compilationUnit = message.getBody();
 
-        SearchImportsVisitor importsVisitor = new SearchImportsVisitor(mainInternalTypeName);
+        SearchImportsVisitor importsVisitor = new SearchImportsVisitor(loader, mainInternalTypeName);
         importsVisitor.visit(compilationUnit);
         ImportsFragment importsFragment = importsVisitor.getImportsFragment();
         message.setHeader("maxLineNumber", importsVisitor.getMaxLineNumber());

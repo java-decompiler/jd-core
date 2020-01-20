@@ -19,6 +19,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
 
@@ -117,24 +118,40 @@ public class Frame {
             lv.getReferences().addAll(alvToMerge.getReferences());
             lv.setFromOffset(alvToMerge.getFromOffset());
 
-            if (!lv.isAssignableFrom(typeBounds, alvToMerge) && !localVariableMaker.isCompatible(lv, alvToMerge.getType())) {
-                Type type = lv.getType();
-                Type alvToMergeType = alvToMerge.getType();
+            Type type = lv.getType();
+            Type alvToMergeType = alvToMerge.getType();
 
+            if (lv.isAssignableFrom(typeBounds, alvToMerge) || localVariableMaker.isCompatible(lv, alvToMerge.getType())) {
+                if (type.isPrimitive()) {
+                    PrimitiveLocalVariable plv = (PrimitiveLocalVariable)lv;
+                    PrimitiveLocalVariable plvToMergeType = (PrimitiveLocalVariable)alvToMerge;
+                    Type t = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType)plv.getType(), (PrimitiveType)plvToMergeType.getType());
+
+                    if (t == null) {
+                        t = PrimitiveType.TYPE_INT;
+                    }
+
+                    plv.setType((PrimitiveType)t.createType(type.getDimension()));
+                }
+            } else {
                 assert (type.isPrimitive() == alvToMergeType.isPrimitive()) && (type.isObject() == alvToMergeType.isObject()) && (type.isGeneric() == alvToMergeType.isGeneric()) : "Frame.mergeLocalVariable(lv) : merge local variable failed";
 
                 if (type.isPrimitive()) {
+                    PrimitiveLocalVariable plv = (PrimitiveLocalVariable)lv;
+
                     if (alvToMerge.isAssignableFrom(typeBounds, lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
-                        ((PrimitiveLocalVariable)lv).setType((PrimitiveType)alvToMergeType);
+                        plv.setType((PrimitiveType)alvToMergeType);
                     } else {
-                        ((PrimitiveLocalVariable)lv).setType(PrimitiveType.TYPE_INT);
+                        plv.setType(PrimitiveType.TYPE_INT);
                     }
                 } else if (type.isObject()) {
+                    ObjectLocalVariable olv = (ObjectLocalVariable)lv;
+
                     if (alvToMerge.isAssignableFrom(typeBounds, lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
-                        ((ObjectLocalVariable)lv).setType(typeBounds, alvToMergeType);
+                        olv.setType(typeBounds, alvToMergeType);
                     } else {
                         int dimension = Math.max(lv.getDimension(), alvToMerge.getDimension());
-                        ((ObjectLocalVariable)lv).setType(typeBounds, ObjectType.TYPE_OBJECT.createType(dimension));
+                        olv.setType(typeBounds, ObjectType.TYPE_OBJECT.createType(dimension));
                     }
                 }
             }
@@ -253,9 +270,9 @@ public class Frame {
         }
     }
 
-    public void createDeclarations() {
+    public void createDeclarations(boolean containsLineNumber) {
         // Create inline declarations
-        boolean containsLineNumber = createInlineDeclarations();
+        createInlineDeclarations();
 
         // Create start-block declarations
         createStartBlockDeclarations();
@@ -268,14 +285,13 @@ public class Frame {
         // Recursive call
         if (children != null) {
             for (Frame child : children) {
-                child.createDeclarations();
+                child.createDeclarations(containsLineNumber);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    protected boolean createInlineDeclarations() {
-        boolean containsLineNumber = false;
+    protected void createInlineDeclarations() {
         HashMap<Frame, HashSet<AbstractLocalVariable>> map = createMapForInlineDeclarations();
 
         if (!map.isEmpty()) {
@@ -292,7 +308,6 @@ public class Frame {
                     visitor.init();
                     statement.accept(visitor);
 
-                    containsLineNumber |= visitor.containsLineNumber();
                     HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement = visitor.getVariables();
                     undeclaredLocalVariablesInStatement.retainAll(undeclaredLocalVariables);
 
@@ -337,8 +352,6 @@ public class Frame {
                 }
             }
         }
-
-        return containsLineNumber;
     }
 
     protected HashMap<Frame, HashSet<AbstractLocalVariable>> createMapForInlineDeclarations() {
@@ -676,7 +689,7 @@ public class Frame {
                         LocalVariableDeclarationStatement lvds2 = (LocalVariableDeclarationStatement) statement;
                         int lineNumber2 = lvds2.getLocalVariableDeclarators().getLineNumber();
 
-                        if ((lineNumber1 != lineNumber2) && (lineNumber1 > 0)) {
+                        if (lineNumber1 != lineNumber2) {
                             iterator.previous();
                             break;
                         }

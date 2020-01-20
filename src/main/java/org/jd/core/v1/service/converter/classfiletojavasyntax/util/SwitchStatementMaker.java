@@ -20,7 +20,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
-import java.util.ListIterator;
+import java.util.Iterator;
 
 public class SwitchStatementMaker {
     protected static final Integer MINUS_ONE = Integer.valueOf(-1);
@@ -193,7 +193,7 @@ public class SwitchStatementMaker {
                     // Javac switch-enum pattern
                     bodyDeclaration = (ClassFileBodyDeclaration) syntheticClassDeclaration.getBodyDeclaration();
                     DefaultList<Statement> statements = bodyDeclaration.getMethodDeclarations().get(0).getStatements().getList();
-                    updateSwitchStatement(switchStatement, statements.listIterator(1));
+                    updateSwitchStatement(switchStatement, searchSwitchMap(fre, statements.iterator()));
                 }
             }
         } else if (expressionClass == ClassFileMethodInvocationExpression.class) {
@@ -213,7 +213,35 @@ public class SwitchStatementMaker {
         }
     }
 
-    protected static void updateSwitchStatement(SwitchStatement switchStatement, ListIterator<Statement> iterator) {
+    protected static Iterator<Statement> searchSwitchMap(FieldReferenceExpression fre, Iterator<Statement> iterator) {
+        String name = fre.getName();
+
+        while (iterator.hasNext()) {
+            Statement statement = iterator.next();
+
+            if (statement.getClass() == ExpressionStatement.class) {
+                Expression expression = ((ExpressionStatement)statement).getExpression();
+
+                if (expression.getClass() == BinaryOperatorExpression.class) {
+                    BinaryOperatorExpression boe = (BinaryOperatorExpression)expression;
+
+                    expression = boe.getLeftExpression();
+
+                    if (expression.getClass() == FieldReferenceExpression.class) {
+                        fre = (FieldReferenceExpression)expression;
+
+                        if (name.equals(fre.getName())) {
+                            return iterator;
+                        }
+                    }
+                }
+            }
+        }
+
+        return iterator;
+    }
+
+    protected static void updateSwitchStatement(SwitchStatement switchStatement, Iterator<Statement> iterator) {
         // Create map<synthetic index -> enum name>
         HashMap<Integer, String> map = new HashMap<>();
 

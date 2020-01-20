@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor;
 
+import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.javafragment.ImportsFragment;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
@@ -21,14 +22,16 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragm
 import java.util.HashSet;
 
 public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
+    protected Loader loader;
     protected String internalPackagePrefix;
     protected ImportsFragment importsFragment = JavaFragmentFactory.newImportsFragment();
     protected int maxLineNumber = 0;
-    protected HashSet<String> typeNames = new HashSet<>();
+    protected HashSet<String> localTypeNames = new HashSet<>();
     protected HashSet<String> internalTypeNames = new HashSet<>();
     protected HashSet<String> importTypeNames = new HashSet<>();
 
-    public SearchImportsVisitor(String mainInternalName) {
+    public SearchImportsVisitor(Loader loader, String mainInternalName) {
+        this.loader = loader;
         int index = mainInternalName.lastIndexOf('/');
         this.internalPackagePrefix = (index == -1) ? "" : mainInternalName.substring(0, index + 1);
     }
@@ -43,7 +46,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     public void visit(CompilationUnit compilationUnit) {
-        compilationUnit.getTypeDeclarations().accept(new TypeVisitor(typeNames));
+        compilationUnit.getTypeDeclarations().accept(new TypeVisitor(localTypeNames));
         compilationUnit.getTypeDeclarations().accept(this);
     }
 
@@ -289,11 +292,11 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
                             importTypeNames.add(typeName);
                         }
                     } else if (internalTypeName.startsWith(internalPackagePrefix)) {
-                        if ((internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1) && !typeNames.contains(typeName)) {
+                        if ((internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1) && !localTypeNames.contains(typeName)) {
                             importsFragment.addImport(internalTypeName, type.getQualifiedName());
                             importTypeNames.add(typeName);
                         }
-                    } else if (!typeNames.contains(typeName)) {
+                    } else if (!localTypeNames.contains(typeName) && !loader.canLoad(internalPackagePrefix + typeName)) {
                         importsFragment.addImport(internalTypeName, type.getQualifiedName());
                         importTypeNames.add(typeName);
                     }

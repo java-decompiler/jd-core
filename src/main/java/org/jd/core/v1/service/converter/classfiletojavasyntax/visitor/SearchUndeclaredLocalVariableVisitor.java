@@ -17,19 +17,13 @@ import java.util.HashSet;
 
 public class SearchUndeclaredLocalVariableVisitor extends AbstractJavaSyntaxVisitor {
     protected HashSet<AbstractLocalVariable> variables = new HashSet<>();
-    protected boolean containsLineNumber;
 
     public void init() {
         variables.clear();
-        containsLineNumber = false;
     }
 
     public HashSet<AbstractLocalVariable> getVariables() {
         return variables;
-    }
-
-    public boolean containsLineNumber() {
-        return containsLineNumber;
     }
 
     @Override
@@ -49,12 +43,6 @@ public class SearchUndeclaredLocalVariableVisitor extends AbstractJavaSyntaxVisi
     @Override
     public void visit(DoWhileStatement statement) {
         safeAccept(statement.getCondition());
-    }
-
-    @Override
-    public void visit(ExpressionStatement statement) {
-        containsLineNumber |= (statement.getExpression().getLineNumber() > 0);
-        statement.getExpression().accept(this);
     }
 
     @Override
@@ -82,7 +70,6 @@ public class SearchUndeclaredLocalVariableVisitor extends AbstractJavaSyntaxVisi
 
     @Override
     public void visit(LambdaExpressionStatement statement) {
-        containsLineNumber |= (statement.getExpression().getLineNumber() > 0);
         statement.getExpression().accept(this);
     }
 

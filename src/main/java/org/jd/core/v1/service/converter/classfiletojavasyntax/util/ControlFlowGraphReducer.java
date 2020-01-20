@@ -215,6 +215,10 @@ public class ControlFlowGraphReducer {
 
     protected static void createIf(BasicBlock basicBlock, BasicBlock sub, BasicBlock last, BasicBlock next) {
         BasicBlock condition = basicBlock.getControlFlowGraph().newBasicBlock(basicBlock);
+
+        condition.setNext(END);
+        condition.setBranch(END);
+
         int toOffset = last.getToOffset();
 
         if (toOffset == 0) {
@@ -235,6 +239,10 @@ public class ControlFlowGraphReducer {
 
     protected static void createIfElse(int type, BasicBlock basicBlock, BasicBlock sub1, BasicBlock last1, BasicBlock sub2, BasicBlock last2, BasicBlock next) {
         BasicBlock condition = basicBlock.getControlFlowGraph().newBasicBlock(basicBlock);
+
+        condition.setNext(END);
+        condition.setBranch(END);
+
         int toOffset = last2.getToOffset();
 
         if (toOffset == 0) {
@@ -271,12 +279,25 @@ public class ControlFlowGraphReducer {
 
             if (nextNext.matchType(TYPE_CONDITIONAL_BRANCH|TYPE_CONDITION)) {
                 if (branch.matchType(TYPE_STATEMENTS|TYPE_GOTO_IN_TERNARY_OPERATOR) && (nextNext == branch.getNext()) && (branch.getPredecessors().size() == 1) && (nextNext.getPredecessors().size() == 2)) {
-                    int stackDepth = ByteCodeParser.evalStackDepth(basicBlock);
-                    int stackDepthNextNext = ByteCodeParser.evalStackDepth(nextNext);
-
-                    if (stackDepth+1 == -stackDepthNextNext) {
+                    if (ByteCodeParser.getOperandCount(nextNext) == 1) {
                         updateConditionTernaryOperator(basicBlock, nextNext);
                         return true;
+                    }
+
+                    BasicBlock nextNextNext = nextNext.getNext();
+                    BasicBlock nextNextBranch = nextNext.getBranch();
+
+                    if ((nextNextNext.getType() == TYPE_GOTO_IN_TERNARY_OPERATOR) && (nextNextNext.getPredecessors().size() == 1)) {
+                        BasicBlock nextNextNextNext = nextNextNext.getNext();
+
+                        if (nextNextNextNext.matchType(TYPE_CONDITIONAL_BRANCH|TYPE_CONDITION)) {
+                            if (nextNextBranch.matchType(TYPE_STATEMENTS|TYPE_GOTO_IN_TERNARY_OPERATOR) && (nextNextNextNext == nextNextBranch.getNext()) && (nextNextBranch.getPredecessors().size() == 1) && (nextNextNextNext.getPredecessors().size() == 2)) {
+                                if (ByteCodeParser.getOperandCount(nextNextNextNext) == 2) {
+                                    updateCondition(basicBlock, nextNext, nextNextNextNext);
+                                    return true;
+                                }
+                            }
+                        }
                     }
                 }
                 if ((nextNext.getNext() == branch) && checkJdk118TernaryOperatorPattern(next, nextNext, 153)) { // IFEQ
@@ -431,12 +452,71 @@ public class ControlFlowGraphReducer {
         basicBlock.getSub2().getPredecessors().clear();
     }
 
+    protected static void updateCondition(BasicBlock basicBlock, BasicBlock nextNext, BasicBlock nextNextNextNext) {
+        int fromOffset =  nextNextNextNext.getFromOffset();
+        int toOffset = nextNextNextNext.getToOffset();
+        BasicBlock next = nextNextNextNext.getNext();
+        BasicBlock branch = nextNextNextNext.getBranch();
+
+        BasicBlock condition = basicBlock.getControlFlowGraph().newBasicBlock(basicBlock);
+        condition.setType(TYPE_CONDITION);
+
+        basicBlock.getNext().setNext(END);
+        basicBlock.getNext().getPredecessors().clear();
+        basicBlock.getBranch().setNext(END);
+        basicBlock.getBranch().getPredecessors().clear();
+
+        nextNextNextNext.setType(TYPE_CONDITION_TERNARY_OPERATOR);
+        nextNextNextNext.setFromOffset(condition.getToOffset());
+        nextNextNextNext.setToOffset(condition.getToOffset());
+        nextNextNextNext.setCondition(condition);
+        nextNextNextNext.setSub1(basicBlock.getNext());
+        nextNextNextNext.setSub2(basicBlock.getBranch());
+        nextNextNextNext.setNext(END);
+        nextNextNextNext.setBranch(END);
+        condition.setNext(END);
+        condition.setBranch(END);
+
+        condition = nextNext.getControlFlowGraph().newBasicBlock(nextNext);
+        condition.setType(TYPE_CONDITION);
+
+        nextNext.getNext().setNext(END);
+        nextNext.getNext().getPredecessors().clear();
+        nextNext.getBranch().setNext(END);
+        nextNext.getBranch().getPredecessors().clear();
+
+        nextNext.setType(TYPE_CONDITION_TERNARY_OPERATOR);
+        nextNext.setFromOffset(condition.getToOffset());
+        nextNext.setToOffset(condition.getToOffset());
+        nextNext.setCondition(condition);
+        nextNext.setSub1(nextNext.getNext());
+        nextNext.setSub2(nextNext.getBranch());
+        nextNext.setNext(END);
+        nextNext.setBranch(END);
+        condition.setNext(END);
+        condition.setBranch(END);
+
+        basicBlock.setType(TYPE_CONDITION);
+        basicBlock.setFromOffset(fromOffset);
+        basicBlock.setToOffset(toOffset);
+        basicBlock.setSub1(nextNextNextNext);
+        basicBlock.setSub2(nextNext);
+        basicBlock.setNext(next);
+        basicBlock.setBranch(branch);
+
+        next.replace(nextNextNextNext, basicBlock);
+        branch.replace(nextNextNextNext, basicBlock);
+    }
+
     protected static void updateConditionTernaryOperator2(BasicBlock basicBlock) {
         BasicBlock next = basicBlock.getNext();
         BasicBlock branch = basicBlock.getBranch();
 
         ControlFlowGraph cfg = basicBlock.getControlFlowGraph();
         BasicBlock condition = cfg.newBasicBlock(TYPE_CONDITION, basicBlock.getFromOffset(), basicBlock.getToOffset());
+
+        condition.setNext(END);
+        condition.setBranch(END);
 
         basicBlock.setType(TYPE_CONDITION_TERNARY_OPERATOR);
         basicBlock.setToOffset(basicBlock.getFromOffset());

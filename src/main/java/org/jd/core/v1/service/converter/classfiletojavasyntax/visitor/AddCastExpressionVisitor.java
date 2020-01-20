@@ -360,13 +360,20 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                         ObjectType objectType = (ObjectType) type;
                         ObjectType expressionObjectType = (ObjectType) expressionType;
 
-                        if (!typeMaker.isAssignable(typeBounds, objectType, expressionObjectType)) {
+                        if (force && !objectType.getInternalName().equals(expressionObjectType.getInternalName())) {
+                            // Force disambiguation of method invocation => Uses raw type
+                            if (expression.getClass() == ClassFileNewExpression.class) {
+                                ClassFileNewExpression ne = (ClassFileNewExpression)expression;
+                                ne.setObjectType(ne.getObjectType().createType(null));
+                            }
+                            expression = addCastExpression(objectType, expression);
+                        } else if (!typeMaker.isAssignable(typeBounds, objectType, expressionObjectType)) {
                             BaseTypeArgument ta1 = objectType.getTypeArguments();
                             BaseTypeArgument ta2 = expressionObjectType.getTypeArguments();
                             Type t = type;
 
                             if ((ta1 != null) && (ta2 != null) && !ta1.isTypeArgumentAssignableFrom(typeBounds, ta2)) {
-                                // Incompatible typeArgument arguments => Uses raw typeArgument
+                                // Incompatible typeArgument arguments => Uses raw type
                                 t = objectType.createType(null);
                             }
                             expression = addCastExpression(t, expression);
@@ -381,7 +388,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                 }
             }
 
-            if (expression.getClass() == CastExpression.class) {
+            if (!force && (expression.getClass() == CastExpression.class)) {
                 CastExpression ce = (CastExpression)expression;
                 Type ceExpressionType = ce.getExpression().getType();
 

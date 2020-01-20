@@ -18,6 +18,7 @@ import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_STRING;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class TypeParametersToTypeArgumentsBinder {
@@ -28,6 +29,7 @@ public class TypeParametersToTypeArgumentsBinder {
     protected SearchInTypeArgumentVisitor searchInTypeArgumentVisitor = new SearchInTypeArgumentVisitor();
     protected TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
     protected BaseTypeToTypeArgumentVisitor baseTypeToTypeArgumentVisitor = new BaseTypeToTypeArgumentVisitor();
+    protected GetTypeArgumentVisitor getTypeArgumentVisitor = new GetTypeArgumentVisitor();
     protected BindTypeParametersToNonWildcardTypeArgumentsVisitor bindTypeParametersToNonWildcardTypeArgumentsVisitor = new BindTypeParametersToNonWildcardTypeArgumentsVisitor();
     protected BindVisitor bindVisitor = new BindVisitor();
 
@@ -184,7 +186,15 @@ public class TypeParametersToTypeArgumentsBinder {
                         typeArguments = null;
                     }
                 } else if (expressionType.isGeneric()) {
-                    typeArguments = null;
+                    BaseType typeBound = contextualTypeBounds.get(expressionType.getName());
+
+                    if (typeBound != null) {
+                        getTypeArgumentVisitor.init();
+                        typeBound.accept(getTypeArgumentVisitor);
+                        typeArguments = getTypeArgumentVisitor.getTypeArguments();
+                    } else {
+                        typeArguments = null;
+                    }
                 } else {
                     typeArguments = ((ObjectType)expressionType).getTypeArguments();
                 }
@@ -535,10 +545,8 @@ public class TypeParametersToTypeArgumentsBinder {
 
         @Override
         public void visit(LocalVariableReferenceExpression expression) {
-            if (!type.isPrimitive()) {
-                AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable();
-                localVariable.typeOnLeft(contextualTypeBounds, checkTypeArguments(type, localVariable));
-            }
+            AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable();
+            localVariable.typeOnLeft(contextualTypeBounds, checkTypeArguments(type, localVariable));
         }
 
         @Override
@@ -593,6 +601,10 @@ public class TypeParametersToTypeArgumentsBinder {
 
         @Override
         public void visit(BinaryOperatorExpression expression) {
+            if ((expression.getType() == TYPE_STRING) && "+".equals(expression.getOperator())) {
+                type = TYPE_OBJECT;
+            }
+
             Type t = type;
 
             expression.getLeftExpression().accept(this);

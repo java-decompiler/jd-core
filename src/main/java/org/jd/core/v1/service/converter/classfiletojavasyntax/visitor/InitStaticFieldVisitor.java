@@ -23,14 +23,14 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 
 public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
     protected SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
     protected String internalTypeName;
-    protected DefaultList<FieldDeclarator> fields = new DefaultList<>();
+    protected HashMap<String, FieldDeclarator> fields = new HashMap<>();
     protected List<ClassFileConstructorOrMethodDeclaration> methods;
     protected Boolean deleteStaticDeclaration;
 
@@ -94,7 +94,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(FieldDeclarator declaration) {
-        fields.add(declaration);
+        fields.put(declaration.getName(), declaration);
     }
 
     @Override
@@ -115,78 +115,46 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
 
         if (statements != null) {
             if (statements.isList()) {
+                DefaultList<Statement> list = statements.getList();
+
                 // Multiple statements
-                if ((statements.size() > 0) && isAssertionsDisabled(statements.getFirst())) {
+                if ((list.size() > 0) && isAssertionsDisabledStatement(list.getFirst())) {
                     // Remove assert initialization statement
-                    statements.getList().removeFirst();
+                    list.removeFirst();
                 }
 
-                if (statements.size() > 0) {
-                    DefaultList<Statement> list = statements.getList();
-                    Iterator<FieldDeclarator> fieldDeclaratorIterator = fields.iterator();
-//                    int lastLineNumber = 0;
+                for (int i=0, len=list.size(); i<len; i++) {
+                    if (setStaticFieldInitializer(list.get(i))) {
+                        if (i > 0) {
+                            // Split 'static' block
+                            BaseStatement newStatements;
 
-                    for (int i=0, len=list.size(); i<len; i++) {
-                        Statement statement = list.get(i);
-
-                        if (setStaticFieldInitializer(statement, fieldDeclaratorIterator)) {
-                            if (i > 0) {
-                                // Split 'static' block
-                                BaseStatement newStatements;
-
-                                if (i == 1) {
-                                    newStatements = list.removeFirst();
-                                } else {
-                                    List<Statement> subList = list.subList(0, i);
-                                    newStatements = new Statements(subList);
-                                    subList.clear();
-                                }
-
-                                // Removes statements from original list
-                                len -= newStatements.size();
-                                i = 0;
-
-                                addStaticInitializerDeclaration(sid, getFirstLineNumber(newStatements), newStatements);
+                            if (i == 1) {
+                                newStatements = list.removeFirst();
+                            } else {
+                                List<Statement> subList = list.subList(0, i);
+                                newStatements = new Statements(subList);
+                                subList.clear();
                             }
 
-                            // Remove field initialization statement
-                            list.remove(i--);
-                            len--;
-// TODO Fix problem with local variable declarations before split static block
-//                            lastLineNumber = 0;
-//                        } else {
-//                            int newLineNumber = getFirstLineNumber(statement);
-//
-//                            if ((lastLineNumber > 0) && (newLineNumber > 0) && (lastLineNumber + 3 < newLineNumber)) {
-//                                // Split 'static' block
-//                                BaseStatement newStatements;
-//
-//                                if (i == 1) {
-//                                    newStatements = list.removeFirst();
-//                                } else {
-//                                    List<Statement> subList = list.subList(0, i);
-//                                    newStatements = new Statements(subList);
-//                                    subList.clear();
-//                                }
-//
-//                                // Removes statements from original list
-//                                len -= newStatements.size();
-//                                i = 0;
-//
-//                                addStaticInitializerDeclaration(sid, newLineNumber, newStatements);
-//                            }
-//
-//                            lastLineNumber = newLineNumber;
+                            // Removes statements from original list
+                            len -= newStatements.size();
+                            i = 0;
+
+                            addStaticInitializerDeclaration(sid, getFirstLineNumber(newStatements), newStatements);
                         }
+                        // Remove field initialization statement
+                        list.remove(i--);
+                        len--;
                     }
                 }
             } else {
                 // Single statement
-                if (isAssertionsDisabled(statements.getFirst())) {
+                if (isAssertionsDisabledStatement(statements.getFirst())) {
                     // Remove assert initialization statement
                     statements = null;
                 }
-                if ((statements != null) && setStaticFieldInitializer(statements.getFirst(), fields.iterator())) {
+                if ((statements != null) && setStaticFieldInitializer(statements.getFirst())) {
                     // Remove field initialization statement
                     statements = null;
                 }
@@ -202,7 +170,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    protected boolean isAssertionsDisabled(Statement statement) {
+    protected boolean isAssertionsDisabledStatement(Statement statement) {
         if ((statement.getClass() == ExpressionStatement.class)) {
             ExpressionStatement cdes = (ExpressionStatement) statement;
 
@@ -222,7 +190,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
         return false;
     }
 
-    protected boolean setStaticFieldInitializer(Statement statement, Iterator<FieldDeclarator> fieldDeclaratorIterator) {
+    protected boolean setStaticFieldInitializer(Statement statement) {
         if (statement.getClass() == ExpressionStatement.class) {
             ExpressionStatement cdes = (ExpressionStatement) statement;
 
@@ -233,24 +201,22 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                     FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
 
                     if (fre.getInternalTypeName().equals(internalTypeName)) {
-                        while (fieldDeclaratorIterator.hasNext()) {
-                            FieldDeclarator fdr = fieldDeclaratorIterator.next();
+                        FieldDeclarator fdr = fields.get(fre.getName());
+
+                        if ((fdr != null) && (fdr.getVariableInitializer() == null)) {
                             FieldDeclaration fdn = fdr.getFieldDeclaration();
 
-                            if (((fdn.getFlags() & Declaration.FLAG_STATIC) != 0) && fdr.getName().equals(fre.getName()) && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
+                            if (((fdn.getFlags() & Declaration.FLAG_STATIC) != 0) && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
                                 Expression expression = cfboe.getRightExpression();
 
                                 searchLocalVariableReferenceVisitor.init(-1);
                                 expression.accept(searchLocalVariableReferenceVisitor);
 
-                                if (searchLocalVariableReferenceVisitor.containsReference()) {
-                                    return false;
+                                if (!searchLocalVariableReferenceVisitor.containsReference()) {
+                                    fdr.setVariableInitializer(new ExpressionVariableInitializer(expression));
+                                    ((ClassFileFieldDeclaration)fdr.getFieldDeclaration()).setFirstLineNumber(expression.getLineNumber());
+                                    return true;
                                 }
-
-                                fdr.setVariableInitializer(new ExpressionVariableInitializer(expression));
-                                ((ClassFileFieldDeclaration)fdr.getFieldDeclaration()).setFirstLineNumber(expression.getLineNumber());
-
-                                return true;
                             }
                         }
                     }

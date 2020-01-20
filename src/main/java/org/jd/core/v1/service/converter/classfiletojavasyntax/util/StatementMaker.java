@@ -195,6 +195,12 @@ public class StatementMaker {
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
                 break;
             case TYPE_CONDITION:
+                if (basicBlock.getSub1() != END) {
+                    stack.push(makeExpression(watchdog, basicBlock.getSub1(), statements, jumps));
+                }
+                if (basicBlock.getSub2() != END) {
+                    stack.push(makeExpression(watchdog, basicBlock.getSub2(), statements, jumps));
+                }
                 parseByteCode(basicBlock, statements);
                 break;
             case TYPE_CONDITION_OR:
@@ -897,7 +903,19 @@ public class StatementMaker {
             } else if ((flags & FLAG_LONG) != 0) {
                 type = TYPE_LONG;
             } else {
-                type = MAYBE_BOOLEAN_TYPE;
+                flags = ((PrimitiveType)expressionTrueType).getFlags() & ((PrimitiveType)expressionFalseType).getFlags();
+
+                if ((flags & FLAG_INT) != 0) {
+                    type = TYPE_INT;
+                } else if ((flags & FLAG_SHORT) != 0) {
+                    type = TYPE_SHORT;
+                } else if ((flags & FLAG_CHAR) != 0) {
+                    type = TYPE_CHAR;
+                } else if ((flags & FLAG_BYTE) != 0) {
+                    type = TYPE_BYTE;
+                } else {
+                    type = MAYBE_BOOLEAN_TYPE;
+                }
             }
         } else if (expressionTrueType.isObject() && expressionFalseType.isObject()) {
             ObjectType ot1 = (ObjectType)expressionTrueType;

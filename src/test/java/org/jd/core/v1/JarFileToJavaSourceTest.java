@@ -38,7 +38,7 @@ public class JarFileToJavaSourceTest extends TestCase {
 
     @Test
     public void testCommonsCodec() throws Exception {
-        // Decompile and recompile 'commons-codec-1.13.jar'
+        // Decompile and recompile 'commons-codec:commons-codec:1.13'
         test(org.apache.commons.codec.Charsets.class);
     }
 
@@ -49,15 +49,40 @@ public class JarFileToJavaSourceTest extends TestCase {
     }
 
     @Test
+    public void testCommonsImaging() throws Exception {
+        // Decompile and recompile 'org.apache.commons:commons-imaging:1.0-alpha1'
+        test(org.apache.commons.collections4.CollectionUtils.class);
+    }
+
+    @Test
     public void testCommonsLang3() throws Exception {
-        // Decompile and recompile 'commons-lang3-3.9.jar'
+        // Decompile and recompile 'org.apache.commons:commons-lang3:3.9'
         test(org.apache.commons.lang3.JavaVersion.class);
+    }
+
+    @Test
+    public void testDiskLruCache() throws Exception {
+        // Decompile and recompile 'com.jakewharton:disklrucache:2.0.2'
+        test(com.jakewharton.disklrucache.DiskLruCache.class);
     }
 
     @Test
     public void testJavaPoet() throws Exception {
         // Decompile and recompile 'com.squareup:javapoet:1.11.1'
         test(com.squareup.javapoet.JavaFile.class);
+    }
+
+    @Test
+    public void testJavaWriter() throws Exception {
+        // Decompile and recompile 'com.squareup:javawriter:2.5.1'
+        test(com.squareup.javawriter.JavaWriter.class);
+    }
+
+    // TODO In progress
+    @Test
+    public void testJodaTime() throws Exception {
+        // Decompile and recompile 'joda-time:joda-time:2.10.5'
+        test(org.joda.time.DateTime.class);
     }
 
     @Test
@@ -72,12 +97,37 @@ public class JarFileToJavaSourceTest extends TestCase {
         test(org.junit.Test.class);
     }
 
+    @Test
+    public void testMimecraft() throws Exception {
+        // Decompile and recompile 'com.squareup.mimecraft:mimecraft:1.1.1'
+        test(com.squareup.mimecraft.Part.class);
+    }
+
+    @Test
+    public void testScribe() throws Exception {
+        // Decompile and recompile 'org.scribe:scribe:1.3.7'
+        test(org.scribe.oauth.OAuthService.class);
+    }
+
+    @Test
+    public void testSparkCore() throws Exception {
+        // Decompile and recompile 'com.sparkjava:spark-core:2.9.1'
+        test(spark.Spark.class);
+    }
+
     // TODO In progress
-//    @Test
-//    public void testLog4j() throws Exception {
-//        // Decompile and recompile 'log4j:log4j:1.2.17'
-//        test(org.apache.log4j.Category.class);
-//    }
+    @Test
+    public void testLog4j() throws Exception {
+        // Decompile and recompile 'log4j:log4j:1.2.17'
+        test(org.apache.log4j.Category.class);
+    }
+
+    // TODO In progress
+    @Test
+    public void testGuava() throws Exception {
+        // Decompile and recompile 'com.google.guava:guava:12.0'
+        test(com.google.common.collect.Collections2.class);
+    }
 
     protected void test(Class clazz) throws Exception {
         test(new FileInputStream(Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile()));
@@ -176,6 +226,7 @@ public class JarFileToJavaSourceTest extends TestCase {
 
             assertTrue(exceptionCounter == 0);
             assertTrue(assertFailedCounter == 0);
+            assertTrue(printer.errorInMethodCounter == 0);
             assertTrue(recompilationFailedCounter == 0);
         }
     }

@@ -28,6 +28,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.s
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.PrimitiveLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.EraseTypeArgumentVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RenameLocalVariablesVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.DefaultStack;
@@ -38,6 +39,7 @@ import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_PRIVA
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
 import static org.jd.core.v1.model.javasyntax.statement.ReturnStatement.RETURN;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
@@ -48,6 +50,8 @@ public class ByteCodeParser {
     private MemberVisitor memberVisitor = new MemberVisitor();
     private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
     private EraseTypeArgumentVisitor eraseTypeArgumentVisitor = new EraseTypeArgumentVisitor();
+    private LambdaParameterNamesVisitor lambdaParameterNamesVisitor = new LambdaParameterNamesVisitor();;
+    private RenameLocalVariablesVisitor renameLocalVariablesVisitor = new RenameLocalVariablesVisitor();
 
     private TypeMaker typeMaker;
     private LocalVariableMaker localVariableMaker;
@@ -799,6 +803,12 @@ public class ByteCodeParser {
                     } else {
                         type1 = typeMaker.makeFromInternalTypeName(typeName).createType(1);
                     }
+                    if (typeName.endsWith(TYPE_CLASS.getInternalName())) {
+                        ot = (ObjectType)type1;
+                        if (ot.getTypeArguments() == null) {
+                            type1 = ot.createType(WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);
+                        }
+                    }
                     stack.push(new NewArray(lineNumber, type1, stack.pop()));
                     break;
                 case 190: // ARRAYLENGTH
@@ -1332,7 +1342,7 @@ public class ByteCodeParser {
                     stack.push(new LambdaIdentifiersExpression(
                             lineNumber, indyMethodTypes.returnedType, indyMethodTypes.returnedType,
                             prepareLambdaParameters(cfmd.getFormalParameters(), parameterCount),
-                            prepareLambdaStatements(cfmd.getStatements())));
+                            prepareLambdaStatements(cfmd.getFormalParameters(), indyParameters, cfmd.getStatements())));
                     return;
                 }
             }
@@ -1354,11 +1364,11 @@ public class ByteCodeParser {
         stack.push(new MethodReferenceExpression(lineNumber, indyMethodTypes.returnedType, (Expression)indyParameters, typeName, name1, descriptor1));
     }
 
-    private static List<String> prepareLambdaParameters(BaseFormalParameter formalParameters, int parameterCount) {
+    private List<String> prepareLambdaParameters(BaseFormalParameter formalParameters, int parameterCount) {
         if ((formalParameters == null) || (parameterCount == 0)) {
             return null;
         } else {
-            LambdaParameterNamesVisitor lambdaParameterNamesVisitor = new LambdaParameterNamesVisitor();
+            lambdaParameterNamesVisitor.init();
             formalParameters.accept(lambdaParameterNamesVisitor);
             List<String> names = lambdaParameterNamesVisitor.getNames();
 
@@ -1372,8 +1382,49 @@ public class ByteCodeParser {
         }
     }
 
-    private static BaseStatement prepareLambdaStatements(BaseStatement baseStatement) {
-        if ((baseStatement != null) && baseStatement.isList()) {
+    private BaseStatement prepareLambdaStatements(BaseFormalParameter formalParameters, BaseExpression indyParameters, BaseStatement baseStatement) {
+        if (baseStatement != null) {
+            if ((formalParameters != null) && (indyParameters != null)) {
+                int size = indyParameters.size();
+
+                if ((size > 0) && (size <= formalParameters.size())) {
+                    HashMap<String, String> mapping = new HashMap<>();
+                    Expression expression = indyParameters.getFirst();
+
+                    if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                        String name = formalParameters.getFirst().getName();
+                        String newName = ((ClassFileLocalVariableReferenceExpression) expression).getName();
+
+                        if (!name.equals(newName)) {
+                            mapping.put(name, newName);
+                        }
+                    }
+
+                    if (size > 1) {
+                        DefaultList<FormalParameter> formalParameterList = formalParameters.getList();
+                        DefaultList<Expression> list = indyParameters.getList();
+
+                        for (int i = 1; i < size; i++) {
+                            expression = list.get(i);
+
+                            if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                                String name = formalParameterList.get(i).getName();
+                                String newName = ((ClassFileLocalVariableReferenceExpression) expression).getName();
+
+                                if (!name.equals(newName)) {
+                                    mapping.put(name, newName);
+                                }
+                            }
+                        }
+                    }
+
+                    if (!mapping.isEmpty()) {
+                        renameLocalVariablesVisitor.init(mapping);
+                        baseStatement.accept(renameLocalVariablesVisitor);
+                    }
+                }
+            }
+
             if (baseStatement.size() == 1) {
                 Statement statement = baseStatement.getFirst();
 
@@ -2438,6 +2489,93 @@ public class ByteCodeParser {
         return depth;
     }
 
+    public static int getOperandCount(BasicBlock bb) {
+        Method method = bb.getControlFlowGraph().getMethod();
+        ConstantPool constants = method.getConstants();
+        AttributeCode attributeCode = method.getAttribute("Code");
+        byte[] code = attributeCode.getCode();
+        return getOperandCount(constants, code, bb);
+    }
+
+    private static int getOperandCount(ConstantPool constants, byte[] code, BasicBlock bb) {
+        ConstantMemberRef constantMemberRef;
+        ConstantNameAndType constantNameAndType;
+        String descriptor;
+        int offset = bb.getFromOffset();
+        int opcode = code[offset] & 255;
+
+        switch (opcode) {
+            case 89: // DUP
+            case 59: case 60: case 61: case 62: // ISTORE_0 ... ISTORE_3
+            case 63: case 64: case 65: case 66: // LSTORE_0 ... LSTORE_3
+            case 67: case 68: case 69: case 70: // FSTORE_0 ... FSTORE_3
+            case 71: case 72: case 73: case 74: // DSTORE_0 ... DSTORE_3
+            case 75: case 76: case 77: case 78: // ASTORE_0 ... ASTORE_3
+            case 87: // POP
+            case 172: case 173: case 174: case 175: case 176: // IRETURN, LRETURN, FRETURN, DRETURN, ARETURN
+            case 194: case 195: // MONITORENTER, MONITOREXIT
+            case 153: case 154: case 155: case 156: case 157: case 158: // IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE
+            case 179: // PUTSTATIC
+            case 198: case 199: // IFNULL, IFNONNULL
+            case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
+            case 180: // GETFIELD
+            case 189: // ANEWARRAY
+            case 192: // CHECKCAST
+            case 193: // INSTANCEOF
+            case 188: // NEWARRAY
+            case 170: // TABLESWITCH
+            case 171: // LOOKUPSWITCH
+                return 1;
+            case 90: // DUP_X1
+            case 46: case 47: case 48: case 49: case 50: case 51: case 52: case 53: // IALOAD, LALOAD, FALOAD, DALOAD, AALOAD, BALOAD, CALOAD, SALOAD
+            case 96: case 97: case 98: case 99:     // IADD, LADD, FADD, DADD
+            case 100: case 101: case 102: case 103: // ISUB, LSUB, FSUB, DSUB
+            case 104: case 105: case 106: case 107: // IMUL, LMUL, FMUL, DMUL
+            case 108: case 109: case 110: case 111: // IDIV, LDIV, FDIV, DDIV
+            case 112: case 113: case 114: case 115: // IREM, LREM, FREM, DREM
+            case 120: case 121: // ISHL, LSHL
+            case 122: case 123: // ISHR, LSHR
+            case 124: case 125: // IUSHR, LUSHR
+            case 126: case 127: // IAND, LAND
+            case 128: case 129: // IOR, LOR
+            case 130: case 131: // IXOR, LXOR
+            case 148: case 149: case 150: case 151: case 152: // LCMP, FCMPL, FCMPG, DCMPL, DCMPG
+            case 92: // DUP2
+            case 159: case 160: case 161: case 162: case 163: case 164: case 165: case 166: // IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE
+            case 181: // PUTFIELD
+            case 88: // POP2
+                return 2;
+            case 91: // DUP_X2
+            case 79: case 80: case 81: case 82: case 83: case 84: case 85: case 86: // IASTORE, LASTORE, FASTORE, DASTORE, AASTORE, BASTORE, CASTORE, SASTORE
+            case 93: // DUP2_X1
+                return 3;
+            case 94: // DUP2_X2
+                return 4;
+            case 182: case 183: case 185: // INVOKEVIRTUAL, INVOKESPECIAL, INVOKEINTERFACE
+                constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
+                descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                return 1 + countMethodParameters(descriptor);
+            case 184: case 186: // INVOKESTATIC, INVOKEDYNAMIC
+                constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
+                descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                return countMethodParameters(descriptor);
+            case 196: // WIDE
+                opcode = code[++offset] & 255;
+                switch (opcode) {
+                    case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
+                        return 1;
+                }
+                break;
+            case 197: // MULTIANEWARRAY
+                offset += 3;
+                return (code[offset] & 255);
+        }
+
+        return 0;
+    }
+
     private static int countMethodParameters(String descriptor) {
         int count = 0;
         int i = 2;
@@ -2488,9 +2626,9 @@ public class ByteCodeParser {
     }
 
     private static class LambdaParameterNamesVisitor extends AbstractNopDeclarationVisitor {
-        protected DefaultList<String> names = new DefaultList<>();
+        protected DefaultList<String> names;
 
-        public void reset() {
+        public void init() {
             names = new DefaultList<>();
         }
 

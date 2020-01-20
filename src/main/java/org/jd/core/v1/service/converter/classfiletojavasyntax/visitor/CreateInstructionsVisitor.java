@@ -9,10 +9,10 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Method;
+import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
@@ -137,7 +137,14 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             comd.setFlags(comd.getFlags() & ~(FLAG_PUBLIC|FLAG_ABSTRACT));
         }
 
-        localVariableMaker.make();
+        boolean containsLineNumber = false;
+        AttributeCode attributeCode = method.getAttribute("Code");
+
+        if (attributeCode != null) {
+            containsLineNumber = (attributeCode.getAttribute("LineNumberTable") != null);
+        }
+
+        localVariableMaker.make(containsLineNumber);
         comd.setFormalParameters(localVariableMaker.getFormalParameters());
     }
 

@@ -143,29 +143,22 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
             if (this.type == TYPE_UNDEFINED_OBJECT) {
                 this.type = type;
                 fireChangeEvent(typeBounds);
-            } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
-                assert !this.type.isPrimitive() && !type.isPrimitive() : "unexpected type in ObjectLocalVariable.typeOnLeft(type)";
+            } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0) && this.type.isObject() && type.isObject()) {
+                ObjectType thisObjectType = (ObjectType) this.type;
+                ObjectType otherObjectType = (ObjectType) type;
 
-                if (this.type.isObject()) {
-                    ObjectType thisObjectType = (ObjectType) this.type;
-
-                    if (type.isObject()) {
-                        ObjectType otherObjectType = (ObjectType) type;
-
-                        if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
-                            if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
-                                // Keep type, update type arguments
-                                this.type = otherObjectType;
-                                fireChangeEvent(typeBounds);
-                            }
-                        } else if (typeMaker.isAssignable(typeBounds, otherObjectType, thisObjectType)) {
-                            // Assignable types
-                            if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
-                                // Keep type, update type arguments
-                                this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
-                                fireChangeEvent(typeBounds);
-                            }
-                        }
+                if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
+                    if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                        // Keep type, update type arguments
+                        this.type = otherObjectType;
+                        fireChangeEvent(typeBounds);
+                    }
+                } else if (typeMaker.isAssignable(typeBounds, otherObjectType, thisObjectType)) {
+                    // Assignable types
+                    if ((thisObjectType.getTypeArguments() == null) && (otherObjectType.getTypeArguments() != null)) {
+                        // Keep type, update type arguments
+                        this.type = thisObjectType.createType(otherObjectType.getTypeArguments());
+                        fireChangeEvent(typeBounds);
                     }
                 }
             }

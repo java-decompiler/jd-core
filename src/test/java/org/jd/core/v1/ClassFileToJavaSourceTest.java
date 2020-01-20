@@ -23,7 +23,9 @@ import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.regex.PatternMaker;
 import org.junit.Test;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -2597,7 +2599,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 61 */", "Supplier<String> constructorReference = String::new;")));
         assertTrue(source.matches(PatternMaker.make(": 65 */", "MethodType mtToString = MethodType.methodType(String.class);")));
         assertTrue(source.matches(PatternMaker.make(": 66 */", "MethodType mtSetter = MethodType.methodType(void.class, Object.class);")));
-        assertTrue(source.matches(PatternMaker.make(": 67 */", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class[]", "{ String.class")));
+        assertTrue(source.matches(PatternMaker.make(": 67 */", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class<?>[]", "{ String.class")));
 
         assertTrue(source.indexOf("// Byte code:") == -1);
 
@@ -2656,6 +2658,45 @@ public class ClassFileToJavaSourceTest extends TestCase {
                 assertTrue("Compilation failed: " + e.getMessage(), false);
             }
         }
+    }
+
+    @Test
+    public void testBstMutationResult() throws Exception {
+        String internalClassName = "com/google/common/collect/BstMutationResult";
+        Class mainClass = com.google.common.collect.Collections2.class;
+        InputStream is = new FileInputStream(Paths.get(mainClass.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
+        Loader loader = new ZipLoader(is);
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", internalClassName);
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        // Check decompiled source code
+        assertTrue(source.indexOf("N resultLeft, resultRight;") != -1);
+        assertTrue(source.indexOf("assert false;") == -1);
+        assertTrue(source.matches(PatternMaker.make("/* 131:", "resultLeft = liftOriginalRoot.childOrNull(BstSide.LEFT);")));
+        assertTrue(source.matches(PatternMaker.make("/* 134:", "case LEFT:")));
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+
+        // Recompile decompiled source code and check errors
+        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
 
     protected void printSource(String source) {

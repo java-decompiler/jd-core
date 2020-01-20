@@ -140,6 +140,7 @@ public class ControlFlowGraphPlantUMLWriter {
                     search(set, basicBlock.getNext());
                 case TYPE_CONDITION_TERNARY_OPERATOR:
                     search(set, basicBlock.getCondition());
+                case TYPE_CONDITION:
                 case TYPE_CONDITION_OR:
                 case TYPE_CONDITION_AND:
                     search(set, basicBlock.getSub1());
@@ -325,6 +326,9 @@ public class ControlFlowGraphPlantUMLWriter {
             case TYPE_GOTO_IN_TERNARY_OPERATOR:
                 writeLink(sb, id, basicBlock.getNext(), "next");
                 break;
+            case TYPE_CONDITION:
+                writeLink(sb, id, basicBlock.getSub1(), "sub1");
+                writeLink(sb, id, basicBlock.getSub2(), "sub2");
             case TYPE_CONDITIONAL_BRANCH:
                 writeLink(sb, id, basicBlock.getNext(), "next");
                 writeLink(sb, id, basicBlock.getBranch(), "branch");
