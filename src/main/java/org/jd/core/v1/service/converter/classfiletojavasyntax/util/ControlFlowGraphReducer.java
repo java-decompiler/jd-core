@@ -279,7 +279,7 @@ public class ControlFlowGraphReducer {
 
             if (nextNext.matchType(TYPE_CONDITIONAL_BRANCH|TYPE_CONDITION)) {
                 if (branch.matchType(TYPE_STATEMENTS|TYPE_GOTO_IN_TERNARY_OPERATOR) && (nextNext == branch.getNext()) && (branch.getPredecessors().size() == 1) && (nextNext.getPredecessors().size() == 2)) {
-                    if (ByteCodeParser.getOperandCount(nextNext) == 1) {
+                    if (ByteCodeParser.getMinDepth(nextNext) == -1) {
                         updateConditionTernaryOperator(basicBlock, nextNext);
                         return true;
                     }
@@ -292,7 +292,7 @@ public class ControlFlowGraphReducer {
 
                         if (nextNextNextNext.matchType(TYPE_CONDITIONAL_BRANCH|TYPE_CONDITION)) {
                             if (nextNextBranch.matchType(TYPE_STATEMENTS|TYPE_GOTO_IN_TERNARY_OPERATOR) && (nextNextNextNext == nextNextBranch.getNext()) && (nextNextBranch.getPredecessors().size() == 1) && (nextNextNextNext.getPredecessors().size() == 2)) {
-                                if (ByteCodeParser.getOperandCount(nextNextNextNext) == 2) {
+                                if (ByteCodeParser.getMinDepth(nextNextNextNext) == -2) {
                                     updateCondition(basicBlock, nextNext, nextNextNextNext);
                                     return true;
                                 }
