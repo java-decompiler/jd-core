@@ -141,11 +141,11 @@ public class ByteCodeParser {
                     break;
                 case 21: // ILOAD
                     localVariable = localVariableMaker.getLocalVariable(code[++offset] & 255, offset);
-                    parseILOAD(statements, stack, lineNumber, localVariable);
+                    parseILOAD(statements, stack, lineNumber, offset, localVariable);
                     break;
                 case 22: case 23: case 24: // LLOAD, FLOAD, DLOAD
                     localVariable = localVariableMaker.getLocalVariable(code[++offset] & 255, offset);
-                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable));
+                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
                     break;
                 case 25: // ALOAD
                     i = code[++offset] & 255;
@@ -153,36 +153,36 @@ public class ByteCodeParser {
                     if ((i == 0) && ((method.getAccessFlags() & FLAG_STATIC) == 0)) {
                         stack.push(new ThisExpression(lineNumber, localVariable.getType()));
                     } else {
-                        stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable));
+                        stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
                     }
                     break;
                 case 26: case 27: case 28: case 29: // ILOAD_0 ... ILOAD_3
                     localVariable = localVariableMaker.getLocalVariable(opcode - 26, offset);
-                    parseILOAD(statements, stack, lineNumber, localVariable);
+                    parseILOAD(statements, stack, lineNumber, offset, localVariable);
                     break;
                 case 30: case 31: case 32: case 33: // LLOAD_0 ... LLOAD_3
                     localVariable = localVariableMaker.getLocalVariable(opcode - 30, offset);
-                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable));
+                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
                     break;
                 case 34: case 35: case 36: case 37: // FLOAD_0 ... FLOAD_3
                     localVariable = localVariableMaker.getLocalVariable(opcode - 34, offset);
-                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable));
+                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
                     break;
                 case 38: case 39: case 40: case 41: // DLOAD_0 ... DLOAD_3
                     localVariable = localVariableMaker.getLocalVariable(opcode - 38, offset);
-                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable));
+                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
                     break;
                 case 42: // ALOAD_0
                     localVariable = localVariableMaker.getLocalVariable(0, offset);
                     if ((method.getAccessFlags() & FLAG_STATIC) == 0) {
                         stack.push(new ThisExpression(lineNumber, localVariable.getType()));
                     } else {
-                        stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable));
+                        stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
                     }
                     break;
                 case 43: case 44: case 45: // ALOAD_1 ... ALOAD_3
                     localVariable = localVariableMaker.getLocalVariable(opcode - 42, offset);
-                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable));
+                    stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
                     break;
                 case 46: case 47: case 48: case 49: case 50: case 51: case 52: case 53: // IALOAD, LALOAD, FALOAD, DALOAD, AALOAD, BALOAD, CALOAD, SALOAD
                     indexRef = stack.pop();
@@ -191,31 +191,31 @@ public class ByteCodeParser {
                     break;
                 case 54: case 55: case 56: case 57: // ISTORE, LSTORE, FSTORE, DSTORE
                     localVariable = getLocalVariableInAssignment(code[++offset] & 255, offset + 2, valueRef = stack.pop());
-                    parseSTORE(statements, stack, lineNumber, localVariable, valueRef);
+                    parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 58: // ASTORE
                     localVariable = getLocalVariableInAssignment(code[++offset] & 255, offset + 1, valueRef = stack.pop());
-                    parseASTORE(statements, stack, lineNumber, localVariable, valueRef);
+                    parseASTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 59: case 60: case 61: case 62: // ISTORE_0 ... ISTORE_3
                     localVariable = getLocalVariableInAssignment(opcode - 59, offset + 1, valueRef = stack.pop());
-                    parseSTORE(statements, stack, lineNumber, localVariable, valueRef);
+                    parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 63: case 64: case 65: case 66: // LSTORE_0 ... LSTORE_3
                     localVariable = getLocalVariableInAssignment(opcode - 63, offset + 1, valueRef = stack.pop());
-                    parseSTORE(statements, stack, lineNumber, localVariable, valueRef);
+                    parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 67: case 68: case 69: case 70: // FSTORE_0 ... FSTORE_3
                     localVariable = getLocalVariableInAssignment(opcode - 67, offset + 1, valueRef = stack.pop());
-                    parseSTORE(statements, stack, lineNumber, localVariable, valueRef);
+                    parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 71: case 72: case 73: case 74: // DSTORE_0 ... DSTORE_3
                     localVariable = getLocalVariableInAssignment(opcode - 71, offset + 1, valueRef = stack.pop());
-                    parseSTORE(statements, stack, lineNumber, localVariable, valueRef);
+                    parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 75: case 76: case 77: case 78: // ASTORE_0 ... ASTORE_3
                     localVariable = getLocalVariableInAssignment(opcode - 75, offset + 1, valueRef = stack.pop());
-                    parseASTORE(statements, stack, lineNumber, localVariable, valueRef);
+                    parseASTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 79: // IASTORE
                     valueRef = stack.pop();
@@ -564,7 +564,7 @@ public class ByteCodeParser {
                     break;
                 case 132: // IINC
                     localVariable = localVariableMaker.getLocalVariable(code[++offset] & 255, offset);
-                    parseIINC(statements, stack, lineNumber, localVariable, (byte)(code[++offset] & 255));
+                    parseIINC(statements, stack, lineNumber, offset, localVariable, (byte)(code[++offset] & 255));
                     break;
                 case 133: // I2L
                     stack.push(new CastExpression(lineNumber, TYPE_LONG, stack.pop(), false));
@@ -852,35 +852,35 @@ public class ByteCodeParser {
 
                     if (opcode == 132) { // IINC
                         count = (short)( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
-                        parseIINC(statements, stack, lineNumber, localVariableMaker.getLocalVariable(i, offset), count);
+                        parseIINC(statements, stack, lineNumber, offset, localVariableMaker.getLocalVariable(i, offset), count);
                     } else {
                         switch (opcode) {
                             case 21: // ILOAD
                                 localVariable = localVariableMaker.getLocalVariable(i, offset + 4);
-                                parseILOAD(statements, stack, lineNumber, localVariable);
+                                parseILOAD(statements, stack, offset, lineNumber, localVariable);
                                 break;
                             case 22: case 23: case 24: case 25: // LLOAD, FLOAD, DLOAD, ALOAD
-                                stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariableMaker.getLocalVariable(i, offset)));
+                                stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariableMaker.getLocalVariable(i, offset)));
                                 break;
                             case 54: // ISTORE
                                 localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
-                                statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, localVariable.getType(), new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable), "=", valueRef, 16)));
+                                statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, localVariable.getType(), new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable), "=", valueRef, 16)));
                                 break;
                             case 55: // LSTORE
                                 localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
-                                statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_LONG, new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable), "=", valueRef, 16)));
+                                statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_LONG, new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable), "=", valueRef, 16)));
                                 break;
                             case 56: // FSTORE
                                 localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
-                                statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_FLOAT, new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable), "=", valueRef, 16)));
+                                statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_FLOAT, new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable), "=", valueRef, 16)));
                                 break;
                             case 57: // DSTORE
                                 localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
-                                statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_DOUBLE, new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable), "=", valueRef, 16)));
+                                statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_DOUBLE, new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable), "=", valueRef, 16)));
                                 break;
                             case 58: // ASTORE
                                 localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
-                                parseASTORE(statements, stack, lineNumber, localVariable, valueRef);
+                                parseASTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                                 break;
                             case 169: // RET
                                 break;
@@ -1071,7 +1071,7 @@ public class ByteCodeParser {
         }
     }
 
-    private static void parseILOAD(Statements statements, DefaultStack<Expression> stack, int lineNumber, AbstractLocalVariable localVariable) {
+    private static void parseILOAD(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable) {
         if (! statements.isEmpty()) {
             Statement statement = statements.getLast();
 
@@ -1095,12 +1095,12 @@ public class ByteCodeParser {
             }
         }
 
-        stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable));
+        stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
     }
 
     @SuppressWarnings("unchecked")
-    private void parseSTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, AbstractLocalVariable localVariable, Expression valueRef) {
-        ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable);
+    private void parseSTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, Expression valueRef) {
+        ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
 
         bindParameterTypesWithArgumentTypes(vre.getType(), valueRef);
 
@@ -1479,11 +1479,11 @@ public class ByteCodeParser {
         return ((expression.getClass() == DoubleConstantExpression.class) && ((DoubleConstantExpression)expression).getValue() == -1.0D);
     }
 
-    private void parseASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, AbstractLocalVariable localVariable, Expression valueRef) {
+    private void parseASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, Expression valueRef) {
         bindParameterTypesWithArgumentTypes(localVariable.getType(), valueRef);
         localVariable.typeOnRight(typeBounds, valueRef.getType());
 
-        ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable);
+        ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
         Expression oldValueRef = valueRef;
 
         if (valueRef.getClass() == NewArray.class) {
@@ -1584,7 +1584,7 @@ public class ByteCodeParser {
     }
 
     @SuppressWarnings("unchecked")
-    private void parseIINC(Statements statements, DefaultStack<Expression> stack, int lineNumber, AbstractLocalVariable localVariable, int count) {
+    private void parseIINC(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, int count) {
         Expression expression;
 
         if (!stack.isEmpty()) {
@@ -1610,7 +1610,7 @@ public class ByteCodeParser {
             }
         }
 
-        expression = new ClassFileLocalVariableReferenceExpression(lineNumber, localVariable);
+        expression = new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
 
         if (count == 1) {
             expression = newPreArithmeticOperatorExpression(lineNumber, "++", expression);

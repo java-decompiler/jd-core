@@ -9,10 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariab
 
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
-import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
-import org.jd.core.v1.model.javasyntax.statement.Statement;
-import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
@@ -20,6 +17,9 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateLocalVariableVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
 
@@ -270,6 +270,126 @@ public class Frame {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    public void updateLocalVariableInForStatements(TypeMaker typeMaker) {
+        // Recursive call
+        if (children != null) {
+            for (Frame child : children) {
+                child.updateLocalVariableInForStatements(typeMaker);
+            }
+        }
+
+        // Split local variable ranges in init 'for' statements
+        SearchLocalVariableVisitor searchLocalVariableVisitor = new SearchLocalVariableVisitor();
+        HashSet<AbstractLocalVariable> undeclaredInExpressionStatements = new HashSet<>();
+
+        for (Statement statement : statements) {
+            Class statementClass = statement.getClass();
+
+            if (statementClass == ClassFileForStatement.class) {
+                ClassFileForStatement fs = (ClassFileForStatement) statement;
+
+                if (fs.getInit() == null) {
+                    if (fs.getCondition() != null) {
+                        searchLocalVariableVisitor.init();
+                        fs.getCondition().accept(searchLocalVariableVisitor);
+                        undeclaredInExpressionStatements.addAll(searchLocalVariableVisitor.getVariables());
+                    }
+                    if (fs.getUpdate() != null) {
+                        searchLocalVariableVisitor.init();
+                        fs.getUpdate().accept(searchLocalVariableVisitor);
+                        undeclaredInExpressionStatements.addAll(searchLocalVariableVisitor.getVariables());
+                    }
+                    if (fs.getStatements() != null) {
+                        searchLocalVariableVisitor.init();
+                        fs.getStatements().accept(searchLocalVariableVisitor);
+                        undeclaredInExpressionStatements.addAll(searchLocalVariableVisitor.getVariables());
+                    }
+                }
+            } else {
+                searchLocalVariableVisitor.init();
+                statement.accept(searchLocalVariableVisitor);
+                undeclaredInExpressionStatements.addAll(searchLocalVariableVisitor.getVariables());
+            }
+        }
+
+        SearchUndeclaredLocalVariableVisitor searchUndeclaredLocalVariableVisitor = new SearchUndeclaredLocalVariableVisitor();
+        HashMap<AbstractLocalVariable, List<ClassFileForStatement>> undeclaredInForStatements = new HashMap<>();
+
+        for (Statement statement : statements) {
+            Class statementClass = statement.getClass();
+
+            if (statementClass == ClassFileForStatement.class) {
+                ClassFileForStatement fs = (ClassFileForStatement) statement;
+
+                if (fs.getInit() != null) {
+                    searchUndeclaredLocalVariableVisitor.init();
+                    fs.getInit().accept(searchUndeclaredLocalVariableVisitor);
+                    searchUndeclaredLocalVariableVisitor.getVariables().removeAll(undeclaredInExpressionStatements);
+
+                    for (AbstractLocalVariable lv : searchUndeclaredLocalVariableVisitor.getVariables()) {
+                        List<ClassFileForStatement> list = undeclaredInForStatements.get(lv);
+                        if (list == null) {
+                            undeclaredInForStatements.put(lv, list = new ArrayList<>());
+                        }
+                        list.add(fs);
+                    }
+                }
+            }
+        }
+
+        if (!undeclaredInForStatements.isEmpty()) {
+            CreateLocalVariableVisitor createLocalVariableVisitor = new CreateLocalVariableVisitor(typeMaker);
+
+            for (Map.Entry<AbstractLocalVariable, List<ClassFileForStatement>> entry : undeclaredInForStatements.entrySet()) {
+                List<ClassFileForStatement> listFS = entry.getValue();
+
+                // Split local variable range
+                AbstractLocalVariable lv = entry.getKey();
+                Iterator<ClassFileForStatement> iteratorFS = listFS.iterator();
+                ClassFileForStatement firstFS = iteratorFS.next();
+
+                while (iteratorFS.hasNext()) {
+                    createNewLocalVariable(createLocalVariableVisitor, iteratorFS.next(), lv);
+                }
+
+                if (lv.getFrame() == this) {
+                    lv.setFromOffset(firstFS.getFromOffset());
+                    lv.setToOffset(firstFS.getToOffset(), true);
+                } else {
+                    createNewLocalVariable(createLocalVariableVisitor, firstFS, lv);
+
+                    if (lv.getReferences().isEmpty()) {
+                        lv.getFrame().removeLocalVariable(lv);
+                    }
+                }
+            }
+        }
+    }
+
+    protected void createNewLocalVariable(CreateLocalVariableVisitor createLocalVariableVisitor, ClassFileForStatement fs, AbstractLocalVariable lv) {
+        int fromOffset = fs.getFromOffset(), toOffset = fs.getToOffset();
+        createLocalVariableVisitor.init(lv.getIndex(), fromOffset);
+        lv.accept(createLocalVariableVisitor);
+        AbstractLocalVariable newLV = createLocalVariableVisitor.getLocalVariable();
+
+        newLV.setToOffset(toOffset, true);
+        newLV.setName(lv.getName());
+        addLocalVariable(newLV);
+        Iterator<LocalVariableReference> iteratorLVR = lv.getReferences().iterator();
+
+        while (iteratorLVR.hasNext()) {
+            LocalVariableReference lvr = iteratorLVR.next();
+            int offset = ((ClassFileLocalVariableReferenceExpression) lvr).getOffset();
+
+            if ((fromOffset <= offset) && (offset <= toOffset)) {
+                lvr.setLocalVariable(newLV);
+                newLV.addReference(lvr);
+                iteratorLVR.remove();
+            }
+        }
+    }
+
     public void createDeclarations(boolean containsLineNumber) {
         // Create inline declarations
         createInlineDeclarations();
@@ -295,7 +415,7 @@ public class Frame {
         HashMap<Frame, HashSet<AbstractLocalVariable>> map = createMapForInlineDeclarations();
 
         if (!map.isEmpty()) {
-            SearchUndeclaredLocalVariableVisitor visitor = new SearchUndeclaredLocalVariableVisitor();
+            SearchUndeclaredLocalVariableVisitor searchUndeclaredLocalVariableVisitor = new SearchUndeclaredLocalVariableVisitor();
 
             for (Map.Entry<Frame, HashSet<AbstractLocalVariable>> entry : map.entrySet()) {
                 Statements statements = entry.getKey().statements;
@@ -305,10 +425,10 @@ public class Frame {
                 while (iterator.hasNext()) {
                     Statement statement = iterator.next();
 
-                    visitor.init();
-                    statement.accept(visitor);
+                    searchUndeclaredLocalVariableVisitor.init();
+                    statement.accept(searchUndeclaredLocalVariableVisitor);
 
-                    HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement = visitor.getVariables();
+                    HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement = searchUndeclaredLocalVariableVisitor.getVariables();
                     undeclaredLocalVariablesInStatement.retainAll(undeclaredLocalVariables);
 
                     if (!undeclaredLocalVariablesInStatement.isEmpty()) {
@@ -363,15 +483,11 @@ public class Frame {
 
             while (lv != null) {
                 if ((this == lv.getFrame()) && !lv.isDeclared()) {
-                    HashSet<AbstractLocalVariable> variablesToDeclare = map.get(lv.getFrame());
-
+                    HashSet<AbstractLocalVariable> variablesToDeclare = map.get(this);
                     if (variablesToDeclare == null) {
-                        variablesToDeclare = new HashSet<>();
-                        variablesToDeclare.add(lv);
-                        map.put(lv.getFrame(), variablesToDeclare);
-                    } else {
-                        variablesToDeclare.add(lv);
+                        map.put(this, variablesToDeclare = new HashSet<>());
                     }
+                    variablesToDeclare.add(lv);
                 }
                 lv = lv.getNext();
             }
@@ -533,7 +649,7 @@ public class Frame {
         Type type0 = null, type1 = null;
         int minDimension = 0, maxDimension = 0;
 
-        for (Expression expression : (List<Expression>)init) {
+        for (Expression expression : init) {
             if (expression.getClass() != BinaryOperatorExpression.class)
                 return;
 

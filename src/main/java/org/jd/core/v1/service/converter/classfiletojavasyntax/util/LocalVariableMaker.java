@@ -493,8 +493,9 @@ public class LocalVariableMaker {
         return names.contains(name);
     }
 
-    public void make(boolean containsLineNumber) {
+    public void make(boolean containsLineNumber, TypeMaker typeMaker) {
         currentFrame.createNames(blackListNames);
+        currentFrame.updateLocalVariableInForStatements(typeMaker);
         currentFrame.createDeclarations(containsLineNumber);
     }
 

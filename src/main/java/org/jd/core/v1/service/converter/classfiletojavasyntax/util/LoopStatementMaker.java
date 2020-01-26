@@ -756,6 +756,18 @@ public class LoopStatementMaker {
     protected static ClassFileForStatement newClassFileForStatement(
             LocalVariableMaker localVariableMaker, int fromOffset, int toOffset, BaseExpression init,
             Expression condition, BaseExpression update, BaseStatement statements) {
+        if (init != null) {
+            SearchFromOffsetVisitor visitor = new SearchFromOffsetVisitor();
+
+            init.accept(visitor);
+
+            int offset = visitor.getOffset();
+
+            if (fromOffset > offset) {
+                fromOffset = offset;
+            }
+        }
+
         ChangeFrameOfLocalVariablesVisitor visitor = new ChangeFrameOfLocalVariablesVisitor(localVariableMaker);
 
         if (condition != null) {

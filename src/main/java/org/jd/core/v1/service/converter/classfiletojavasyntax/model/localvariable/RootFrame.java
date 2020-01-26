@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+
 public class RootFrame extends Frame {
 
     public RootFrame() {
@@ -20,6 +22,16 @@ public class RootFrame extends Frame {
         return null;
     }
 
+    @Override
+    public void updateLocalVariableInForStatements(TypeMaker typeMaker) {
+        if (children != null) {
+            for (Frame child : children) {
+                child.updateLocalVariableInForStatements(typeMaker);
+            }
+        }
+    }
+
+    @Override
     public void createDeclarations(boolean containsLineNumber) {
         if (children != null) {
             for (Frame child : children) {

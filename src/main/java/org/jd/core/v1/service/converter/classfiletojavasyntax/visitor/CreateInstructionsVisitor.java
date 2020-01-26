@@ -144,7 +144,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             containsLineNumber = (attributeCode.getAttribute("LineNumberTable") != null);
         }
 
-        localVariableMaker.make(containsLineNumber);
+        localVariableMaker.make(containsLineNumber, typeMaker);
         comd.setFormalParameters(localVariableMaker.getFormalParameters());
     }
 

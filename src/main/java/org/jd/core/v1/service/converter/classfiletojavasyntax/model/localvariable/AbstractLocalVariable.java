@@ -65,6 +65,10 @@ public abstract class AbstractLocalVariable {
             this.toOffset = offset;
     }
 
+    public void setToOffset(int offset, boolean force) {
+        this.toOffset = offset;
+    }
+
     public abstract Type getType();
 
     public String getName() { return name; }
