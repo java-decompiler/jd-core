@@ -25,10 +25,21 @@ public class ClassFileDeserializer {
     protected static final int[] EMPTY_INT_ARRAY = new int[0];
 
     public ClassFile loadClassFile(Loader loader, String internalTypeName) throws Exception {
-        return innerLoadClassFile(loader, internalTypeName);
+        ClassFile classFile = innerLoadClassFile(loader, internalTypeName);
+
+        if (classFile == null) {
+            throw new IllegalArgumentException("Class '" + internalTypeName + "' could not be loaded");
+        }
+        else {
+            return classFile;
+        }
     }
 
-    public ClassFile innerLoadClassFile(Loader loader, String internalTypeName) throws Exception {
+    private ClassFile innerLoadClassFile(Loader loader, String internalTypeName) throws Exception {
+        if (!loader.canLoad(internalTypeName)) {
+            return null;
+        }
+
         byte[] data = loader.load(internalTypeName);
 
         if (data == null) {
