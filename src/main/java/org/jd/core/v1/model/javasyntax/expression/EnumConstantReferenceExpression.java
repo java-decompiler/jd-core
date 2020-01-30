@@ -46,6 +46,6 @@ public class EnumConstantReferenceExpression extends AbstractLineNumberExpressio
 
     @Override
     public String toString() {
-        return "EnumConstantReferenceExpression{lastType=" + type + ", name=" + name + "}";
+        return "EnumConstantReferenceExpression{type=" + type + ", name=" + name + "}";
     }
 }

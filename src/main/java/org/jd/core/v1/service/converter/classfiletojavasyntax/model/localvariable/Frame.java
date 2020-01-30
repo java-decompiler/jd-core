@@ -190,7 +190,7 @@ public class Frame {
     }
 
     public void close() {
-        // Update lastType for 'new' expression
+        // Update type for 'new' expression
         if (newExpressions != null) {
             for (Map.Entry<NewExpression, AbstractLocalVariable> entry : newExpressions.entrySet()) {
                 ObjectType ot1 = entry.getKey().getObjectType();

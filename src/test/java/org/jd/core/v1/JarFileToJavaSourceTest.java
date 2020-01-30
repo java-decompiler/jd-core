@@ -79,11 +79,11 @@ public class JarFileToJavaSourceTest extends TestCase {
     }
 
     // TODO In progress
-    @Test
-    public void testJodaTime() throws Exception {
-        // Decompile and recompile 'joda-time:joda-time:2.10.5'
-        test(org.joda.time.DateTime.class);
-    }
+//    @Test
+//    public void testJodaTime() throws Exception {
+//        // Decompile and recompile 'joda-time:joda-time:2.10.5'
+//        test(org.joda.time.DateTime.class);
+//    }
 
     @Test
     public void testJSoup() throws Exception {
@@ -115,7 +115,6 @@ public class JarFileToJavaSourceTest extends TestCase {
         test(spark.Spark.class);
     }
 
-    // TODO In progress
     @Test
     public void testLog4j() throws Exception {
         // Decompile and recompile 'log4j:log4j:1.2.17'
@@ -123,11 +122,11 @@ public class JarFileToJavaSourceTest extends TestCase {
     }
 
     // TODO In progress
-    @Test
-    public void testGuava() throws Exception {
-        // Decompile and recompile 'com.google.guava:guava:12.0'
-        test(com.google.common.collect.Collections2.class);
-    }
+//    @Test
+//    public void testGuava() throws Exception {
+//        // Decompile and recompile 'com.google.guava:guava:12.0'
+//        test(com.google.common.collect.Collections2.class);
+//    }
 
     protected void test(Class clazz) throws Exception {
         test(new FileInputStream(Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile()));
@@ -150,7 +149,6 @@ public class JarFileToJavaSourceTest extends TestCase {
             Message message = new Message();
             message.setHeader("loader", loader);
             message.setHeader("printer", printer);
-            // message.setHeader("configuration", Collections.singletonMap("realignLineNumbers", Boolean.TRUE));
             message.setHeader("configuration", configuration);
 
             long time0 = System.currentTimeMillis();

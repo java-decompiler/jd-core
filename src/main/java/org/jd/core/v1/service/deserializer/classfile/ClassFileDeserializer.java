@@ -35,7 +35,7 @@ public class ClassFileDeserializer {
         }
     }
 
-    private ClassFile innerLoadClassFile(Loader loader, String internalTypeName) throws Exception {
+    protected ClassFile innerLoadClassFile(Loader loader, String internalTypeName) throws Exception {
         if (!loader.canLoad(internalTypeName)) {
             return null;
         }

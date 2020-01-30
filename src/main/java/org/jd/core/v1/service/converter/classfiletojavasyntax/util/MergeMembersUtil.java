@@ -93,7 +93,7 @@ public class MergeMembersUtil {
         int order = 0;
         int lastLineNumber = 0;
 
-        // Detect order lastType
+        // Detect order type
         for (ClassFileMemberDeclaration member : members) {
             int lineNumber = member.getFirstLineNumber();
 

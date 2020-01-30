@@ -62,6 +62,6 @@ public class FieldReferenceExpression extends AbstractLineNumberTypeExpression {
 
     @Override
     public String toString() {
-        return "FieldReferenceExpression{lastType=" + type + ", expression=" + expression + ", name=" + name + ", descriptor=" + descriptor + "}";
+        return "FieldReferenceExpression{type=" + type + ", expression=" + expression + ", name=" + name + ", descriptor=" + descriptor + "}";
     }
 }

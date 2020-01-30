@@ -13,7 +13,7 @@ import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.model.processor.Processor;
 
 /**
- * Create a ClassFile model from a loader and a internal lastType name.<br><br>
+ * Create a ClassFile model from a loader and a internal type name.<br><br>
  *
  * Input:  -<br>
  * Output: {@link org.jd.core.v1.model.classfile.ClassFile}<br>

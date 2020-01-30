@@ -33,6 +33,6 @@ public class LocalVariableReferenceExpression extends AbstractLineNumberTypeExpr
 
     @Override
     public String toString() {
-        return "LocalVariableReferenceExpression{lastType=" + type + ", name=" + name + "}";
+        return "LocalVariableReferenceExpression{type=" + type + ", name=" + name + "}";
     }
 }

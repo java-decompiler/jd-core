@@ -249,7 +249,7 @@ public class LocalVariableMaker {
 
                 if ((parameterIndex == lastParameterIndex) && varargs) {
                     sb.append("VarArgs");
-//                } else if (lastType.getDimension() > 1) {
+//                } else if (type.getDimension() > 1) {
 //                    sb.append("ArrayOfArray");
                 } else {
                     if (type.getDimension() > 0) {

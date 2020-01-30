@@ -372,7 +372,7 @@ public class ControlFlowGraphMaker {
 
             map[lastOffset] = cfg.newBasicBlock(lastOffset, length);
 
-            // --- Set lastType, successors and predecessors --- //
+            // --- Set type, successors and predecessors --- //
             List<BasicBlock> list = cfg.getBasicBlocks();
             List<BasicBlock> basicBlocks = new DefaultList<>(list.size());
             BasicBlock successor = list.get(1);

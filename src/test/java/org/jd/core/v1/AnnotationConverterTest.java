@@ -62,7 +62,7 @@ public class AnnotationConverterTest extends TestCase {
         assertEquals(
                 "ExpressionElementValue{" +
                     "FieldReferenceExpression{" +
-                    "lastType=InnerObjectType{ObjectType{org/jd/core/test/annotation/Quality}.Lorg/jd/core/test/annotation/Quality$Level;}, " +
+                    "type=InnerObjectType{ObjectType{org/jd/core/test/annotation/Quality}.Lorg/jd/core/test/annotation/Quality$Level;}, " +
                     "expression=ObjectTypeReferenceExpression{InnerObjectType{ObjectType{org/jd/core/test/annotation/Quality}.Lorg/jd/core/test/annotation/Quality$Level;}}, " +
                     "name=HIGH, " +
                     "descriptor=Lorg/jd/core/test/annotation/Quality$Level;}" +
