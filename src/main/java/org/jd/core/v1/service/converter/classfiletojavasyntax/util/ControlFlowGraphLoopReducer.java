@@ -720,10 +720,5 @@ public class ControlFlowGraphLoopReducer {
         public int compare(Loop loop1, Loop loop2) {
             return loop1.getMembers().size() - loop2.getMembers().size();
         }
-
-        @Override
-        public boolean equals(Object other) {
-            return this==other;
-        }
     }
 }

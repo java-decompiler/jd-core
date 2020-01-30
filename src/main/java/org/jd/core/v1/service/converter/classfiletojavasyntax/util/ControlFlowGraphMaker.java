@@ -588,10 +588,5 @@ public class ControlFlowGraphMaker {
                 comp = ce1.getEndPc() - ce2.getEndPc();
             return comp;
         }
-
-        @Override
-        public boolean equals(Object other) {
-            return this==other;
-        }
     }
 }
