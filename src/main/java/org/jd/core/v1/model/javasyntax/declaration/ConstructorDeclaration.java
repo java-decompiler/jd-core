@@ -42,6 +42,10 @@ public class ConstructorDeclaration implements MemberDeclaration {
         return flags;
     }
 
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
     public BaseAnnotationReference getAnnotationReferences() {
         return annotationReferences;
     }

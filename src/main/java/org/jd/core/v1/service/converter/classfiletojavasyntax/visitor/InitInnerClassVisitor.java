@@ -156,7 +156,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             }
         }
 
-        // Hide anonymous class constructor
+        // Anonymous class constructor ?
         if (outerClassFile != null) {
             String outerTypeName = outerClassFile.getInternalTypeName();
             String internalTypeName = cfcd.getClassFile().getInternalTypeName();
@@ -180,8 +180,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 }
 
                 if (anonymousFlag) {
-                    // Hide anonymous class constructor
-                    cfcd.setFlags(cfcd.getFlags() | Constants.ACC_SYNTHETIC);
+                    // Mark anonymous class constructor
+                    cfcd.setFlags(cfcd.getFlags() | Declaration.FLAG_ANONYMOUS);
                 }
             }
         }

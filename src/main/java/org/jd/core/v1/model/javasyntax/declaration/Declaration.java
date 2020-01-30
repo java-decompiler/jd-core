@@ -25,6 +25,7 @@ public interface Declaration {
     int FLAG_VARARGS      = 0x0080;  // .  .  M  .  .  .  .  .
     int FLAG_NATIVE       = 0x0100;  // .  .  M  .  .  .  .  .
     int FLAG_INTERFACE    = 0x0200;  // C  .  .  N  .  .  .  .
+    int FLAG_ANONYMOUS    = 0x0200;  // .  .  M  .  .  .  .  . // Custom flag
     int FLAG_ABSTRACT     = 0x0400;  // C  .  M  N  .  .  .  .
     int FLAG_STRICT       = 0x0800;  // .  .  M  .  .  .  .  .
     int FLAG_SYNTHETIC    = 0x1000;  // C  F  M  N  Mo MR ME MO

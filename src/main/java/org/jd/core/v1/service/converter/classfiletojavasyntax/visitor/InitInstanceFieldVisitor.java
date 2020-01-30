@@ -82,7 +82,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(ConstructorDeclaration declaration) {
         ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration)declaration;
 
-        if (cfcd.getStatements().getClass() == Statements.class) {
+        if ((cfcd.getStatements() != null) && (cfcd.getStatements().getClass() == Statements.class)) {
             Statements statements = (Statements) cfcd.getStatements();
             ListIterator<Statement> iterator = statements.listIterator();
             SuperConstructorInvocationExpression superConstructorCall = searchSuperConstructorCall(iterator);

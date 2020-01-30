@@ -11,6 +11,7 @@ import junit.framework.TestCase;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.printer.PlainTextPrinter;
@@ -1118,6 +1119,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 104 */", "System.out.println(\"end\");")));
 
         assertTrue(source.indexOf("/* 111: 111 */") != -1);
+
+        assertTrue(source.indexOf("{ ;") == -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
@@ -2014,6 +2017,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.matches(PatternMaker.make(": 111 */", "this.l = l & 0x80L;")));
 
+        assertTrue(source.indexOf("{ ;") == -1);
         assertTrue(source.indexOf("} ;") == -1);
         assertTrue(source.indexOf("// Byte code:") == -1);
 
@@ -2692,6 +2696,40 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("assert false;") == -1);
         assertTrue(source.matches(PatternMaker.make("/* 131:", "resultLeft = liftOriginalRoot.childOrNull(BstSide.LEFT);")));
         assertTrue(source.matches(PatternMaker.make("/* 134:", "case LEFT:")));
+
+        assertTrue(source.indexOf("// Byte code:") == -1);
+
+        // Recompile decompiled source code and check errors
+        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+    }
+
+    @Test
+    public void testAnnotationUtils() throws Exception {
+        String internalClassName = "org/apache/commons/lang3/AnnotationUtils";
+        Loader loader = new ClassPathLoader();
+        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+        PlainTextPrinter printer = new PlainTextPrinter();
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+
+        Message message = new Message();
+        message.setHeader("mainInternalTypeName", internalClassName);
+        message.setHeader("loader", loader);
+        message.setHeader("printer", printer);
+        message.setHeader("configuration", configuration);
+
+        deserializer.process(message);
+        converter.process(message);
+        fragmenter.process(message);
+        layouter.process(message);
+        tokenizer.process(message);
+        writer.process(message);
+
+        String source = printer.toString();
+
+        printSource(source);
+
+        // Check decompiled source code
+        assertTrue(source.indexOf("setDefaultFullDetail(true);") != -1);
 
         assertTrue(source.indexOf("// Byte code:") == -1);
 

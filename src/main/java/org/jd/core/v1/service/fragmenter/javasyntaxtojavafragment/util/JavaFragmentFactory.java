@@ -43,6 +43,10 @@ public class JavaFragmentFactory {
         fragments.add(new EndBodyFragment(0, 1, 1, 8, "End method body", start));
     }
 
+    public static void addEndInstanceInitializerBlock(List<Fragment> fragments, StartBlockFragment start) {
+        fragments.add(new EndBlockFragment(0, 1, 1, 8, "End anonymous method body", start));
+    }
+
     public static void addEndTypeBody(List<Fragment> fragments, StartBodyFragment start) {
         fragments.add(new EndBodyFragment(0, 1, 1, 3, "End type body", start));
     }
@@ -157,6 +161,12 @@ public class JavaFragmentFactory {
 
     public static StartBodyFragment addStartMethodBody(List<Fragment> fragments) {
         StartBodyFragment fragment = new StartBodyFragment(0, 1, 2, 9, "Start method body");
+        fragments.add(fragment);
+        return fragment;
+    }
+
+    public static StartBlockFragment addStartInstanceInitializerBlock(List<Fragment> fragments) {
+        StartBlockFragment fragment = new StartBlockFragment(0, 1, 2, 9, "Start anonymous method body");
         fragments.add(fragment);
         return fragment;
     }

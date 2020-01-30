@@ -44,11 +44,6 @@ public class ClassFileConstructorDeclaration extends ConstructorDeclaration impl
     }
 
     @Override
-    public void setFlags(int flags) {
-        this.flags = flags;
-    }
-
-    @Override
     public void setFormalParameters(BaseFormalParameter formalParameters) {
         this.formalParameters = formalParameters;
     }

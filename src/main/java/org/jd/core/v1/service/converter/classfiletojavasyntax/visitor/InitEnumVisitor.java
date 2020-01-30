@@ -49,24 +49,18 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration)declaration;
-
-        if (cfcd.getStatements().getClass() == Statements.class) {
-            Statements statements = (Statements)cfcd.getStatements();
-
-            if (statements.size() == 1) {
-                cfcd.setFlags(FLAG_SYNTHETIC);
-            } else {
-                FormalParameters parameters = (FormalParameters)cfcd.getFormalParameters();
-                // Remove name & index parameterTypes
-                parameters.subList(0, 2).clear();
-                // Remove super constructor call
-                statements.remove(0);
-                // Fix flags
-                cfcd.setFlags(0);
-            }
+        if ((declaration.getFlags() & FLAG_ANONYMOUS) != 0) {
+            declaration.setFlags(FLAG_SYNTHETIC);
+        } else if (declaration.getStatements().size() <= 1) {
+            declaration.setFlags(FLAG_SYNTHETIC);
         } else {
-            cfcd.setFlags(FLAG_SYNTHETIC);
+            FormalParameters parameters = (FormalParameters)declaration.getFormalParameters();
+            // Remove name & index parameterTypes
+            parameters.subList(0, 2).clear();
+            // Remove super constructor call
+            declaration.getStatements().getList().remove(0);
+            // Fix flags
+            declaration.setFlags(0);
         }
     }
 
