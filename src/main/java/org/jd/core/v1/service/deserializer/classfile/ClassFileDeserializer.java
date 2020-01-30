@@ -59,25 +59,27 @@ public class ClassFileDeserializer {
             String innerTypePrefix = internalTypeName + '$';
 
             for (InnerClass ic : aic.getInnerClasses()) {
-                if (!internalTypeName.equals(ic.getInnerTypeName())) {
-                    if (internalTypeName.equals(ic.getOuterTypeName()) || ic.getInnerTypeName().startsWith(innerTypePrefix)) {
-                        ClassFile innerClassFile = innerLoadClassFile(loader, ic.getInnerTypeName());
+                String innerTypeName = ic.getInnerTypeName();
+
+                if (!internalTypeName.equals(innerTypeName)) {
+                    if (internalTypeName.equals(ic.getOuterTypeName()) || innerTypeName.startsWith(innerTypePrefix)) {
+                        ClassFile innerClassFile = innerLoadClassFile(loader, innerTypeName);
                         int flags = ic.getInnerAccessFlags();
                         int length;
 
-                        if (ic.getInnerTypeName().startsWith(innerTypePrefix)) {
+                        if (innerTypeName.startsWith(innerTypePrefix)) {
                             length = internalTypeName.length() + 1;
                         } else {
-                            length = ic.getInnerTypeName().indexOf('$') + 1;
+                            length = innerTypeName.indexOf('$') + 1;
                         }
 
-                        if (Character.isDigit(ic.getInnerTypeName().charAt(length))) {
+                        if (Character.isDigit(innerTypeName.charAt(length))) {
                             flags |= ACC_SYNTHETIC;
                         }
 
                         if (innerClassFile == null) {
                             // Inner class not found. Create an empty one.
-                            innerClassFile = new ClassFile(classFile.getMajorVersion(), classFile.getMinorVersion(), 0, internalTypeName, "java/lang/Object", null, null, null, null);
+                            innerClassFile = new ClassFile(classFile.getMajorVersion(), classFile.getMinorVersion(), 0, innerTypeName, "java/lang/Object", null, null, null, null);
                         }
 
                         innerClassFile.setOuterClassFile(classFile);
