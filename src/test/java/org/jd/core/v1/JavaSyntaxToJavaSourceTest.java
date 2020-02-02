@@ -45,97 +45,97 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         ObjectType printStreamType = new ObjectType("java/io/PrintStream", "java.io.PrintStream", "PrintStream");
 
         CompilationUnit compilationUnit = new CompilationUnit(
-                new ClassDeclaration(
-                        ClassDeclaration.FLAG_PUBLIC,
-                        "org/jd/core/v1/service/test/TokenWriterTest",
-                        "TokenWriterTest",
-                        new BodyDeclaration(
-                                "org/jd/core/v1/service/test/TokenWriterTest",
-                                new MethodDeclaration(
-                                        MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
-                                        "main",
-                                        PrimitiveType.TYPE_VOID,
-                                        new FormalParameter(ObjectType.TYPE_STRING.createType(1), "args"),
-                                        "([Ljava/lang/String;)V",
-                                        new Statements(
-                                                new IfStatement(
-                                                        new BinaryOperatorExpression(
-                                                                8,
+            new ClassDeclaration(
+                ClassDeclaration.FLAG_PUBLIC,
+                "org/jd/core/v1/service/test/TokenWriterTest",
+                "TokenWriterTest",
+                new BodyDeclaration(
+                    "org/jd/core/v1/service/test/TokenWriterTest",
+                    new MethodDeclaration(
+                        MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
+                        "main",
+                        PrimitiveType.TYPE_VOID,
+                        new FormalParameter(ObjectType.TYPE_STRING.createType(1), "args"),
+                        "([Ljava/lang/String;)V",
+                        new Statements(
+                            new IfStatement(
+                                new BinaryOperatorExpression(
+                                    8,
+                                    PrimitiveType.TYPE_BOOLEAN,
+                                    new LocalVariableReferenceExpression(8, stringArrayType, "args"),
+                                    "==",
+                                    new NullExpression(8, stringArrayType),
+                                    9
+                                ),
+                                ReturnStatement.RETURN
+                            ),
+                            new LocalVariableDeclarationStatement(
+                                PrimitiveType.TYPE_INT,
+                                new LocalVariableDeclarator(
+                                    "i",
+                                    new ExpressionVariableInitializer(
+                                        new MethodInvocationExpression(
+                                            10,
+                                            PrimitiveType.TYPE_INT,
+                                            new ThisExpression(10, new ObjectType("org/jd/core/v1/service/test/TokenWriterTest", "org.jd.core.v1.service.writer.TokenWriterTest", "TokenWriterTest")),
+                                            "org/jd/core/v1/service/test/TokenWriterTest",
+                                            "call",
+                                            "(Ljava/lang/String;ILjava/util/Enumeration;C)I",
+                                            new Expressions(
+                                                new StringConstantExpression(11, "aaaa"),
+                                                new LocalVariableReferenceExpression(12, PrimitiveType.TYPE_INT, "b"),
+                                                new NewExpression(
+                                                    13,
+                                                    new ObjectType("java/util/Enumeration", "java.util.Enumeration", "Enumeration"),
+                                                    "()V",
+                                                    new BodyDeclaration(
+                                                        "java/util/Enumeration",
+                                                        new MemberDeclarations(
+                                                            new MethodDeclaration(
+                                                                MethodDeclaration.FLAG_PUBLIC,
+                                                                "hasMoreElements",
                                                                 PrimitiveType.TYPE_BOOLEAN,
-                                                                new LocalVariableReferenceExpression(8, stringArrayType, "args"),
-                                                                "==",
-                                                                new NullExpression(8, stringArrayType),
-                                                                9
-                                                        ),
-                                                        ReturnStatement.RETURN
-                                                ),
-                                                new LocalVariableDeclarationStatement(
-                                                        PrimitiveType.TYPE_INT,
-                                                        new LocalVariableDeclarator(
-                                                                "i",
-                                                                new ExpressionVariableInitializer(
-                                                                        new MethodInvocationExpression(
-                                                                                10,
-                                                                                PrimitiveType.TYPE_INT,
-                                                                                new ThisExpression(10, new ObjectType("org/jd/core/v1/service/test/TokenWriterTest", "org.jd.core.v1.service.writer.TokenWriterTest", "TokenWriterTest")),
-                                                                                "org/jd/core/v1/service/test/TokenWriterTest",
-                                                                                "call",
-                                                                                "(Ljava/lang/String;ILjava/util/Enumeration;C)I",
-                                                                                new Expressions(
-                                                                                        new StringConstantExpression(11, "aaaa"),
-                                                                                        new LocalVariableReferenceExpression(12, PrimitiveType.TYPE_INT, "b"),
-                                                                                        new NewExpression(
-                                                                                                13,
-                                                                                                new ObjectType("java/util/Enumeration", "java.util.Enumeration", "Enumeration"),
-                                                                                                "()V",
-                                                                                                new BodyDeclaration(
-                                                                                                        "java/util/Enumeration",
-                                                                                                        new MemberDeclarations(
-                                                                                                                new MethodDeclaration(
-                                                                                                                        MethodDeclaration.FLAG_PUBLIC,
-                                                                                                                        "hasMoreElements",
-                                                                                                                        PrimitiveType.TYPE_BOOLEAN,
-                                                                                                                        "()Z",
-                                                                                                                        new ReturnExpressionStatement(new BooleanExpression(15, false))
-                                                                                                                ),
-                                                                                                                new MethodDeclaration(
-                                                                                                                        MethodDeclaration.FLAG_PUBLIC,
-                                                                                                                        "nextElement",
-                                                                                                                        ObjectType.TYPE_OBJECT,
-                                                                                                                        "()Ljava/lang/Object;",
-                                                                                                                        new ReturnExpressionStatement(new NullExpression(18, ObjectType.TYPE_OBJECT))
-                                                                                                                )
-                                                                                                        )
-                                                                                                )
-                                                                                        ),
-                                                                                        new LocalVariableReferenceExpression(21, PrimitiveType.TYPE_CHAR, "c")
-                                                                                )
-                                                                        )
-                                                                )
+                                                                "()Z",
+                                                                new ReturnExpressionStatement(new BooleanExpression(15, false))
+                                                            ),
+                                                            new MethodDeclaration(
+                                                                MethodDeclaration.FLAG_PUBLIC,
+                                                                "nextElement",
+                                                                ObjectType.TYPE_OBJECT,
+                                                                "()Ljava/lang/Object;",
+                                                                new ReturnExpressionStatement(new NullExpression(18, ObjectType.TYPE_OBJECT))
+                                                            )
                                                         )
+                                                    )
                                                 ),
-                                                new ExpressionStatement(
-                                                        new MethodInvocationExpression(
-                                                                22,
-                                                                PrimitiveType.TYPE_VOID,
-                                                                new FieldReferenceExpression(
-                                                                        22,
-                                                                        printStreamType,
-                                                                        new ObjectTypeReferenceExpression(22, new ObjectType("java/lang/System", "java.lang.System", "System")),
-                                                                        "java/lang/System",
-                                                                        "out",
-                                                                        "Ljava/io/PrintStream;"
-                                                                ),
-                                                                "java/io/PrintStream",
-                                                                "println",
-                                                                "(I)V",
-                                                                new LocalVariableReferenceExpression(22, PrimitiveType.TYPE_INT, "i")
-                                                        )
-                                                )
+                                                new LocalVariableReferenceExpression(21, PrimitiveType.TYPE_CHAR, "c")
+                                            )
                                         )
+                                    )
                                 )
+                            ),
+                            new ExpressionStatement(
+                                new MethodInvocationExpression(
+                                    22,
+                                    PrimitiveType.TYPE_VOID,
+                                    new FieldReferenceExpression(
+                                        22,
+                                        printStreamType,
+                                        new ObjectTypeReferenceExpression(22, new ObjectType("java/lang/System", "java.lang.System", "System")),
+                                        "java/lang/System",
+                                        "out",
+                                        "Ljava/io/PrintStream;"
+                                    ),
+                                    "java/io/PrintStream",
+                                    "println",
+                                    "(I)V",
+                                    new LocalVariableReferenceExpression(22, PrimitiveType.TYPE_INT, "i")
+                                )
+                            )
                         )
+                    )
                 )
+            )
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
@@ -172,12 +172,12 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         ObjectType listType = new ObjectType("java/util/List", "java.util.List", "List", stringType);
 
         CompilationUnit compilationUnit = new CompilationUnit(
-                new InterfaceDeclaration(
-                        InterfaceDeclaration.FLAG_PUBLIC,
-                        "org/jd/core/v1/service/test/InterfaceTest",
-                        "InterfaceTest",
-                        new Types(listType, cloneableType)
-                )
+            new InterfaceDeclaration(
+                InterfaceDeclaration.FLAG_PUBLIC,
+                "org/jd/core/v1/service/test/InterfaceTest",
+                "InterfaceTest",
+                new Types(listType, cloneableType)
+            )
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
@@ -211,23 +211,23 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
     @Test
     public void testEnumDayDeclaration() throws Exception {
         CompilationUnit compilationUnit = new CompilationUnit(
-                new EnumDeclaration(
-                        null,
-                        EnumDeclaration.FLAG_PUBLIC,
-                        "org/jd/core/v1/service/test/Day",
-                        "Day",
-                        null,
-                        Arrays.asList(
-                                new EnumDeclaration.Constant("SUNDAY"),
-                                new EnumDeclaration.Constant("MONDAY"),
-                                new EnumDeclaration.Constant("TUESDAY"),
-                                new EnumDeclaration.Constant("WEDNESDAY"),
-                                new EnumDeclaration.Constant("THURSDAY"),
-                                new EnumDeclaration.Constant("FRIDAY"),
-                                new EnumDeclaration.Constant("SATURDAY")
-                        ),
-                        null
-                )
+            new EnumDeclaration(
+                null,
+                EnumDeclaration.FLAG_PUBLIC,
+                "org/jd/core/v1/service/test/Day",
+                "Day",
+                null,
+                Arrays.asList(
+                    new EnumDeclaration.Constant("SUNDAY"),
+                    new EnumDeclaration.Constant("MONDAY"),
+                    new EnumDeclaration.Constant("TUESDAY"),
+                    new EnumDeclaration.Constant("WEDNESDAY"),
+                    new EnumDeclaration.Constant("THURSDAY"),
+                    new EnumDeclaration.Constant("FRIDAY"),
+                    new EnumDeclaration.Constant("SATURDAY")
+                ),
+                null
+            )
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
@@ -265,253 +265,253 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         ThisExpression thisExpression = new ThisExpression(new ObjectType("org/jd/core/v1/service/test/Planet", "org.jd.core.v1.service.test.Planet", "Planet"));
 
         CompilationUnit compilationUnit = new CompilationUnit(
-                new EnumDeclaration(
-                        EnumDeclaration.FLAG_PUBLIC,
-                        "org/jd/core/v1/service/test/Planet",
-                        "Planet",
-                        Arrays.asList(
-                                new EnumDeclaration.Constant(
-                                        "MERCURY",
-                                        new Expressions(
-                                                new DoubleConstantExpression(3.303e+23),
-                                                new DoubleConstantExpression(2.4397e6)
-                                        )
-                                    ),
-                                new EnumDeclaration.Constant(
-                                        "VENUS",
-                                        new Expressions(
-                                                new DoubleConstantExpression(4.869e+24),
-                                                new DoubleConstantExpression(6.0518e6)
-                                        )
-                                ),
-                                new EnumDeclaration.Constant(
-                                        "EARTH",
-                                        new Expressions(
-                                                new DoubleConstantExpression(5.976e+24),
-                                                new DoubleConstantExpression(6.37814e6)
-                                        )
-                                )
-                        ),
-                        new BodyDeclaration(
-                                "org/jd/core/v1/service/test/Planet",
-                                new MemberDeclarations(
-                                        new FieldDeclaration(FieldDeclaration.FLAG_PRIVATE | FieldDeclaration.FLAG_FINAL, PrimitiveType.TYPE_DOUBLE, new FieldDeclarator("mass")),
-                                        new FieldDeclaration(FieldDeclaration.FLAG_PRIVATE | FieldDeclaration.FLAG_FINAL, PrimitiveType.TYPE_DOUBLE, new FieldDeclarator("radius")),
-                                        new ConstructorDeclaration(
-                                                0,
-                                                new FormalParameters(
-                                                        new FormalParameter(PrimitiveType.TYPE_DOUBLE, "mass"),
-                                                        new FormalParameter(PrimitiveType.TYPE_DOUBLE, "radius")
-                                                ),
-                                                "(DD)V",
-                                                new Statements(
-                                                        new ExpressionStatement(new BinaryOperatorExpression(
-                                                                0,
-                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "mass", "D"),
-                                                                "=",
-                                                                new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "mass"),
-                                                                16
-                                                        )),
-                                                        new ExpressionStatement(new BinaryOperatorExpression(
-                                                                0,
-                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"),
-                                                                "=",
-                                                                new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "radius"),
-                                                                16
-                                                        ))
-                                                )
-                                        ),
-                                        new MethodDeclaration(
-                                                MethodDeclaration.FLAG_PRIVATE,
-                                                "mass",
-                                                PrimitiveType.TYPE_DOUBLE,
-                                                "()D",
-                                                new ReturnExpressionStatement(new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "mass", "D"))
-                                        ),
-                                        new MethodDeclaration(
-                                                MethodDeclaration.FLAG_PRIVATE,
-                                                "radius",
-                                                PrimitiveType.TYPE_DOUBLE,
-                                                "()D",
-                                                new ReturnExpressionStatement(new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"))
-                                        ),
-                                        new FieldDeclaration(
-                                                FieldDeclaration.FLAG_PUBLIC | FieldDeclaration.FLAG_STATIC | FieldDeclaration.FLAG_FINAL,
-                                                PrimitiveType.TYPE_DOUBLE,
-                                                new FieldDeclarator("G", new ExpressionVariableInitializer(new DoubleConstantExpression(6.67300E-11)))
-                                        ),
-                                        new MethodDeclaration(
-                                                0,
-                                                "surfaceGravity",
-                                                PrimitiveType.TYPE_DOUBLE,
-                                                "()D",
-                                                new ReturnExpressionStatement(
-                                                        new BinaryOperatorExpression(
-                                                                0,
-                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "G", "D"),
-                                                                "*",
-                                                                new BinaryOperatorExpression(
-                                                                        0,
-                                                                        PrimitiveType.TYPE_DOUBLE,
-                                                                        new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "mass", "D"),
-                                                                        "/",
-                                                                        new ParenthesesExpression(new BinaryOperatorExpression(
-                                                                                0,
-                                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                                new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"),
-                                                                                "*",
-                                                                                new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"),
-                                                                                4
-                                                                        )),
-                                                                        4
-                                                                ),
-                                                                4
-                                                        )
-                                                )
-                                        ),
-                                        new MethodDeclaration(
-                                                0,
-                                                "surfaceWeight",
-                                                PrimitiveType.TYPE_DOUBLE,
-                                                new FormalParameter(PrimitiveType.TYPE_DOUBLE, "otherMass"),
-                                                "(D)D",
-                                                new ReturnExpressionStatement(
-                                                        new BinaryOperatorExpression(
-                                                                0,
-                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "otherMass"),
-                                                                "*",
-                                                                new MethodInvocationExpression(
-                                                                        PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "surfaceGravity", "()D"
-                                                                ),
-                                                                4
-                                                        )
-                                                )
-                                        ),
-                                        new MethodDeclaration(
-                                                MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
-                                                "surfaceWeight",
-                                                PrimitiveType.TYPE_VOID,
-                                                new FormalParameter(arrayOfStringType, "args"),
-                                                "([Ljava/lan/String;)V",
-                                                new Statements(
-                                                        new IfStatement(
-                                                                new BinaryOperatorExpression(
-                                                                        0,
-                                                                        PrimitiveType.TYPE_BOOLEAN,
-                                                                        new LengthExpression(new LocalVariableReferenceExpression(arrayOfStringType, "args")),
-                                                                        "!=",
-                                                                        new IntegerConstantExpression(PrimitiveType.TYPE_INT, 1),
-                                                                        9
-                                                                ),
-                                                                new Statements(
-                                                                        new ExpressionStatement(new MethodInvocationExpression(
-                                                                                PrimitiveType.TYPE_VOID,
-                                                                                new FieldReferenceExpression(
-                                                                                        printStreamType,
-                                                                                        new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
-                                                                                        "java/lang/System",
-                                                                                        "out",
-                                                                                        "Ljava/io/PrintStream;"
-                                                                                ),
-                                                                                "java/io/PrintStream",
-                                                                                "println",
-                                                                                "(Ljava/lang/String;)V",
-                                                                                new StringConstantExpression("Usage: java Planet <earth_weight>")
-                                                                        )),
-                                                                        new ExpressionStatement(new MethodInvocationExpression(
-                                                                                PrimitiveType.TYPE_VOID,
-                                                                                new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
-                                                                                "java/lang/System",
-                                                                                "exit",
-                                                                                "(I)V",
-                                                                                new IntegerConstantExpression(PrimitiveType.TYPE_INT, -1)
-                                                                        ))
-                                                                )
-                                                        ),
-                                                        new LocalVariableDeclarationStatement(
-                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                new LocalVariableDeclarator("earthWeight", new ExpressionVariableInitializer(
-                                                                        new MethodInvocationExpression(
-                                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                                new ObjectTypeReferenceExpression(new ObjectType("java/lang/Double", "java.lang.Double", "Double")),
-                                                                                "java/lang/Double",
-                                                                                "parseDouble",
-                                                                                "(Ljava/lang/String;)D",
-                                                                                new ArrayExpression(
-                                                                                        new LocalVariableReferenceExpression(arrayOfStringType, "args"),
-                                                                                        new IntegerConstantExpression(PrimitiveType.TYPE_INT, 0)
-                                                                                )
-                                                                        )
-                                                                ))
-                                                        ),
-                                                        new LocalVariableDeclarationStatement(
-                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                new LocalVariableDeclarator("mass", new ExpressionVariableInitializer(
-                                                                        new BinaryOperatorExpression(
-                                                                                0,
-                                                                                PrimitiveType.TYPE_DOUBLE,
-                                                                                new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "earthWeight"),
-                                                                                "/",
-                                                                                new MethodInvocationExpression(
-                                                                                        PrimitiveType.TYPE_DOUBLE,
-                                                                                        new FieldReferenceExpression(
-                                                                                                planetType,
-                                                                                                new ObjectTypeReferenceExpression(new ObjectType("org/jd/core/v1/service/test/Planet", "org.jd.core.v1.service.test.Planet", "Planet")),
-                                                                                                "org/jd/core/v1/service/test/Planet",
-                                                                                                "EARTH",
-                                                                                                "org/jd/core/v1/service/test/Planet"),
-                                                                                        "org/jd/core/v1/service/test/Planet",
-                                                                                        "surfaceGravity",
-                                                                                        "()D"
-                                                                                ),
-                                                                                4
-                                                                        )
-                                                                ))
-                                                        ),
-                                                        new ForEachStatement(
-                                                                planetType,
-                                                                "p",
-                                                                new MethodInvocationExpression(
-                                                                        planetType,
-                                                                        new ObjectTypeReferenceExpression(new ObjectType("org/jd/core/v1/service/test/Planet", "org.jd.core.v1.service.test.Planet", "Planet")),
-                                                                        "org/jd/core/v1/service/test/Planet",
-                                                                        "values",
-                                                                        "()[Lorg/jd/core/v1/service/test/Planet;"),
-                                                                new ExpressionStatement(new MethodInvocationExpression(
-                                                                        PrimitiveType.TYPE_VOID,
-                                                                        new FieldReferenceExpression(
-                                                                                printStreamType,
-                                                                                new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
-                                                                                "java/lang/System",
-                                                                                "out",
-                                                                                "Ljava/io/PrintStream;"
-                                                                        ),
-                                                                        "java/io/PrintStream",
-                                                                        "printf",
-                                                                        "(Ljava/lang/String;[Ljava/lang/Object;)V",
-                                                                        new Expressions(
-                                                                                new StringConstantExpression("Your weight on %s is %f%n"),
-                                                                                new LocalVariableReferenceExpression(planetType, "p"),
-                                                                                new MethodInvocationExpression(
-                                                                                        PrimitiveType.TYPE_DOUBLE,
-                                                                                        new LocalVariableReferenceExpression(planetType, "p"),
-                                                                                        "org/jd/core/v1/service/test/Planet",
-                                                                                        "surfaceWeight",
-                                                                                        "(D)D",
-                                                                                        new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "mass")
-                                                                                )
-                                                                        )
-                                                                ))
-                                                        )
-                                                )
-                                        )
-                                )
+            new EnumDeclaration(
+                EnumDeclaration.FLAG_PUBLIC,
+                "org/jd/core/v1/service/test/Planet",
+                "Planet",
+                Arrays.asList(
+                    new EnumDeclaration.Constant(
+                        "MERCURY",
+                        new Expressions(
+                            new DoubleConstantExpression(3.303e+23),
+                            new DoubleConstantExpression(2.4397e6)
                         )
+                    ),
+                    new EnumDeclaration.Constant(
+                        "VENUS",
+                        new Expressions(
+                            new DoubleConstantExpression(4.869e+24),
+                            new DoubleConstantExpression(6.0518e6)
+                        )
+                    ),
+                    new EnumDeclaration.Constant(
+                        "EARTH",
+                        new Expressions(
+                            new DoubleConstantExpression(5.976e+24),
+                            new DoubleConstantExpression(6.37814e6)
+                        )
+                    )
+                ),
+                new BodyDeclaration(
+                    "org/jd/core/v1/service/test/Planet",
+                    new MemberDeclarations(
+                        new FieldDeclaration(FieldDeclaration.FLAG_PRIVATE | FieldDeclaration.FLAG_FINAL, PrimitiveType.TYPE_DOUBLE, new FieldDeclarator("mass")),
+                        new FieldDeclaration(FieldDeclaration.FLAG_PRIVATE | FieldDeclaration.FLAG_FINAL, PrimitiveType.TYPE_DOUBLE, new FieldDeclarator("radius")),
+                        new ConstructorDeclaration(
+                            0,
+                            new FormalParameters(
+                                new FormalParameter(PrimitiveType.TYPE_DOUBLE, "mass"),
+                                new FormalParameter(PrimitiveType.TYPE_DOUBLE, "radius")
+                            ),
+                            "(DD)V",
+                            new Statements(
+                                new ExpressionStatement(new BinaryOperatorExpression(
+                                    0,
+                                    PrimitiveType.TYPE_DOUBLE,
+                                    new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "mass", "D"),
+                                    "=",
+                                    new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "mass"),
+                                    16
+                                )),
+                                new ExpressionStatement(new BinaryOperatorExpression(
+                                    0,
+                                    PrimitiveType.TYPE_DOUBLE,
+                                    new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"),
+                                    "=",
+                                    new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "radius"),
+                                    16
+                                ))
+                            )
+                        ),
+                        new MethodDeclaration(
+                            MethodDeclaration.FLAG_PRIVATE,
+                            "mass",
+                            PrimitiveType.TYPE_DOUBLE,
+                            "()D",
+                            new ReturnExpressionStatement(new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "mass", "D"))
+                        ),
+                        new MethodDeclaration(
+                            MethodDeclaration.FLAG_PRIVATE,
+                            "radius",
+                            PrimitiveType.TYPE_DOUBLE,
+                            "()D",
+                            new ReturnExpressionStatement(new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"))
+                        ),
+                        new FieldDeclaration(
+                            FieldDeclaration.FLAG_PUBLIC | FieldDeclaration.FLAG_STATIC | FieldDeclaration.FLAG_FINAL,
+                            PrimitiveType.TYPE_DOUBLE,
+                            new FieldDeclarator("G", new ExpressionVariableInitializer(new DoubleConstantExpression(6.67300E-11)))
+                        ),
+                        new MethodDeclaration(
+                            0,
+                            "surfaceGravity",
+                            PrimitiveType.TYPE_DOUBLE,
+                            "()D",
+                            new ReturnExpressionStatement(
+                                new BinaryOperatorExpression(
+                                    0,
+                                    PrimitiveType.TYPE_DOUBLE,
+                                    new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "G", "D"),
+                                    "*",
+                                    new BinaryOperatorExpression(
+                                        0,
+                                        PrimitiveType.TYPE_DOUBLE,
+                                        new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "mass", "D"),
+                                        "/",
+                                        new ParenthesesExpression(new BinaryOperatorExpression(
+                                            0,
+                                            PrimitiveType.TYPE_DOUBLE,
+                                            new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"),
+                                            "*",
+                                            new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"),
+                                            4
+                                        )),
+                                        4
+                                    ),
+                                    4
+                                )
+                            )
+                        ),
+                        new MethodDeclaration(
+                            0,
+                            "surfaceWeight",
+                            PrimitiveType.TYPE_DOUBLE,
+                            new FormalParameter(PrimitiveType.TYPE_DOUBLE, "otherMass"),
+                            "(D)D",
+                            new ReturnExpressionStatement(
+                                new BinaryOperatorExpression(
+                                    0,
+                                    PrimitiveType.TYPE_DOUBLE,
+                                    new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "otherMass"),
+                                    "*",
+                                    new MethodInvocationExpression(
+                                        PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "surfaceGravity", "()D"
+                                    ),
+                                    4
+                                )
+                            )
+                        ),
+                        new MethodDeclaration(
+                            MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
+                            "surfaceWeight",
+                            PrimitiveType.TYPE_VOID,
+                            new FormalParameter(arrayOfStringType, "args"),
+                            "([Ljava/lan/String;)V",
+                            new Statements(
+                                new IfStatement(
+                                    new BinaryOperatorExpression(
+                                        0,
+                                        PrimitiveType.TYPE_BOOLEAN,
+                                        new LengthExpression(new LocalVariableReferenceExpression(arrayOfStringType, "args")),
+                                        "!=",
+                                        new IntegerConstantExpression(PrimitiveType.TYPE_INT, 1),
+                                        9
+                                    ),
+                                    new Statements(
+                                        new ExpressionStatement(new MethodInvocationExpression(
+                                            PrimitiveType.TYPE_VOID,
+                                            new FieldReferenceExpression(
+                                                printStreamType,
+                                                new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
+                                                "java/lang/System",
+                                                "out",
+                                                "Ljava/io/PrintStream;"
+                                            ),
+                                            "java/io/PrintStream",
+                                            "println",
+                                            "(Ljava/lang/String;)V",
+                                            new StringConstantExpression("Usage: java Planet <earth_weight>")
+                                        )),
+                                        new ExpressionStatement(new MethodInvocationExpression(
+                                            PrimitiveType.TYPE_VOID,
+                                            new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
+                                            "java/lang/System",
+                                            "exit",
+                                            "(I)V",
+                                            new IntegerConstantExpression(PrimitiveType.TYPE_INT, -1)
+                                        ))
+                                    )
+                                ),
+                                new LocalVariableDeclarationStatement(
+                                    PrimitiveType.TYPE_DOUBLE,
+                                    new LocalVariableDeclarator("earthWeight", new ExpressionVariableInitializer(
+                                        new MethodInvocationExpression(
+                                            PrimitiveType.TYPE_DOUBLE,
+                                            new ObjectTypeReferenceExpression(new ObjectType("java/lang/Double", "java.lang.Double", "Double")),
+                                            "java/lang/Double",
+                                            "parseDouble",
+                                            "(Ljava/lang/String;)D",
+                                            new ArrayExpression(
+                                                new LocalVariableReferenceExpression(arrayOfStringType, "args"),
+                                                new IntegerConstantExpression(PrimitiveType.TYPE_INT, 0)
+                                            )
+                                        )
+                                    ))
+                                ),
+                                new LocalVariableDeclarationStatement(
+                                    PrimitiveType.TYPE_DOUBLE,
+                                    new LocalVariableDeclarator("mass", new ExpressionVariableInitializer(
+                                        new BinaryOperatorExpression(
+                                            0,
+                                            PrimitiveType.TYPE_DOUBLE,
+                                            new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "earthWeight"),
+                                            "/",
+                                            new MethodInvocationExpression(
+                                                PrimitiveType.TYPE_DOUBLE,
+                                                new FieldReferenceExpression(
+                                                    planetType,
+                                                    new ObjectTypeReferenceExpression(new ObjectType("org/jd/core/v1/service/test/Planet", "org.jd.core.v1.service.test.Planet", "Planet")),
+                                                    "org/jd/core/v1/service/test/Planet",
+                                                    "EARTH",
+                                                    "org/jd/core/v1/service/test/Planet"),
+                                                "org/jd/core/v1/service/test/Planet",
+                                                "surfaceGravity",
+                                                "()D"
+                                            ),
+                                            4
+                                        )
+                                    ))
+                                ),
+                                new ForEachStatement(
+                                    planetType,
+                                    "p",
+                                    new MethodInvocationExpression(
+                                        planetType,
+                                        new ObjectTypeReferenceExpression(new ObjectType("org/jd/core/v1/service/test/Planet", "org.jd.core.v1.service.test.Planet", "Planet")),
+                                        "org/jd/core/v1/service/test/Planet",
+                                        "values",
+                                        "()[Lorg/jd/core/v1/service/test/Planet;"),
+                                    new ExpressionStatement(new MethodInvocationExpression(
+                                        PrimitiveType.TYPE_VOID,
+                                        new FieldReferenceExpression(
+                                            printStreamType,
+                                            new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
+                                            "java/lang/System",
+                                            "out",
+                                            "Ljava/io/PrintStream;"
+                                        ),
+                                        "java/io/PrintStream",
+                                        "printf",
+                                        "(Ljava/lang/String;[Ljava/lang/Object;)V",
+                                        new Expressions(
+                                            new StringConstantExpression("Your weight on %s is %f%n"),
+                                            new LocalVariableReferenceExpression(planetType, "p"),
+                                            new MethodInvocationExpression(
+                                                PrimitiveType.TYPE_DOUBLE,
+                                                new LocalVariableReferenceExpression(planetType, "p"),
+                                                "org/jd/core/v1/service/test/Planet",
+                                                "surfaceWeight",
+                                                "(D)D",
+                                                new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "mass")
+                                            )
+                                        )
+                                    ))
+                                )
+                            )
+                        )
+                    )
                 )
+            )
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
@@ -540,47 +540,47 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
     @Test
     public void testSwitch() throws Exception {
         CompilationUnit compilationUnit = new CompilationUnit(
-                new ClassDeclaration(
-                        ClassDeclaration.FLAG_PUBLIC,
-                        "org/jd/core/v1/service/test/SwitchTest",
-                        "SwitchTest",
-                        new BodyDeclaration(
-                                "org/jd/core/v1/service/test/SwitchTest",
-                                new MethodDeclaration(
-                                        MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
-                                        "translate",
-                                        PrimitiveType.TYPE_INT,
-                                        new FormalParameter(PrimitiveType.TYPE_INT, "i"),
-                                        "(I)Ljava/lang/String;",
-                                        new SwitchStatement(
-                                                new LocalVariableReferenceExpression(PrimitiveType.TYPE_INT, "i"),
-                                                Arrays.asList(
-                                                        (SwitchStatement.Block)new SwitchStatement.LabelBlock(
-                                                                new SwitchStatement.ExpressionLabel(new IntegerConstantExpression(PrimitiveType.TYPE_INT, 0)),
-                                                                new Statements(
-                                                                        new LocalVariableDeclarationStatement(
-                                                                                ObjectType.TYPE_STRING,
-                                                                                new LocalVariableDeclarator("zero", new ExpressionVariableInitializer(new StringConstantExpression("zero")))
-                                                                        ),
-                                                                        new ReturnExpressionStatement(new LocalVariableReferenceExpression(ObjectType.TYPE_STRING, "zero"))
-                                                                )
-                                                        ),
-                                                        new SwitchStatement.MultiLabelsBlock(
-                                                                Arrays.asList(
-                                                                        (SwitchStatement.Label)new SwitchStatement.ExpressionLabel(new IntegerConstantExpression(PrimitiveType.TYPE_INT, 1)),
-                                                                        new SwitchStatement.ExpressionLabel(new IntegerConstantExpression(PrimitiveType.TYPE_INT, 2))
-                                                                ),
-                                                                new ReturnExpressionStatement(new StringConstantExpression("one or two"))
-                                                        ),
-                                                        new SwitchStatement.LabelBlock(
-                                                                SwitchStatement.DEFAULT_LABEL,
-                                                                new ReturnExpressionStatement(new StringConstantExpression("other"))
-                                                        )
-                                                )
-                                        )
+            new ClassDeclaration(
+                ClassDeclaration.FLAG_PUBLIC,
+                "org/jd/core/v1/service/test/SwitchTest",
+                "SwitchTest",
+                new BodyDeclaration(
+                    "org/jd/core/v1/service/test/SwitchTest",
+                    new MethodDeclaration(
+                        MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
+                        "translate",
+                        PrimitiveType.TYPE_INT,
+                        new FormalParameter(PrimitiveType.TYPE_INT, "i"),
+                        "(I)Ljava/lang/String;",
+                        new SwitchStatement(
+                            new LocalVariableReferenceExpression(PrimitiveType.TYPE_INT, "i"),
+                            Arrays.asList(
+                                (SwitchStatement.Block)new SwitchStatement.LabelBlock(
+                                    new SwitchStatement.ExpressionLabel(new IntegerConstantExpression(PrimitiveType.TYPE_INT, 0)),
+                                    new Statements(
+                                        new LocalVariableDeclarationStatement(
+                                            ObjectType.TYPE_STRING,
+                                            new LocalVariableDeclarator("zero", new ExpressionVariableInitializer(new StringConstantExpression("zero")))
+                                        ),
+                                        new ReturnExpressionStatement(new LocalVariableReferenceExpression(ObjectType.TYPE_STRING, "zero"))
+                                    )
+                                ),
+                                new SwitchStatement.MultiLabelsBlock(
+                                    Arrays.asList(
+                                        (SwitchStatement.Label)new SwitchStatement.ExpressionLabel(new IntegerConstantExpression(PrimitiveType.TYPE_INT, 1)),
+                                        new SwitchStatement.ExpressionLabel(new IntegerConstantExpression(PrimitiveType.TYPE_INT, 2))
+                                    ),
+                                    new ReturnExpressionStatement(new StringConstantExpression("one or two"))
+                                ),
+                                new SwitchStatement.LabelBlock(
+                                    SwitchStatement.DEFAULT_LABEL,
+                                    new ReturnExpressionStatement(new StringConstantExpression("other"))
                                 )
+                            )
                         )
+                    )
                 )
+            )
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
@@ -610,33 +610,33 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
     @Test
     public void testBridgeAndSyntheticAttributes() throws Exception {
         CompilationUnit compilationUnit = new CompilationUnit(
-                new ClassDeclaration(
-                        ClassDeclaration.FLAG_PUBLIC,
-                        "org/jd/core/v1/service/test/SyntheticAttributeTest",
-                        "SyntheticAttributeTest",
-                        new BodyDeclaration(
-                                "org/jd/core/v1/service/test/SyntheticAttributeTest",
-                                new MemberDeclarations(
-                                        new FieldDeclaration(
-                                                FieldDeclaration.FLAG_PUBLIC|FieldDeclaration.FLAG_BRIDGE,
-                                                PrimitiveType.TYPE_INT,
-                                                new FieldDeclarator("i")
-                                        ),
-                                        new MethodDeclaration(
-                                                MethodDeclaration.FLAG_PUBLIC|MethodDeclaration.FLAG_BRIDGE,
-                                                "testBridgeAttribute",
-                                                PrimitiveType.TYPE_VOID,
-                                                "()V"
-                                        ),
-                                        new MethodDeclaration(
-                                                MethodDeclaration.FLAG_PUBLIC|MethodDeclaration.FLAG_SYNTHETIC,
-                                                "testSyntheticAttribute",
-                                                PrimitiveType.TYPE_VOID,
-                                                "()V"
-                                        )
-                                )
+            new ClassDeclaration(
+                ClassDeclaration.FLAG_PUBLIC,
+                "org/jd/core/v1/service/test/SyntheticAttributeTest",
+                "SyntheticAttributeTest",
+                new BodyDeclaration(
+                    "org/jd/core/v1/service/test/SyntheticAttributeTest",
+                    new MemberDeclarations(
+                        new FieldDeclaration(
+                            FieldDeclaration.FLAG_PUBLIC|FieldDeclaration.FLAG_BRIDGE,
+                            PrimitiveType.TYPE_INT,
+                            new FieldDeclarator("i")
+                        ),
+                        new MethodDeclaration(
+                            MethodDeclaration.FLAG_PUBLIC|MethodDeclaration.FLAG_BRIDGE,
+                            "testBridgeAttribute",
+                            PrimitiveType.TYPE_VOID,
+                            "()V"
+                        ),
+                        new MethodDeclaration(
+                            MethodDeclaration.FLAG_PUBLIC|MethodDeclaration.FLAG_SYNTHETIC,
+                            "testSyntheticAttribute",
+                            PrimitiveType.TYPE_VOID,
+                            "()V"
                         )
+                    )
                 )
+            )
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
