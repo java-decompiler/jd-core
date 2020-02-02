@@ -29,7 +29,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ClassFileToJavaSourceTest extends TestCase {
@@ -1682,12 +1681,10 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
 
-    @Test
     protected String decompile(Loader loader, Printer printer, String internalTypeName) throws Exception {
         return decompile(loader, printer, internalTypeName, Collections.emptyMap());
     }
 
-    @Test
     protected String decompile(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
         Message message = new Message();
         message.setHeader("loader", loader);
