@@ -576,40 +576,40 @@ public class ByteCodeParser {
                     stack.push(new CastExpression(lineNumber, TYPE_DOUBLE, stack.pop(), false));
                     break;
                 case 136: // L2I
-                    stack.push(new CastExpression(lineNumber, TYPE_INT, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_INT, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 137: // L2F
-                    stack.push(new CastExpression(lineNumber, TYPE_FLOAT, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_FLOAT, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 138: // L2D
                     stack.push(new CastExpression(lineNumber, TYPE_DOUBLE, stack.pop(), false));
                     break;
                 case 139: // F2I
-                    stack.push(new CastExpression(lineNumber, TYPE_INT, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_INT, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 140: // F2L
-                    stack.push(new CastExpression(lineNumber, TYPE_LONG, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_LONG, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 141: // F2D
                     stack.push(new CastExpression(lineNumber, TYPE_DOUBLE, stack.pop(), false));
                     break;
                 case 142: // D2I
-                    stack.push(new CastExpression(lineNumber, TYPE_INT, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_INT, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 143: // D2L
-                    stack.push(new CastExpression(lineNumber, TYPE_LONG, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_LONG, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 144: // D2F
-                    stack.push(new CastExpression(lineNumber, TYPE_FLOAT, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_FLOAT, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 145: // I2B
-                    stack.push(new CastExpression(lineNumber, TYPE_BYTE, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_BYTE, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 146: // I2C
-                    stack.push(new CastExpression(lineNumber, TYPE_CHAR, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_CHAR, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 147: // I2S
-                    stack.push(new CastExpression(lineNumber, TYPE_SHORT, stack.pop()));
+                    stack.push(new CastExpression(lineNumber, TYPE_SHORT, forceExplicitCastExpression(stack.pop())));
                     break;
                 case 148: case 149: case 150: case 151: case 152: // LCMP, FCMPL, FCMPG, DCMPL, DCMPG
                     expression2 = stack.pop();
@@ -829,7 +829,7 @@ public class ByteCodeParser {
                     } else {
                         searchFirstLineNumberVisitor.init();
                         expression1.accept(searchFirstLineNumberVisitor);
-                        stack.push(new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, stack.pop()));
+                        stack.push(new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, forceExplicitCastExpression(stack.pop())));
                     }
                     break;
                 case 193: // INSTANCEOF
@@ -2914,5 +2914,18 @@ public class ByteCodeParser {
         }
 
         return parameterTypes;
+    }
+
+    protected static Expression forceExplicitCastExpression(Expression expression) {
+        // In case of downcasting, set all cast expression children as explicit to prevent missing castings
+        Expression exp = expression;
+
+        while (exp.getClass() == CastExpression.class) {
+            CastExpression ce = (CastExpression)exp;
+            ce.setExplicit(true);
+            exp = ce.getExpression();
+        }
+
+        return expression;
     }
 }

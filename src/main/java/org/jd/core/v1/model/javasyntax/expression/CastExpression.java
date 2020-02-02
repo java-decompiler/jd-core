@@ -43,6 +43,10 @@ public class CastExpression extends AbstractLineNumberTypeExpression {
         return explicit;
     }
 
+    public void setExplicit(boolean explicit) {
+        this.explicit = explicit;
+    }
+
     @Override
     public int getPriority() {
         return 3;
