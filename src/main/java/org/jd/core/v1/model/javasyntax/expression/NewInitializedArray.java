@@ -29,7 +29,7 @@ public class NewInitializedArray extends AbstractLineNumberTypeExpression {
 
     @Override
     public int getPriority() {
-        return 3;
+        return 0;
     }
 
     @Override

@@ -49,7 +49,7 @@ public class NewExpression extends AbstractLineNumberExpression {
 
     @Override
     public int getPriority() {
-        return 3;
+        return 0;
     }
 
     public String getDescriptor() {

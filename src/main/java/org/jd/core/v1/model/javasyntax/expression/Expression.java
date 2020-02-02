@@ -11,6 +11,7 @@ import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 /* Priority  Operator   Operation                              Order of Evaluation
+ * 0         new        Object creation
  * 1         [ ]        Array index                            Left to Right
  *           ()         Method call
  *           .          Member access
@@ -22,7 +23,6 @@ import org.jd.core.v1.model.javasyntax.type.Type;
  *           ~          Bitwise NOT
  *           !          Boolean (logical) NOT
  * 3         (type)     Type cast                              Right to Left
- *           new        Object creation
  * 4         +          String concatenation                   Left to Right
  * 5         * / %      Multiplication, division, remainder    Left to Right
  * 6         + -        Addition, subtraction                  Left to Right

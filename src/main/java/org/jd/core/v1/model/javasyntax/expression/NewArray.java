@@ -27,7 +27,7 @@ public class NewArray extends AbstractLineNumberTypeExpression {
 
     @Override
     public int getPriority() {
-        return 3;
+        return 0;
     }
 
     @Override
