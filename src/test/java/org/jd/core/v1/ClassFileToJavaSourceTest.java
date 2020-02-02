@@ -9,6 +9,7 @@ package org.jd.core.v1;
 
 import junit.framework.TestCase;
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
@@ -45,26 +46,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Basic";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("serialVersionUID = 9506606333927794L;") != -1);
@@ -121,7 +104,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("<init>()") == -1);
         assertTrue(source.indexOf("NaND") == -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -132,24 +114,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Basic";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0-no-debug-info.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("System.out.println(\"hello\");")));
@@ -171,7 +136,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.indexOf("<init>()") == -1);
         assertTrue(source.indexOf("NaND") == -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -182,24 +146,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Constructors";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(": 28 */", "this.short123 = 1;")));
@@ -211,8 +158,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 38 */", "this.int78 = int78;")));
         assertTrue(source.matches(PatternMaker.make(": 39 */", "this.short123 = 3;")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -222,26 +167,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/IfElse";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("/*  12:  12 */", "if (this == null)")));
@@ -273,8 +200,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/* 172: 172 */", "if ((i == 1 || (i == 5 && i == 6 && i == 7) || i == 8 || (i == 9 && i == 10 && i == 11)) && (i == 4 || i % 200 > 50) && (i > 3 || i > 4))")));
         assertTrue(source.matches(PatternMaker.make("/* 184: 184 */", "if ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4))")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -284,28 +209,10 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Interface";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("public interface Interface", "extends Serializable")));
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -316,26 +223,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/While";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  15 */", "while (i-- > 0)")));
@@ -352,8 +241,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertFalse(source.matches(PatternMaker.make("[ 350: 348 */", "continue;")));
         assertTrue(source.matches(PatternMaker.make("/* 404: 404 */", "System.out.println(\"a\");")));
         assertTrue(source.matches(PatternMaker.make("/* 431: 431 */", "System.out.println(\"a\");")));
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -364,26 +251,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/While";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  15 */", "while (i-- > 0)")));
@@ -400,8 +269,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertFalse(source.matches(PatternMaker.make("[ 350: 348 */", "continue;")));
         assertTrue(source.matches(PatternMaker.make("/* 404: 404 */", "System.out.println(\"a\");")));
         assertTrue(source.matches(PatternMaker.make("/* 431: 431 */", "System.out.println(\"a\");")));
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
@@ -412,26 +279,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/While";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-10.0.2.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  15 */", "while (i-- > 0)")));
@@ -449,8 +298,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/* 404: 404 */", "System.out.println(\"a\");")));
         assertTrue(source.matches(PatternMaker.make("/* 431: 431 */", "System.out.println(\"a\");")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -460,24 +307,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/DoWhile";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  24 */", "} while (i < 10);")));
@@ -491,8 +321,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 108 */", "while (i-- > 0.0F);")));
         assertTrue(source.indexOf("while ((i == 1 || (i == 5 && i == 6 && i == 7) || i == 8 || (i == 9 && i == 10 && i == 11)) && (i == 4 || i % 200 > 50) && (i > 3 || i > 4));") != -1);
         assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));") != -1);
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -503,24 +331,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/DoWhile";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  24 */", "} while (i < 10);")));
@@ -534,8 +345,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 108 */", "while (i-- > 0.0F);")));
         assertTrue(source.indexOf("while ((i == 1 || (i == 5 && i == 6 && i == 7) || i == 8 || (i == 9 && i == 10 && i == 11)) && (i == 4 || i % 200 > 50) && (i > 3 || i > 4));") != -1);
         assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));") != -1);
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
@@ -546,24 +355,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/DoWhile";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-10.0.2.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  24 */", "} while (i < 10);")));
@@ -578,8 +370,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("while ((i == 1 || (i == 5 && i == 6 && i == 7) || i == 8 || (i == 9 && i == 10 && i == 11)) && (i == 4 || i % 200 > 50) && (i > 3 || i > 4));") != -1);
         assertTrue(source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));") != -1);
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -589,26 +379,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/BreakContinue";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("/*  15:  15 */", "if (i == 1)")));
@@ -640,8 +412,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/* 155:   0 */", "label16:", "do {")));
         assertTrue(source.matches(PatternMaker.make("/* 162:   0 */", "break label16;")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -651,26 +421,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/For";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  20 */", "for (int i = 0; i < 10; i++)")));
@@ -721,7 +473,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 411 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
 
         assertTrue(source.indexOf("/* 524: 524 */") != -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -732,24 +483,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/For";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0-no-debug-info.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("for (byte b = 0; b < 10; b++)")));
@@ -761,8 +495,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("for (String str : paramArrayOfString)")));
         assertTrue(source.matches(PatternMaker.make("for (String str : paramList)")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         //assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -772,26 +504,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/For";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  20 */", "for (byte b = 0; b < 10; b++)")));
@@ -805,8 +519,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 411 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
         assertTrue(source.matches(PatternMaker.make(": 427 */", "for (byte b = 0; b < 3; b++)")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -816,26 +528,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/For";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.6.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  20 */", "for (int i = 0; i < 10; i++)")));
@@ -849,8 +543,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 411 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
         assertTrue(source.matches(PatternMaker.make(": 427 */", "for (int i = 0; i < 3; i++)")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.6", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -860,26 +552,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/For";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-ibm-j9_vm.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  88 */", "while (i < 10)")));
@@ -892,8 +566,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 411 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
         assertTrue(source.matches(PatternMaker.make(": 427 */", "for (int i = 0; i < 3; i++)")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -903,28 +575,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Array";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        HashMap<String, Object> configuration = new HashMap<>();
-
-        configuration.put("realignLineNumbers", Boolean.FALSE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.FALSE);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(": 12 */", "int[] i1 = new int[1];")));
@@ -941,8 +593,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][]", "{ { 1 } ,")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -952,28 +602,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Array";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        HashMap<String, Object> configuration = new HashMap<>();
-
-        configuration.put("realignLineNumbers", Boolean.FALSE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.FALSE);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(": 13 */", "int[][] arrayOfInt1 = new int[1][];")));
@@ -986,8 +616,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][] { { 1,")));
         assertTrue(source.matches(PatternMaker.make(": 75 */", "testInt3(new int[][][] { { { 0, 1")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -997,26 +625,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Assert";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("/* 16: 16 */", "assert false : \"false\";")));
@@ -1027,8 +637,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.matches(PatternMaker.make("/* 41: 41 */", "assert check() : \"boom\";")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1038,26 +646,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Assert";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("/* 16: 16 */", "assert false : \"false\";")));
@@ -1068,8 +658,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.matches(PatternMaker.make("/* 41: 41 */", "assert check() : \"boom\";")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1079,26 +667,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/AnonymousClass";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  21 */", "Object object = new Object()")));
@@ -1121,14 +691,13 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("/* 111: 111 */") != -1);
 
         assertTrue(source.indexOf("{ ;") == -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile(
                 "1.5",
                 new JavaSourceFileObject(internalClassName, source),
                 new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
-                ));
+            ));
     }
 
     @Test
@@ -1136,26 +705,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Switch";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("/*  15:  15 */", "switch (i)")));
@@ -1191,8 +742,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/* 286:   0 */", "break;")));
         assertTrue(source.matches(PatternMaker.make("/* 288:   0 */", "default:")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1202,26 +751,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/AdvancedSwitch";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("/* 13: 13 */", "A,", "B,", "C;")));
@@ -1243,8 +774,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/* 79:  0 */", "case \"POe\":")));
         assertTrue(source.matches(PatternMaker.make("/* 80: 80 */", "System.out.println(\"'One' or 'POe'\");")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1254,30 +783,11 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Switch";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-eclipse-java-compiler-3.2.1.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("/* 239: 239 */") != -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
@@ -1288,30 +798,11 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Switch";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-eclipse-java-compiler-3.13.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("/* 239: 239 */") != -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
@@ -1322,24 +813,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TernaryOperator";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.1.8.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  13 */", "this.str =")));
@@ -1357,8 +831,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 148 */", "if (s1 == s2 || ((s1 == null) ? (s2 == null) : s1.equals(s2)) || s1 == s2)")));
         assertTrue(source.matches(PatternMaker.make(": 157 */", "return Short.toString((short)((this == null) ? 1 : 2));")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.3", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1368,24 +840,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TernaryOperator";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  13 */", "this.str = (s == null) ? \"1\" : \"2\";")));
@@ -1400,8 +855,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 148 */", "if (s1 == s2 || ((s1 == null) ? (s2 == null) : s1.equals(s2)) || s1 == s2)")));
         assertTrue(source.matches(PatternMaker.make(": 157 */", "return Short.toString((short)((this == null) ? 1 : 2));")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1411,26 +864,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TryWithResources";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  12 */", "try (FileInputStream input = new FileInputStream(path))")));
@@ -1454,7 +889,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 162 */", "return 3;")));
 
         assertTrue(source.indexOf("/* 162: 162 */") != -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -1465,26 +899,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TryWithResources";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.8.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  12 */", "try (FileInputStream input = new FileInputStream(path))")));
@@ -1508,7 +924,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 162 */", "return 3;")));
 
         assertTrue(source.indexOf("/* 162: 162 */") != -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
@@ -1519,24 +934,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Synchronized";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  11 */", "synchronized (paramStringBuilder)")));
@@ -1558,8 +956,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(":  95 */", "synchronized (s)")));
         assertTrue(source.matches(PatternMaker.make(":  97 */", "return subContentEquals(s);")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1569,26 +965,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TryCatchFinally";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-eclipse-java-compiler-3.2.1.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("catch (RuntimeException runtimeexception)") != -1);
@@ -1607,8 +985,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("RuntimeException runtimeexception4;") == -1);
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
 
@@ -1621,26 +997,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TryCatchFinally";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-eclipse-java-compiler-3.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("catch (RuntimeException runtimeException)") != -1);
@@ -1671,8 +1029,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("RuntimeException runtimeexception4;") == -1);
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1682,26 +1038,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TryCatchFinally";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-eclipse-java-compiler-3.13.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("catch (RuntimeException runtimeException)") != -1);
@@ -1731,8 +1069,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("RuntimeException runtimeexception4;") == -1);
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1742,26 +1078,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TryCatchFinally";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.1.8.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("catch (RuntimeException runtimeexception)") != -1);
@@ -1791,8 +1109,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("RuntimeException runtimeexception4;") == -1);
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.3", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1802,26 +1118,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TryCatchFinally";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.3.1.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("catch (RuntimeException runtimeexception)") != -1);
@@ -1847,8 +1145,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("RuntimeException runtimeexception4;") == -1);
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.3", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1858,26 +1154,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/TryCatchFinally";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("catch (RuntimeException runtimeexception)") != -1);
@@ -1910,8 +1188,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("RuntimeException runtimeexception4;") == -1);
         assertTrue(source.indexOf("Exception exception8;") == -1);
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -1921,24 +1197,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/AnnotatedClass";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        // PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.indexOf("@Quality(Quality.Level.HIGH)") != -1);
@@ -1955,8 +1214,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.indexOf("@Value(clazz = String.class)") != -1);
         assertTrue(source.indexOf("public void ping(@Deprecated Writer writer, @Deprecated @Value(str = \"localhost\") String host, long timeout)") != -1);
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile(
                 "1.7",
@@ -1965,7 +1222,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
                 new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String salutation() default \"\"; String value(); String last() default \"\";}"),
                 new JavaSourceFileObject("org/jd/core/test/annotation/Quality", "package org.jd.core.test.annotation; public @interface Quality {enum Level {LOW,MIDDLE,HIGH}; Level value();}"),
                 new JavaSourceFileObject("org/jd/core/test/annotation/Value", "package org.jd.core.test.annotation; public @interface Value {boolean z() default true; byte b() default 1; short s() default 1; int i() default 1; long l() default 1L; float f() default 1.0F; double d() default 1.0D; String str() default \"str\"; Class clazz() default Object.class;}")
-                ));
+            ));
     }
 
     @Test
@@ -1973,26 +1230,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/AnonymousClass";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        // PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  21 */", "Object obj = new Object()")));
@@ -2026,7 +1265,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
                 "1.7",
                 new JavaSourceFileObject(internalClassName, source),
                 new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
-                ));
+            ));
     }
 
     @Test
@@ -2034,26 +1273,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/GenericClass";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("public class GenericClass<T1, T2, T3 extends AnnotatedClass, T4 extends Serializable, T5 extends Serializable & Comparable, T6 extends AnnotatedClass & Serializable & Comparable<GenericClass>, T7 extends Map<?, ?>, T8 extends Map<? extends Number, ? super Serializable>, T9 extends T8>") != -1);
@@ -2073,7 +1294,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 104 */", "return (T1)this;")));
 
         assertTrue(source.indexOf("/* 104: 104 */") != -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile(
@@ -2088,38 +1308,19 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/annotation/Author";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("/*   3:   0 */", "public @interface Author")));
         assertTrue(source.matches(PatternMaker.make("/*   4:   0 */", "Name value();")));
         assertTrue(source.matches(PatternMaker.make("/*   6:   0 */", "Name[] contributors() default {};")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile(
                 "1.7",
                 new JavaSourceFileObject(internalClassName, source),
                 new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
-                ));
+            ));
     }
 
     @Test
@@ -2127,24 +1328,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/annotation/Value";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("/*   8:   0 */", "@Retention(RetentionPolicy.RUNTIME)")));
@@ -2155,8 +1339,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/*  25:   0 */", "String str() default \"str\";")));
         assertTrue(source.matches(PatternMaker.make("/*  27:   0 */", "Class clazz() default Object.class;")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -2166,27 +1348,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/OuterClass";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //ClassPathLoader loader = new ClassPathLoader();
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  10 */", "protected int outerField1 = 0;")));
@@ -2241,8 +1404,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         assertTrue(source.matches(PatternMaker.make("public class InnerInnerClass", "{", "}")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -2252,26 +1413,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Enum";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  5 */", "SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY;")));
@@ -2290,7 +1433,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 
         assertTrue(source.indexOf("public static final enum") == -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -2301,26 +1443,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Enum";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  5 */", "SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY;")));
@@ -2339,7 +1463,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 
         assertTrue(source.indexOf("public static final enum") == -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
@@ -2350,26 +1473,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Enum";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-10.0.2.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  5 */", "SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY;")));
@@ -2388,7 +1493,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 
         assertTrue(source.indexOf("public static final enum") == -1);
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
@@ -2399,26 +1503,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Basic";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.1.8.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  43 */", "Class class3 = String.class, class2 = class3, class1 = class2;")));
@@ -2427,8 +1513,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 128 */", "int int78 = getInt78(new Object[] { this }, (short)5);")));
         assertTrue(source.matches(PatternMaker.make("/* 173: 173 */", "return String.valueOf(str) + str;")));
         assertTrue(source.matches(PatternMaker.make("/* 176: 176 */", "return str;")));
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.3", new JavaSourceFileObject(internalClassName, source)));
@@ -2439,26 +1523,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Basic";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.4.2.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  18 */", "protected short short56 = 56;")));
@@ -2471,8 +1537,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/* 185: 185 */", "return ((Basic)objects[index]).int78;")));
         assertTrue(source.matches(PatternMaker.make("/* 188: 188 */", "protected static final Integer INTEGER_255 = new Integer(255);")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.4", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -2482,26 +1546,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Basic";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  18 */", "protected short short56 = 56;")));
@@ -2513,8 +1559,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/* 176: 176 */", "return str;")));
         assertTrue(source.matches(PatternMaker.make("/* 185: 185 */", "return ((Basic)objects[index]).int78;")));
         assertTrue(source.matches(PatternMaker.make("/* 188: 188 */", "protected static final Integer INTEGER_255 = new Integer(255);")));
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
@@ -2525,26 +1569,8 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Basic";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-10.0.2.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  18 */", "protected short short56 = 56;")));
@@ -2557,8 +1583,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make("/* 185: 185 */", "return ((Basic)objects[index]).int78;")));
         assertTrue(source.matches(PatternMaker.make("/* 188: 188 */", "protected static final Integer INTEGER_255 = new Integer(255);")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -2568,24 +1592,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/Lambda";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.8.0.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(": 16 */", "list.forEach(System.out::println);")));
@@ -2605,8 +1612,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 66 */", "MethodType mtSetter = MethodType.methodType(void.class, Object.class);")));
         assertTrue(source.matches(PatternMaker.make(": 67 */", "MethodType mtStringComparator = MethodType.methodType(int[].class, String.class, new Class<?>[]", "{ String.class")));
 
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
@@ -2616,24 +1621,7 @@ public class ClassFileToJavaSourceTest extends TestCase {
         String internalClassName = "org/jd/core/test/InterfaceWithDefaultMethods";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-9.0.1.zip");
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make("public interface InterfaceWithDefaultMethods")));
@@ -2649,8 +1637,6 @@ public class ClassFileToJavaSourceTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 36 */", "return ZoneId.of(zoneString);")));
         assertTrue(source.matches(PatternMaker.make("private ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId)")));
         assertTrue(source.matches(PatternMaker.make(": 40 */", "return ZonedDateTime.of(localDateTime, zoneId);")));
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         try {
@@ -2670,34 +1656,14 @@ public class ClassFileToJavaSourceTest extends TestCase {
         Class mainClass = com.google.common.collect.Collections2.class;
         InputStream is = new FileInputStream(Paths.get(mainClass.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile());
         Loader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
         assertTrue(source.indexOf("N resultLeft, resultRight;") != -1);
         assertTrue(source.indexOf("assert false;") == -1);
         assertTrue(source.matches(PatternMaker.make("/* 131:", "resultLeft = liftOriginalRoot.childOrNull(BstSide.LEFT);")));
         assertTrue(source.matches(PatternMaker.make("/* 134:", "case LEFT:")));
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
@@ -2706,15 +1672,27 @@ public class ClassFileToJavaSourceTest extends TestCase {
     @Test
     public void testAnnotationUtils() throws Exception {
         String internalClassName = "org/apache/commons/lang3/AnnotationUtils";
-        Loader loader = new ClassPathLoader();
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+        String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName, configuration);
 
+        // Check decompiled source code
+        assertTrue(source.indexOf("setDefaultFullDetail(true);") != -1);
+
+        // Recompile decompiled source code and check errors
+        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+    }
+
+    @Test
+    protected String decompile(Loader loader, Printer printer, String internalTypeName) throws Exception {
+        return decompile(loader, printer, internalTypeName, Collections.emptyMap());
+    }
+
+    @Test
+    protected String decompile(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
         Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalClassName);
         message.setHeader("loader", loader);
         message.setHeader("printer", printer);
+        message.setHeader("mainInternalTypeName", internalTypeName);
         message.setHeader("configuration", configuration);
 
         deserializer.process(message);
@@ -2728,13 +1706,9 @@ public class ClassFileToJavaSourceTest extends TestCase {
 
         printSource(source);
 
-        // Check decompiled source code
-        assertTrue(source.indexOf("setDefaultFullDetail(true);") != -1);
-
         assertTrue(source.indexOf("// Byte code:") == -1);
 
-        // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+        return source;
     }
 
     protected void printSource(String source) {
