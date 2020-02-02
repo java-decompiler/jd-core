@@ -16,7 +16,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class WriteTokenTest {
-
     public static final KeywordToken PACKAGE = new KeywordToken("package");
     public static final KeywordToken IF = new KeywordToken("if");
     public static final KeywordToken IMPORT = new KeywordToken("import");
