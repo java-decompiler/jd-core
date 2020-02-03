@@ -158,6 +158,8 @@ public class JarFileToJavaSourceTest extends TestCase {
                     String internalTypeName = path.substring(0, path.length() - 6); // 6 = ".class".length()
 
                     // TODO DEBUG if (!internalTypeName.endsWith("/Rule")) continue;
+                    //if (!internalTypeName.endsWith("/TypeUtils")) continue;
+                    if (!internalTypeName.endsWith("/Parameterized")) continue;
 
                     message.setHeader("mainInternalTypeName", internalTypeName);
                     printer.init();
