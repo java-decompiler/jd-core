@@ -328,6 +328,8 @@ public class StatementMaker {
                             // Pattern matched -> Multi-assignment
                             statements.removeLast();
                             expression = boe;
+                        } else if (expression.getClass() == NewArray.class) {
+                            expression = NewArrayMaker.make(statements, (NewArray)expression);
                         }
                     }
                 }

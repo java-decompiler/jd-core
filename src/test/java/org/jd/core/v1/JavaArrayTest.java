@@ -118,13 +118,13 @@ public class JavaArrayTest extends TestCase {
         String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(":  97 */", "return (i == 0) ? new Class<?>[] { Object.class } : null;")));
-        assertTrue(source.matches(PatternMaker.make(": 100 */", "return (i == 0) ? new Class<?>[] { Object.class, String.class, Number.class } : null;")));
-        assertTrue(source.matches(PatternMaker.make(": 103 */", "return (i == 0) ? new Class<?>[][] { { Object.class }, { String.class, Number.class} } : null;")));
-        assertTrue(source.matches(PatternMaker.make(": 106 */", "return (i == 0) ? null : new Class<?>[] { Object.class };")));
-        assertTrue(source.matches(PatternMaker.make(": 109 */", "return (i == 0) ? null : new Class<?>[] { Object.class, String.class, Number.class };")));
-        assertTrue(source.matches(PatternMaker.make(": 112 */", "return (i == 0) ? null : new Class<?>[][] { { Object.class }, { String.class, Number.class} };")));
-        assertTrue(source.matches(PatternMaker.make(": 115 */", "return (i == 0) ? new Class<?>[] { Object.class } : new Class<?>[] { String.class, Number.class };")));
+        assertTrue(source.matches(PatternMaker.make(":  95 */", "return (i == 0) ? new Class<?>[] { Object.class } : null;")));
+        assertTrue(source.matches(PatternMaker.make(":  98 */", "return (i == 0) ? new Class<?>[] { Object.class, String.class, Number.class } : null;")));
+        assertTrue(source.matches(PatternMaker.make(": 101 */", "return (i == 0) ? new Class[][] { { Object.class }, { String.class, Number.class} } : (Class[][])null;")));
+        assertTrue(source.matches(PatternMaker.make(": 104 */", "return (i == 0) ? null : new Class<?>[] { Object.class };")));
+        assertTrue(source.matches(PatternMaker.make(": 107 */", "return (i == 0) ? null : new Class<?>[] { Object.class, String.class, Number.class };")));
+        assertTrue(source.matches(PatternMaker.make(": 110 */", "return (i == 0) ? (Class[][])null : new Class[][] { { Object.class }, { String.class, Number.class} };")));
+        assertTrue(source.matches(PatternMaker.make(": 113 */", "return (i == 0) ? new Class<?>[] { Object.class } : new Class<?>[] { String.class, Number.class };")));
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
