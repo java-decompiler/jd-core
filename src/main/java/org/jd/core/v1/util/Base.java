@@ -25,7 +25,7 @@ public interface Base<T> extends Iterable<T> {
     }
 
     default DefaultList<T> getList() {
-        return (DefaultList<T>)this;
+        throw new UnsupportedOperationException();
     }
 
     default int size() {

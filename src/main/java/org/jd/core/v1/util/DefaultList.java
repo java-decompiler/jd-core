@@ -66,6 +66,10 @@ public class DefaultList<E> extends ArrayList<E> {
         return true;
     }
 
+    public DefaultList<E> getList() {
+        return this;
+    }
+
     public static <T> DefaultList<T> emptyList() {
         return EMPTY_LIST;
     }
