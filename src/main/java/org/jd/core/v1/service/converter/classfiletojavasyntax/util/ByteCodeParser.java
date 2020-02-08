@@ -1480,38 +1480,36 @@ public class ByteCodeParser {
                 Expression lastExpression = lastStatement.getExpression();
 
                 if (lastExpression.isBinaryOperatorExpression()) {
-                    BinaryOperatorExpression boe = (BinaryOperatorExpression) lastExpression;
-
-                    if (getLastRightExpression(boe) == rightExpression) {
+                    if (getLastRightExpression(lastExpression) == rightExpression) {
                         // Multi assignment
-                        lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", boe, 16));
+                        lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", lastExpression, 16));
                         return;
                     }
 
-                    if ((lineNumber > 0) && (boe.getLineNumber() == lineNumber) && (boe.getLeftExpression().getClass() == rightExpression.getClass())) {
-                        if (leftExpression.isLocalVariableReferenceExpression()) {
-                            ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression) boe.getLeftExpression();
+                    if ((lineNumber > 0) && (lastExpression.getLineNumber() == lineNumber) && (lastExpression.getLeftExpression().getClass() == rightExpression.getClass())) {
+                        if (rightExpression.isLocalVariableReferenceExpression()) {
+                            ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression) lastExpression.getLeftExpression();
                             ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) rightExpression;
 
                             if (lvr1.getLocalVariable() == lvr2.getLocalVariable()) {
                                 // Multi assignment
-                                lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", boe, 16));
+                                lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", lastExpression, 16));
                                 return;
                             }
-                        } else if (leftExpression.isFieldReferenceExpression()) {
-                            FieldReferenceExpression fr1 = (FieldReferenceExpression) boe.getLeftExpression();
+                        } else if (rightExpression.isFieldReferenceExpression()) {
+                            FieldReferenceExpression fr1 = (FieldReferenceExpression) lastExpression.getLeftExpression();
                             FieldReferenceExpression fr2 = (FieldReferenceExpression) rightExpression;
 
                             if (fr1.getName().equals(fr2.getName()) && fr1.getExpression().getType().equals(fr2.getExpression().getType())) {
                                 // Multi assignment
-                                lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", boe, 16));
+                                lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", lastExpression, 16));
                                 return;
                             }
                         }
                     }
                 } else if (lastExpression.isPreOperatorExpression()) {
                     if (lastExpression.getExpression().getClass() == rightExpression.getClass()) {
-                        if (lastExpression.getExpression().isLocalVariableReferenceExpression()) {
+                        if (rightExpression.isLocalVariableReferenceExpression()) {
                             ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression)lastExpression.getExpression();
                             ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression)rightExpression;
 
@@ -1519,7 +1517,7 @@ public class ByteCodeParser {
                                 rightExpression = newPreArithmeticOperatorExpression(lastExpression.getLineNumber(), lastExpression.getOperator(), lastExpression.getExpression());
                                 statements.removeLast();
                             }
-                        } else if (lastExpression.getExpression().isFieldReferenceExpression()) {
+                        } else if (rightExpression.isFieldReferenceExpression()) {
                             FieldReferenceExpression fr1 = (FieldReferenceExpression)lastExpression.getExpression();
                             FieldReferenceExpression fr2 = (FieldReferenceExpression)rightExpression;
 
