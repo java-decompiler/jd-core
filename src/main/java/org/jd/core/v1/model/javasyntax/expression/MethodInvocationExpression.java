@@ -40,6 +40,7 @@ public class MethodInvocationExpression extends MethodReferenceExpression {
         this.nonWildcardTypeArguments = nonWildcardTypeArguments;
     }
 
+    @Override
     public BaseExpression getParameters() {
         return parameters;
     }
@@ -52,6 +53,9 @@ public class MethodInvocationExpression extends MethodReferenceExpression {
     public int getPriority() {
         return 1;
     }
+
+    @Override
+    public boolean isMethodInvocationExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

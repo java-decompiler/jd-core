@@ -30,7 +30,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
     protected HashMap<String, FieldDeclarator> fieldDeclarators = new HashMap<>();
     protected DefaultList<Data> datas = new DefaultList<>();
-    protected DefaultList<BinaryOperatorExpression> putFields = new DefaultList<>();
+    protected DefaultList<Expression> putFields = new DefaultList<>();
     protected int lineNumber = UNKNOWN_LINE_NUMBER;
     protected boolean containsLocalVariableReference;
 
@@ -82,7 +82,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(ConstructorDeclaration declaration) {
         ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration)declaration;
 
-        if ((cfcd.getStatements() != null) && (cfcd.getStatements().getClass() == Statements.class)) {
+        if ((cfcd.getStatements() != null) && cfcd.getStatements().isStatements()) {
             Statements statements = (Statements) cfcd.getStatements();
             ListIterator<Statement> iterator = statements.listIterator();
             SuperConstructorInvocationExpression superConstructorCall = searchSuperConstructorCall(iterator);
@@ -148,19 +148,14 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
 
     protected SuperConstructorInvocationExpression searchSuperConstructorCall(ListIterator<Statement> iterator) {
         while (iterator.hasNext()) {
-            Statement statement = iterator.next();
+            Expression expression = iterator.next().getExpression();
 
-            if (statement.getClass() == ExpressionStatement.class) {
-                Expression expression = ((ExpressionStatement)statement).getExpression();
-                Class clazz = expression.getClass();
+            if (expression.isSuperConstructorInvocationExpression()) {
+                return (SuperConstructorInvocationExpression)expression;
+            }
 
-                if (clazz == ClassFileSuperConstructorInvocationExpression.class) {
-                    return (SuperConstructorInvocationExpression)expression;
-                }
-
-                if (clazz == ClassFileConstructorInvocationExpression.class) {
-                    break;
-                }
+            if (expression.isConstructorInvocationExpression()) {
+                break;
             }
         }
 
@@ -174,25 +169,23 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
         while (iterator.hasNext()) {
             Statement statement = iterator.next();
 
-            if (statement.getClass() != ExpressionStatement.class) {
+            if (!statement.isExpressionStatement()) {
                 break;
             }
 
-            expression = ((ExpressionStatement)statement).getExpression();
+            expression = statement.getExpression();
 
-            if (expression.getClass() != BinaryOperatorExpression.class) {
+            if (!expression.isBinaryOperatorExpression()) {
                 break;
             }
 
-            BinaryOperatorExpression cfboe = (BinaryOperatorExpression)expression;
-
-            if (!cfboe.getOperator().equals("=") || (cfboe.getLeftExpression().getClass() != FieldReferenceExpression.class)) {
+            if (!expression.getOperator().equals("=") || !expression.getLeftExpression().isFieldReferenceExpression()) {
                 break;
             }
 
-            FieldReferenceExpression fre = (FieldReferenceExpression)cfboe.getLeftExpression();
+            FieldReferenceExpression fre = (FieldReferenceExpression)expression.getLeftExpression();
 
-            if (!fre.getInternalTypeName().equals(internalTypeName) || (fre.getExpression().getClass() != ThisExpression.class)) {
+            if (!fre.getInternalTypeName().equals(internalTypeName) || !fre.getExpression().isThisExpression()) {
                 break;
             }
 
@@ -203,13 +196,13 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
             }
 
             containsLocalVariableReference = false;
-            cfboe.getRightExpression().accept(this);
+            expression.getRightExpression().accept(this);
 
             if (containsLocalVariableReference) {
                 break;
             }
 
-            putFields.add(cfboe);
+            putFields.add(expression);
             fieldNames.add(fieldName);
             expression = null;
         }
@@ -223,7 +216,7 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         if (firstLineNumber < lastLineNumber) {
-            Iterator<BinaryOperatorExpression> ite = putFields.iterator();
+            Iterator<Expression> ite = putFields.iterator();
 
             while (ite.hasNext()) {
                 int lineNumber = ite.next().getLineNumber();
@@ -239,43 +232,33 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected void filterPutFields(String internalTypeName, ListIterator<Statement> iterator) {
-        Iterator<BinaryOperatorExpression> putFieldIterator = putFields.iterator();
+        Iterator<Expression> putFieldIterator = putFields.iterator();
         int index = 0;
 
         while (iterator.hasNext() && putFieldIterator.hasNext()) {
-            Statement statement = iterator.next();
+            Expression expression = iterator.next().getExpression();
 
-            if (statement.getClass() != ExpressionStatement.class) {
+            if (!expression.isBinaryOperatorExpression()) {
                 break;
             }
 
-            Expression expression = ((ExpressionStatement)statement).getExpression();
-
-            if (expression.getClass() != BinaryOperatorExpression.class) {
+            if (!expression.getOperator().equals("=") || !expression.getLeftExpression().isFieldReferenceExpression()) {
                 break;
             }
 
-            BinaryOperatorExpression cfboe = (BinaryOperatorExpression)expression;
-
-            if (!cfboe.getOperator().equals("=") || (cfboe.getLeftExpression().getClass() != FieldReferenceExpression.class)) {
-                break;
-            }
-
-            FieldReferenceExpression fre = (FieldReferenceExpression)cfboe.getLeftExpression();
+            FieldReferenceExpression fre = (FieldReferenceExpression) expression.getLeftExpression();
 
             if (!fre.getInternalTypeName().equals(internalTypeName)) {
                 break;
             }
 
-            BinaryOperatorExpression putField = putFieldIterator.next();
+            Expression putField = putFieldIterator.next();
 
-            if (cfboe.getLineNumber() != putField.getLineNumber()) {
+            if (expression.getLineNumber() != putField.getLineNumber()) {
                 break;
             }
 
-            FieldReferenceExpression putFieldFre = (FieldReferenceExpression)putField.getLeftExpression();
-
-            if (!fre.getName().equals(putFieldFre.getName())) {
+            if (!fre.getName().equals(putField.getLeftExpression().getName())) {
                 break;
             }
 
@@ -293,9 +276,8 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
 
         if (count > 0) {
             // Init values
-            for (BinaryOperatorExpression putField : putFields) {
-                FieldReferenceExpression fre = (FieldReferenceExpression) putField.getLeftExpression();
-                FieldDeclarator declaration = fieldDeclarators.get(fre.getName());
+            for (Expression putField : putFields) {
+                FieldDeclarator declaration = fieldDeclarators.get(putField.getLeftExpression().getName());
 
                 if (declaration != null) {
                     Expression expression = putField.getRightExpression();

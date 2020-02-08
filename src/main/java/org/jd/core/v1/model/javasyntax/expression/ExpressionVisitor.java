@@ -32,6 +32,7 @@ public interface ExpressionVisitor {
     void visit(NewArray expression);
     void visit(NewExpression expression);
     void visit(NewInitializedArray expression);
+    void visit(NoExpression expression);
     void visit(NullExpression expression);
     void visit(ObjectTypeReferenceExpression expression);
     void visit(ParenthesesExpression expression);

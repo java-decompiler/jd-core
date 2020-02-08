@@ -23,6 +23,7 @@ public class ReturnExpressionStatement implements Statement {
         assert expression != null;
     }
 
+    @Override
     public int getLineNumber() {
         return lineNumber;
     }
@@ -31,6 +32,7 @@ public class ReturnExpressionStatement implements Statement {
         this.lineNumber = lineNumber;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -44,6 +46,9 @@ public class ReturnExpressionStatement implements Statement {
     public <T extends Expression> T getGenericExpression() {
         return (T)expression;
     }
+
+    @Override
+    public boolean isReturnExpressionStatement() { return true; }
 
     @Override
     public void accept(StatementVisitor visitor) {

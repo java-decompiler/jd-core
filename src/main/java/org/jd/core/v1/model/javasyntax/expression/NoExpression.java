@@ -7,19 +7,14 @@
 
 package org.jd.core.v1.model.javasyntax.expression;
 
-import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
-public class NullExpression extends AbstractLineNumberTypeExpression {
-    public NullExpression(Type type) {
-        super(type);
+public class NoExpression extends AbstractLineNumberTypeExpression {
+    public static final NoExpression NO_EXPRESSION = new NoExpression();
+
+    protected NoExpression() {
+        super(PrimitiveType.TYPE_VOID);
     }
-
-    public NullExpression(int lineNumber, Type type) {
-        super(lineNumber, type);
-    }
-
-    @Override
-    public boolean isNullExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {
@@ -28,6 +23,6 @@ public class NullExpression extends AbstractLineNumberTypeExpression {
 
     @Override
     public String toString() {
-        return "NullExpression{type=" + type + "}";
+        return "NoExpression";
     }
 }

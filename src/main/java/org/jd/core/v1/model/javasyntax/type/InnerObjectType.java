@@ -39,18 +39,9 @@ public class InnerObjectType extends ObjectType {
         this.outerType = iot.outerType;
     }
 
+    @Override
     public ObjectType getOuterType() {
         return outerType;
-    }
-
-    @Override
-    public void accept(TypeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public void accept(TypeArgumentVisitor visitor) {
-        visitor.visit(this);
     }
 
     @Override
@@ -81,6 +72,26 @@ public class InnerObjectType extends ObjectType {
         int result = 111476860 + super.hashCode();
         result = 31 * result + outerType.hashCode();
         return result;
+    }
+
+    @Override
+    public boolean isInnerObjectType() {
+        return true;
+    }
+
+    @Override
+    public boolean isInnerObjectTypeArgument() {
+        return true;
+    }
+
+    @Override
+    public void accept(TypeVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public void accept(TypeArgumentVisitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

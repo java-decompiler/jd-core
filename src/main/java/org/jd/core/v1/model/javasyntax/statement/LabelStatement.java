@@ -25,6 +25,9 @@ public class LabelStatement implements Statement {
     }
 
     @Override
+    public boolean isLabelStatement() { return true; }
+
+    @Override
     public void accept(StatementVisitor visitor) {
         visitor.visit(this);
     }

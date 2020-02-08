@@ -24,10 +24,12 @@ public class PreOperatorExpression extends AbstractLineNumberExpression {
         this.expression = expression;
     }
 
+    @Override
     public String getOperator() {
         return operator;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -45,6 +47,9 @@ public class PreOperatorExpression extends AbstractLineNumberExpression {
     public int getPriority() {
         return 2;
     }
+
+    @Override
+    public boolean isPreOperatorExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

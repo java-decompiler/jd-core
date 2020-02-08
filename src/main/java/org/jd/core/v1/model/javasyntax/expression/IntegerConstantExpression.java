@@ -11,8 +11,6 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
-
 
 public class IntegerConstantExpression extends AbstractLineNumberTypeExpression {
     protected int value;
@@ -20,16 +18,17 @@ public class IntegerConstantExpression extends AbstractLineNumberTypeExpression 
     public IntegerConstantExpression(Type type, int value) {
         super(type);
         this.value = value;
-        assert type.isPrimitive();
+        assert type.isPrimitiveType();
     }
 
     public IntegerConstantExpression(int lineNumber, Type type, int value) {
         super(lineNumber, type);
         this.value = value;
-        assert type.isPrimitive();
+        assert type.isPrimitiveType();
     }
 
-    public int getValue() {
+    @Override
+    public int getIntegerValue() {
         return value;
     }
 
@@ -40,14 +39,17 @@ public class IntegerConstantExpression extends AbstractLineNumberTypeExpression 
     }
 
     protected boolean checkType(Type type) {
-        if (type.isPrimitive()) {
+        if (type.isPrimitiveType()) {
             PrimitiveType valueType = PrimitiveTypeUtil.getPrimitiveTypeFromValue(value);
             return (((PrimitiveType)type).getFlags() & valueType.getFlags()) != 0;
         }
 
         return false;
     }
-    
+
+    @Override
+    public boolean isIntegerConstantExpression() { return true; }
+
     @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);

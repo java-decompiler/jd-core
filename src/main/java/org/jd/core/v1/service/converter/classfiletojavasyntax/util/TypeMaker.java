@@ -1325,7 +1325,7 @@ public class TypeMaker {
                     methodTypes.parameterTypes.accept(bindTypesToTypesVisitor);
                     BaseType baseType = bindTypesToTypesVisitor.getType();
 
-                    if (baseType.isList() && (baseType.getClass() == Types.class)) {
+                    if (baseType.isList() && baseType.isTypes()) {
                         baseType = new UnmodifiableTypes(baseType.getList());
                     }
 

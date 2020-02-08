@@ -27,6 +27,9 @@ public class SuperExpression extends AbstractLineNumberExpression {
     }
 
     @Override
+    public boolean isSuperExpression() { return true; }
+
+    @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
     }

@@ -22,9 +22,13 @@ public class DoubleConstantExpression extends AbstractLineNumberTypeExpression {
         this.value = value;
     }
 
-    public double getValue() {
+    @Override
+    public double getDoubleValue() {
         return value;
     }
+
+    @Override
+    public boolean isDoubleConstantExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

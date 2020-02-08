@@ -254,28 +254,20 @@ public class StatementVisitor extends ExpressionVisitor {
 
             stmt.accept(this);
 
-            if (stmt.getClass() == Statements.class) {
-                Statements sal = (Statements)stmt;
-
-                switch (sal.size()) {
-                    case 0:
-                        tmp.add(TokensFragment.SEMICOLON);
-                        break;
-                    case 1:
-                        StartSingleStatementBlockFragment start = JavaFragmentFactory.addStartSingleStatementBlock(tmp);
-                        tmp.addAll(fragments);
-                        JavaFragmentFactory.addEndSingleStatementBlock(tmp, start);
-                        break;
-                    default:
-                        StartStatementsBlockFragment.Group group = JavaFragmentFactory.addStartStatementsBlock(tmp);
-                        tmp.addAll(fragments);
-                        JavaFragmentFactory.addEndStatementsBlock(tmp, group);
-                        break;
-                }
-            } else {
-                StartSingleStatementBlockFragment start = JavaFragmentFactory.addStartSingleStatementBlock(tmp);
-                tmp.addAll(fragments);
-                JavaFragmentFactory.addEndSingleStatementBlock(tmp, start);
+            switch (stmt.size()) {
+                case 0:
+                    tmp.add(TokensFragment.SEMICOLON);
+                    break;
+                case 1:
+                    StartSingleStatementBlockFragment start = JavaFragmentFactory.addStartSingleStatementBlock(tmp);
+                    tmp.addAll(fragments);
+                    JavaFragmentFactory.addEndSingleStatementBlock(tmp, start);
+                    break;
+                default:
+                    StartStatementsBlockFragment.Group group = JavaFragmentFactory.addStartStatementsBlock(tmp);
+                    tmp.addAll(fragments);
+                    JavaFragmentFactory.addEndStatementsBlock(tmp, group);
+                    break;
             }
 
             fragments = tmp;
@@ -312,39 +304,35 @@ public class StatementVisitor extends ExpressionVisitor {
         tokens = new Tokens();
         tokens.add(ELSE);
 
-        if (statementList.getClass() == IfElseStatement.class) {
-            IfElseStatement iss = (IfElseStatement)statementList;
-
+        if (statementList.isIfElseStatement()) {
             tokens.add(TextToken.SPACE);
             tokens.add(IF);
             tokens.add(TextToken.SPACE);
             tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
-            iss.getCondition().accept(this);
+            statementList.getCondition().accept(this);
 
             tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
             fragments.addTokensFragment(tokens);
 
             JavaFragmentFactory.addStartStatementsBlock(fragments, group);
-            iss.getStatements().accept(this);
+            statementList.getStatements().accept(this);
             JavaFragmentFactory.addEndStatementsBlock(fragments, group);
-            visitElseStatements(iss.getElseStatements(), group);
-        } else if (statementList.getClass() == IfStatement.class) {
-            IfStatement is = (IfStatement)statementList;
-
+            visitElseStatements(statementList.getElseStatements(), group);
+        } else if (statementList.isIfStatement()) {
             tokens.add(TextToken.SPACE);
             tokens.add(IF);
             tokens.add(TextToken.SPACE);
             tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
-            is.getCondition().accept(this);
+            statementList.getCondition().accept(this);
 
             tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
             fragments.addTokensFragment(tokens);
 
             JavaFragmentFactory.addStartStatementsBlock(fragments, group);
 
-            is.getStatements().accept(this);
+            statementList.getStatements().accept(this);
 
             JavaFragmentFactory.addEndStatementsBlock(fragments, group);
         } else {

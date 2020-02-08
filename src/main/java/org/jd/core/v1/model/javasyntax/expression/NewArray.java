@@ -17,6 +17,7 @@ public class NewArray extends AbstractLineNumberTypeExpression {
         this.dimensionExpressionList = dimensionExpressionList;
     }
 
+    @Override
     public BaseExpression getDimensionExpressionList() {
         return dimensionExpressionList;
     }
@@ -29,6 +30,9 @@ public class NewArray extends AbstractLineNumberTypeExpression {
     public int getPriority() {
         return 0;
     }
+
+    @Override
+    public boolean isNewArray() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

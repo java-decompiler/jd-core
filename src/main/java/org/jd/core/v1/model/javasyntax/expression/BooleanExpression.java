@@ -39,6 +39,9 @@ public class BooleanExpression extends AbstractLineNumberExpression {
     }
 
     @Override
+    public boolean isBooleanExpression() { return true; }
+
+    @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
     }

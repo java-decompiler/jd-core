@@ -10,7 +10,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.util.DefaultList;
 
@@ -99,14 +98,14 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
         Expressions parameters = (Expressions)expression.getParameters();
         Expression exp = parameters.get(1);
 
-        if (exp.getClass() == CastExpression.class) {
-            exp = ((CastExpression)exp).getExpression();
+        if (exp.isCastExpression()) {
+            exp = exp.getExpression();
         }
 
         IntegerConstantExpression ice = (IntegerConstantExpression)exp;
 
         lineNumber = expression.getLineNumber();
-        index = ice.getValue();
+        index = ice.getIntegerValue();
 
         // Remove name & index
         if (parameters.size() == 2) {

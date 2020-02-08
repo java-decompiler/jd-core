@@ -22,6 +22,7 @@ public class ParenthesesExpression extends AbstractLineNumberExpression {
         return expression.getType();
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }

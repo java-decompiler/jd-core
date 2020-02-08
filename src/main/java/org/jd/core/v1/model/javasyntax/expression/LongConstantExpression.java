@@ -22,9 +22,13 @@ public class LongConstantExpression extends AbstractLineNumberTypeExpression {
         this.value = value;
     }
 
-    public long getValue() {
+    @Override
+    public long getLongValue() {
         return value;
     }
+
+    @Override
+    public boolean isLongConstantExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

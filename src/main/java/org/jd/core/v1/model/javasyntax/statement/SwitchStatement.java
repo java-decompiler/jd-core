@@ -22,6 +22,7 @@ public class SwitchStatement implements Statement {
         this.blocks = blocks;
     }
 
+    @Override
     public Expression getCondition() {
         return condition;
     }
@@ -33,6 +34,9 @@ public class SwitchStatement implements Statement {
     public List<Block> getBlocks() {
         return blocks;
     }
+
+    @Override
+    public boolean isSwitchStatement() { return true; }
 
     @Override
     public void accept(StatementVisitor visitor) {
@@ -63,6 +67,7 @@ public class SwitchStatement implements Statement {
             this.expression = expression;
         }
 
+        @Override
         public Expression getExpression() {
             return expression;
         }
@@ -90,6 +95,7 @@ public class SwitchStatement implements Statement {
             this.statements = statements;
         }
 
+        @Override
         public BaseStatement getStatements() {
             return statements;
         }
@@ -106,6 +112,9 @@ public class SwitchStatement implements Statement {
         public Label getLabel() {
             return label;
         }
+
+        @Override
+        public boolean isSwitchStatementLabelBlock() { return true; }
 
         @Override
         public void accept(StatementVisitor visitor) {
@@ -129,6 +138,9 @@ public class SwitchStatement implements Statement {
         public List<Label> getLabels() {
             return labels;
         }
+
+        @Override
+        public boolean isSwitchStatementMultiLabelsBlock() { return true; }
 
         @Override
         public void accept(StatementVisitor visitor) {

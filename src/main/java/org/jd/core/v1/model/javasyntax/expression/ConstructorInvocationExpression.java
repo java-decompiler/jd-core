@@ -23,6 +23,7 @@ public class ConstructorInvocationExpression extends ConstructorReferenceExpress
         this.parameters = parameters;
     }
 
+    @Override
     public BaseExpression getParameters() {
         return parameters;
     }
@@ -35,6 +36,9 @@ public class ConstructorInvocationExpression extends ConstructorReferenceExpress
     public int getPriority() {
         return 1;
     }
+
+    @Override
+    public boolean isConstructorInvocationExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

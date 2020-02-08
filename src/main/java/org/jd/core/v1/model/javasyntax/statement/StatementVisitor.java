@@ -22,6 +22,7 @@ public interface StatementVisitor {
     void visit(LabelStatement statement);
     void visit(LambdaExpressionStatement statement);
     void visit(LocalVariableDeclarationStatement statement);
+    void visit(NoStatement statement);
     void visit(ReturnExpressionStatement statement);
     void visit(ReturnStatement statement);
     void visit(Statements statement);

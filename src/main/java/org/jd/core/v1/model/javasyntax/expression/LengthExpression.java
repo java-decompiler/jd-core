@@ -27,6 +27,7 @@ public class LengthExpression extends AbstractLineNumberExpression {
         return PrimitiveType.TYPE_INT;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -34,6 +35,9 @@ public class LengthExpression extends AbstractLineNumberExpression {
     public void setExpression(Expression expression) {
         this.expression = expression;
     }
+
+    @Override
+    public boolean isLengthExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

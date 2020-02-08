@@ -16,6 +16,7 @@ public class LambdaExpressionStatement implements Statement {
         this.expression = expression;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -23,6 +24,9 @@ public class LambdaExpressionStatement implements Statement {
     public void setExpression(Expression expression) {
         this.expression = expression;
     }
+
+    @Override
+    public boolean isLambdaExpressionStatement() { return true; }
 
     @Override
     public void accept(StatementVisitor visitor) {

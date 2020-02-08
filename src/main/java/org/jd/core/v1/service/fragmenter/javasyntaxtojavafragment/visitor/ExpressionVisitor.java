@@ -16,7 +16,6 @@ import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
-import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.CharacterUtil;
@@ -153,7 +152,7 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(DoubleConstantExpression expression) {
         tokens.addLineNumberToken(expression);
-        tokens.add(new NumericConstantToken(String.valueOf(expression.getValue()) + 'D'));
+        tokens.add(new NumericConstantToken(String.valueOf(expression.getDoubleValue()) + 'D'));
     }
 
     @Override
@@ -216,7 +215,7 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(FloatConstantExpression expression) {
         tokens.addLineNumberToken(expression);
-        tokens.add(new NumericConstantToken(String.valueOf(expression.getValue()) + 'F'));
+        tokens.add(new NumericConstantToken(String.valueOf(expression.getFloatValue()) + 'F'));
     }
 
     @Override
@@ -227,13 +226,13 @@ public class ExpressionVisitor extends TypeVisitor {
 
         switch (pt.getJavaPrimitiveFlags()) {
             case FLAG_CHAR:
-                tokens.add(new CharacterConstantToken(CharacterUtil.escapeChar((char)expression.getValue()), currentInternalTypeName));
+                tokens.add(new CharacterConstantToken(CharacterUtil.escapeChar((char)expression.getIntegerValue()), currentInternalTypeName));
                 break;
             case FLAG_BOOLEAN:
-                tokens.add(new BooleanConstantToken(expression.getValue() != 0));
+                tokens.add(new BooleanConstantToken(expression.getIntegerValue() != 0));
                 break;
             default:
-                tokens.add(new NumericConstantToken(String.valueOf(expression.getValue())));
+                tokens.add(new NumericConstantToken(String.valueOf(expression.getIntegerValue())));
                 break;
         }
     }
@@ -252,7 +251,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(LambdaFormalParametersExpression expression) {
-        BaseFormalParameter parameters = expression.getParameters();
+        BaseFormalParameter parameters = expression.getFormalParameters();
 
         if (parameters == null) {
             tokens.add(TextToken.LEFTRIGHTROUNDBRACKETS);
@@ -286,7 +285,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(LambdaIdentifiersExpression expression) {
-        List<String> parameters = expression.getParameters();
+        List<String> parameters = expression.getParameterNames();
 
         if (parameters == null) {
             tokens.add(TextToken.LEFTRIGHTROUNDBRACKETS);
@@ -320,7 +319,7 @@ public class ExpressionVisitor extends TypeVisitor {
         if (statementList != null) {
             tokens.add(TextToken.SPACE_ARROW_SPACE);
 
-            if (statementList.getClass() == LambdaExpressionStatement.class) {
+            if (statementList.isLambdaExpressionStatement()) {
                 statementList.accept(this);
             } else {
                 fragments.addTokensFragment(tokens);
@@ -357,7 +356,7 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(LongConstantExpression expression) {
         tokens.addLineNumberToken(expression);
-        tokens.add(new NumericConstantToken(String.valueOf(expression.getValue()) + 'L'));
+        tokens.add(new NumericConstantToken(String.valueOf(expression.getLongValue()) + 'L'));
     }
 
     @Override
@@ -367,9 +366,9 @@ public class ExpressionVisitor extends TypeVisitor {
         BaseExpression parameters = expression.getParameters();
         boolean dot = false;
 
-        if (exp.getClass() == ThisExpression.class) {
+        if (exp.isThisExpression()) {
             // Nothing to do : do not print 'this.method(...)'
-        } else if (exp.getClass() == ObjectTypeReferenceExpression.class) {
+        } else if (exp.isObjectTypeReferenceExpression()) {
             ObjectType ot = ((ObjectTypeReferenceExpression)exp).getObjectType();
 
             if (! ot.getInternalName().equals(currentInternalTypeName)) {
@@ -587,9 +586,7 @@ public class ExpressionVisitor extends TypeVisitor {
     public void visit(TernaryOperatorExpression expression) {
         tokens.addLineNumberToken(expression.getCondition());
 
-        if ((expression.getExpressionTrue().getClass() == BooleanExpression.class) &&
-            (expression.getExpressionFalse().getClass() == BooleanExpression.class)) {
-
+        if (expression.getExpressionTrue().isBooleanExpression() && expression.getExpressionFalse().isBooleanExpression()) {
             BooleanExpression be1 = (BooleanExpression)expression.getExpressionTrue();
             BooleanExpression be2 = (BooleanExpression)expression.getExpressionFalse();
 
@@ -705,10 +702,10 @@ public class ExpressionVisitor extends TypeVisitor {
 
             switch (pt.getJavaPrimitiveFlags()) {
                 case FLAG_BOOLEAN:
-                    tokens.add(new BooleanConstantToken(expression.getValue() == 1));
+                    tokens.add(new BooleanConstantToken(expression.getIntegerValue() == 1));
                     break;
                 default:
-                    tokens.add(new NumericConstantToken("0x" + Integer.toHexString(expression.getValue()).toUpperCase()));
+                    tokens.add(new NumericConstantToken("0x" + Integer.toHexString(expression.getIntegerValue()).toUpperCase()));
                     break;
             }
         }
@@ -716,7 +713,7 @@ public class ExpressionVisitor extends TypeVisitor {
         @Override
         public void visit(LongConstantExpression expression) {
             tokens.addLineNumberToken(expression);
-            tokens.add(new NumericConstantToken("0x" + Long.toHexString(expression.getValue()).toUpperCase() + 'L'));
+            tokens.add(new NumericConstantToken("0x" + Long.toHexString(expression.getLongValue()).toUpperCase() + 'L'));
         }
 
         @Override public void visit(ArrayExpression expression) { ExpressionVisitor.this.visit(expression); }
@@ -741,6 +738,7 @@ public class ExpressionVisitor extends TypeVisitor {
         @Override public void visit(NewArray expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(NewExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(NewInitializedArray expression) { ExpressionVisitor.this.visit(expression); }
+        @Override public void visit(NoExpression expression) {}
         @Override public void visit(NullExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(ObjectTypeReferenceExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override public void visit(ParenthesesExpression expression) { ExpressionVisitor.this.visit(expression); }

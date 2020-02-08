@@ -34,6 +34,9 @@ public class StringConstantExpression extends AbstractLineNumberExpression {
     }
 
     @Override
+    public boolean isStringConstantExpression() { return true; }
+
+    @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
     }

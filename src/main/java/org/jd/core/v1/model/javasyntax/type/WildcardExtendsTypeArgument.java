@@ -16,19 +16,15 @@ public class WildcardExtendsTypeArgument implements TypeArgument {
         this.type = type;
     }
 
+    @Override
     public Type getType() {
         return type;
     }
 
     @Override
-    public void accept(TypeArgumentVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
-        if (typeArgument.getClass() == WildcardExtendsTypeArgument.class) {
-            return type.isTypeArgumentAssignableFrom(typeBounds, ((WildcardExtendsTypeArgument)typeArgument).getType());
+        if (typeArgument.isWildcardExtendsTypeArgument()) {
+            return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument.getType());
         } else if (typeArgument instanceof Type) {
             return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument);
         }
@@ -49,6 +45,14 @@ public class WildcardExtendsTypeArgument implements TypeArgument {
     @Override
     public int hashCode() {
         return 957014778 + (type != null ? type.hashCode() : 0);
+    }
+
+    @Override
+    public boolean isWildcardExtendsTypeArgument() { return true; }
+
+    @Override
+    public void accept(TypeArgumentVisitor visitor) {
+        visitor.visit(this);
     }
 
     @Override

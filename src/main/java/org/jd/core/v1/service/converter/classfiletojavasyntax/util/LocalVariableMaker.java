@@ -228,9 +228,9 @@ public class LocalVariableMaker {
             int innerTypeDepth = 1;
             ObjectType type = typeMaker.makeFromInternalTypeName(classFile.getOuterClassFile().getInternalTypeName());
 
-            while ((type != null) && (type.getClass() == InnerObjectType.class)) {
+            while ((type != null) && type.isInnerObjectType()) {
                 innerTypeDepth++;
-                type = ((InnerObjectType)type).getOuterType();
+                type = type.getOuterType();
             }
 
             parameterNamePrefix += innerTypeDepth;
@@ -335,10 +335,10 @@ public class LocalVariableMaker {
     public boolean isCompatible(AbstractLocalVariable lv, Type valueType) {
         if (valueType == ObjectType.TYPE_UNDEFINED_OBJECT) {
             return true;
-        } else if (valueType.isObject() && (lv.getType().getDimension() == valueType.getDimension())) {
+        } else if (valueType.isObjectType() && (lv.getType().getDimension() == valueType.getDimension())) {
             ObjectType valueObjectType = (ObjectType) valueType;
 
-            if (lv.getType().isObject()) {
+            if (lv.getType().isObjectType()) {
                 ObjectType lvObjectType = (ObjectType) lv.getType();
 
                 BaseTypeArgument lvTypeArguments = lvObjectType.getTypeArguments();
@@ -359,7 +359,7 @@ public class LocalVariableMaker {
                         return typeMaker.isRawTypeAssignable(lvObjectType, valueObjectType);
                     }
                 }
-            } else if (lv.getType().isGeneric() && valueObjectType.getInternalName().equals(ObjectType.TYPE_OBJECT.getInternalName())) {
+            } else if (lv.getType().isGenericType() && valueObjectType.getInternalName().equals(ObjectType.TYPE_OBJECT.getInternalName())) {
                 return true;
             }
         }
@@ -378,7 +378,7 @@ public class LocalVariableMaker {
         } else if (lv.isAssignableFrom(typeBounds, valueType) || isCompatible(lv, valueType)) {
             // Assignable, reduce type
             lv.typeOnRight(typeBounds, valueType);
-        } else if (!lv.getType().isGeneric() || (ObjectType.TYPE_OBJECT != valueType)) {
+        } else if (!lv.getType().isGenericType() || (ObjectType.TYPE_OBJECT != valueType)) {
             // Not assignable -> Create a new local variable
             createLocalVariableVisitor.init(index, offset);
             valueType.accept(createLocalVariableVisitor);
@@ -402,7 +402,7 @@ public class LocalVariableMaker {
         } else {
             Type type = lv.getType();
 
-            if ((type.getDimension() == 0) && type.isPrimitive()) {
+            if ((type.getDimension() == 0) && type.isPrimitiveType()) {
                 // Not assignable -> Create a new local variable
                 createLocalVariableVisitor.init(index, offset);
                 valueType.accept(createLocalVariableVisitor);
@@ -426,7 +426,7 @@ public class LocalVariableMaker {
             lv = createLocalVariableVisitor.getLocalVariable();
         } else if (lv.isAssignableFrom(typeBounds, valueLocalVariable) || isCompatible(lv, valueLocalVariable.getType())) {
             // Assignable
-        } else if (!lv.getType().isGeneric() || (ObjectType.TYPE_OBJECT != valueLocalVariable.getType())) {
+        } else if (!lv.getType().isGenericType() || (ObjectType.TYPE_OBJECT != valueLocalVariable.getType())) {
             // Not assignable -> Create a new local variable
             createLocalVariableVisitor.init(index, offset);
             valueLocalVariable.accept(createLocalVariableVisitor);

@@ -27,6 +27,7 @@ public class ArrayExpression extends AbstractLineNumberTypeExpression {
         this.index = index;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -54,6 +55,9 @@ public class ArrayExpression extends AbstractLineNumberTypeExpression {
 
         return type.createType((dimension > 0) ? dimension-1 : 0);
     }
+
+    @Override
+    public boolean isArrayExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

@@ -101,11 +101,11 @@ public class TypeParametersToTypeArgumentsBinder {
 
         Type expressionType = expression.getType();
 
-        if (expressionType.isObject()) {
+        if (expressionType.isObjectType()) {
             ObjectType expressionObjectType = (ObjectType) expressionType;
 
             if (staticMethod || !expressionObjectType.getInternalName().equals(internalTypeName)) {
-                if (type.isObject()) {
+                if (type.isObjectType()) {
                     ObjectType ot = (ObjectType) type;
 
                     if (ot.getTypeArguments() != null) {
@@ -141,13 +141,13 @@ public class TypeParametersToTypeArgumentsBinder {
     }
 
     protected Type checkTypeArguments(Type type, AbstractLocalVariable localVariable) {
-        if (type.isObject()) {
+        if (type.isObjectType()) {
             ObjectType objectType = (ObjectType)type;
 
             if (objectType.getTypeArguments() != null) {
                 Type localVariableType = localVariable.getType();
 
-                if (localVariableType.isObject()) {
+                if (localVariableType.isObjectType()) {
                     ObjectType localVariableObjectType = (ObjectType)localVariableType;
                     TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(localVariableObjectType.getInternalName());
 
@@ -175,17 +175,17 @@ public class TypeParametersToTypeArgumentsBinder {
                 BaseTypeParameter methodTypeParameters = mie.getTypeParameters();
                 BaseTypeArgument typeArguments;
 
-                if (expression.getClass() == SuperExpression.class) {
+                if (expression.isSuperExpression()) {
                     typeTypes = typeMaker.makeTypeTypes(internalTypeName);
                     typeArguments = (typeTypes.superType == null) ? null : typeTypes.superType.getTypeArguments();
-                } else if (expression.getClass() == ClassFileMethodInvocationExpression.class) {
+                } else if (expression.isMethodInvocationExpression()) {
                     Type t = getExpressionType((ClassFileMethodInvocationExpression) expression);
-                    if ((t != null) && t.isObject()) {
+                    if ((t != null) && t.isObjectType()) {
                         typeArguments = ((ObjectType)t).getTypeArguments();
                     } else {
                         typeArguments = null;
                     }
-                } else if (expressionType.isGeneric()) {
+                } else if (expressionType.isGenericType()) {
                     BaseType typeBound = contextualTypeBounds.get(expressionType.getName());
 
                     if (typeBound != null) {
@@ -201,7 +201,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
                 Type t = mie.getType();
 
-                if (type.isObject() && t.isObject()) {
+                if (type.isObjectType() && t.isObjectType()) {
                     ObjectType objectType = (ObjectType) type;
                     ObjectType mieTypeObjectType = (ObjectType) t;
                     t = typeMaker.searchSuperParameterizedType(objectType, mieTypeObjectType);
@@ -222,15 +222,13 @@ public class TypeParametersToTypeArgumentsBinder {
                     mie.setNonWildcardTypeArguments(bindTypeParametersToNonWildcardTypeArgumentsVisitor.getTypeArgument());
                 }
 
-                if (expressionType.isObject()) {
+                if (expressionType.isObjectType()) {
                     ObjectType expressionObjectType = (ObjectType) expressionType;
 
                     if (bindings.isEmpty() || bindingsContainsNull) {
                         expressionType = expressionObjectType.createType(null);
                     } else {
-                        boolean statik = (expression.getClass() == ObjectTypeReferenceExpression.class);
-
-                        if (statik || (typeParameters == null)) {
+                        if (expression.isObjectTypeReferenceExpression() || (typeParameters == null)) {
                             expressionType = expressionObjectType.createType(null);
                         } else if (typeParameters.isList()) {
                             TypeArguments tas = new TypeArguments(typeParameters.size());
@@ -242,7 +240,7 @@ public class TypeParametersToTypeArgumentsBinder {
                             expressionType = expressionObjectType.createType(bindings.get(typeParameters.getFirst().getIdentifier()));
                         }
                     }
-                } else if (expressionType.isGeneric()) {
+                } else if (expressionType.isGenericType()) {
                     if (bindings.isEmpty() || bindingsContainsNull) {
                         expressionType = ObjectType.TYPE_OBJECT;
                     } else {
@@ -286,7 +284,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
                 Type t = neObjectType;
 
-                if (type.isObject()) {
+                if (type.isObjectType()) {
                     ObjectType objectType = (ObjectType)type;
                     t = typeMaker.searchSuperParameterizedType(objectType, neObjectType);
                     if (t == null) {
@@ -334,7 +332,7 @@ public class TypeParametersToTypeArgumentsBinder {
     }
 
     public static void staticBindParameterTypesWithArgumentTypes(Type type, Expression expression) {
-        if (expression.getClass() == ClassFileMethodInvocationExpression.class) {
+        if (expression.isMethodInvocationExpression()) {
             ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
             TypeParametersToTypeArgumentsBinder binder = mie.getBinder();
 
@@ -351,7 +349,7 @@ public class TypeParametersToTypeArgumentsBinder {
 
         Map<String, TypeArgument> bindings = new HashMap<>();
         Map<String, BaseType> typeBounds = new HashMap<>();
-        boolean statik = (expression != null) && (expression.getClass() == ObjectTypeReferenceExpression.class);
+        boolean statik = (expression != null) && expression.isObjectTypeReferenceExpression();
 
         if (!statik) {
             bindings.putAll(contextualBindings);
@@ -430,16 +428,10 @@ public class TypeParametersToTypeArgumentsBinder {
 
     protected boolean eraseTypeArguments(Expression expression, BaseTypeParameter typeParameters, BaseTypeArgument typeArguments) {
         if ((typeParameters != null) && (typeArguments == null) && (expression != null)) {
-            Class expressionClass = expression.getClass();
-
-            if (expressionClass == CastExpression.class) {
-                expression = ((CastExpression)expression).getExpression();
-                expressionClass = expression.getClass();
+            if (expression.isCastExpression()) {
+                expression = expression.getExpression();
             }
-
-            if ((expressionClass == FieldReferenceExpression.class) ||
-                (expressionClass == ClassFileMethodInvocationExpression.class) ||
-                (expressionClass == ClassFileLocalVariableReferenceExpression.class)) {
+            if (expression.isFieldReferenceExpression() || expression.isMethodInvocationExpression() || expression.isLocalVariableReferenceExpression()) {
                 return true;
             }
         }
@@ -480,11 +472,9 @@ public class TypeParametersToTypeArgumentsBinder {
     }
 
     protected Type getExpressionType(Expression expression) {
-        Class expressionClass = expression.getClass();
-
-        if (expressionClass == ClassFileMethodInvocationExpression.class) {
+        if (expression.isMethodInvocationExpression()) {
             return getExpressionType((ClassFileMethodInvocationExpression)expression);
-        } else if (expressionClass == ClassFileNewExpression.class) {
+        } else if (expression.isNewExpression()) {
             return getExpressionType((ClassFileNewExpression)expression);
         }
 
@@ -559,18 +549,18 @@ public class TypeParametersToTypeArgumentsBinder {
         public void visit(CastExpression expression) {
             assert TYPE_OBJECT.equals(type) || (type.getDimension() == expression.getType().getDimension()) : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid array type";
 
-            if (type.isObject()) {
+            if (type.isObjectType()) {
                 ObjectType objectType = (ObjectType)type;
 
                 if ((objectType.getTypeArguments() != null) && !objectType.getTypeArguments().equals(WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT)) {
-                    assert expression.getType().isObject() : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid object type";
+                    assert expression.getType().isObjectType() : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid object type";
 
                     ObjectType expressionObjectType = (ObjectType) expression.getType();
 
                     if (objectType.getInternalName().equals(expressionObjectType.getInternalName())) {
                         Type expressionExpressionType = expression.getExpression().getType();
 
-                        if (expressionExpressionType.isObject()) {
+                        if (expressionExpressionType.isObjectType()) {
                             ObjectType expressionExpressionObjectType = (ObjectType)expressionExpressionType;
 
                             if (expressionExpressionObjectType.getTypeArguments() == null) {
@@ -578,7 +568,7 @@ public class TypeParametersToTypeArgumentsBinder {
                             } else if (objectType.getTypeArguments().isTypeArgumentAssignableFrom(contextualTypeBounds, expressionExpressionObjectType.getTypeArguments())) {
                                 expression.setType(objectType);
                             }
-                        } else if (expressionExpressionType.isGeneric()) {
+                        } else if (expressionExpressionType.isGenericType()) {
                             expression.setType(objectType);
                         }
                     }

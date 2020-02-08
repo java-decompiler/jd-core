@@ -18,6 +18,7 @@ public class SynchronizedStatement implements Statement {
         this.statements = statements;
     }
 
+    @Override
     public Expression getMonitor() {
         return monitor;
     }
@@ -26,6 +27,7 @@ public class SynchronizedStatement implements Statement {
         this.monitor = monitor;
     }
 
+    @Override
     public BaseStatement getStatements() {
         return statements;
     }

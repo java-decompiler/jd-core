@@ -31,6 +31,7 @@ public class CastExpression extends AbstractLineNumberTypeExpression {
         this.explicit = explicit;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -51,6 +52,9 @@ public class CastExpression extends AbstractLineNumberTypeExpression {
     public int getPriority() {
         return 3;
     }
+
+    @Override
+    public boolean isCastExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

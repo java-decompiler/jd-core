@@ -16,6 +16,7 @@ public class ExpressionVariableInitializer implements VariableInitializer {
         this.expression = expression;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -45,6 +46,9 @@ public class ExpressionVariableInitializer implements VariableInitializer {
     public int hashCode() {
         return 25107399 + (expression != null ? expression.hashCode() : 0);
     }
+
+    @Override
+    public boolean isExpressionVariableInitializer() { return true; }
 
     @Override
     public void accept(DeclarationVisitor visitor) {

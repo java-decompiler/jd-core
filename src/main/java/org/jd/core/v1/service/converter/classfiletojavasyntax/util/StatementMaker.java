@@ -25,11 +25,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorEnterStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorExitStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
@@ -38,10 +34,11 @@ import org.jd.core.v1.util.DefaultStack;
 
 import java.util.*;
 
+import static org.jd.core.v1.model.javasyntax.expression.Expression.UNKNOWN_LINE_NUMBER;
+import static org.jd.core.v1.model.javasyntax.expression.NoExpression.NO_EXPRESSION;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
-
 
 public class StatementMaker {
     protected static final SwitchCaseComparator SWITCH_CASE_COMPARATOR = new SwitchCaseComparator();
@@ -104,7 +101,7 @@ public class StatementMaker {
         statements.accept(removeBinaryOpReturnStatementsVisitor);
 
         // Remove last 'return' statement
-        if (!statements.isEmpty() && (statements.getLast().getClass() == ReturnStatement.class)) {
+        if (!statements.isEmpty() && statements.getLast().isReturnStatement()) {
             statements.removeLast();
         }
 
@@ -285,7 +282,7 @@ public class StatementMaker {
     protected Statements makeSubStatements(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         Statements subStatements = new Statements();
 
-        if (!statements.isEmpty() && (statements.getLast().getClass() == ClassFileMonitorEnterStatement.class)) {
+        if (!statements.isEmpty() && statements.getLast().isMonitorEnterStatement()) {
             subStatements.add(statements.removeLast());
         }
 
@@ -294,8 +291,8 @@ public class StatementMaker {
         localVariableMaker.popFrame();
         replacePreOperatorWithPostOperator(subStatements);
 
-        if (!subStatements.isEmpty() && (subStatements.getFirst().getClass() == ClassFileMonitorEnterStatement.class)) {
-            statements.add(subStatements.remove(0));
+        if (!subStatements.isEmpty() && subStatements.getFirst().isMonitorEnterStatement()) {
+            statements.add(subStatements.removeFirst());
         }
 
         return subStatements;
@@ -316,21 +313,15 @@ public class StatementMaker {
 
             if (statements.size() > initialStatementCount) {
                 // Is a multi-assignment ?
-                Statement lastStatement = statements.getLast();
+                Expression boe = statements.getLast().getExpression();
 
-                if (lastStatement.getClass() == ExpressionStatement.class) {
-                    Expression expr = ((ExpressionStatement) lastStatement).getExpression();
-
-                    if (expr.getClass() == BinaryOperatorExpression.class) {
-                        BinaryOperatorExpression boe = (BinaryOperatorExpression) expr;
-
-                        if (boe.getRightExpression() == expression) {
-                            // Pattern matched -> Multi-assignment
-                            statements.removeLast();
-                            expression = boe;
-                        } else if (expression.getClass() == NewArray.class) {
-                            expression = NewArrayMaker.make(statements, (NewArray)expression);
-                        }
+                if (boe != NO_EXPRESSION) {
+                    if (boe.getRightExpression() == expression) {
+                        // Pattern matched -> Multi-assignment
+                        statements.removeLast();
+                        expression = boe;
+                    } else if (expression.isNewArray()) {
+                        expression = NewArrayMaker.make(statements, expression);
                     }
                 }
             }
@@ -384,12 +375,11 @@ public class StatementMaker {
         }
 
         int size = statements.size();
-        Class conditionClass = condition.getClass();
 
-        if ((size > 3) && (conditionClass == ClassFileLocalVariableReferenceExpression.class) && (statements.get(size-2).getClass() == SwitchStatement.class)) {
+        if ((size > 3) && condition.isLocalVariableReferenceExpression() && statements.get(size-2).isSwitchStatement()) {
             // Check pattern & make 'switch-string'
             SwitchStatementMaker.makeSwitchString(localVariableMaker, statements, switchStatement);
-        } else if (conditionClass == ArrayExpression.class) {
+        } else if (condition.isArrayExpression()) {
             // Check pattern & make 'switch-enum'
             SwitchStatementMaker.makeSwitchEnum(bodyDeclaration, switchStatement);
         }
@@ -410,38 +400,31 @@ public class StatementMaker {
             assert stack.size() == assertStackSize : "parseTry : problem with stack";
 
             if (exceptionHandler.getInternalThrowableName() == null) {
+                // 'finally' handler
                 stack.push(FINALLY_EXCEPTION_EXPRESSION);
 
                 finallyStatements = makeSubStatements(watchdog, exceptionHandler.getBasicBlock(), statements, jumps);
 
-                if (finallyStatements.get(0).getClass() != ClassFileMonitorExitStatement.class) {
+                if (!finallyStatements.getFirst().isMonitorEnterStatement()) {
                     removeFinallyStatementsFlag |= (jsr == false);
 
-                    Statement statement = finallyStatements.getFirst();
+                    Expression leftExpression = finallyStatements.getFirst().getExpression().getLeftExpression();
 
-                    if (statement.getClass() == ExpressionStatement.class) {
-                        Expression expression = ((ExpressionStatement) statement).getExpression();
+                    if (leftExpression.isLocalVariableReferenceExpression()) {
+                        Statement statement = finallyStatements.getLast();
 
-                        if (expression.getClass() == BinaryOperatorExpression.class) {
-                            BinaryOperatorExpression boe = (BinaryOperatorExpression) expression;
+                        if (statement.isThrowStatement()) {
+                            // Remove synthetic local variable
+                            Expression expression = statement.getExpression();
 
-                            if (boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                                statement = finallyStatements.getLast();
+                            if (expression.isLocalVariableReferenceExpression()) {
+                                ClassFileLocalVariableReferenceExpression vre1 = (ClassFileLocalVariableReferenceExpression) expression;
+                                ClassFileLocalVariableReferenceExpression vre2 = (ClassFileLocalVariableReferenceExpression) leftExpression;
 
-                                if (statement.getClass() == ThrowStatement.class) {
-                                    // Remove synthetic local variable
-                                    expression = ((ThrowStatement)statement).getExpression();
-
-                                    if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                                        ClassFileLocalVariableReferenceExpression vre1 = (ClassFileLocalVariableReferenceExpression) expression;
-                                        ClassFileLocalVariableReferenceExpression vre2 = (ClassFileLocalVariableReferenceExpression) boe.getLeftExpression();
-
-                                        if (vre1.getLocalVariable() == vre2.getLocalVariable()) {
-                                            localVariableMaker.removeLocalVariable(vre2.getLocalVariable());
-                                            // Remove first statement (storage of finally localVariable)
-                                            finallyStatements.remove(0);
-                                        }
-                                    }
+                                if (vre1.getLocalVariable() == vre2.getLocalVariable()) {
+                                    localVariableMaker.removeLocalVariable(vre2.getLocalVariable());
+                                    // Remove first statement (storage of finally localVariable)
+                                    finallyStatements.removeFirst();
                                 }
                             }
                         }
@@ -475,11 +458,11 @@ public class StatementMaker {
                 localVariableMaker.popFrame();
                 removeExceptionReference(catchStatements);
 
-                if (lineNumber != Expression.UNKNOWN_LINE_NUMBER) {
+                if (lineNumber != UNKNOWN_LINE_NUMBER) {
                     searchFirstLineNumberVisitor.init();
                     searchFirstLineNumberVisitor.visit(catchStatements);
                     if (searchFirstLineNumberVisitor.getLineNumber() == lineNumber) {
-                        lineNumber = Expression.UNKNOWN_LINE_NUMBER;
+                        lineNumber = UNKNOWN_LINE_NUMBER;
                     }
                 }
 
@@ -500,7 +483,7 @@ public class StatementMaker {
         // 'try', 'try-with-resources' or 'synchronized' ?
         Statement statement = null;
 
-        if ((finallyStatements != null) && (finallyStatements.size() > 0) && (finallyStatements.get(0).getClass() == ClassFileMonitorExitStatement.class)) {
+        if ((finallyStatements != null) && (finallyStatements.size() > 0) && finallyStatements.getFirst().isMonitorExitStatement()) {
             statement = SynchronizedStatementMaker.make(localVariableMaker, statements, tryStatements);
         } else {
             if (majorVersion >= 51) { // (majorVersion >= Java 7)
@@ -519,17 +502,15 @@ public class StatementMaker {
     }
 
     protected void removeExceptionReference(Statements catchStatements) {
-        if ((catchStatements.size() > 0) && (catchStatements.get(0).getClass() == ExpressionStatement.class)) {
-            ExpressionStatement es = (ExpressionStatement) catchStatements.get(0);
+        if ((catchStatements.size() > 0) && catchStatements.getFirst().isExpressionStatement()) {
+            Expression exp = catchStatements.getFirst().getExpression();
 
-            if (es.getExpression().getClass() == BinaryOperatorExpression.class) {
-                BinaryOperatorExpression boe = (BinaryOperatorExpression)es.getExpression();
-
-                if ((boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class) && (boe.getRightExpression().getClass() == NullExpression.class)) {
-                    catchStatements.remove(0);
+            if (exp.isBinaryOperatorExpression()) {
+                if (exp.getLeftExpression().isLocalVariableReferenceExpression() && exp.getRightExpression().isNullExpression()) {
+                    catchStatements.removeFirst();
                 }
-            } else if (es.getExpression().getClass() == NullExpression.class) {
-                catchStatements.remove(0);
+            } else if (exp.isNullExpression()) {
+                catchStatements.removeFirst();
             }
         }
     }
@@ -574,10 +555,10 @@ public class StatementMaker {
             Statements subStatements = makeSubStatements(watchdog, basicBlock.getSub1(), statements, jumps);
             Expression message = null;
 
-            if (subStatements.get(0).getClass() == ThrowStatement.class) {
-                Expression e = ((ThrowStatement)subStatements.get(0)).getExpression();
-                if (e.getClass() == ClassFileNewExpression.class) {
-                    BaseExpression parameters = ((NewExpression)e).getParameters();
+            if (subStatements.getFirst().isThrowStatement()) {
+                Expression e = subStatements.getFirst().getExpression();
+                if (e.isNewExpression()) {
+                    BaseExpression parameters = e.getParameters();
                     if ((parameters != null) && !parameters.isList()) {
                         message = parameters.getFirst();
                     }
@@ -600,12 +581,12 @@ public class StatementMaker {
 
             if ((subStatements.size() == 1) &&
                     (index+1 == statements.size()) &&
-                    (subStatements.get(0).getClass() == ReturnExpressionStatement.class) &&
-                    (statements.get(index).getClass() == ReturnExpressionStatement.class)) {
-                ReturnExpressionStatement cfres1 = (ReturnExpressionStatement)subStatements.get(0);
+                    (subStatements.getFirst().isReturnExpressionStatement()) &&
+                    (statements.get(index).isReturnExpressionStatement())) {
+                Statement cfres1 = subStatements.getFirst();
 
                 if (cond.getLineNumber() >= cfres1.getLineNumber()) {
-                    ReturnExpressionStatement cfres2 = (ReturnExpressionStatement)statements.get(index);
+                    Statement cfres2 = statements.get(index);
 
                     if (cfres1.getLineNumber() == cfres2.getLineNumber()) {
                         statements.subList(index-1, statements.size()).clear();
@@ -843,34 +824,29 @@ public class StatementMaker {
     }
 
     protected Expression parseTernaryOperator(int lineNumber, Expression condition, Expression exp1, Expression exp2) {
-        if (ObjectType.TYPE_CLASS.equals(exp1.getType()) && ObjectType.TYPE_CLASS.equals(exp2.getType()) && (condition.getClass() == BinaryOperatorExpression.class)) {
-            BinaryOperatorExpression boeCond = (BinaryOperatorExpression) condition;
+        if (ObjectType.TYPE_CLASS.equals(exp1.getType()) && ObjectType.TYPE_CLASS.equals(exp2.getType()) && condition.isBinaryOperatorExpression()) {
 
-            if ((boeCond.getLeftExpression().getClass() == FieldReferenceExpression.class) && (boeCond.getRightExpression().getClass() == NullExpression.class)) {
-                FieldReferenceExpression freCond = (FieldReferenceExpression) boeCond.getLeftExpression();
+            if (condition.getLeftExpression().isFieldReferenceExpression() && condition.getRightExpression().isNullExpression()) {
+                FieldReferenceExpression freCond = (FieldReferenceExpression) condition.getLeftExpression();
 
                 if (freCond.getInternalTypeName().equals(internalTypeName)) {
                     String fieldName = freCond.getName();
 
                     if (fieldName.startsWith("class$")) {
-                        if (boeCond.getOperator().equals("==") && (exp1.getClass() == BinaryOperatorExpression.class) && checkFieldReference(fieldName, exp2)) {
-                            BinaryOperatorExpression boe1 = (BinaryOperatorExpression) exp1;
+                        if (condition.getOperator().equals("==") && exp1.isBinaryOperatorExpression() && checkFieldReference(fieldName, exp2)) {
+                            if (exp1.getRightExpression().isMethodInvocationExpression() && checkFieldReference(fieldName, exp1.getLeftExpression())) {
+                                MethodInvocationExpression mie = (MethodInvocationExpression) exp1.getRightExpression();
 
-                            if ((boe1.getRightExpression().getClass() == ClassFileMethodInvocationExpression.class) && checkFieldReference(fieldName, boe1.getLeftExpression())) {
-                                MethodInvocationExpression mie = (MethodInvocationExpression) boe1.getRightExpression();
-
-                                if ((mie.getParameters().getClass() == StringConstantExpression.class) && mie.getName().equals("class$") && mie.getInternalTypeName().equals(internalTypeName)) {
+                                if (mie.getParameters().isStringConstantExpression() && mie.getName().equals("class$") && mie.getInternalTypeName().equals(internalTypeName)) {
                                     // JDK 1.4.2 '.class' found ==> Convert '(class$java$lang$String == null) ? (class$java$lang$String = TestDotClass.class$("java.lang.String") : class$java$lang$String)' to 'String.class'
                                     return createObjectTypeReferenceDotClassExpression(lineNumber, fieldName, mie);
                                 }
                             }
-                        } else if (boeCond.getOperator().equals("!=") && (exp2.getClass() == BinaryOperatorExpression.class) && checkFieldReference(fieldName, exp1)) {
-                            BinaryOperatorExpression boe2 = (BinaryOperatorExpression) exp2;
+                        } else if (condition.getOperator().equals("!=") && exp2.isBinaryOperatorExpression() && checkFieldReference(fieldName, exp1)) {
+                            if (exp2.getRightExpression().isMethodInvocationExpression() && checkFieldReference(fieldName, exp2.getLeftExpression())) {
+                                MethodInvocationExpression mie = (MethodInvocationExpression) exp2.getRightExpression();
 
-                            if ((boe2.getRightExpression().getClass() == ClassFileMethodInvocationExpression.class) && checkFieldReference(fieldName, boe2.getLeftExpression())) {
-                                MethodInvocationExpression mie = (MethodInvocationExpression) boe2.getRightExpression();
-
-                                if ((mie.getParameters().getClass() == StringConstantExpression.class) && mie.getName().equals("class$") && mie.getInternalTypeName().equals(internalTypeName)) {
+                                if (mie.getParameters().isStringConstantExpression() && mie.getName().equals("class$") && mie.getInternalTypeName().equals(internalTypeName)) {
                                     // JDK 1.1.8 '.class' found ==> Convert '(class$java$lang$String != null) ? class$java$lang$String : (class$java$lang$String = TestDotClass.class$("java.lang.String"))' to 'String.class'
                                     return createObjectTypeReferenceDotClassExpression(lineNumber, fieldName, mie);
                                 }
@@ -889,13 +865,13 @@ public class StatementMaker {
         Type expressionFalseType = expressionFalse.getType();
         Type type;
 
-        if (expressionTrue.getClass() == NullExpression.class) {
+        if (expressionTrue.isNullExpression()) {
             type = expressionFalseType;
-        } else if (expressionFalse.getClass() == NullExpression.class) {
+        } else if (expressionFalse.isNullExpression()) {
             type = expressionTrueType;
         } else if (expressionTrueType.equals(expressionFalseType)) {
             type = expressionTrueType;
-        } else if (expressionTrueType.isPrimitive() && expressionFalseType.isPrimitive()) {
+        } else if (expressionTrueType.isPrimitiveType() && expressionFalseType.isPrimitiveType()) {
             int flags = ((PrimitiveType)expressionTrueType).getFlags() | ((PrimitiveType)expressionFalseType).getFlags();
 
             if ((flags & FLAG_DOUBLE) != 0) {
@@ -919,7 +895,7 @@ public class StatementMaker {
                     type = MAYBE_BOOLEAN_TYPE;
                 }
             }
-        } else if (expressionTrueType.isObject() && expressionFalseType.isObject()) {
+        } else if (expressionTrueType.isObjectType() && expressionFalseType.isObjectType()) {
             ObjectType ot1 = (ObjectType)expressionTrueType;
             ObjectType ot2 = (ObjectType)expressionFalseType;
 
@@ -952,12 +928,12 @@ public class StatementMaker {
     }
 
     protected boolean checkFieldReference(String fieldName, Expression expression) {
-        if (expression.getClass() != FieldReferenceExpression.class)
-            return false;
+        if (expression.isFieldReferenceExpression()) {
+            FieldReferenceExpression fre = (FieldReferenceExpression) expression;
+            return fre.getName().equals(fieldName) && fre.getInternalTypeName().equals(internalTypeName);
+        }
 
-        FieldReferenceExpression fre = (FieldReferenceExpression)expression;
-
-        return fre.getName().equals(fieldName) && fre.getInternalTypeName().equals(internalTypeName);
+        return false;
     }
 
     @SuppressWarnings("unchecked")
@@ -1001,17 +977,15 @@ public class StatementMaker {
         while (iterator.hasNext()) {
             Statement statement = iterator.next();
 
-            if (statement.getClass() == ExpressionStatement.class) {
-                ExpressionStatement cfes = (ExpressionStatement)statement;
+            if (statement.getExpression().isPreOperatorExpression()) {
+                Expression poe = statement.getExpression();
+                String operator = poe.getOperator();
 
-                if (cfes.getExpression().getClass() == PreOperatorExpression.class) {
-                    PreOperatorExpression poe = (PreOperatorExpression)cfes.getExpression();
-                    String operator = poe.getOperator();
+                if ("++".equals(operator) || "--".equals(operator)) {
+                    ExpressionStatement cfes = (ExpressionStatement)statement;
 
-                    if ("++".equals(operator) || "--".equals(operator)) {
-                        // Replace pre-operator statement with post-operator statement
-                        cfes.setExpression(new PostOperatorExpression(poe.getLineNumber(), poe.getExpression(), operator));
-                    }
+                    // Replace pre-operator statement with post-operator statement
+                    cfes.setExpression(new PostOperatorExpression(poe.getLineNumber(), poe.getExpression(), operator));
                 }
             }
         }

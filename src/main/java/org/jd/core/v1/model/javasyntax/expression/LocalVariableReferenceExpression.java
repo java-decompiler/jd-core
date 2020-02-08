@@ -22,9 +22,13 @@ public class LocalVariableReferenceExpression extends AbstractLineNumberTypeExpr
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
+
+    @Override
+    public boolean isLocalVariableReferenceExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

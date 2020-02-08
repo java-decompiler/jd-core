@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
 public class StringConcatenationUtil {
 
     public static Expression create(Expression expression, int lineNumber, String typeName) {
-        if (expression.getClass() == ClassFileMethodInvocationExpression.class) {
+        if (expression.isMethodInvocationExpression()) {
             MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
             if ((mie.getParameters() != null) && !mie.getParameters().isList() && "append".equals(mie.getName())) {
@@ -27,19 +27,19 @@ public class StringConcatenationUtil {
                 Expression expr = mie.getExpression();
                 boolean firstParameterHaveGenericType = false;
 
-                while (expr.getClass() == ClassFileMethodInvocationExpression.class) {
+                while (expr.isMethodInvocationExpression()) {
                     mie = (MethodInvocationExpression) expr;
 
                     if ((mie.getParameters() == null) || mie.getParameters().isList() || !"append".equals(mie.getName())) {
                         break;
                     }
 
-                    firstParameterHaveGenericType = mie.getParameters().getFirst().getType().isGeneric();
+                    firstParameterHaveGenericType = mie.getParameters().getFirst().getType().isGenericType();
                     concatenatedStringExpression = new BinaryOperatorExpression(mie.getLineNumber(), ObjectType.TYPE_STRING, (Expression) mie.getParameters(), "+", concatenatedStringExpression, 4);
                     expr = mie.getExpression();
                 }
 
-                if (expr.getClass() == ClassFileNewExpression.class) {
+                if (expr.isNewExpression()) {
                     String internalTypeName = expr.getType().getDescriptor();
 
                     if ("Ljava/lang/StringBuilder;".equals(internalTypeName) || "Ljava/lang/StringBuffer;".equals(internalTypeName)) {

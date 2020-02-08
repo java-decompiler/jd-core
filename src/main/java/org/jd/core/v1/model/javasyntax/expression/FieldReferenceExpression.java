@@ -31,6 +31,7 @@ public class FieldReferenceExpression extends AbstractLineNumberTypeExpression {
         this.descriptor = descriptor;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -43,6 +44,7 @@ public class FieldReferenceExpression extends AbstractLineNumberTypeExpression {
         return internalTypeName;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -51,9 +53,13 @@ public class FieldReferenceExpression extends AbstractLineNumberTypeExpression {
         this.name = name;
     }
 
+    @Override
     public String getDescriptor() {
         return descriptor;
     }
+
+    @Override
+    public boolean isFieldReferenceExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

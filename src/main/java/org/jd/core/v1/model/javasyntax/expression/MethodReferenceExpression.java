@@ -31,6 +31,7 @@ public class MethodReferenceExpression extends AbstractLineNumberTypeExpression 
         this.descriptor = descriptor;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }
@@ -43,10 +44,12 @@ public class MethodReferenceExpression extends AbstractLineNumberTypeExpression 
         return internalTypeName;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getDescriptor() {
         return descriptor;
     }

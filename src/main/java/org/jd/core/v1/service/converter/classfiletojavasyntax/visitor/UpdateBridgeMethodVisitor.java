@@ -64,7 +64,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
     @SuppressWarnings("unchecked")
     protected Expression updateExpression(Expression expression) {
-        if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
+        if (!expression.isMethodInvocationExpression()) {
             return expression;
         }
 
@@ -82,33 +82,31 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         }
 
         Statement statement = bridgeMethodDeclaration.getStatements().getFirst();
-        Class statementClass = statement.getClass();
         Expression exp;
 
-        if (statementClass == ReturnExpressionStatement.class) {
-            exp = ((ReturnExpressionStatement) statement).getExpression();
-        } else if (statement.getClass() == ExpressionStatement.class) {
-            exp = ((ExpressionStatement) statement).getExpression();
+        if (statement.isReturnExpressionStatement()) {
+            exp = statement.getExpression();
+        } else if (statement.isExpressionStatement()) {
+            exp = statement.getExpression();
         } else {
             return expression;
         }
 
-        Class expClass = exp.getClass();
         BaseType parameterTypes = bridgeMethodDeclaration.getParameterTypes();
         int parameterTypesCount = (parameterTypes == null) ? 0 : parameterTypes.size();
 
-        if (expClass == FieldReferenceExpression.class) {
+        if (exp.isFieldReferenceExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp);
 
             expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new FieldReferenceExpression(mie1.getLineNumber(), fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor());
-        } else if (expClass == ClassFileMethodInvocationExpression.class) {
+        } else if (exp.isMethodInvocationExpression()) {
             MethodInvocationExpression mie2 = (MethodInvocationExpression) exp;
             TypeMaker.MethodTypes methodTypes = typeMaker.makeMethodTypes(mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor());
 
             if (methodTypes != null) {
-                if ((mie2.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {
+                if (mie2.getExpression().isObjectTypeReferenceExpression()) {
                     // Static method invocation
                     return new ClassFileMethodInvocationExpression(null, mie1.getLineNumber(), null, methodTypes.returnedType, mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.parameterTypes, mie1.getParameters());
                 } else {
@@ -131,48 +129,45 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                     return new ClassFileMethodInvocationExpression(mie1.getBinder(), mie1.getLineNumber(), null, methodTypes.returnedType, mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.parameterTypes, newParameters);
                 }
             }
-        } else if (expClass == BinaryOperatorExpression.class) {
-            BinaryOperatorExpression boe = (BinaryOperatorExpression) exp;
-            FieldReferenceExpression fre = getFieldReferenceExpression(boe.getLeftExpression());
+        } else if (exp.isBinaryOperatorExpression()) {
+            FieldReferenceExpression fre = getFieldReferenceExpression(exp.getLeftExpression());
 
             if (parameterTypesCount == 1) {
                 return new BinaryOperatorExpression(
                         mie1.getLineNumber(), mie1.getType(),
                         new FieldReferenceExpression(fre.getType(), fre.getExpression(), fre.getInternalTypeName(), fre.getName(), fre.getDescriptor()),
-                        boe.getOperator(),
+                        exp.getOperator(),
                         mie1.getParameters().getFirst(),
-                        boe.getPriority());
+                        exp.getPriority());
             } else if (parameterTypesCount == 2) {
                 DefaultList<Expression> parameters = mie1.getParameters().getList();
 
                 return new BinaryOperatorExpression(
                         mie1.getLineNumber(), mie1.getType(),
                         new FieldReferenceExpression(fre.getType(), parameters.get(0), fre.getInternalTypeName(), fre.getName(), fre.getDescriptor()),
-                        boe.getOperator(),
+                        exp.getOperator(),
                         parameters.get(1),
-                        boe.getPriority());
+                        exp.getPriority());
             }
-        } else if (expClass == PostOperatorExpression.class) {
-            PostOperatorExpression poe = (PostOperatorExpression)exp;
-            FieldReferenceExpression fre = getFieldReferenceExpression(poe.getExpression());
+        } else if (exp.isPostOperatorExpression()) {
+            FieldReferenceExpression fre = getFieldReferenceExpression(exp.getExpression());
 
             expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new PostOperatorExpression(
                     mie1.getLineNumber(),
                     new FieldReferenceExpression(fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor()),
-                    poe.getOperator());
-        } else if (expClass == PreOperatorExpression.class) {
-            PreOperatorExpression poe = (PreOperatorExpression)exp;
-            FieldReferenceExpression fre = getFieldReferenceExpression(poe.getExpression());
+                    exp.getOperator());
+        } else if (exp.isPreOperatorExpression()) {
+            FieldReferenceExpression fre = getFieldReferenceExpression(exp.getExpression());
 
             expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new PreOperatorExpression(
                     mie1.getLineNumber(),
-                    poe.getOperator(),
+                    exp.getOperator(),
                     new FieldReferenceExpression(fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor()));
-        } else if (expClass == IntegerConstantExpression.class) {
+        } else if (exp.isIntegerConstantExpression()) {
             return exp;
         }
 
@@ -183,7 +178,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         FieldReferenceExpression fre = (FieldReferenceExpression) expression;
         Expression freExpression = fre.getExpression();
 
-        if ((freExpression != null) && (freExpression.getClass() == ObjectTypeReferenceExpression.class)) {
+        if ((freExpression != null) && freExpression.isObjectTypeReferenceExpression()) {
             ((ObjectTypeReferenceExpression)freExpression).setExplicit(true);
         }
 
@@ -252,33 +247,31 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
         private boolean checkBridgeMethodDeclaration(ClassFileMethodDeclaration bridgeMethodDeclaration) {
             Statement statement = bridgeMethodDeclaration.getStatements().getFirst();
-            Class statementClass = statement.getClass();
             Expression exp;
 
-            if (statementClass == ReturnExpressionStatement.class) {
-                exp = ((ReturnExpressionStatement) statement).getExpression();
-            } else if (statement.getClass() == ExpressionStatement.class) {
-                exp = ((ExpressionStatement) statement).getExpression();
+            if (statement.isReturnExpressionStatement()) {
+                exp = statement.getExpression();
+            } else if (statement.isExpressionStatement()) {
+                exp = statement.getExpression();
             } else {
                 return false;
             }
 
-            Class expClass = exp.getClass();
             BaseType parameterTypes = bridgeMethodDeclaration.getParameterTypes();
             int parameterTypesCount = (parameterTypes == null) ? 0 : parameterTypes.size();
 
-            if (expClass == FieldReferenceExpression.class) {
+            if (exp.isFieldReferenceExpression()) {
                 FieldReferenceExpression fre = (FieldReferenceExpression) exp;
 
                 if (parameterTypesCount == 0) {
-                    return (fre.getExpression() != null) && (fre.getExpression().getClass() == ObjectTypeReferenceExpression.class);
+                    return (fre.getExpression() != null) && fre.getExpression().isObjectTypeReferenceExpression();
                 } else if (parameterTypesCount == 1) {
                     return (fre.getExpression() == null) || checkLocalVariableReference(fre.getExpression(), 0);
                 }
-            } else if (expClass == ClassFileMethodInvocationExpression.class) {
+            } else if (exp.isMethodInvocationExpression()) {
                 MethodInvocationExpression mie2 = (MethodInvocationExpression) exp;
 
-                if ((mie2.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {
+                if (mie2.getExpression().isObjectTypeReferenceExpression()) {
                     BaseExpression mie2Parameters = mie2.getParameters();
 
                     if ((mie2Parameters == null) || (mie2Parameters.size() == 0)) {
@@ -323,47 +316,39 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
                     return checkLocalVariableReference(mie2Parameters, 1);
                 }
-            } else if (expClass == BinaryOperatorExpression.class) {
-                BinaryOperatorExpression boe = (BinaryOperatorExpression) exp;
-
+            } else if (exp.isBinaryOperatorExpression()) {
                 if (parameterTypesCount == 1) {
-                    if ((boe.getLeftExpression().getClass() == FieldReferenceExpression.class) && checkLocalVariableReference(boe.getRightExpression(), 0)) {
-                        FieldReferenceExpression fre = (FieldReferenceExpression) boe.getLeftExpression();
-
-                        return (fre.getExpression().getClass() == ObjectTypeReferenceExpression.class);
+                    if (exp.getLeftExpression().isFieldReferenceExpression() && checkLocalVariableReference(exp.getRightExpression(), 0)) {
+                        FieldReferenceExpression fre = (FieldReferenceExpression) exp.getLeftExpression();
+                        return fre.getExpression().isObjectTypeReferenceExpression();
                     }
                 } else if (parameterTypesCount == 2) {
-                    if ((boe.getLeftExpression().getClass() == FieldReferenceExpression.class) && checkLocalVariableReference(boe.getRightExpression(), 1)) {
-                        FieldReferenceExpression fre = (FieldReferenceExpression) boe.getLeftExpression();
-
+                    if (exp.getLeftExpression().isFieldReferenceExpression() && checkLocalVariableReference(exp.getRightExpression(), 1)) {
+                        FieldReferenceExpression fre = (FieldReferenceExpression) exp.getLeftExpression();
                         return checkLocalVariableReference(fre.getExpression(), 0);
                     }
                 }
-            } else if (expClass == PostOperatorExpression.class) {
-                PostOperatorExpression poe = (PostOperatorExpression)exp;
+            } else if (exp.isPostOperatorExpression()) {
+                exp = exp.getExpression();
 
-                if (poe.getExpression().getClass() == FieldReferenceExpression.class) {
-                    FieldReferenceExpression fre = (FieldReferenceExpression) poe.getExpression();
-
-                    if ((parameterTypesCount == 0) && (fre.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {
+                if (exp.isFieldReferenceExpression()) {
+                    if ((parameterTypesCount == 0) && exp.getExpression().isObjectTypeReferenceExpression()) {
                         return true;
-                    } else if ((parameterTypesCount == 1) && (fre.getExpression() != null) && checkLocalVariableReference(fre.getExpression(), 0)) {
+                    } else if ((parameterTypesCount == 1) && (exp.getExpression() != null) && checkLocalVariableReference(exp.getExpression(), 0)) {
                         return true;
                     }
                 }
-            } else if ((parameterTypesCount == 1) && (expClass == PreOperatorExpression.class)) {
-                PreOperatorExpression poe = (PreOperatorExpression)exp;
+            } else if ((parameterTypesCount == 1) && exp.isPreOperatorExpression()) {
+                exp = exp.getExpression();
 
-                if (poe.getExpression().getClass() == FieldReferenceExpression.class) {
-                    FieldReferenceExpression fre = (FieldReferenceExpression) poe.getExpression();
-
-                    if ((parameterTypesCount == 0) && (fre.getExpression().getClass() == ObjectTypeReferenceExpression.class)) {
+                if (exp.isFieldReferenceExpression()) {
+                    if ((parameterTypesCount == 0) && exp.getExpression().isObjectTypeReferenceExpression()) {
                         return true;
-                    } else if ((parameterTypesCount == 1) && (fre.getExpression() != null) && checkLocalVariableReference(fre.getExpression(), 0)) {
+                    } else if ((parameterTypesCount == 1) && (exp.getExpression() != null) && checkLocalVariableReference(exp.getExpression(), 0)) {
                         return true;
                     }
                 }
-            } else if ((parameterTypesCount == 0) && (expClass == IntegerConstantExpression.class)) {
+            } else if ((parameterTypesCount == 0) && exp.isIntegerConstantExpression()) {
                 return true;
             }
 
@@ -371,13 +356,12 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         }
 
         private boolean checkLocalVariableReference(BaseExpression expression, int index) {
-            if (expression.getClass() != ClassFileLocalVariableReferenceExpression.class) {
-                return false;
+            if (expression.isLocalVariableReferenceExpression()) {
+                ClassFileLocalVariableReferenceExpression var = (ClassFileLocalVariableReferenceExpression) expression;
+                return (var.getLocalVariable().getIndex() == index);
             }
 
-            ClassFileLocalVariableReferenceExpression var = (ClassFileLocalVariableReferenceExpression) expression;
-
-            return (var.getLocalVariable().getIndex() == index);
+            return false;
         }
     }
 }

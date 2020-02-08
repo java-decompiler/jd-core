@@ -23,6 +23,7 @@ public class BinaryOperatorExpression extends AbstractLineNumberTypeExpression {
         this.priority = priority;
     }
 
+    @Override
     public Expression getLeftExpression() {
         return leftExpression;
     }
@@ -31,11 +32,7 @@ public class BinaryOperatorExpression extends AbstractLineNumberTypeExpression {
         this.leftExpression = leftExpression;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Expression> T getGenericLeftExpression() {
-        return (T) leftExpression;
-    }
-
+    @Override
     public String getOperator() {
         return operator;
     }
@@ -44,17 +41,13 @@ public class BinaryOperatorExpression extends AbstractLineNumberTypeExpression {
         this.operator = operator;
     }
 
+    @Override
     public Expression getRightExpression() {
         return rightExpression;
     }
 
     public void setRightExpression(Expression rightExpression) {
         this.rightExpression = rightExpression;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends Expression> T getGenericRightExpression() {
-        return (T) rightExpression;
     }
 
     public int getPriority() {
@@ -64,6 +57,9 @@ public class BinaryOperatorExpression extends AbstractLineNumberTypeExpression {
     public void setPriority(int priority) {
         this.priority = priority;
     }
+
+    @Override
+    public boolean isBinaryOperatorExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

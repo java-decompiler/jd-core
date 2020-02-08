@@ -18,6 +18,7 @@ public class AssertStatement implements Statement {
         this.message = message;
     }
 
+    @Override
     public Expression getCondition() {
         return condition;
     }

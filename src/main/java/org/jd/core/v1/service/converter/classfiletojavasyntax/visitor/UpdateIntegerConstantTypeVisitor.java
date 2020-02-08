@@ -124,8 +124,8 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
             case "==":
             case "!=":
                 if ((leftType.getDimension() == 0) && (rightType.getDimension() == 0)) {
-                    if (leftType.isPrimitive()) {
-                        if (rightType.isPrimitive()) {
+                    if (leftType.isPrimitiveType()) {
+                        if (rightType.isPrimitiveType()) {
                             if (leftType == rightType) {
                                 type = leftType;
                             } else {
@@ -141,7 +141,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                             right.accept(this);
                         }
                         break;
-                    } else if (rightType.isPrimitive()) {
+                    } else if (rightType.isPrimitiveType()) {
                         left.accept(this);
                         expression.setRightExpression(updateExpression(leftType, right));
                         break;
@@ -248,8 +248,8 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
 
         expression.setCondition(updateBooleanExpression(expression.getCondition()));
 
-        if (trueType.isPrimitive()) {
-            if (falseType.isPrimitive()) {
+        if (trueType.isPrimitiveType()) {
+            if (falseType.isPrimitiveType()) {
                 expression.setExpressionTrue(updateExpression(TYPE_INT, expression.getExpressionTrue()));
                 expression.setExpressionFalse(updateExpression(TYPE_INT, expression.getExpressionFalse()));
             } else {
@@ -257,7 +257,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                 expression.setExpressionTrue(updateExpression(falseType, expression.getExpressionTrue()));
             }
         } else {
-            if (falseType.isPrimitive()) {
+            if (falseType.isPrimitiveType()) {
                 expression.setExpressionFalse(updateExpression(trueType, expression.getExpressionFalse()));
                 expression.getExpressionFalse().accept(this);
             } else {
@@ -309,11 +309,11 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
             for (int i=e.size()-1; i>=0; i--) {
                 Type type = t.get(i);
 
-                if ((type.getDimension() == 0) && type.isPrimitive()) {
+                if ((type.getDimension() == 0) && type.isPrimitiveType()) {
                     Expression parameter = e.get(i);
                     Expression updatedParameter = updateExpression(type, parameter);
 
-                    if (updatedParameter.getClass() == IntegerConstantExpression.class) {
+                    if (updatedParameter.isIntegerConstantExpression()) {
                         switch (((PrimitiveType)type).getJavaPrimitiveFlags()) {
                             case FLAG_BYTE:
                             case FLAG_SHORT:
@@ -328,10 +328,10 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
         } else {
             Type type = types.getFirst();
 
-            if ((type.getDimension() == 0) && type.isPrimitive()) {
+            if ((type.getDimension() == 0) && type.isPrimitiveType()) {
                 Expression updatedParameter = updateExpression(type, (Expression)expressions);
 
-                if (updatedParameter.getClass() == IntegerConstantExpression.class) {
+                if (updatedParameter.isIntegerConstantExpression()) {
                     switch (((PrimitiveType)type).getJavaPrimitiveFlags()) {
                         case FLAG_BYTE:
                         case FLAG_SHORT:
@@ -349,20 +349,18 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
     }
 
     protected Expression updateExpression(Type type, Expression expression) {
-        Class clazz = expression.getClass();
-
         assert type != TYPE_VOID : "UpdateIntegerConstantTypeVisitor.updateExpression(type, expr) : try to set 'void' to a numeric expression";
 
-        if ((type != expression.getType()) && (clazz == IntegerConstantExpression.class)) {
+        if ((type != expression.getType()) && expression.isIntegerConstantExpression()) {
             if (ObjectType.TYPE_STRING.equals(type)) {
                 type = PrimitiveType.TYPE_CHAR;
             }
 
-            if (type.isPrimitive()) {
+            if (type.isPrimitiveType()) {
                 PrimitiveType primitiveType = (PrimitiveType) type;
                 IntegerConstantExpression ice = (IntegerConstantExpression) expression;
                 PrimitiveType icePrimitiveType = (PrimitiveType)ice.getType();
-                int value = ice.getValue();
+                int value = ice.getIntegerValue();
                 int lineNumber = ice.getLineNumber();
 
                 switch (primitiveType.getJavaPrimitiveFlags()) {
@@ -429,14 +427,14 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                         }
                         break;
                     case FLAG_LONG:
-                        return new LongConstantExpression(ice.getLineNumber(), ice.getValue());
+                        return new LongConstantExpression(ice.getLineNumber(), ice.getIntegerValue());
                 }
 
                 return expression;
             }
         }
 
-        if (type.isPrimitive() && (clazz == TernaryOperatorExpression.class)) {
+        if (type.isPrimitiveType() && expression.isTernaryOperatorExpression()) {
             TernaryOperatorExpression toe = (TernaryOperatorExpression) expression;
 
             toe.setType(type);
@@ -457,13 +455,9 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
 
     protected Expression updateBooleanExpression(Expression expression) {
         if (TYPE_BOOLEAN != expression.getType()) {
-            Class clazz = expression.getClass();
-
-            if (clazz == IntegerConstantExpression.class) {
-                IntegerConstantExpression ice = (IntegerConstantExpression)expression;
-
-                return new BooleanExpression(ice.getLineNumber(), ice.getValue()!=0);
-            } else if (clazz == TernaryOperatorExpression.class) {
+            if (expression.isIntegerConstantExpression()) {
+                return new BooleanExpression(expression.getLineNumber(), expression.getIntegerValue()!=0);
+            } else if (expression.isTernaryOperatorExpression()) {
                 TernaryOperatorExpression toe = (TernaryOperatorExpression) expression;
 
                 toe.setType(TYPE_BOOLEAN);

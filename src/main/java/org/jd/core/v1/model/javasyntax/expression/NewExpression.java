@@ -52,10 +52,12 @@ public class NewExpression extends AbstractLineNumberExpression {
         return 0;
     }
 
+    @Override
     public String getDescriptor() {
         return descriptor;
     }
 
+    @Override
     public BaseExpression getParameters() {
         return parameters;
     }
@@ -67,6 +69,9 @@ public class NewExpression extends AbstractLineNumberExpression {
     public BodyDeclaration getBodyDeclaration() {
         return bodyDeclaration;
     }
+
+    @Override
+    public boolean isNewExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

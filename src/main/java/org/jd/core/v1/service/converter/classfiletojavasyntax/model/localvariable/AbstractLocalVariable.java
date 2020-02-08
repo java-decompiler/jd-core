@@ -127,4 +127,6 @@ public abstract class AbstractLocalVariable {
             variable.addVariableOnLeft(this);
         }
     }
+
+    public boolean isPrimitiveLocalVariable() { return false; }
 }

@@ -31,41 +31,35 @@ public class RemoveBinaryOpReturnStatementsVisitor extends AbstractJavaSyntaxVis
     public void visit(Statements statements) {
         if (statements.size() > 1) {
             // Replace pattern "local_var_2 = ...; return local_var_2;" with "return ...;"
-            Statement lastStatement = (Statement)statements.getLast();
+            Statement lastStatement = statements.getLast();
 
-            if (lastStatement.getClass() == ReturnExpressionStatement.class) {
-                ReturnExpressionStatement res = (ReturnExpressionStatement) lastStatement;
+            if (lastStatement.isReturnExpressionStatement() && lastStatement.getExpression().isLocalVariableReferenceExpression()) {
+                ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression)lastStatement.getExpression();
 
-                if (res.getExpression().getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                    ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression)res.getExpression();
+                if (lvr1.getName() == null) {
+                    Statement statement = statements.get(statements.size()-2);
 
-                    if (lvr1.getName() == null) {
-                        Statement statement = (Statement)statements.get(statements.size()-2);
+                    if (statement.getExpression().isBinaryOperatorExpression()) {
+                        Expression boe = statement.getExpression();
+                        Expression leftExpression = boe.getLeftExpression();
 
-                        if (statement.getClass() == ExpressionStatement.class) {
-                            ExpressionStatement es = (ExpressionStatement)statement;
+                        if (leftExpression.isLocalVariableReferenceExpression()) {
+                            ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) leftExpression;
 
-                            if (es.getExpression().getClass() == BinaryOperatorExpression.class) {
-                                BinaryOperatorExpression boe = (BinaryOperatorExpression)es.getExpression();
-                                Expression leftExpression = boe.getLeftExpression();
+                            if ((lvr1.getLocalVariable() == lvr2.getLocalVariable()) && (lvr1.getLocalVariable().getReferences().size() == 2)) {
+                                ReturnExpressionStatement res = (ReturnExpressionStatement) lastStatement;
 
-                                if (leftExpression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                                    ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) leftExpression;
-
-                                    if ((lvr1.getLocalVariable() == lvr2.getLocalVariable()) && (lvr1.getLocalVariable().getReferences().size() == 2)) {
-                                        // Remove synthetic assignment statement
-                                        statements.remove(statements.size() - 2);
-                                        // Replace synthetic local variable with expression
-                                        res.setExpression(boe.getRightExpression());
-                                        // Check line number
-                                        int expressionLineNumber = boe.getRightExpression().getLineNumber();
-                                        if (res.getLineNumber() > expressionLineNumber) {
-                                            res.setLineNumber(expressionLineNumber);
-                                        }
-                                        // Remove synthetic local variable
-                                        localVariableMaker.removeLocalVariable(lvr1.getLocalVariable());
-                                    }
+                                // Remove synthetic assignment statement
+                                statements.remove(statements.size() - 2);
+                                // Replace synthetic local variable with expression
+                                res.setExpression(boe.getRightExpression());
+                                // Check line number
+                                int expressionLineNumber = boe.getRightExpression().getLineNumber();
+                                if (res.getLineNumber() > expressionLineNumber) {
+                                    res.setLineNumber(expressionLineNumber);
                                 }
+                                // Remove synthetic local variable
+                                localVariableMaker.removeLocalVariable(lvr1.getLocalVariable());
                             }
                         }
                     }

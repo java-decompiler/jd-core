@@ -36,6 +36,7 @@ public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression 
         this.condition = condition;
     }
 
+    @Override
     public Expression getExpressionTrue() {
         return expressionTrue;
     }
@@ -44,6 +45,7 @@ public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression 
         this.expressionTrue = expressionTrue;
     }
 
+    @Override
     public Expression getExpressionFalse() {
         return expressionFalse;
     }
@@ -56,6 +58,9 @@ public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression 
     public int getPriority() {
         return 15;
     }
+
+    @Override
+    public boolean isTernaryOperatorExpression() { return true; }
 
     @Override
     public void accept(ExpressionVisitor visitor) {

@@ -59,34 +59,28 @@ public class RemoveDefaultConstructorVisitor extends AbstractJavaSyntaxVisitor {
         if ((declaration.getFlags() & ConstructorDeclaration.FLAG_ABSTRACT) == 0) {
             ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration)declaration;
 
-            if ((cfcd.getStatements() != null) && (cfcd.getStatements().getClass() == Statements.class)) {
+            if ((cfcd.getStatements() != null) && cfcd.getStatements().isStatements()) {
                 Statements statements = (Statements) cfcd.getStatements();
 
                 // Remove no-parameter super constructor call and anonymous class super constructor call
                 Iterator<Statement> iterator = statements.iterator();
 
                 while (iterator.hasNext()) {
-                    Statement statement = iterator.next();
+                    Expression es = iterator.next().getExpression();
 
-                    if (statement.getClass() == ExpressionStatement.class) {
-                        Expression es = ((ExpressionStatement) statement).getExpression();
+                    if (es.isSuperConstructorInvocationExpression()) {
+                        if ((declaration.getFlags() & FLAG_ANONYMOUS) == 0) {
+                            BaseExpression parameters = es.getParameters();
 
-                        if (es.getClass() == ClassFileSuperConstructorInvocationExpression.class) {
-                            SuperConstructorInvocationExpression scie = (SuperConstructorInvocationExpression) es;
-
-                            if ((declaration.getFlags() & FLAG_ANONYMOUS) == 0) {
-                                BaseExpression parameters = scie.getParameters();
-
-                                if ((parameters == null) || (parameters.size() == 0)) {
-                                    // Remove 'super();'
-                                    iterator.remove();
-                                    break;
-                                }
-                            } else {
-                                // Remove anonymous class super constructor call
+                            if ((parameters == null) || (parameters.size() == 0)) {
+                                // Remove 'super();'
                                 iterator.remove();
                                 break;
                             }
+                        } else {
+                            // Remove anonymous class super constructor call
+                            iterator.remove();
+                            break;
                         }
                     }
                 }

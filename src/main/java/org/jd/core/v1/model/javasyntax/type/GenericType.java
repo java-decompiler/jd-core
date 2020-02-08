@@ -79,13 +79,11 @@ public class GenericType implements Type {
 
     @Override
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
-        Class typeArgumentClass = typeArgument.getClass();
-
-        if (typeArgumentClass == GenericType.class) {
+        if (typeArgument.isGenericTypeArgument()) {
             return true;
         } else if (typeArgument instanceof Type) {
             return false;
-        } else if (typeArgumentClass == WildcardTypeArgument.class) {
+        } else if (typeArgument.isWildcardTypeArgument()) {
             return false;
         }
 
@@ -93,9 +91,12 @@ public class GenericType implements Type {
     }
 
     @Override
-    public boolean isGeneric() {
+    public boolean isGenericType() {
         return true;
     }
+
+    @Override
+    public boolean isGenericTypeArgument() { return true; }
 
     @Override
     public String toString() {

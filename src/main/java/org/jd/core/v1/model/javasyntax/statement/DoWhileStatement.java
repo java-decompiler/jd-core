@@ -18,6 +18,7 @@ public class DoWhileStatement implements Statement {
         this.statements = statements;
     }
 
+    @Override
     public Expression getCondition() {
         return condition;
     }
@@ -26,6 +27,7 @@ public class DoWhileStatement implements Statement {
         this.condition = condition;
     }
 
+    @Override
     public BaseStatement getStatements() {
         return statements;
     }

@@ -160,7 +160,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if ((exceptionTypes != null) && (exceptionTypes.size() == 1)) {
             Type exceptionType = exceptionTypes.getFirst();
 
-            if (exceptionType.isGeneric() && !statement.getExpression().getType().equals(exceptionType)) {
+            if (exceptionType.isGenericType() && !statement.getExpression().getType().equals(exceptionType)) {
                 statement.setExpression(addCastExpression(exceptionType, statement.getExpression()));
             }
         }
@@ -211,7 +211,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(ExpressionVariableInitializer declaration) {
         Expression expression = declaration.getExpression();
 
-        if (expression.getClass() == NewInitializedArray.class) {
+        if (expression.isNewInitializedArray()) {
             NewInitializedArray nia = (NewInitializedArray)expression;
             Type t = type;
 
@@ -281,7 +281,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(FieldReferenceExpression expression) {
         Expression exp = expression.getExpression();
 
-        if ((exp != null) && (exp.getClass() != ObjectTypeReferenceExpression.class)) {
+        if ((exp != null) && !exp.isObjectTypeReferenceExpression()) {
             Type type = typeMaker.makeFromInternalTypeName(expression.getInternalTypeName());
 
             if (type.getName() != null) {
@@ -297,7 +297,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         Expression rightExpression = expression.getRightExpression();
 
         if (expression.getOperator().equals("=")) {
-            if (rightExpression.getClass() == ClassFileMethodInvocationExpression.class) {
+            if (rightExpression.isMethodInvocationExpression()) {
                 ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)rightExpression;
 
                 if (mie.getTypeParameters() != null) {
@@ -343,9 +343,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     private Expression updateExpression(Type type, Expression expression, boolean force) {
-        Class expressionClass = expression.getClass();
-
-        if (expressionClass == NullExpression.class) {
+        if (expression.isNullExpression()) {
             if (force) {
                 searchFirstLineNumberVisitor.init();
                 expression.accept(searchFirstLineNumberVisitor);
@@ -355,14 +353,14 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             Type expressionType = expression.getType();
 
             if (!expressionType.equals(type) && !TYPE_OBJECT.equals(type)) {
-                if (type.isObject()) {
-                    if (expressionType.isObject()) {
+                if (type.isObjectType()) {
+                    if (expressionType.isObjectType()) {
                         ObjectType objectType = (ObjectType) type;
                         ObjectType expressionObjectType = (ObjectType) expressionType;
 
                         if (force && !objectType.getInternalName().equals(expressionObjectType.getInternalName())) {
                             // Force disambiguation of method invocation => Uses raw type
-                            if (expression.getClass() == ClassFileNewExpression.class) {
+                            if (expression.isNewExpression()) {
                                 ClassFileNewExpression ne = (ClassFileNewExpression)expression;
                                 ne.setObjectType(ne.getObjectType().createType(null));
                             }
@@ -378,23 +376,22 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                             }
                             expression = addCastExpression(t, expression);
                         }
-                    } else if (expressionType.isGeneric()) {
+                    } else if (expressionType.isGenericType()) {
                         expression = addCastExpression(type, expression);
                     }
-                } else if (type.isGeneric()) {
-                    if (expressionType.isObject() || expressionType.isGeneric()) {
+                } else if (type.isGenericType()) {
+                    if (expressionType.isObjectType() || expressionType.isGenericType()) {
                         expression = addCastExpression(type, expression);
                     }
                 }
             }
 
-            if (!force && (expression.getClass() == CastExpression.class)) {
-                CastExpression ce = (CastExpression)expression;
-                Type ceExpressionType = ce.getExpression().getType();
+            if (!force && expression.isCastExpression()) {
+                Type ceExpressionType = expression.getExpression().getType();
 
-                if (type.isObject() && ceExpressionType.isObject() && typeMaker.isAssignable(typeBounds, (ObjectType)type, (ObjectType)ceExpressionType)) {
+                if (type.isObjectType() && ceExpressionType.isObjectType() && typeMaker.isAssignable(typeBounds, (ObjectType)type, (ObjectType)ceExpressionType)) {
                     // Remove cast expression
-                    expression = ce.getExpression();
+                    expression = expression.getExpression();
                 }
             }
 
@@ -405,12 +402,12 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     private Expression addCastExpression(Type type, Expression expression) {
-        if (expression.getClass() == CastExpression.class) {
-            CastExpression ce = (CastExpression)expression;
-
-            if (type.equals(ce.getExpression().getType())) {
-                return ce.getExpression();
+        if (expression.isCastExpression()) {
+            if (type.equals(expression.getExpression().getType())) {
+                return expression.getExpression();
             } else {
+                CastExpression ce = (CastExpression)expression;
+
                 ce.setType(type);
                 return ce;
             }

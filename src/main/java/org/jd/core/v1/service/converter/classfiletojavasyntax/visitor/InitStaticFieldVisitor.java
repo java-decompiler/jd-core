@@ -171,19 +171,13 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected boolean isAssertionsDisabledStatement(Statement statement) {
-        if ((statement.getClass() == ExpressionStatement.class)) {
-            ExpressionStatement cdes = (ExpressionStatement) statement;
+        Expression expression = statement.getExpression();
 
-            if (cdes.getExpression().getClass() == BinaryOperatorExpression.class) {
-                BinaryOperatorExpression cfboe = (BinaryOperatorExpression) cdes.getExpression();
+        if (expression.getLeftExpression().isFieldReferenceExpression()) {
+            FieldReferenceExpression fre = (FieldReferenceExpression) expression.getLeftExpression();
 
-                if (cfboe.getLeftExpression().getClass() == FieldReferenceExpression.class) {
-                    FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
-
-                    if ((fre.getType() == PrimitiveType.TYPE_BOOLEAN) && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
-                        return true;
-                    }
-                }
+            if ((fre.getType() == PrimitiveType.TYPE_BOOLEAN) && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
+                return true;
             }
         }
 
@@ -191,33 +185,27 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected boolean setStaticFieldInitializer(Statement statement) {
-        if (statement.getClass() == ExpressionStatement.class) {
-            ExpressionStatement cdes = (ExpressionStatement) statement;
+        Expression expression = statement.getExpression();
 
-            if (cdes.getExpression().getClass() == BinaryOperatorExpression.class) {
-                BinaryOperatorExpression cfboe = (BinaryOperatorExpression) cdes.getExpression();
+        if (expression.getLeftExpression().isFieldReferenceExpression()) {
+            FieldReferenceExpression fre = (FieldReferenceExpression) expression.getLeftExpression();
 
-                if (cfboe.getLeftExpression().getClass() == FieldReferenceExpression.class) {
-                    FieldReferenceExpression fre = (FieldReferenceExpression) cfboe.getLeftExpression();
+            if (fre.getInternalTypeName().equals(internalTypeName)) {
+                FieldDeclarator fdr = fields.get(fre.getName());
 
-                    if (fre.getInternalTypeName().equals(internalTypeName)) {
-                        FieldDeclarator fdr = fields.get(fre.getName());
+                if ((fdr != null) && (fdr.getVariableInitializer() == null)) {
+                    FieldDeclaration fdn = fdr.getFieldDeclaration();
 
-                        if ((fdr != null) && (fdr.getVariableInitializer() == null)) {
-                            FieldDeclaration fdn = fdr.getFieldDeclaration();
+                    if (((fdn.getFlags() & Declaration.FLAG_STATIC) != 0) && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
+                        expression = expression.getRightExpression();
 
-                            if (((fdn.getFlags() & Declaration.FLAG_STATIC) != 0) && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
-                                Expression expression = cfboe.getRightExpression();
+                        searchLocalVariableReferenceVisitor.init(-1);
+                        expression.accept(searchLocalVariableReferenceVisitor);
 
-                                searchLocalVariableReferenceVisitor.init(-1);
-                                expression.accept(searchLocalVariableReferenceVisitor);
-
-                                if (!searchLocalVariableReferenceVisitor.containsReference()) {
-                                    fdr.setVariableInitializer(new ExpressionVariableInitializer(expression));
-                                    ((ClassFileFieldDeclaration)fdr.getFieldDeclaration()).setFirstLineNumber(expression.getLineNumber());
-                                    return true;
-                                }
-                            }
+                        if (!searchLocalVariableReferenceVisitor.containsReference()) {
+                            fdr.setVariableInitializer(new ExpressionVariableInitializer(expression));
+                            ((ClassFileFieldDeclaration)fdr.getFieldDeclaration()).setFirstLineNumber(expression.getLineNumber());
+                            return true;
                         }
                     }
                 }

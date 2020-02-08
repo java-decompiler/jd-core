@@ -35,6 +35,7 @@ public class EnumConstantReferenceExpression extends AbstractLineNumberExpressio
         return type;
     }
 
+    @Override
     public String getName() {
         return name;
     }

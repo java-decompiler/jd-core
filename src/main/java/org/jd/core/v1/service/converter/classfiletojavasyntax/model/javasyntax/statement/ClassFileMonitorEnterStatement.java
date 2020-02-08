@@ -18,9 +18,13 @@ public class ClassFileMonitorEnterStatement extends CommentStatement {
         this.monitor = monitor;
     }
 
+    @Override
     public Expression getMonitor() {
         return monitor;
     }
+
+    @Override
+    public boolean isMonitorEnterStatement() { return true; }
 
     @Override
     public String toString() {

@@ -30,6 +30,7 @@ public class ConstructorReferenceExpression extends AbstractLineNumberTypeExpres
         return objectType;
     }
 
+    @Override
     public String getDescriptor() {
         return descriptor;
     }

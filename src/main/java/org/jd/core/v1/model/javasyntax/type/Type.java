@@ -15,16 +15,4 @@ public interface Type extends BaseType, TypeArgument {
     int getDimension();
 
     Type createType(int dimension);
-
-    default boolean isPrimitive() {
-        return false;
-    }
-
-    default boolean isObject() {
-        return false;
-    }
-
-    default boolean isGeneric() {
-        return false;
-    }
 }

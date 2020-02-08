@@ -17,9 +17,13 @@ public class IfElseStatement extends IfStatement {
         this.elseStatements = elseStatements;
     }
 
+    @Override
     public BaseStatement getElseStatements() {
         return elseStatements;
     }
+
+    @Override
+    public boolean isIfElseStatement() { return true; }
 
     @Override
     public void accept(StatementVisitor visitor) {

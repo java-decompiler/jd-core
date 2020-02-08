@@ -35,6 +35,7 @@ public class TryStatement implements Statement {
         return resources;
     }
 
+    @Override
     public BaseStatement getTryStatements() {
         return tryStatements;
     }
@@ -43,10 +44,12 @@ public class TryStatement implements Statement {
         this.tryStatements = tryStatements;
     }
 
+    @Override
     public DefaultList<CatchClause> getCatchClauses() {
         return catchClauses;
     }
 
+    @Override
     public BaseStatement getFinallyStatements() {
         return finallyStatements;
     }
@@ -74,6 +77,7 @@ public class TryStatement implements Statement {
             return name;
         }
 
+        @Override
         public Expression getExpression() {
             return expression;
         }
@@ -102,6 +106,7 @@ public class TryStatement implements Statement {
             this.statements = statements;
         }
 
+        @Override
         public int getLineNumber() {
             return lineNumber;
         }
@@ -118,13 +123,15 @@ public class TryStatement implements Statement {
             return name;
         }
 
+        @Override
         public BaseStatement getStatements() {
             return statements;
         }
 
         public void addType(ObjectType type) {
-            if (otherTypes == null)
+            if (otherTypes == null) {
                 otherTypes = new DefaultList<>();
+            }
             otherTypes.add(type);
         }
 
@@ -133,6 +140,9 @@ public class TryStatement implements Statement {
             visitor.visit(this);
         }
     }
+
+    @Override
+    public boolean isTryStatement() { return true; }
 
     @Override
     public void accept(StatementVisitor visitor) {

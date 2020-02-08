@@ -65,6 +65,9 @@ public class ObjectTypeReferenceExpression implements Expression {
     }
 
     @Override
+    public boolean isObjectTypeReferenceExpression() { return true; }
+
+    @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
     }

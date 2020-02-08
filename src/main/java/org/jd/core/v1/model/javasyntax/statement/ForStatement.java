@@ -40,6 +40,7 @@ public class ForStatement implements Statement {
         this.declaration = declaration;
     }
 
+    @Override
     public BaseExpression getInit() {
         return init;
     }
@@ -48,6 +49,7 @@ public class ForStatement implements Statement {
         this.init = init;
     }
 
+    @Override
     public Expression getCondition() {
         return condition;
     }
@@ -56,6 +58,7 @@ public class ForStatement implements Statement {
         this.condition = condition;
     }
 
+    @Override
     public BaseExpression getUpdate() {
         return update;
     }
@@ -64,6 +67,7 @@ public class ForStatement implements Statement {
         this.update = update;
     }
 
+    @Override
     public BaseStatement getStatements() {
         return statements;
     }

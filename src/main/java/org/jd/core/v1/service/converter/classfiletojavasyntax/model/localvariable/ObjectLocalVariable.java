@@ -82,14 +82,14 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
 
     @Override
     public boolean isAssignableFrom(Map<String, BaseType> typeBounds, Type type) {
-        if (this.type.isObject()) {
+        if (this.type.isObjectType()) {
             if (this.type.equals(TYPE_OBJECT)) {
-                if ((type.getDimension() > 0) || !type.isPrimitive()) {
+                if ((type.getDimension() > 0) || !type.isPrimitiveType()) {
                     return true;
                 }
             }
 
-            if (type.isObject()) {
+            if (type.isObjectType()) {
                 return typeMaker.isAssignable(typeBounds, (ObjectType) this.type, (ObjectType) type);
             }
         }
@@ -104,12 +104,12 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                 this.type = type;
                 fireChangeEvent(typeBounds);
             } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0)) {
-                assert !this.type.isPrimitive() && !type.isPrimitive() : "ObjectLocalVariable.typeOnRight(type) : unexpected type";
+                assert !this.type.isPrimitiveType() && !type.isPrimitiveType() : "ObjectLocalVariable.typeOnRight(type) : unexpected type";
 
-                if (this.type.isObject()) {
+                if (this.type.isObjectType()) {
                     ObjectType thisObjectType = (ObjectType) this.type;
 
-                    if (type.isObject()) {
+                    if (type.isObjectType()) {
                         ObjectType otherObjectType = (ObjectType) type;
 
                         if (thisObjectType.getInternalName().equals(otherObjectType.getInternalName())) {
@@ -127,8 +127,8 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
                             }
                         }
                     }
-                } else if (this.type.isGeneric()) {
-                    if (type.isGeneric()) {
+                } else if (this.type.isGenericType()) {
+                    if (type.isGenericType()) {
                         this.type = type;
                         fireChangeEvent(typeBounds);
                     }
@@ -143,7 +143,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
             if (this.type == TYPE_UNDEFINED_OBJECT) {
                 this.type = type;
                 fireChangeEvent(typeBounds);
-            } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0) && this.type.isObject() && type.isObject()) {
+            } else if ((this.type.getDimension() == 0) && (type.getDimension() == 0) && this.type.isObjectType() && type.isObjectType()) {
                 ObjectType thisObjectType = (ObjectType) this.type;
                 ObjectType otherObjectType = (ObjectType) type;
 

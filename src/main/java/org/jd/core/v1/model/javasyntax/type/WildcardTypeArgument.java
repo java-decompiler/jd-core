@@ -15,14 +15,17 @@ public class WildcardTypeArgument implements TypeArgument {
     private WildcardTypeArgument() {}
 
     @Override
+    public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
+        return true;
+    }
+
+    @Override
     public void accept(TypeArgumentVisitor visitor) {
         visitor.visit(this);
     }
 
     @Override
-    public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
-        return true;
-    }
+    public boolean isWildcardTypeArgument() { return true; }
 
     @Override
     public String toString() {

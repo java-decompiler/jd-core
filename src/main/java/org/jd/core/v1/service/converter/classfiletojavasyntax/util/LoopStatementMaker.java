@@ -12,7 +12,6 @@ import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForEachStatement;
@@ -90,8 +89,8 @@ public class LoopStatementMaker {
                     Statement subStatement = subStatements.getFirst();
                     BaseExpression init = extractInit(statements, lineNumber);
 
-                    if (subStatement.getClass() == ExpressionStatement.class) {
-                        Expression subExpression = ((ExpressionStatement) subStatement).getExpression();
+                    if (subStatement.isExpressionStatement()) {
+                        Expression subExpression = subStatement.getExpression();
 
                         if (subExpression.getLineNumber() == lineNumber) {
                             return newClassFileForStatement(
@@ -114,7 +113,7 @@ public class LoopStatementMaker {
                     // Known line numbers
                     SearchFirstLineNumberVisitor visitor = new SearchFirstLineNumberVisitor();
 
-                    subStatements.get(0).accept(visitor);
+                    subStatements.getFirst().accept(visitor);
 
                     int firstLineNumber = visitor.getLineNumber();
 
@@ -164,8 +163,8 @@ public class LoopStatementMaker {
             case 1:
                 Statement subStatement = subStatements.getFirst();
 
-                if (subStatement.getClass() == ExpressionStatement.class) {
-                    Expression subExpression = ((ExpressionStatement) subStatement).getExpression();
+                if (subStatement.isExpressionStatement()) {
+                    Expression subExpression = subStatement.getExpression();
                     int lineNumber = subExpression.getLineNumber();
 
                     if (lineNumber > 0) {
@@ -231,15 +230,15 @@ public class LoopStatementMaker {
                 case 1:
                     Statement statement = statements.getFirst();
 
-                    if (statement.getClass() != ExpressionStatement.class) {
+                    if (!statement.isExpressionStatement()) {
                         break;
                     }
 
-                    Expression expression = ((ExpressionStatement) statement).getExpression();
+                    Expression expression = statement.getExpression();
 
                     if ((expression.getLineNumber() != lineNumber) ||
-                        (expression.getClass() != BinaryOperatorExpression.class) ||
-                        (((BinaryOperatorExpression) expression).getRightExpression().getLineNumber() == 0)) {
+                        !expression.isBinaryOperatorExpression() ||
+                        (expression.getRightExpression().getLineNumber() == 0)) {
                         break;
                     }
 
@@ -252,15 +251,15 @@ public class LoopStatementMaker {
                     while (iterator.hasPrevious()) {
                         statement = iterator.previous();
 
-                        if (statement.getClass() != ExpressionStatement.class) {
+                        if (!statement.isExpressionStatement()) {
                             break;
                         }
 
-                        expression = ((ExpressionStatement) statement).getExpression();
+                        expression = statement.getExpression();
 
                         if ((expression.getLineNumber() != lineNumber) ||
-                            (expression.getClass() != BinaryOperatorExpression.class) ||
-                            (((BinaryOperatorExpression) expression).getRightExpression().getLineNumber() == 0)) {
+                            !expression.isBinaryOperatorExpression() ||
+                            (expression.getRightExpression().getLineNumber() == 0)) {
                             break;
                         }
 
@@ -288,13 +287,13 @@ public class LoopStatementMaker {
         // Populates 'update'
         while (iterator.hasPrevious()) {
             Statement statement = iterator.previous();
-
-            if (statement.getClass() != ExpressionStatement.class)
+            if (!statement.isExpressionStatement()) {
                 break;
-            Expression expression = ((ExpressionStatement)statement).getExpression();
-            if (expression.getLineNumber() >= firstLineNumber)
+            }
+            Expression expression = statement.getExpression();
+            if (expression.getLineNumber() >= firstLineNumber) {
                 break;
-
+            }
             iterator.remove();
             update.add(expression);
         }
@@ -310,50 +309,35 @@ public class LoopStatementMaker {
             LocalVariableMaker localVariableMaker, BasicBlock basicBlock, Statements statements, Expression condition, Statements subStatements) {
 
         if (!statements.isEmpty()) {
-            Statement statement = statements.getLast();
+            Expression init = statements.getLast().getExpression();
 
-            if (statement.getClass() == ExpressionStatement.class) {
-                Expression init = ((ExpressionStatement) statement).getExpression();
+            if (init.getLeftExpression().isLocalVariableReferenceExpression()) {
+                AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) init.getLeftExpression()).getLocalVariable();
+                Expression update = subStatements.getLast().getExpression();
+                Expression expression;
 
-                if (init.getClass() == BinaryOperatorExpression.class) {
-                    BinaryOperatorExpression boe = (BinaryOperatorExpression) init;
+                if (update.isBinaryOperatorExpression()) {
+                    expression = update.getLeftExpression();
+                } else if (update.isPreOperatorExpression()) {
+                    expression = update.getExpression();
+                    update = new PostOperatorExpression(update.getLineNumber(), expression, update.getOperator());
+                } else if (update.isPostOperatorExpression()) {
+                    expression = update.getExpression();
+                } else {
+                    return new WhileStatement(condition, subStatements);
+                }
 
-                    if (boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                        AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) boe.getLeftExpression()).getLocalVariable();
+                if (expression.isLocalVariableReferenceExpression() &&
+                        (((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable() == localVariable)) {
+                    statements.removeLast();
+                    subStatements.removeLast();
 
-                        statement = subStatements.getLast();
-
-                        if (statement.getClass() == ExpressionStatement.class) {
-                            Expression update = ((ExpressionStatement) statement).getExpression();
-                            Class clazz = update.getClass();
-                            Expression expression;
-
-                            if (clazz == BinaryOperatorExpression.class) {
-                                expression = ((BinaryOperatorExpression) update).getLeftExpression();
-                            } else if (clazz == PreOperatorExpression.class) {
-                                PreOperatorExpression poe = (PreOperatorExpression) update;
-                                expression = poe.getExpression();
-                                update = new PostOperatorExpression(poe.getLineNumber(), expression, poe.getOperator());
-                            } else if (clazz == PostOperatorExpression.class) {
-                                expression = ((PostOperatorExpression) update).getExpression();
-                            } else {
-                                return new WhileStatement(condition, subStatements);
-                            }
-
-                            if ((expression.getClass() == ClassFileLocalVariableReferenceExpression.class) &&
-                                    (((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable() == localVariable)) {
-                                statements.removeLast();
-                                subStatements.removeLast();
-
-                                if (condition == BooleanExpression.TRUE) {
-                                    condition = null;
-                                }
-
-                                return newClassFileForStatement(
-                                    localVariableMaker, basicBlock.getFromOffset(), basicBlock.getToOffset(), init, condition, update, subStatements);
-                            }
-                        }
+                    if (condition == BooleanExpression.TRUE) {
+                        condition = null;
                     }
+
+                    return newClassFileForStatement(
+                        localVariableMaker, basicBlock.getFromOffset(), basicBlock.getToOffset(), init, condition, update, subStatements);
                 }
             }
         }
@@ -377,26 +361,26 @@ public class LoopStatementMaker {
         // len$ = arr$.length;
         Statement statement = statements.get(statementsSize-2);
 
-        if (statement.getClass() != ExpressionStatement.class) {
+        if (!statement.isExpressionStatement()) {
             return null;
         }
 
         int lineNumber = condition.getLineNumber();
-        Expression expression = ((ExpressionStatement)statement).getExpression();
+        Expression expression = statement.getExpression();
 
-        if ((expression.getLineNumber() != lineNumber) || (expression.getClass() != BinaryOperatorExpression.class)) {
+        if ((expression.getLineNumber() != lineNumber) || !expression.isBinaryOperatorExpression()) {
             return null;
         }
 
-        BinaryOperatorExpression boe = (BinaryOperatorExpression)expression;
-
-        if ((boe.getRightExpression().getClass() != LengthExpression.class) || (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+        if (!expression.getRightExpression().isLengthExpression() || !expression.getLeftExpression().isLocalVariableReferenceExpression()) {
             return null;
         }
 
-        expression = ((LengthExpression)boe.getRightExpression()).getExpression();
+        Expression boe = expression;
 
-        if (expression.getClass() != ClassFileLocalVariableReferenceExpression.class) {
+        expression = boe.getRightExpression().getExpression();
+
+        if (!expression.isLocalVariableReferenceExpression()) {
             return null;
         }
 
@@ -408,30 +392,17 @@ public class LoopStatementMaker {
         }
 
         // String s = arr$[i$];
-        statement = subStatements.getFirst();
+        expression = subStatements.getFirst().getExpression();
 
-        if (statement.getClass() != ExpressionStatement.class) {
+        if (!expression.getRightExpression().isArrayExpression() ||
+                !expression.getLeftExpression().isLocalVariableReferenceExpression() ||
+                (expression.getLineNumber() != condition.getLineNumber())) {
             return null;
         }
 
-        expression = ((ExpressionStatement)statement).getExpression();
+        ArrayExpression arrayExpression = (ArrayExpression)expression.getRightExpression();
 
-        if (expression.getClass() != BinaryOperatorExpression.class) {
-            return null;
-        }
-
-        boe = (BinaryOperatorExpression)expression;
-
-        if ((boe.getRightExpression().getClass() != ArrayExpression.class) ||
-                (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
-                (boe.getLineNumber() != condition.getLineNumber())) {
-            return null;
-        }
-
-        ArrayExpression arrayExpression = (ArrayExpression)boe.getRightExpression();
-
-        if ((arrayExpression.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
-                (arrayExpression.getIndex().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+        if (!arrayExpression.getExpression().isLocalVariableReferenceExpression() || !arrayExpression.getIndex().isLocalVariableReferenceExpression()) {
             return null;
         }
         if (((ClassFileLocalVariableReferenceExpression)arrayExpression.getExpression()).getLocalVariable() != syntheticArray) {
@@ -439,88 +410,51 @@ public class LoopStatementMaker {
         }
 
         AbstractLocalVariable syntheticIndex = ((ClassFileLocalVariableReferenceExpression)arrayExpression.getIndex()).getLocalVariable();
-        AbstractLocalVariable item = ((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable();
+        AbstractLocalVariable item = ((ClassFileLocalVariableReferenceExpression)expression.getLeftExpression()).getLocalVariable();
 
         if ((syntheticIndex.getName() != null) && (syntheticIndex.getName().indexOf('$') == -1)) {
             return null;
         }
 
         // arr$ = array;
-        statement = statements.get(statementsSize-3);
+        expression = statements.get(statementsSize-3).getExpression();
 
-        if (statement.getClass() != ExpressionStatement.class) {
+        if (!expression.getLeftExpression().isLocalVariableReferenceExpression()) {
+            return null;
+        }
+        if (((ClassFileLocalVariableReferenceExpression)expression.getLeftExpression()).getLocalVariable() != syntheticArray) {
             return null;
         }
 
-        expression = ((ExpressionStatement)statement).getExpression();
-
-        if (expression.getClass() != BinaryOperatorExpression.class) {
-            return null;
-        }
-
-        boe = (BinaryOperatorExpression)expression;
-
-        if (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) {
-            return null;
-        }
-        if (((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticArray) {
-            return null;
-        }
-
-        Type arrayType = boe.getRightExpression().getType();
-        Expression array = boe.getRightExpression();
+        Type arrayType = expression.getRightExpression().getType();
+        Expression array = expression.getRightExpression();
 
         // i$ = 0;
-        statement = statements.get(statementsSize-1);
+        expression = statements.get(statementsSize-1).getExpression();
 
-        if (statement.getClass() != ExpressionStatement.class) {
+        if ((expression.getLineNumber() != lineNumber) ||
+                !expression.getLeftExpression().isLocalVariableReferenceExpression() ||
+                !expression.getRightExpression().isIntegerConstantExpression()) {
             return null;
         }
-
-        expression = ((ExpressionStatement)statement).getExpression();
-
-        if (expression.getClass() != BinaryOperatorExpression.class) {
-            return null;
-        }
-
-        boe = (BinaryOperatorExpression)expression;
-
-        if ((boe.getLineNumber() != lineNumber) ||
-                (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
-                (boe.getRightExpression().getClass() != IntegerConstantExpression.class)) {
-            return null;
-        }
-        if ((((IntegerConstantExpression)boe.getRightExpression()).getValue() != 0) ||
-                (((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticIndex)) {
+        if ((expression.getRightExpression().getIntegerValue() != 0) ||
+                (((ClassFileLocalVariableReferenceExpression)expression.getLeftExpression()).getLocalVariable() != syntheticIndex)) {
             return null;
         }
 
         // i$ < len$;
-        if (condition.getClass() != BinaryOperatorExpression.class) {
+        if (!condition.getLeftExpression().isLocalVariableReferenceExpression() || !condition.getRightExpression().isLocalVariableReferenceExpression()) {
             return null;
         }
-
-        boe = (BinaryOperatorExpression)condition;
-
-        if ((boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
-                (boe.getRightExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
-            return null;
-        }
-        if ((((ClassFileLocalVariableReferenceExpression)boe.getLeftExpression()).getLocalVariable() != syntheticIndex) ||
-                (((ClassFileLocalVariableReferenceExpression)boe.getRightExpression()).getLocalVariable() != syntheticLength)) {
+        if ((((ClassFileLocalVariableReferenceExpression)condition.getLeftExpression()).getLocalVariable() != syntheticIndex) ||
+                (((ClassFileLocalVariableReferenceExpression)condition.getRightExpression()).getLocalVariable() != syntheticLength)) {
             return null;
         }
 
         // ++i$;
-        statement = subStatements.getLast();
+        expression = subStatements.getLast().getExpression();
 
-        if (statement.getClass() != ExpressionStatement.class) {
-            return null;
-        }
-
-        expression = ((ExpressionStatement)statement).getExpression();
-
-        if ((expression.getLineNumber() != lineNumber) || (expression.getClass() != PostOperatorExpression.class)) {
+        if ((expression.getLineNumber() != lineNumber) || !expression.isPostOperatorExpression()) {
             return null;
         }
 
@@ -537,7 +471,7 @@ public class LoopStatementMaker {
 
         if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
             ((ObjectLocalVariable)item).setType(typeBounds, type);
-        } else if (item.getType().isGeneric()) {
+        } else if (item.getType().isGenericType()) {
             ((GenericLocalVariable)item).setType((GenericType)type);
         } else {
             item.typeOnRight(typeBounds, type);
@@ -562,37 +496,25 @@ public class LoopStatementMaker {
         }
 
         // i$.hasNext();
-        if (condition.getClass() != ClassFileMethodInvocationExpression.class) {
+        if (!condition.isMethodInvocationExpression()) {
             return null;
         }
 
         MethodInvocationExpression mie = (MethodInvocationExpression)condition;
 
         if (!mie.getName().equals("hasNext") || !mie.getInternalTypeName().equals("java/util/Iterator") ||
-                (mie.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+                !mie.getExpression().isLocalVariableReferenceExpression()) {
             return null;
         }
 
         AbstractLocalVariable syntheticIterator = ((ClassFileLocalVariableReferenceExpression)mie.getExpression()).getLocalVariable();
 
         // Iterator i$ = list.iterator();
-        Statement lastStatement = statements.getLast();
-
-        if (lastStatement.getClass() != ExpressionStatement.class) {
-            return null;
-        }
-
-        ExpressionStatement es = (ExpressionStatement)lastStatement;
-
-        if (es.getExpression().getClass() != BinaryOperatorExpression.class) {
-            return null;
-        }
-
-        BinaryOperatorExpression boe = (BinaryOperatorExpression)es.getExpression();
+        Expression boe = statements.getLast().getExpression();
 
         if ((boe == null) ||
-                (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) ||
-                (boe.getRightExpression().getClass() != ClassFileMethodInvocationExpression.class) ||
+                !boe.getLeftExpression().isLocalVariableReferenceExpression() ||
+                !boe.getRightExpression().isMethodInvocationExpression() ||
                 (boe.getLineNumber() != condition.getLineNumber())) {
             return null;
         }
@@ -608,35 +530,23 @@ public class LoopStatementMaker {
 
         Expression list = mie.getExpression();
 
-        if (list.getClass() == CastExpression.class) {
-            list = ((CastExpression)list).getExpression();
+        if (list.isCastExpression()) {
+            list = list.getExpression();
         }
 
         // String s = (String)i$.next();
-        Statement firstSubStatement = subStatements.get(0);
+        boe = subStatements.getFirst().getExpression();
 
-        if (firstSubStatement.getClass() != ExpressionStatement.class) {
-            return null;
-        }
-
-        es = (ExpressionStatement)firstSubStatement;
-
-        if (es.getExpression().getClass() != BinaryOperatorExpression.class) {
-            return null;
-        }
-
-        boe = (BinaryOperatorExpression)es.getExpression();
-
-        if (boe.getLeftExpression().getClass() != ClassFileLocalVariableReferenceExpression.class) {
+        if (!boe.getLeftExpression().isLocalVariableReferenceExpression()) {
             return null;
         }
 
         Expression expression = boe.getRightExpression();
 
-        if (boe.getRightExpression().getClass() == CastExpression.class) {
-            expression = ((CastExpression)expression).getExpression();
+        if (boe.getRightExpression().isCastExpression()) {
+            expression = expression.getExpression();
         }
-        if (expression.getClass() != ClassFileMethodInvocationExpression.class) {
+        if (!expression.isMethodInvocationExpression()) {
             return null;
         }
 
@@ -644,7 +554,7 @@ public class LoopStatementMaker {
 
         if (!mie.getName().equals("next") ||
                 !mie.getInternalTypeName().equals("java/util/Iterator") ||
-                (mie.getExpression().getClass() != ClassFileLocalVariableReferenceExpression.class)) {
+                !mie.getExpression().isLocalVariableReferenceExpression()) {
             return null;
         }
         if (((ClassFileLocalVariableReferenceExpression)mie.getExpression()).getLocalVariable() != syntheticIterator) {
@@ -678,12 +588,12 @@ public class LoopStatementMaker {
 
         Type type = list.getType();
 
-        if (type.isObject()) {
+        if (type.isObjectType()) {
             ObjectType listType = (ObjectType)type;
 
             if (listType.getTypeArguments() == null) {
                 if (!TYPE_OBJECT.equals(item.getType())) {
-                    if (list.getClass() == ClassFileNewExpression.class) {
+                    if (list.isNewExpression()) {
                         ClassFileNewExpression ne = (ClassFileNewExpression)list;
                         ne.setType(listType.createType(DiamondTypeArgument.DIAMOND));
                     } else {
@@ -698,7 +608,7 @@ public class LoopStatementMaker {
                 if (type != null) {
                     if (TYPE_OBJECT.equals(item.getType())) {
                         ((ObjectLocalVariable) item).setType(typeBounds, type);
-                    } else if (item.getType().isGeneric()) {
+                    } else if (item.getType().isGenericType()) {
                         ((GenericLocalVariable) item).setType((GenericType) type);
                     } else {
                         item.typeOnRight(typeBounds, type);

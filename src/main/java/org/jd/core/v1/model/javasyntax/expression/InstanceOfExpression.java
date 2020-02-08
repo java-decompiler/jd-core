@@ -26,6 +26,7 @@ public class InstanceOfExpression extends AbstractLineNumberExpression {
         this.instanceOfType = instanceOfType;
     }
 
+    @Override
     public Expression getExpression() {
         return expression;
     }

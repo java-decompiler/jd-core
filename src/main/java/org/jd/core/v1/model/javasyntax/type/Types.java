@@ -29,6 +29,9 @@ public class Types extends DefaultList<Type> implements BaseType {
     }
 
     @Override
+    public boolean isTypes() { return true; }
+
+    @Override
     public void accept(TypeVisitor visitor) {
         visitor.visit(this);
     }

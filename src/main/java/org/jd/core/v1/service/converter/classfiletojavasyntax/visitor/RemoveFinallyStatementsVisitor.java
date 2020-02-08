@@ -44,15 +44,14 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
 
             // Check last statement
             Statement lastStatement = stmts.getLast();
-            Class lastStatementClass = lastStatement.getClass();
 
-            if ((lastStatementClass == ReturnExpressionStatement.class) || (lastStatementClass == ReturnStatement.class)) {
+            if (lastStatement.isReturnExpressionStatement() || lastStatement.isReturnStatement()) {
                 statementCountToRemove = statementCountInFinally;
                 i--;
-            } else if (lastStatementClass == ThrowStatement.class) {
+            } else if (lastStatement.isThrowStatement()) {
                 statementCountToRemove = 0;
                 i--;
-            } else if ((lastStatementClass == ContinueStatement.class) ||(lastStatementClass == BreakStatement.class)) {
+            } else if (lastStatement.isContinueStatement() || lastStatement.isBreakStatement()) {
                 i--;
             } else {
                 WhileStatement whileStatement = getInfiniteWhileStatement(lastStatement);
@@ -67,7 +66,7 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
 
             // Remove 'finally' statements
             if (statementCountToRemove > 0) {
-                if (!lastFinallyStatementIsATryStatement && (i > 0) && (stmts.get(i-1).getClass() == ClassFileTryStatement.class)) {
+                if (!lastFinallyStatementIsATryStatement && (i > 0) && stmts.get(i-1).isTryStatement()) {
                     stmts.get(i-1).accept(this);
                     statementCountToRemove = 0;
                     i--;
@@ -122,27 +121,25 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
     }
 
     private static WhileStatement getInfiniteWhileStatement(Statement statement) {
-        if (statement.getClass() == LabelStatement.class) {
+        if (statement.isLabelStatement()) {
             statement = ((LabelStatement)statement).getStatement();
         }
 
-        if ((statement == null) || (statement.getClass() != WhileStatement.class)) {
+        if ((statement == null) || !statement.isWhileStatement()) {
             return null;
         }
 
-        WhileStatement whileStatement = (WhileStatement)statement;
-
-        if (whileStatement.getCondition().getClass() != BooleanExpression.class) {
+        if (!statement.getCondition().isBooleanExpression()) {
             return null;
         }
 
-        BooleanExpression booleanExpression = (BooleanExpression)whileStatement.getCondition();
+        BooleanExpression booleanExpression = (BooleanExpression)statement.getCondition();
 
         if (booleanExpression.isFalse()) {
             return null;
         }
 
-        return whileStatement;
+        return (WhileStatement)statement;
     }
 
     @Override
@@ -173,7 +170,7 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
             }
 
             if ((statementCountInFinally == 0) && (finallyStatements.size() > 0)) {
-                lastFinallyStatementIsATryStatement = (finallyStatements.getLast().getClass() == ClassFileTryStatement.class);
+                lastFinallyStatementIsATryStatement = finallyStatements.getLast().isTryStatement();
             }
         }
 
@@ -250,6 +247,7 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
     @Override public void visit(LabelStatement statement) {}
     @Override public void visit(LambdaExpressionStatement statement) {}
     @Override public void visit(LocalVariableDeclarationStatement statement) {}
+    @Override public void visit(NoStatement statement) {}
     @Override public void visit(ReturnExpressionStatement statement) {}
     @Override public void visit(ReturnStatement statement) {}
     @Override public void visit(SwitchStatement.DefaultLabel statement) {}

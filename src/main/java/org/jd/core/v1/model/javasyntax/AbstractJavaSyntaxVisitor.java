@@ -268,7 +268,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(LambdaFormalParametersExpression expression) {
-        safeAccept(expression.getParameters());
+        safeAccept(expression.getFormalParameters());
         expression.getStatements().accept(this);
     }
 
@@ -331,6 +331,9 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
         type.accept(this);
         safeAccept(expression.getArrayInitializer());
     }
+
+    @Override
+    public void visit(NoExpression expression) {}
 
     @Override
     public void visit(NullExpression expression) {
@@ -524,6 +527,9 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     public void visit(LocalVariableDeclarationStatement statement) {
         visit((LocalVariableDeclaration) statement);
     }
+
+    @Override
+    public void visit(NoStatement statement) {}
 
     @Override public void visit(ReturnExpressionStatement statement) {
         statement.getExpression().accept(this);

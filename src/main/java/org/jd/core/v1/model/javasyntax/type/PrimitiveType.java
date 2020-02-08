@@ -166,7 +166,12 @@ public class PrimitiveType implements Type {
     }
 
     @Override
-    public boolean isPrimitive() {
+    public boolean isPrimitiveType() {
+        return true;
+    }
+
+    @Override
+    public boolean isPrimitiveTypeArgument() {
         return true;
     }
 

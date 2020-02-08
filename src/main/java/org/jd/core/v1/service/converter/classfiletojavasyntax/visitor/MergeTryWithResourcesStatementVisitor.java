@@ -39,7 +39,7 @@ public class MergeTryWithResourcesStatementVisitor implements StatementVisitor {
         if (tryStatements.size() == 1) {
             Statement first = tryStatements.getFirst();
 
-            if (first.getClass() == ClassFileTryStatement.class) {
+            if (first.isTryStatement()) {
                 ClassFileTryStatement cfswrs1 = (ClassFileTryStatement)statement;
                 ClassFileTryStatement cfswrs2 = (ClassFileTryStatement)first;
 
@@ -73,6 +73,7 @@ public class MergeTryWithResourcesStatementVisitor implements StatementVisitor {
     @Override public void visit(LabelStatement statement) {}
     @Override public void visit(LambdaExpressionStatement statement) {}
     @Override public void visit(LocalVariableDeclarationStatement statement) {}
+    @Override public void visit(NoStatement statement) {}
     @Override public void visit(ReturnExpressionStatement statement) {}
     @Override public void visit(ReturnStatement statement) {}
     @Override public void visit(SwitchStatement.DefaultLabel statement) {}

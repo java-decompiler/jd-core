@@ -56,7 +56,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
             TypeArgument typeArgument = bindings.get(typeName);
 
             if (current != null) {
-                if ((current.getClass() == GenericType.class) && !equals(contextualTypeBounds.get(typeName), typeBounds.get(((GenericType)current).getName()))) {
+                if (current.isGenericTypeArgument() && !equals(contextualTypeBounds.get(typeName), typeBounds.get(((GenericType)current).getName()))) {
                     return; // Incompatible bounds
                 }
 
@@ -72,7 +72,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
                     Type t2 = typeArgumentToTypeVisitor.getType();
 
                     if (!t1.createType(0).equals(t2.createType(0))) {
-                        if (t1.isObject() && t2.isObject()) {
+                        if (t1.isObjectType() && t2.isObjectType()) {
                             ObjectType ot1 = (ObjectType)t1;
                             ObjectType ot2 = (ObjectType)t2.createType(t2.getDimension() - type.getDimension());
 
@@ -98,7 +98,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
         if (current != null) {
             Class currentClass = current.getClass();
 
-            if (currentClass == ObjectType.class) {
+            if (current.isObjectTypeArgument()) {
                 ObjectType ot = (ObjectType) current;
 
                 if ((ot.getTypeArguments() == null) && ot.getInternalName().equals(TYPE_CLASS.getInternalName())) {
@@ -106,7 +106,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
                 }
 
                 return ot.createType(ot.getDimension() - type.getDimension());
-            } else if ((currentClass == InnerObjectType.class) || (currentClass == GenericType.class) || (currentClass == PrimitiveType.class)) {
+            } else if (current.isInnerObjectTypeArgument() || current.isGenericTypeArgument() || current.isPrimitiveTypeArgument()) {
                 Type t = (Type)current;
                 return t.createType(t.getDimension() - type.getDimension());
             }
@@ -118,8 +118,8 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
     @Override
     public void visit(WildcardExtendsTypeArgument type) {
         if (current != null) {
-            if (current.getClass() == WildcardExtendsTypeArgument.class) {
-                current = ((WildcardExtendsTypeArgument) current).getType();
+            if (current.isWildcardExtendsTypeArgument()) {
+                current = current.getType();
                 type.getType().accept(this);
             } else {
                 type.getType().accept(this);
@@ -130,8 +130,8 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
     @Override
     public void visit(WildcardSuperTypeArgument type) {
         if (current != null) {
-            if (current.getClass() == WildcardSuperTypeArgument.class) {
-                current = ((WildcardSuperTypeArgument) current).getType();
+            if (current.isWildcardSuperTypeArgument()) {
+                current = current.getType();
                 type.getType().accept(this);
             } else {
                 type.getType().accept(this);
@@ -142,7 +142,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
     @Override
     public void visit(ObjectType type) {
         if ((current != null) && (type.getTypeArguments() != null)) {
-            if ((current.getClass() == ObjectType.class) || (current.getClass() == InnerObjectType.class)) {
+            if (current.isObjectTypeArgument() || current.isInnerObjectTypeArgument()) {
                 current = ((ObjectType) current).getTypeArguments();
                 type.getTypeArguments().accept(this);
             }
@@ -151,7 +151,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
 
     @Override
     public void visit(InnerObjectType type) {
-        if ((current != null) && (type.getTypeArguments() != null) && (current.getClass() == InnerObjectType.class)) {
+        if ((current != null) && (type.getTypeArguments() != null) && current.isInnerObjectTypeArgument()) {
             current = ((InnerObjectType)current).getTypeArguments();
             type.getTypeArguments().accept(this);
         }

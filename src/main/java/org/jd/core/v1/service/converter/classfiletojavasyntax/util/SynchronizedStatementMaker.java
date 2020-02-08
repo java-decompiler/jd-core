@@ -26,40 +26,28 @@ public class SynchronizedStatementMaker {
 
     public static Statement make(LocalVariableMaker localVariableMaker, Statements statements, Statements tryStatements) {
         // Remove monitor enter
-        ClassFileMonitorEnterStatement monitorEnterStatement = (ClassFileMonitorEnterStatement) statements.removeLast();
-        Expression monitor = monitorEnterStatement.getMonitor();
-        Class monitorClass = monitor.getClass();
+        Expression monitor = statements.removeLast().getMonitor();
         AbstractLocalVariable localVariable = null;
 
-        if (monitorClass == ClassFileLocalVariableReferenceExpression.class) {
+        if (monitor.isLocalVariableReferenceExpression()) {
             if (!statements.isEmpty()) {
-                Statement statement = statements.removeLast();
+                Expression expression = statements.removeLast().getExpression();
 
-                if (statement.getClass() == ExpressionStatement.class) {
-                    Expression expression = ((ExpressionStatement)statement).getExpression();
-
-                    if (expression.getClass() == BinaryOperatorExpression.class) {
-                        BinaryOperatorExpression boe = (BinaryOperatorExpression)expression;
-
-                        if ((boe != null) && (boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class)) {
-                            ClassFileLocalVariableReferenceExpression m = (ClassFileLocalVariableReferenceExpression) monitor;
-                            ClassFileLocalVariableReferenceExpression l = boe.getGenericLeftExpression();
-                            assert l.getLocalVariable() == m.getLocalVariable();
-                            // Update monitor
-                            monitor = boe.getRightExpression();
-                            // Store synthetic local variable
-                            localVariable = l.getLocalVariable();
-                        }
-                    }
+                if (expression.isBinaryOperatorExpression() && expression.getLeftExpression().isLocalVariableReferenceExpression()) {
+                    ClassFileLocalVariableReferenceExpression m = (ClassFileLocalVariableReferenceExpression) monitor;
+                    ClassFileLocalVariableReferenceExpression l = (ClassFileLocalVariableReferenceExpression)expression.getLeftExpression();
+                    assert l.getLocalVariable() == m.getLocalVariable();
+                    // Update monitor
+                    monitor = expression.getRightExpression();
+                    // Store synthetic local variable
+                    localVariable = l.getLocalVariable();
                 }
             }
-        } else if (monitorClass == BinaryOperatorExpression.class) {
-            BinaryOperatorExpression boe = (BinaryOperatorExpression)monitor;
-
-            if (boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                ClassFileLocalVariableReferenceExpression l = boe.getGenericLeftExpression();
+        } else if (monitor.isBinaryOperatorExpression()) {
+            if (monitor.getLeftExpression().isLocalVariableReferenceExpression()) {
+                ClassFileLocalVariableReferenceExpression l = (ClassFileLocalVariableReferenceExpression)monitor.getLeftExpression();
                 // Update monitor
-                monitor = boe.getRightExpression();
+                monitor = monitor.getRightExpression();
                 // Store synthetic local variable
                 localVariable = l.getLocalVariable();
             }
@@ -89,10 +77,9 @@ public class SynchronizedStatementMaker {
                 while (iterator.hasNext()) {
                     Statement statement = iterator.next();
 
-                    if (statement.getClass() == ClassFileMonitorExitStatement.class) {
-                        ClassFileMonitorExitStatement cfmes = (ClassFileMonitorExitStatement)statement;
-                        if (cfmes.getMonitor().getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                            ClassFileLocalVariableReferenceExpression cflvre = (ClassFileLocalVariableReferenceExpression)cfmes.getMonitor();
+                    if (statement.isMonitorExitStatement()) {
+                        if (statement.getMonitor().isLocalVariableReferenceExpression()) {
+                            ClassFileLocalVariableReferenceExpression cflvre = (ClassFileLocalVariableReferenceExpression)statement.getMonitor();
                             if (cflvre.getLocalVariable() == localVariable) {
                                 iterator.remove();
                             }

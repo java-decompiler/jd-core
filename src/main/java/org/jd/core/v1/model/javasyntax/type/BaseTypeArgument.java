@@ -32,4 +32,14 @@ public interface BaseTypeArgument extends TypeArgumentVisitable {
     default int typeArgumentSize() {
         return 1;
     }
+
+    default boolean isGenericTypeArgument() { return false; }
+    default boolean isInnerObjectTypeArgument() { return false; }
+    default boolean isObjectTypeArgument() { return false; }
+    default boolean isPrimitiveTypeArgument() { return false; }
+    default boolean isWildcardExtendsTypeArgument() { return false; }
+    default boolean isWildcardSuperTypeArgument() { return false; }
+    default boolean isWildcardTypeArgument() { return false; }
+
+    default Type getType() { return ObjectType.TYPE_UNDEFINED_OBJECT; }
 }

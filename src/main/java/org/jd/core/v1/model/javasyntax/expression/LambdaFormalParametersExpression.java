@@ -12,24 +12,24 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class LambdaFormalParametersExpression extends AbstractLambdaExpression {
-    protected BaseFormalParameter parameters;
+    protected BaseFormalParameter formalParameters;
 
-    public LambdaFormalParametersExpression(Type type, BaseFormalParameter parameters, BaseStatement statements) {
+    public LambdaFormalParametersExpression(Type type, BaseFormalParameter formalParameters, BaseStatement statements) {
         super(type, statements);
-        this.parameters = parameters;
+        this.formalParameters = formalParameters;
     }
 
-    public LambdaFormalParametersExpression(int lineNumber, Type type, BaseFormalParameter parameters, BaseStatement statements) {
+    public LambdaFormalParametersExpression(int lineNumber, Type type, BaseFormalParameter formalParameters, BaseStatement statements) {
         super(lineNumber, type, statements);
-        this.parameters = parameters;
+        this.formalParameters = formalParameters;
     }
 
-    public BaseFormalParameter getParameters() {
-        return parameters;
+    public BaseFormalParameter getFormalParameters() {
+        return formalParameters;
     }
 
-    public void setParameters(BaseFormalParameter parameters) {
-        this.parameters = parameters;
+    public void setParameters(BaseFormalParameter formalParameters) {
+        this.formalParameters = formalParameters;
     }
 
     @Override
@@ -39,6 +39,6 @@ public class LambdaFormalParametersExpression extends AbstractLambdaExpression {
 
     @Override
     public String toString() {
-        return "LambdaFormalParametersExpression{" + parameters + " -> " + statements + "}";
+        return "LambdaFormalParametersExpression{" + formalParameters + " -> " + statements + "}";
     }
 }

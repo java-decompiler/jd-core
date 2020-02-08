@@ -8,7 +8,6 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Constants;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
@@ -93,16 +92,15 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             while (iterator.hasNext()) {
                 Statement statement = iterator.next();
 
-                if (statement.getClass() == ExpressionStatement.class) {
-                    Expression expression = ((ExpressionStatement) statement).getExpression();
-                    Class clazz = expression.getClass();
+                if (statement.isExpressionStatement()) {
+                    Expression expression = statement.getExpression();
 
-                    if (clazz == ClassFileSuperConstructorInvocationExpression.class) {
+                    if (expression.isSuperConstructorInvocationExpression()) {
                         // 'super(...)'
                         break;
                     }
 
-                    if (clazz == ClassFileConstructorInvocationExpression.class) {
+                    if (expression.isConstructorInvocationExpression()) {
                         // 'this(...)'
                         if ((outerClassFile != null) && ((classFile.getAccessFlags() & ACC_STATIC) == 0)) {
                             // Inner non-static class --> First parameter is the synthetic outer reference
@@ -111,15 +109,14 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                         break;
                     }
 
-                    if (clazz == BinaryOperatorExpression.class) {
-                        BinaryOperatorExpression boe = (BinaryOperatorExpression) expression;
-                        Expression e = boe.getLeftExpression();
+                    if (expression.isBinaryOperatorExpression()) {
+                        Expression e = expression.getLeftExpression();
 
-                        if (e.getClass() == FieldReferenceExpression.class) {
+                        if (e.isFieldReferenceExpression()) {
                             String name = ((FieldReferenceExpression)e).getName();
 
                             if (name.startsWith("this$")) {
-                                outerType = (ObjectType) boe.getRightExpression().getType();
+                                outerType = (ObjectType) expression.getRightExpression().getType();
                             } else if (name.startsWith("val$")) {
                                 syntheticInnerFieldNames.add(name);
                             }
@@ -246,7 +243,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 } else {
                     ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(expression.getInternalTypeName());
 
-                    if ((typeDeclaration != null) && (typeDeclaration.getClass() == ClassFileClassDeclaration.class)) {
+                    if ((typeDeclaration != null) && typeDeclaration.isClassDeclaration()) {
                         if (typeDeclaration.getInternalTypeName().equals(expression.getInternalTypeName())) {
                             ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) typeDeclaration.getBodyDeclaration();
                             String outerInternalTypeName = cfbd.getOuterBodyDeclaration().getInternalTypeName();
@@ -270,7 +267,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
         @Override
         protected Expression updateExpression(Expression expression) {
-            if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+            if (expression.isLocalVariableReferenceExpression()) {
                 ClassFileLocalVariableReferenceExpression cdlvre = (ClassFileLocalVariableReferenceExpression) expression;
 
                 if ((cdlvre.getName() != null) && cdlvre.getName().startsWith("this$") && cdlvre.getType().getDescriptor().equals(outerType.getDescriptor())) {
@@ -409,7 +406,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                                 break;
                             }
                         }
-                    } else if (typeDeclaration.getClass() == ClassFileClassDeclaration.class) {
+                    } else if (typeDeclaration.isClassDeclaration()) {
                         ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) typeDeclaration;
                         cfbd = (ClassFileBodyDeclaration) cfcd.getBodyDeclaration();
 
@@ -456,11 +453,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                                     Expression param = parameterIterator.next();
                                     String syntheticInnerFieldName = syntheticInnerFieldNameIterator.next();
 
-                                    if (param.getClass() == CastExpression.class) {
-                                        param = ((CastExpression) param).getExpression();
+                                    if (param.isCastExpression()) {
+                                        param = param.getExpression();
                                     }
 
-                                    if (param.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                                    if (param.isLocalVariableReferenceExpression()) {
                                         AbstractLocalVariable lv = ((ClassFileLocalVariableReferenceExpression) param).getLocalVariable();
                                         String localVariableName = syntheticInnerFieldName.substring(4);
                                         finalLocalVariableNameMap.put(lv.getName(), localVariableName);
@@ -478,11 +475,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                             // Remove outer local variable reference
                             Expression param = parameters.getFirst();
 
-                            if (param.getClass() == CastExpression.class) {
-                                param = ((CastExpression) param).getExpression();
+                            if (param.isCastExpression()) {
+                                param = param.getExpression();
                             }
 
-                            if (param.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                            if (param.isLocalVariableReferenceExpression()) {
                                 AbstractLocalVariable lv = ((ClassFileLocalVariableReferenceExpression) param).getLocalVariable();
                                 String localVariableName = syntheticInnerFieldNames.getFirst().substring(4);
                                 finalLocalVariableNameMap.put(lv.getName(), localVariableName);
@@ -494,7 +491,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                         // Is the last parameter synthetic ?
                         parameters = ne.getParameters();
 
-                        if ((parameters != null) && (parameters.size() > 0) && (parameters.getLast().getClass() == NullExpression.class)) {
+                        if ((parameters != null) && (parameters.size() > 0) && parameters.getLast().isNullExpression()) {
                             parameterTypes = ne.getParameterTypes();
 
                             if (parameterTypes.getLast().getName() == null) {
@@ -524,11 +521,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 // Remove outer 'this' reference parameter
                 Type firstParameterType = parameters.getFirst().getType();
 
-                if (firstParameterType.isObject() && ((classFile.getAccessFlags() & ACC_STATIC) == 0) && (bodyDeclaration.getOuterType() != null)) {
+                if (firstParameterType.isObjectType() && ((classFile.getAccessFlags() & ACC_STATIC) == 0) && (bodyDeclaration.getOuterType() != null)) {
                     TypeMaker.TypeTypes superTypeTypes = typeMaker.makeTypeTypes(classFile.getSuperTypeName());
 
-                    if ((superTypeTypes != null) && (superTypeTypes.thisType.getClass() == InnerObjectType.class)) {
-                        if (typeMaker.isRawTypeAssignable(((InnerObjectType)superTypeTypes.thisType).getOuterType(), (ObjectType)firstParameterType)) {
+                    if ((superTypeTypes != null) && superTypeTypes.thisType.isInnerObjectType()) {
+                        if (typeMaker.isRawTypeAssignable(superTypeTypes.thisType.getOuterType(), (ObjectType)firstParameterType)) {
                             scie.setParameters(removeFirstItem(parameters));
                             scie.setParameterTypes(removeFirstItem(scie.getParameterTypes()));
                         }
@@ -579,7 +576,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
         protected BaseExpression removeLastSyntheticParameter(BaseExpression parameters, BaseType parameterTypes) {
             // Is the last parameter synthetic ?
-            if ((parameters != null) && (parameters.size() > 0) && (parameters.getLast().getClass() == NullExpression.class)) {
+            if ((parameters != null) && (parameters.size() > 0) && parameters.getLast().isNullExpression()) {
                 if (parameterTypes.getLast().getName() == null) {
                     // Yes. Remove it.
                     if (parameters.isList()) {
@@ -652,7 +649,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             @SuppressWarnings("unchecked")
             protected BaseStatement addLocalClassDeclarations(BaseStatement statements) {
                 if (!localClassDeclarations.isEmpty()) {
-                    if (statements.getClass() == Statements.class) {
+                    if (statements.isStatements()) {
                         statements.accept(this);
                     } else {
                         ClassFileClassDeclaration declaration = localClassDeclarations.get(0);

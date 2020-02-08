@@ -26,7 +26,6 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorEnterStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorExitStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.PrimitiveLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.EraseTypeArgumentVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RenameLocalVariablesVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
@@ -271,8 +270,7 @@ public class ByteCodeParser {
                     break;
                 case 87: case 88: // POP, POP2
                     expression1 = stack.pop();
-                    Class clazz = expression1.getClass();
-                    if ((clazz != ClassFileLocalVariableReferenceExpression.class) && (clazz != FieldReferenceExpression.class)) {
+                    if (!expression1.isLocalVariableReferenceExpression() && !expression1.isFieldReferenceExpression()) {
                         bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
                         statements.add(new ExpressionStatement(expression1));
                     }
@@ -745,7 +743,7 @@ public class ByteCodeParser {
                         }
                     } else {
                         expression1 = stack.pop();
-                        if (expression1.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                        if (expression1.isLocalVariableReferenceExpression()) {
                             ((ClassFileLocalVariableReferenceExpression)expression1).getLocalVariable().typeOnLeft(typeBounds, ot);
                         }
                         if (opcode == 185) { // INVOKEINTERFACE
@@ -755,7 +753,7 @@ public class ByteCodeParser {
                             if ((opcode == 183) && // INVOKESPECIAL
                                 "<init>".equals(name)) {
 
-                                if (expression1.getClass() == ClassFileNewExpression.class) {
+                                if (expression1.isNewExpression()) {
                                     typeParametersToTypeArgumentsBinder.updateNewExpression((ClassFileNewExpression)expression1, descriptor, methodTypes, parameters);
                                 } else if (ot.getDescriptor().equals(expression1.getType().getDescriptor())) {
                                     statements.add(new ExpressionStatement(newConstructorInvocationExpression(lineNumber, ot, descriptor, methodTypes, parameters)));
@@ -821,9 +819,9 @@ public class ByteCodeParser {
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                     type1 = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
                     expression1 = stack.peek();
-                    if (type1.isObject() && expression1.getType().isObject() && typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) expression1.getType())) {
+                    if (type1.isObjectType() && expression1.getType().isObjectType() && typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) expression1.getType())) {
                         // Ignore cast
-                    } else if (expression1.getClass() == CastExpression.class) {
+                    } else if (expression1.isCastExpression()) {
                         // Skip double cast
                         ((CastExpression) expression1).setType(type1);
                     } else {
@@ -935,8 +933,8 @@ public class ByteCodeParser {
                 return null;
             case 1:
                 Expression parameter = stack.pop();
-                if (parameter.getClass() == NewArray.class) {
-                    parameter = NewArrayMaker.make(statements, (NewArray)parameter);
+                if (parameter.isNewArray()) {
+                    parameter = NewArrayMaker.make(statements, parameter);
                 }
                 return checkIfLastStatementIsAMultiAssignment(statements, parameter);
             default:
@@ -945,8 +943,8 @@ public class ByteCodeParser {
 
                 for (int i=count; i>=0; --i) {
                     parameter = stack.pop();
-                    if (parameter.getClass() == NewArray.class) {
-                        parameter = NewArrayMaker.make(statements, (NewArray)parameter);
+                    if (parameter.isNewArray()) {
+                        parameter = NewArrayMaker.make(statements, parameter);
                     }
                     parameters.add(checkIfLastStatementIsAMultiAssignment(statements, parameter));
                 }
@@ -958,20 +956,12 @@ public class ByteCodeParser {
 
     private static Expression checkIfLastStatementIsAMultiAssignment(Statements statements, Expression parameter) {
         if (!statements.isEmpty()) {
-            Statement lastStatement = statements.getLast();
+            Expression expression = statements.getLast().getExpression();
 
-            if (lastStatement.getClass() == ExpressionStatement.class) {
-                Expression expression = ((ExpressionStatement) lastStatement).getExpression();
-
-                if (expression.getClass() == BinaryOperatorExpression.class) {
-                    BinaryOperatorExpression boe = (BinaryOperatorExpression) expression;
-
-                    if (getLastRightExpression(boe) == parameter) {
-                        // Return multi assignment expression
-                        statements.removeLast();
-                        return expression;
-                    }
-                }
+            if (expression.isBinaryOperatorExpression() && (getLastRightExpression(expression) == parameter)) {
+                // Return multi assignment expression
+                statements.removeLast();
+                return expression;
             }
         }
 
@@ -979,18 +969,17 @@ public class ByteCodeParser {
     }
 
     private AbstractLocalVariable getLocalVariableInAssignment(int index, int offset, Expression value) {
-        Class valueClass = value.getClass();
         Type valueType = value.getType();
 
-        if (valueClass == NullExpression.class) {
+        if (value.isNullExpression()) {
             return localVariableMaker.getLocalVariableInNullAssignment(index, offset, valueType);
-        } else if (valueClass == ClassFileLocalVariableReferenceExpression.class) {
+        } else if (value.isLocalVariableReferenceExpression()) {
             return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, ((ClassFileLocalVariableReferenceExpression)value).getLocalVariable());
-        } else if (valueClass == ClassFileMethodInvocationExpression.class) {
-            if (valueType.isObject()) {
+        } else if (value.isMethodInvocationExpression()) {
+            if (valueType.isObjectType()) {
                 // Remove type arguments
                 valueType = ((ObjectType)valueType).createType(null);
-            } else if (valueType.isGeneric()) {
+            } else if (valueType.isGenericType()) {
                 valueType = TYPE_UNDEFINED_OBJECT;
             }
 
@@ -1073,24 +1062,16 @@ public class ByteCodeParser {
 
     private static void parseILOAD(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable) {
         if (! statements.isEmpty()) {
-            Statement statement = statements.getLast();
+            Expression expression = statements.getLast().getExpression();
 
-            if (statement.getClass() == ExpressionStatement.class) {
-                Expression expression = ((ExpressionStatement)statement).getExpression();
+            if ((expression.getLineNumber() == lineNumber) && expression.isPreOperatorExpression() && expression.getExpression().isLocalVariableReferenceExpression()) {
+                ClassFileLocalVariableReferenceExpression cflvre = (ClassFileLocalVariableReferenceExpression)expression.getExpression();
 
-                if ((expression.getLineNumber() == lineNumber) && (expression.getClass() == PreOperatorExpression.class)) {
-                    PreOperatorExpression poe = (PreOperatorExpression)expression;
-
-                    if (poe.getExpression().getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                        ClassFileLocalVariableReferenceExpression cflvre = (ClassFileLocalVariableReferenceExpression)poe.getExpression();
-
-                        if (cflvre.getLocalVariable() == localVariable) {
-                            // IINC pattern found -> Remove last statement and create a pre-incrementation
-                            statements.removeLast();
-                            stack.push(poe);
-                            return;
-                        }
-                    }
+                if (cflvre.getLocalVariable() == localVariable) {
+                    // IINC pattern found -> Remove last statement and create a pre-incrementation
+                    statements.removeLast();
+                    stack.push(expression);
+                    return;
                 }
             }
         }
@@ -1104,78 +1085,75 @@ public class ByteCodeParser {
 
         bindParameterTypesWithArgumentTypes(vre.getType(), valueRef);
 
-        if ((valueRef.getLineNumber() == lineNumber) && (valueRef.getClass() == BinaryOperatorExpression.class)) {
-            BinaryOperatorExpression boe = (BinaryOperatorExpression)valueRef;
+        if ((valueRef.getLineNumber() == lineNumber) && valueRef.isBinaryOperatorExpression() && valueRef.getLeftExpression().isLocalVariableReferenceExpression()) {
+            ClassFileLocalVariableReferenceExpression lvr = (ClassFileLocalVariableReferenceExpression)valueRef.getLeftExpression();
 
-            if (boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class) {
-                ClassFileLocalVariableReferenceExpression lvr = (ClassFileLocalVariableReferenceExpression)boe.getLeftExpression();
+            if (lvr.getLocalVariable() == localVariable) {
+                BinaryOperatorExpression boe = (BinaryOperatorExpression)valueRef;
+                Expression expression;
 
-                if (lvr.getLocalVariable() == localVariable) {
-                    Expression expression;
-
-                    switch (boe.getOperator()) {
-                        case "*": expression = createAssignment(boe, "*="); break;
-                        case "/": expression = createAssignment(boe, "/="); break;
-                        case "%": expression = createAssignment(boe, "%="); break;
-                        case "<<": expression = createAssignment(boe, "<<="); break;
-                        case ">>": expression = createAssignment(boe, ">>="); break;
-                        case ">>>": expression = createAssignment(boe, ">>>="); break;
-                        case "&": expression = createAssignment(boe, "&="); break;
-                        case "^": expression = createAssignment(boe, "^="); break;
-                        case "|": expression = createAssignment(boe, "|="); break;
-                        case "=": expression = boe; break;
-                        case "+":
-                            if (isPositiveOne(boe.getRightExpression())) {
-                                if (stackContainsLocalVariableReference(stack, localVariable)) {
-                                    stack.pop();
-                                    stack.push(valueRef);
-                                    expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "++");
-                                } else {
-                                    expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "++", boe.getLeftExpression());
-                                }
-                            } else if (isNegativeOne(boe.getRightExpression())) {
-                                if (stackContainsLocalVariableReference(stack, localVariable)) {
-                                    stack.pop();
-                                    stack.push(valueRef);
-                                    expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "--");
-                                } else {
-                                    expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
-                                }
+                switch (boe.getOperator()) {
+                    case "*": expression = createAssignment(boe, "*="); break;
+                    case "/": expression = createAssignment(boe, "/="); break;
+                    case "%": expression = createAssignment(boe, "%="); break;
+                    case "<<": expression = createAssignment(boe, "<<="); break;
+                    case ">>": expression = createAssignment(boe, ">>="); break;
+                    case ">>>": expression = createAssignment(boe, ">>>="); break;
+                    case "&": expression = createAssignment(boe, "&="); break;
+                    case "^": expression = createAssignment(boe, "^="); break;
+                    case "|": expression = createAssignment(boe, "|="); break;
+                    case "=": expression = boe; break;
+                    case "+":
+                        if (isPositiveOne(boe.getRightExpression())) {
+                            if (stackContainsLocalVariableReference(stack, localVariable)) {
+                                stack.pop();
+                                stack.push(valueRef);
+                                expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "++");
                             } else {
-                                expression = createAssignment(boe, "+=");
+                                expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "++", boe.getLeftExpression());
                             }
-                            break;
-                        case "-":
-                            if (isPositiveOne(boe.getRightExpression())) {
-                                if (stackContainsLocalVariableReference(stack, localVariable)) {
-                                    stack.pop();
-                                    stack.push(valueRef);
-                                    expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "--");
-                                } else {
-                                    expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
-                                }
-                            } else if (isNegativeOne(boe.getRightExpression())) {
-                                if (stackContainsLocalVariableReference(stack, localVariable)) {
-                                    stack.pop();
-                                    stack.push(valueRef);
-                                    expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "++");
-                                } else {
-                                    expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "++", boe.getLeftExpression());
-                                }
+                        } else if (isNegativeOne(boe.getRightExpression())) {
+                            if (stackContainsLocalVariableReference(stack, localVariable)) {
+                                stack.pop();
+                                stack.push(valueRef);
+                                expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "--");
                             } else {
-                                expression = createAssignment(boe, "-=");
+                                expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
                             }
-                            break;
-                        default: throw new RuntimeException("Unexpected value expression");
-                    }
-
-                    if (!stack.isEmpty() && (stack.peek() == valueRef)) {
-                        stack.replace(valueRef, expression);
-                    } else {
-                        statements.add(new ExpressionStatement(expression));
-                    }
-                    return;
+                        } else {
+                            expression = createAssignment(boe, "+=");
+                        }
+                        break;
+                    case "-":
+                        if (isPositiveOne(boe.getRightExpression())) {
+                            if (stackContainsLocalVariableReference(stack, localVariable)) {
+                                stack.pop();
+                                stack.push(valueRef);
+                                expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "--");
+                            } else {
+                                expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
+                            }
+                        } else if (isNegativeOne(boe.getRightExpression())) {
+                            if (stackContainsLocalVariableReference(stack, localVariable)) {
+                                stack.pop();
+                                stack.push(valueRef);
+                                expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "++");
+                            } else {
+                                expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "++", boe.getLeftExpression());
+                            }
+                        } else {
+                            expression = createAssignment(boe, "-=");
+                        }
+                        break;
+                    default: throw new RuntimeException("Unexpected value expression");
                 }
+
+                if (!stack.isEmpty() && (stack.peek() == valueRef)) {
+                    stack.replace(valueRef, expression);
+                } else {
+                    statements.add(new ExpressionStatement(expression));
+                }
+                return;
             }
         }
 
@@ -1183,99 +1161,95 @@ public class ByteCodeParser {
     }
 
     private static boolean stackContainsLocalVariableReference(DefaultStack<Expression> stack, AbstractLocalVariable localVariable) {
-        if (stack.isEmpty())
-            return false;
+        if (!stack.isEmpty()) {
+            Expression expression = stack.peek();
 
-        Expression expression = stack.peek();
+            if (expression.isLocalVariableReferenceExpression()) {
+                ClassFileLocalVariableReferenceExpression lvr = (ClassFileLocalVariableReferenceExpression) expression;
+                return lvr.getLocalVariable() == localVariable;
+            }
+        }
 
-        if (expression.getClass() != ClassFileLocalVariableReferenceExpression.class)
-            return false;
-
-        ClassFileLocalVariableReferenceExpression lvr = (ClassFileLocalVariableReferenceExpression)expression;
-
-        return lvr.getLocalVariable() == localVariable;
+        return false;
     }
 
     @SuppressWarnings("unchecked")
     private void parsePUT(Statements statements, DefaultStack<Expression> stack, int lineNumber, FieldReferenceExpression fr, Expression valueRef) {
-        if (valueRef.getClass() == NewArray.class) {
-            valueRef = NewArrayMaker.make(statements, (NewArray)valueRef);
+        if (valueRef.isNewArray()) {
+            valueRef = NewArrayMaker.make(statements, valueRef);
         }
 
         bindParameterTypesWithArgumentTypes(fr.getType(), valueRef);
 
-        if ((valueRef.getLineNumber() == lineNumber) && (valueRef.getClass() == BinaryOperatorExpression.class)) {
-            BinaryOperatorExpression boe = (BinaryOperatorExpression)valueRef;
+        if ((valueRef.getLineNumber() == lineNumber) && valueRef.isBinaryOperatorExpression() && valueRef.getLeftExpression().isFieldReferenceExpression()) {
+            FieldReferenceExpression boefr = (FieldReferenceExpression)valueRef.getLeftExpression();
 
-            if (boe.getLeftExpression().getClass() == FieldReferenceExpression.class) {
-                FieldReferenceExpression boefr = (FieldReferenceExpression)boe.getLeftExpression();
+            if (boefr.getName().equals(fr.getName()) && boefr.getExpression().getType().equals(fr.getExpression().getType())) {
+                BinaryOperatorExpression boe = (BinaryOperatorExpression)valueRef;
+                Expression expression;
 
-                if (boefr.getName().equals(fr.getName()) && boefr.getExpression().getType().equals(fr.getExpression().getType())) {
-                    Expression expression;
-
-                    switch (boe.getOperator()) {
-                        case "*": expression = createAssignment(boe, "*="); break;
-                        case "/": expression = createAssignment(boe, "/="); break;
-                        case "%": expression = createAssignment(boe, "%="); break;
-                        case "<<": expression = createAssignment(boe, "<<="); break;
-                        case ">>": expression = createAssignment(boe, ">>="); break;
-                        case ">>>": expression = createAssignment(boe, ">>>="); break;
-                        case "&": expression = createAssignment(boe, "&="); break;
-                        case "^": expression = createAssignment(boe, "^="); break;
-                        case "|": expression = createAssignment(boe, "|="); break;
-                        case "=": expression = boe; break;
-                        case "+":
-                            if (isPositiveOne(boe.getRightExpression())) {
-                                if (stackContainsFieldReference(stack, fr)) {
-                                    stack.pop();
-                                    stack.push(valueRef);
-                                    expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "++");
-                                } else {
-                                    expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "++", boe.getLeftExpression());
-                                }
-                            } else if (isNegativeOne(boe.getRightExpression())) {
-                                if (stackContainsFieldReference(stack, fr)) {
-                                    stack.pop();
-                                    stack.push(valueRef);
-                                    expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "--");
-                                } else {
-                                    expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
-                                }
+                switch (boe.getOperator()) {
+                    case "*": expression = createAssignment(boe, "*="); break;
+                    case "/": expression = createAssignment(boe, "/="); break;
+                    case "%": expression = createAssignment(boe, "%="); break;
+                    case "<<": expression = createAssignment(boe, "<<="); break;
+                    case ">>": expression = createAssignment(boe, ">>="); break;
+                    case ">>>": expression = createAssignment(boe, ">>>="); break;
+                    case "&": expression = createAssignment(boe, "&="); break;
+                    case "^": expression = createAssignment(boe, "^="); break;
+                    case "|": expression = createAssignment(boe, "|="); break;
+                    case "=": expression = boe; break;
+                    case "+":
+                        if (isPositiveOne(boe.getRightExpression())) {
+                            if (stackContainsFieldReference(stack, fr)) {
+                                stack.pop();
+                                stack.push(valueRef);
+                                expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "++");
                             } else {
-                                expression = createAssignment(boe, "+=");
+                                expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "++", boe.getLeftExpression());
                             }
-                            break;
-                        case "-":
-                            if (isPositiveOne(boe.getRightExpression())) {
-                                if (stackContainsFieldReference(stack, fr)) {
-                                    stack.pop();
-                                    stack.push(valueRef);
-                                    expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "--");
-                                } else {
-                                    expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
-                                }
-                            } else if (isPositiveOne(boe.getRightExpression())) {
-                                if (stackContainsFieldReference(stack, fr)) {
-                                    stack.pop();
-                                    stack.push(valueRef);
-                                    expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "++");
-                                } else {
-                                    expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "++", boe.getLeftExpression());
-                                }
+                        } else if (isNegativeOne(boe.getRightExpression())) {
+                            if (stackContainsFieldReference(stack, fr)) {
+                                stack.pop();
+                                stack.push(valueRef);
+                                expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "--");
                             } else {
-                                expression = createAssignment(boe, "-=");
+                                expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
                             }
-                            break;
-                        default: throw new RuntimeException("Unexpected value expression");
-                    }
-
-                    if (!stack.isEmpty() && (stack.peek() == valueRef)) {
-                        stack.replace(valueRef, expression);
-                    } else {
-                        statements.add(new ExpressionStatement(expression));
-                    }
-                    return;
+                        } else {
+                            expression = createAssignment(boe, "+=");
+                        }
+                        break;
+                    case "-":
+                        if (isPositiveOne(boe.getRightExpression())) {
+                            if (stackContainsFieldReference(stack, fr)) {
+                                stack.pop();
+                                stack.push(valueRef);
+                                expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "--");
+                            } else {
+                                expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
+                            }
+                        } else if (isPositiveOne(boe.getRightExpression())) {
+                            if (stackContainsFieldReference(stack, fr)) {
+                                stack.pop();
+                                stack.push(valueRef);
+                                expression = newPostArithmeticOperatorExpression(boe.getLineNumber(), boe.getLeftExpression(), "++");
+                            } else {
+                                expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "++", boe.getLeftExpression());
+                            }
+                        } else {
+                            expression = createAssignment(boe, "-=");
+                        }
+                        break;
+                    default: throw new RuntimeException("Unexpected value expression");
                 }
+
+                if (!stack.isEmpty() && (stack.peek() == valueRef)) {
+                    stack.replace(valueRef, expression);
+                } else {
+                    statements.add(new ExpressionStatement(expression));
+                }
+                return;
             }
         }
 
@@ -1285,17 +1259,13 @@ public class ByteCodeParser {
     private void parseInvokeDynamic(Statements statements, DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, int index) {
         // Remove previous 'getClass()' or cast if exists
         if (! statements.isEmpty()) {
-            Statement last = statements.getLast();
+            Expression expression = statements.getLast().getExpression();
 
-            if (last.getClass() == ExpressionStatement.class) {
-                Expression expression = ((ExpressionStatement)last).getExpression();
+            if (expression.isMethodInvocationExpression()) {
+                MethodInvocationExpression mie = (MethodInvocationExpression)expression;
 
-                if (expression.getClass() == ClassFileMethodInvocationExpression.class) {
-                    MethodInvocationExpression mie = (MethodInvocationExpression)expression;
-
-                    if (mie.getName().equals("getClass") && mie.getDescriptor().equals("()Ljava/lang/Class;") && mie.getInternalTypeName().equals("java/lang/Object")) {
-                        statements.removeLast();
-                    }
+                if (mie.getName().equals("getClass") && mie.getDescriptor().equals("()Ljava/lang/Class;") && mie.getInternalTypeName().equals("java/lang/Object")) {
+                    statements.removeLast();
                 }
             }
         }
@@ -1341,7 +1311,7 @@ public class ByteCodeParser {
                     ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)methodDeclaration;
                     stack.push(new LambdaIdentifiersExpression(
                             lineNumber, indyMethodTypes.returnedType, indyMethodTypes.returnedType,
-                            prepareLambdaParameters(cfmd.getFormalParameters(), parameterCount),
+                            prepareLambdaParameterNames(cfmd.getFormalParameters(), parameterCount),
                             prepareLambdaStatements(cfmd.getFormalParameters(), indyParameters, cfmd.getStatements())));
                     return;
                 }
@@ -1364,7 +1334,7 @@ public class ByteCodeParser {
         stack.push(new MethodReferenceExpression(lineNumber, indyMethodTypes.returnedType, (Expression)indyParameters, typeName, name1, descriptor1));
     }
 
-    private List<String> prepareLambdaParameters(BaseFormalParameter formalParameters, int parameterCount) {
+    private List<String> prepareLambdaParameterNames(BaseFormalParameter formalParameters, int parameterCount) {
         if ((formalParameters == null) || (parameterCount == 0)) {
             return null;
         } else {
@@ -1391,9 +1361,9 @@ public class ByteCodeParser {
                     HashMap<String, String> mapping = new HashMap<>();
                     Expression expression = indyParameters.getFirst();
 
-                    if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                    if (expression.isLocalVariableReferenceExpression()) {
                         String name = formalParameters.getFirst().getName();
-                        String newName = ((ClassFileLocalVariableReferenceExpression) expression).getName();
+                        String newName = expression.getName();
 
                         if (!name.equals(newName)) {
                             mapping.put(name, newName);
@@ -1407,9 +1377,9 @@ public class ByteCodeParser {
                         for (int i = 1; i < size; i++) {
                             expression = list.get(i);
 
-                            if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+                            if (expression.isLocalVariableReferenceExpression()) {
                                 String name = formalParameterList.get(i).getName();
-                                String newName = ((ClassFileLocalVariableReferenceExpression) expression).getName();
+                                String newName = expression.getName();
 
                                 if (!name.equals(newName)) {
                                     mapping.put(name, newName);
@@ -1428,10 +1398,10 @@ public class ByteCodeParser {
             if (baseStatement.size() == 1) {
                 Statement statement = baseStatement.getFirst();
 
-                if (statement.getClass() == ReturnExpressionStatement.class) {
-                    return new LambdaExpressionStatement(((ReturnExpressionStatement)statement).getExpression());
-                } else if (statement.getClass() ==  ExpressionStatement.class) {
-                    return new LambdaExpressionStatement(((ExpressionStatement)statement).getExpression());
+                if (statement.isReturnExpressionStatement()) {
+                    return new LambdaExpressionStatement(statement.getExpression());
+                } else if (statement.isExpressionStatement()) {
+                    return new LambdaExpressionStatement(statement.getExpression());
                 }
             }
         }
@@ -1440,17 +1410,15 @@ public class ByteCodeParser {
     }
 
     private static boolean stackContainsFieldReference(DefaultStack<Expression> stack, FieldReferenceExpression fr) {
-        if (stack.isEmpty())
-            return false;
+        if (!stack.isEmpty()) {
+            Expression expression = stack.peek();
 
-        Expression expression = stack.peek();
+            if (expression.isFieldReferenceExpression()) {
+                return expression.getName().equals(fr.getName()) && expression.getExpression().getType().equals(fr.getExpression().getType());
+            }
+        }
 
-        if (expression.getClass() != FieldReferenceExpression.class)
-            return false;
-
-        FieldReferenceExpression stackfr = (FieldReferenceExpression)expression;
-
-        return stackfr.getName().equals(fr.getName()) && stackfr.getExpression().getType().equals(fr.getExpression().getType());
+        return false;
     }
 
     private static Expression createAssignment(BinaryOperatorExpression boe, String operator) {
@@ -1460,23 +1428,23 @@ public class ByteCodeParser {
     }
 
     private static boolean isPositiveOne(Expression expression) {
-        if ((expression.getClass() == IntegerConstantExpression.class) && ((IntegerConstantExpression)expression).getValue() == 1)
+        if (expression.isIntegerConstantExpression() && expression.getIntegerValue() == 1)
             return true;
-        if ((expression.getClass() == LongConstantExpression.class) && ((LongConstantExpression)expression).getValue() == 1L)
+        if (expression.isLongConstantExpression() && expression.getLongValue() == 1L)
             return true;
-        if ((expression.getClass() == FloatConstantExpression.class) && ((FloatConstantExpression)expression).getValue() == 1.0F)
+        if (expression.isFloatConstantExpression() && expression.getFloatValue() == 1.0F)
             return true;
-        return ((expression.getClass() == DoubleConstantExpression.class) && ((DoubleConstantExpression)expression).getValue() == 1.0D);
+        return (expression.isDoubleConstantExpression() && expression.getDoubleValue() == 1.0D);
     }
 
     private static boolean isNegativeOne(Expression expression) {
-        if ((expression.getClass() == IntegerConstantExpression.class) && ((IntegerConstantExpression)expression).getValue() == -1)
+        if (expression.isIntegerConstantExpression() && expression.getIntegerValue() == -1)
             return true;
-        if ((expression.getClass() == LongConstantExpression.class) && ((LongConstantExpression)expression).getValue() == -1L)
+        if (expression.isLongConstantExpression() && expression.getLongValue() == -1L)
             return true;
-        if ((expression.getClass() == FloatConstantExpression.class) && ((FloatConstantExpression)expression).getValue() == -1.0F)
+        if (expression.isFloatConstantExpression() && expression.getFloatValue() == -1.0F)
             return true;
-        return ((expression.getClass() == DoubleConstantExpression.class) && ((DoubleConstantExpression)expression).getValue() == -1.0D);
+        return (expression.isDoubleConstantExpression() && expression.getDoubleValue() == -1.0D);
     }
 
     private void parseASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, Expression valueRef) {
@@ -1486,8 +1454,8 @@ public class ByteCodeParser {
         ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
         Expression oldValueRef = valueRef;
 
-        if (valueRef.getClass() == NewArray.class) {
-            valueRef = NewArrayMaker.make(statements, (NewArray)valueRef);
+        if (valueRef.isNewArray()) {
+            valueRef = NewArrayMaker.make(statements, valueRef);
         }
 
         if (oldValueRef != valueRef) {
@@ -1507,12 +1475,11 @@ public class ByteCodeParser {
         if (!statements.isEmpty()) {
             Statement lastStatement = statements.getLast();
 
-            if (lastStatement.getClass() == ExpressionStatement.class) {
-                ExpressionStatement lastES = (ExpressionStatement) lastStatement;
-                Expression lastExpression = lastES.getExpression();
-                Class lastExpressionClass = lastExpression.getClass();
+            if (lastStatement.isExpressionStatement()) {
+                ExpressionStatement lastES = (ExpressionStatement)lastStatement;
+                Expression lastExpression = lastStatement.getExpression();
 
-                if (lastExpressionClass == BinaryOperatorExpression.class) {
+                if (lastExpression.isBinaryOperatorExpression()) {
                     BinaryOperatorExpression boe = (BinaryOperatorExpression) lastExpression;
 
                     if (getLastRightExpression(boe) == rightExpression) {
@@ -1521,55 +1488,48 @@ public class ByteCodeParser {
                         return;
                     }
 
-                    if ((lineNumber > 0) && (boe.getLineNumber() == lineNumber)) {
-                        Class leftExpressionClass = boe.getLeftExpression().getClass();
+                    if ((lineNumber > 0) && (boe.getLineNumber() == lineNumber) && (boe.getLeftExpression().getClass() == rightExpression.getClass())) {
+                        if (leftExpression.isLocalVariableReferenceExpression()) {
+                            ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression) boe.getLeftExpression();
+                            ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) rightExpression;
 
-                        if (leftExpressionClass == rightExpression.getClass()) {
-                            if (leftExpressionClass == ClassFileLocalVariableReferenceExpression.class) {
-                                ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression) boe.getLeftExpression();
-                                ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) rightExpression;
+                            if (lvr1.getLocalVariable() == lvr2.getLocalVariable()) {
+                                // Multi assignment
+                                lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", boe, 16));
+                                return;
+                            }
+                        } else if (leftExpression.isFieldReferenceExpression()) {
+                            FieldReferenceExpression fr1 = (FieldReferenceExpression) boe.getLeftExpression();
+                            FieldReferenceExpression fr2 = (FieldReferenceExpression) rightExpression;
 
-                                if (lvr1.getLocalVariable() == lvr2.getLocalVariable()) {
-                                    // Multi assignment
-                                    lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", boe, 16));
-                                    return;
-                                }
-                            } else if (leftExpressionClass == FieldReferenceExpression.class) {
-                                FieldReferenceExpression fr1 = (FieldReferenceExpression) boe.getLeftExpression();
-                                FieldReferenceExpression fr2 = (FieldReferenceExpression) rightExpression;
-
-                                if (fr1.getName().equals(fr2.getName()) && fr1.getExpression().getType().equals(fr2.getExpression().getType())) {
-                                    // Multi assignment
-                                    lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", boe, 16));
-                                    return;
-                                }
+                            if (fr1.getName().equals(fr2.getName()) && fr1.getExpression().getType().equals(fr2.getExpression().getType())) {
+                                // Multi assignment
+                                lastES.setExpression(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", boe, 16));
+                                return;
                             }
                         }
                     }
-                } else if (lastExpressionClass == PreOperatorExpression.class) {
-                    PreOperatorExpression poe = (PreOperatorExpression)lastExpression;
-                    Class clazz = poe.getExpression().getClass();
-
-                    if (clazz == rightExpression.getClass()) {
-                        if (clazz == ClassFileLocalVariableReferenceExpression.class) {
-                            ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression)poe.getExpression();
+                } else if (lastExpression.isPreOperatorExpression()) {
+                    if (lastExpression.getExpression().getClass() == rightExpression.getClass()) {
+                        if (lastExpression.getExpression().isLocalVariableReferenceExpression()) {
+                            ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression)lastExpression.getExpression();
                             ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression)rightExpression;
 
                             if (lvr1.getLocalVariable() == lvr2.getLocalVariable()) {
-                                rightExpression = newPreArithmeticOperatorExpression(poe.getLineNumber(), poe.getOperator(), poe.getExpression());
+                                rightExpression = newPreArithmeticOperatorExpression(lastExpression.getLineNumber(), lastExpression.getOperator(), lastExpression.getExpression());
                                 statements.removeLast();
                             }
-                        } else if (clazz == FieldReferenceExpression.class) {
-                            FieldReferenceExpression fr1 = (FieldReferenceExpression)poe.getExpression();
+                        } else if (lastExpression.getExpression().isFieldReferenceExpression()) {
+                            FieldReferenceExpression fr1 = (FieldReferenceExpression)lastExpression.getExpression();
                             FieldReferenceExpression fr2 = (FieldReferenceExpression)rightExpression;
 
                             if (fr1.getName().equals(fr2.getName()) && fr1.getExpression().getType().equals(fr2.getExpression().getType())) {
-                                rightExpression = newPreArithmeticOperatorExpression(poe.getLineNumber(), poe.getOperator(), poe.getExpression());
+                                rightExpression = newPreArithmeticOperatorExpression(lastExpression.getLineNumber(), lastExpression.getOperator(), lastExpression.getExpression());
                                 statements.removeLast();
                             }
                         }
                     }
-                } else if (lastExpressionClass == PostOperatorExpression.class) {
+                } else if (lastExpression.isPostOperatorExpression()) {
                     PostOperatorExpression poe = (PostOperatorExpression)lastExpression;
 
                     if (poe.getExpression() == rightExpression) {
@@ -1590,7 +1550,7 @@ public class ByteCodeParser {
         if (!stack.isEmpty()) {
             expression = stack.peek();
 
-            if ((expression.getLineNumber() == lineNumber) && (expression.getClass() == ClassFileLocalVariableReferenceExpression.class)) {
+            if ((expression.getLineNumber() == lineNumber) && expression.isLocalVariableReferenceExpression()) {
                 ClassFileLocalVariableReferenceExpression exp = (ClassFileLocalVariableReferenceExpression)expression;
 
                 if (exp.getLocalVariable() == localVariable) {
@@ -1638,7 +1598,7 @@ public class ByteCodeParser {
             bindParameterTypesWithArgumentTypes(cmp.getRightExpression().getType(), cmp.getRightExpression());
 
             stack.push(new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, cmp.getLeftExpression(), (basicBlock.mustInverseCondition() ? operator1 : operator2), cmp.getRightExpression(), priority));
-        } else if (expression.getType().isPrimitive()) {
+        } else if (expression.getType().isPrimitiveType()) {
             PrimitiveType pt = (PrimitiveType)expression.getType();
 
             bindParameterTypesWithArgumentTypes(pt, expression);
@@ -1672,8 +1632,8 @@ public class ByteCodeParser {
     private void parseXRETURN(Statements statements, DefaultStack<Expression> stack, int lineNumber) {
         Expression valueRef = stack.pop();
 
-        if (valueRef.getClass() == NewArray.class) {
-            valueRef = NewArrayMaker.make(statements, (NewArray)valueRef);
+        if (valueRef.isNewArray()) {
+            valueRef = NewArrayMaker.make(statements, valueRef);
         }
 
         bindParameterTypesWithArgumentTypes(returnedType, valueRef);
@@ -1682,27 +1642,24 @@ public class ByteCodeParser {
             lineNumber = valueRef.getLineNumber();
         }
 
-        if (!statements.isEmpty() && (valueRef.getClass() == ClassFileLocalVariableReferenceExpression.class)) {
+        if (!statements.isEmpty() && valueRef.isLocalVariableReferenceExpression()) {
             Statement lastStatement = statements.getLast();
 
-            if (lastStatement.getClass() == ExpressionStatement.class) {
-                Expression expression = ((ExpressionStatement)lastStatement).getExpression();
+            if (lastStatement.isExpressionStatement()) {
+                Expression expression = statements.getLast().getExpression();
 
-                if ((lineNumber <= expression.getLineNumber()) && (expression.getClass() == BinaryOperatorExpression.class)) {
-                    BinaryOperatorExpression boe = (BinaryOperatorExpression)expression;
+                if ((lineNumber <= expression.getLineNumber()) && expression.isBinaryOperatorExpression() &&
+                    expression.getOperator().equals("=") && expression.getLeftExpression().isLocalVariableReferenceExpression()) {
+                    ClassFileLocalVariableReferenceExpression vre1 = (ClassFileLocalVariableReferenceExpression) expression.getLeftExpression();
+                    ClassFileLocalVariableReferenceExpression vre2 = (ClassFileLocalVariableReferenceExpression) valueRef;
 
-                    if ((boe.getOperator().equals("=")) && (boe.getLeftExpression().getClass() == ClassFileLocalVariableReferenceExpression.class)) {
-                        ClassFileLocalVariableReferenceExpression vre1 = (ClassFileLocalVariableReferenceExpression) boe.getLeftExpression();
-                        ClassFileLocalVariableReferenceExpression vre2 = (ClassFileLocalVariableReferenceExpression) valueRef;
-
-                        if (vre1.getLocalVariable() == vre2.getLocalVariable()) {
-                            // Remove synthetic local variable
-                            localVariableMaker.removeLocalVariable(vre1.getLocalVariable());
-                            // Remove assignment statement
-                            statements.removeLast();
-                            statements.add(new ReturnExpressionStatement(lineNumber, boe.getRightExpression()));
-                            return;
-                        }
+                    if (vre1.getLocalVariable() == vre2.getLocalVariable()) {
+                        // Remove synthetic local variable
+                        localVariableMaker.removeLocalVariable(vre1.getLocalVariable());
+                        // Remove assignment statement
+                        statements.removeLast();
+                        statements.add(new ReturnExpressionStatement(lineNumber, expression.getRightExpression()));
+                        return;
                     }
                 }
             }
@@ -1778,17 +1735,17 @@ public class ByteCodeParser {
         parsePUT(statements, stack, lineNumber, fieldRef, valueRef);
     }
 
-    private static Expression getLastRightExpression(BinaryOperatorExpression boe) {
+    private static Expression getLastRightExpression(Expression boe) {
         while (true) {
             if (! boe.getOperator().equals("=")) {
                 return boe;
             }
 
-            if (boe.getRightExpression().getClass() != BinaryOperatorExpression.class) {
+            if (! boe.getRightExpression().isBinaryOperatorExpression()) {
                 return boe.getRightExpression();
             }
 
-            boe = (BinaryOperatorExpression)boe.getRightExpression();
+            boe = boe.getRightExpression();
         }
     }
 
@@ -1800,7 +1757,7 @@ public class ByteCodeParser {
 
             if (typeDeclaration == null) {
                 return new ClassFileNewExpression(lineNumber, ObjectType.TYPE_OBJECT);
-            } else if (typeDeclaration.getClass() == ClassFileClassDeclaration.class) {
+            } else if (typeDeclaration.isClassDeclaration()) {
                 ClassFileClassDeclaration declaration = (ClassFileClassDeclaration) typeDeclaration;
                 BodyDeclaration bodyDeclaration;
 
@@ -1829,18 +1786,13 @@ public class ByteCodeParser {
      * See "Shift Operators":                                https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.19
      */
     private Expression newIntegerBinaryOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
-        Class leftClass = leftExpression.getClass();
-        Class rightClass = rightExpression.getClass();
-
-        if (leftClass == ClassFileLocalVariableReferenceExpression.class) {
+        if (leftExpression.isLocalVariableReferenceExpression()) {
             AbstractLocalVariable leftVariable = ((ClassFileLocalVariableReferenceExpression)leftExpression).getLocalVariable();
-
             leftVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
 
-        if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
+        if (rightExpression.isLocalVariableReferenceExpression()) {
             AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
-
             rightVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
 
@@ -1852,14 +1804,12 @@ public class ByteCodeParser {
      * See "Binary Numeric Promotion": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.22.1
      */
     private Expression newIntegerOrBooleanBinaryOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
-        Class leftClass = leftExpression.getClass();
-        Class rightClass = rightExpression.getClass();
         Type type = TYPE_INT;
 
-        if (leftClass == ClassFileLocalVariableReferenceExpression.class) {
+        if (leftExpression.isLocalVariableReferenceExpression()) {
             AbstractLocalVariable leftVariable = ((ClassFileLocalVariableReferenceExpression)leftExpression).getLocalVariable();
 
-            if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
+            if (rightExpression.isLocalVariableReferenceExpression()) {
                 AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
                 if (leftVariable.isAssignableFrom(typeBounds, TYPE_BOOLEAN) || rightVariable.isAssignableFrom(typeBounds, TYPE_BOOLEAN)) {
@@ -1876,7 +1826,7 @@ public class ByteCodeParser {
                 }
             }
         } else {
-            if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
+            if (rightExpression.isLocalVariableReferenceExpression()) {
                 if (leftExpression.getType() == TYPE_BOOLEAN) {
                     AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
@@ -1893,13 +1843,10 @@ public class ByteCodeParser {
      * See "Numerical Equality Operators == and !=": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.21.1
      */
     private Expression newIntegerOrBooleanComparisonOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
-        Class leftClass = leftExpression.getClass();
-        Class rightClass = rightExpression.getClass();
-
-        if (leftClass == ClassFileLocalVariableReferenceExpression.class) {
+        if (leftExpression.isLocalVariableReferenceExpression()) {
             AbstractLocalVariable leftVariable = ((ClassFileLocalVariableReferenceExpression)leftExpression).getLocalVariable();
 
-            if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
+            if (rightExpression.isLocalVariableReferenceExpression()) {
                 AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
 
                 if (leftVariable.isAssignableFrom(typeBounds, TYPE_BOOLEAN) || rightVariable.isAssignableFrom(typeBounds, TYPE_BOOLEAN)) {
@@ -1912,10 +1859,9 @@ public class ByteCodeParser {
                 }
             }
         } else {
-            if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
+            if (rightExpression.isLocalVariableReferenceExpression()) {
                 if (leftExpression.getType() == TYPE_BOOLEAN) {
                     AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
-
                     rightVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
                 }
             }
@@ -1932,18 +1878,13 @@ public class ByteCodeParser {
      * See "Numerical Equality Operators == and !=": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.21.1
      */
     private Expression newIntegerComparisonOperatorExpression(int lineNumber, Expression leftExpression, String operator, Expression rightExpression, int priority) {
-        Class leftClass = leftExpression.getClass();
-        Class rightClass = rightExpression.getClass();
-
-        if (leftClass == ClassFileLocalVariableReferenceExpression.class) {
+        if (leftExpression.isLocalVariableReferenceExpression()) {
             AbstractLocalVariable leftVariable = ((ClassFileLocalVariableReferenceExpression)leftExpression).getLocalVariable();
-
             leftVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
 
-        if (rightClass == ClassFileLocalVariableReferenceExpression.class) {
+        if (rightExpression.isLocalVariableReferenceExpression()) {
             AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
-
             rightVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
 
@@ -1961,11 +1902,11 @@ public class ByteCodeParser {
     }
 
     private void reduceIntegerLocalVariableType(Expression expression) {
-        if (expression.getClass() == ClassFileLocalVariableReferenceExpression.class) {
+        if (expression.isLocalVariableReferenceExpression()) {
             ClassFileLocalVariableReferenceExpression lvre = (ClassFileLocalVariableReferenceExpression)expression;
 
-            if (lvre.getLocalVariable().getClass() == PrimitiveLocalVariable.class) {
-                PrimitiveLocalVariable plv = (PrimitiveLocalVariable)lvre.getLocalVariable();
+            if (lvre.getLocalVariable().isPrimitiveLocalVariable()) {
+                AbstractLocalVariable plv = lvre.getLocalVariable();
                 if (plv.isAssignableFrom(typeBounds, MAYBE_BOOLEAN_TYPE)) {
                     plv.typeOnRight(typeBounds, MAYBE_BYTE_TYPE);
                 }
@@ -1977,8 +1918,8 @@ public class ByteCodeParser {
      * @return expression, 'this' or 'super'
      */
     private Expression getFieldInstanceReference(Expression expression, ObjectType ot, String name) {
-        if ((bodyDeclaration.getFieldDeclarations() != null) && (expression.getClass() == ThisExpression.class)) {
-            String internalName = ((ObjectType)expression.getType()).getInternalName();
+        if ((bodyDeclaration.getFieldDeclarations() != null) && expression.isThisExpression()) {
+            String internalName = expression.getType().getInternalName();
 
             if (!ot.getInternalName().equals(internalName)) {
                 memberVisitor.init(name, null);
@@ -1998,8 +1939,8 @@ public class ByteCodeParser {
      * @return expression, 'this' or 'super'
      */
     private Expression getMethodInstanceReference(Expression expression, ObjectType ot, String name, String descriptor) {
-        if ((bodyDeclaration.getMethodDeclarations() != null) && (expression.getClass() == ThisExpression.class)) {
-            String internalName = ((ObjectType)expression.getType()).getInternalName();
+        if ((bodyDeclaration.getMethodDeclarations() != null) && expression.isThisExpression()) {
+            String internalName = expression.getType().getInternalName();
 
             if (!ot.getInternalName().equals(internalName)) {
                 memberVisitor.init(name, descriptor);
@@ -2920,7 +2861,7 @@ public class ByteCodeParser {
         // In case of downcasting, set all cast expression children as explicit to prevent missing castings
         Expression exp = expression;
 
-        while (exp.getClass() == CastExpression.class) {
+        while (exp.isCastExpression()) {
             CastExpression ce = (CastExpression)exp;
             ce.setExplicit(true);
             exp = ce.getExpression();

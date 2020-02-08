@@ -18,6 +18,7 @@ public class IfStatement implements Statement {
         this.statements = statements;
     }
 
+    @Override
     public Expression getCondition() {
         return condition;
     }
@@ -26,9 +27,13 @@ public class IfStatement implements Statement {
         this.condition = condition;
     }
 
+    @Override
     public BaseStatement getStatements() {
         return statements;
     }
+
+    @Override
+    public boolean isIfStatement() { return true; }
 
     @Override
     public void accept(StatementVisitor visitor) {

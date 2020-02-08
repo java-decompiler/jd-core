@@ -32,6 +32,7 @@ public abstract class AbstractNopExpressionVisitor implements ExpressionVisitor 
     @Override public void visit(NewArray expression) {}
     @Override public void visit(NewExpression expression) {}
     @Override public void visit(NewInitializedArray expression) {}
+    @Override public void visit(NoExpression expression) {}
     @Override public void visit(NullExpression expression) {}
     @Override public void visit(ObjectTypeReferenceExpression expression) {}
     @Override public void visit(ParenthesesExpression expression) {}

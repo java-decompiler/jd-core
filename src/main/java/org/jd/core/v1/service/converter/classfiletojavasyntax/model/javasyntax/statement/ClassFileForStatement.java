@@ -31,6 +31,9 @@ public class ClassFileForStatement extends ForStatement {
     }
 
     @Override
+    public boolean isForStatement() { return true; }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ClassFileForStatement{");
 

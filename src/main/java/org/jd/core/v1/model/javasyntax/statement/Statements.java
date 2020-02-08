@@ -12,7 +12,6 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.List;
 
 public class Statements extends DefaultList<Statement> implements BaseStatement {
-
     public Statements() {}
 
     public Statements(int capacity) {
@@ -29,6 +28,9 @@ public class Statements extends DefaultList<Statement> implements BaseStatement 
         super(statement, statements);
         assert (statements != null) && (statements.length > 0) : "Uses 'Statement' implementation instead";
     }
+
+    @Override
+    public boolean isStatements() { return true; }
 
     @Override
     public void accept(StatementVisitor visitor) {

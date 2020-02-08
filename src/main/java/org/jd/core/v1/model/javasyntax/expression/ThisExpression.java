@@ -38,6 +38,9 @@ public class ThisExpression extends AbstractLineNumberExpression {
     }
 
     @Override
+    public boolean isThisExpression() { return true; }
+
+    @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
     }

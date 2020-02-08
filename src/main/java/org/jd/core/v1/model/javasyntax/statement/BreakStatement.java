@@ -27,6 +27,9 @@ public class BreakStatement implements Statement {
     }
 
     @Override
+    public boolean isBreakStatement() { return true; }
+
+    @Override
     public void accept(StatementVisitor visitor) {
         visitor.visit(this);
     }

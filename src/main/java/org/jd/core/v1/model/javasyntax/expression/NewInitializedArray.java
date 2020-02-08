@@ -33,6 +33,9 @@ public class NewInitializedArray extends AbstractLineNumberTypeExpression {
     }
 
     @Override
+    public boolean isNewInitializedArray() { return true; }
+
+    @Override
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
     }

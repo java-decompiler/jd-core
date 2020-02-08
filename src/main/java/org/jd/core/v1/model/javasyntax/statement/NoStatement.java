@@ -7,13 +7,10 @@
 
 package org.jd.core.v1.model.javasyntax.statement;
 
-public class ReturnStatement implements Statement {
-    public static final ReturnStatement RETURN = new ReturnStatement();
+public class NoStatement implements Statement {
+    public static final NoStatement NO_STATEMENT = new NoStatement();
 
-    protected ReturnStatement() {}
-
-    @Override
-    public boolean isReturnStatement() { return true; }
+    protected NoStatement() {}
 
     @Override
     public void accept(StatementVisitor visitor) {
@@ -22,6 +19,6 @@ public class ReturnStatement implements Statement {
 
     @Override
     public String toString() {
-        return "ReturnStatement{}";
+        return "NoStatement";
     }
 }

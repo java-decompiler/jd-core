@@ -27,6 +27,9 @@ public class ContinueStatement implements Statement {
     }
 
     @Override
+    public boolean isContinueStatement() { return true; }
+
+    @Override
     public void accept(StatementVisitor visitor) {
         visitor.visit(this);
     }

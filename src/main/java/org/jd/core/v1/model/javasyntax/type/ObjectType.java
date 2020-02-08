@@ -110,6 +110,7 @@ public class ObjectType implements Type {
         this.descriptor = ot.getDescriptor();
     }
 
+    @Override
     public String getInternalName() {
         return internalName;
     }
@@ -263,7 +264,12 @@ public class ObjectType implements Type {
     }
 
     @Override
-    public boolean isObject() {
+    public boolean isObjectType() {
+        return true;
+    }
+
+    @Override
+    public boolean isObjectTypeArgument() {
         return true;
     }
 
