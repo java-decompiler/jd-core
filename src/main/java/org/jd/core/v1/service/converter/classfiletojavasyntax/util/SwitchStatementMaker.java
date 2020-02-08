@@ -186,12 +186,8 @@ public class SwitchStatementMaker {
         while (iterator.hasNext()) {
             Expression expression = iterator.next().getExpression().getLeftExpression();
 
-            if (expression.isFieldReferenceExpression()) {
-                fre = (FieldReferenceExpression)expression;
-
-                if (name.equals(fre.getName())) {
-                    return iterator;
-                }
+            if (expression.isFieldReferenceExpression() && name.equals(expression.getName())) {
+                return iterator;
             }
         }
 
