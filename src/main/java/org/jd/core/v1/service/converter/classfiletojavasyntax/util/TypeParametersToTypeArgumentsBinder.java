@@ -244,9 +244,14 @@ public class TypeParametersToTypeArgumentsBinder {
                     if (bindings.isEmpty() || bindingsContainsNull) {
                         expressionType = ObjectType.TYPE_OBJECT;
                     } else {
-                        typeArgumentToTypeVisitor.init();
-                        bindings.get(expressionType.getName()).accept(typeArgumentToTypeVisitor);
-                        expressionType = typeArgumentToTypeVisitor.getType();
+                        TypeArgument typeArgument = bindings.get(expressionType.getName());
+                        if (typeArgument == null) {
+                            expressionType = ObjectType.TYPE_OBJECT;
+                        } else {
+                            typeArgumentToTypeVisitor.init();
+                            typeArgument.accept(typeArgumentToTypeVisitor);
+                            expressionType = typeArgumentToTypeVisitor.getType();
+                        }
                     }
                 }
             }
