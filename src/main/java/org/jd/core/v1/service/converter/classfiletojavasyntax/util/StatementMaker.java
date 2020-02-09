@@ -982,10 +982,15 @@ public class StatementMaker {
                 String operator = poe.getOperator();
 
                 if ("++".equals(operator) || "--".equals(operator)) {
-                    ExpressionStatement cfes = (ExpressionStatement)statement;
-
-                    // Replace pre-operator statement with post-operator statement
-                    cfes.setExpression(new PostOperatorExpression(poe.getLineNumber(), poe.getExpression(), operator));
+                    if (statement.isExpressionStatement()) {
+                        ExpressionStatement es = (ExpressionStatement) statement;
+                        // Replace pre-operator statement with post-operator statement
+                        es.setExpression(new PostOperatorExpression(poe.getLineNumber(), poe.getExpression(), operator));
+                    } else if (statement.isReturnExpressionStatement()) {
+                        ReturnExpressionStatement res = (ReturnExpressionStatement) statement;
+                        // Replace pre-operator statement with post-operator statement
+                        res.setExpression(new PostOperatorExpression(poe.getLineNumber(), poe.getExpression(), operator));
+                    }
                 }
             }
         }

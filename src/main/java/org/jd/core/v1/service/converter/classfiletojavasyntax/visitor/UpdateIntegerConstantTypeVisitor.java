@@ -106,12 +106,14 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
             case "&":
             case "|":
             case "^":
-                Type type = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType)leftType, (PrimitiveType)rightType);
-                if (type == null) {
-                    type = TYPE_INT;
+                if (leftType.isPrimitiveType() && rightType.isPrimitiveType()) {
+                    Type type = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType) leftType, (PrimitiveType) rightType);
+                    if (type == null) {
+                        type = TYPE_INT;
+                    }
+                    expression.setLeftExpression(updateExpression(type, left));
+                    expression.setRightExpression(updateExpression(type, right));
                 }
-                expression.setLeftExpression(updateExpression(type, left));
-                expression.setRightExpression(updateExpression(type, right));
                 break;
             case "=":
                 left.accept(this);
@@ -126,6 +128,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                 if ((leftType.getDimension() == 0) && (rightType.getDimension() == 0)) {
                     if (leftType.isPrimitiveType()) {
                         if (rightType.isPrimitiveType()) {
+                            Type type;
                             if (leftType == rightType) {
                                 type = leftType;
                             } else {

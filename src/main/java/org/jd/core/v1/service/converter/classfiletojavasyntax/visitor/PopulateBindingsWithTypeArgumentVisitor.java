@@ -42,7 +42,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
             Iterator<TypeArgument> typeArgumentIterator = arguments.iterator();
             Iterator<TypeArgument> typeGenericArgumentIterator = current.getTypeArgumentList().iterator();
 
-            while (typeArgumentIterator.hasNext()) {
+            while (typeArgumentIterator.hasNext() && typeGenericArgumentIterator.hasNext()) {
                 current = typeGenericArgumentIterator.next();
                 typeArgumentIterator.next().accept(this);
             }
