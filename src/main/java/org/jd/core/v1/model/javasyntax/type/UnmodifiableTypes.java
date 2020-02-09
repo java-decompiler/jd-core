@@ -7,8 +7,7 @@
 
 package org.jd.core.v1.model.javasyntax.type;
 
-import java.util.Collection;
-import java.util.ListIterator;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
@@ -71,12 +70,12 @@ public class UnmodifiableTypes extends Types {
 
     @Override
     public ListIterator<Type> listIterator(int i) {
-        throw new UnsupportedOperationException();
+        return new UnmodifiableTypesListIterator(super.listIterator(i));
     }
 
     @Override
     public ListIterator<Type> listIterator() {
-        throw new UnsupportedOperationException();
+        return new UnmodifiableTypesListIterator(super.listIterator());
     }
 
     @Override
@@ -92,5 +91,26 @@ public class UnmodifiableTypes extends Types {
     @Override
     public void replaceAll(UnaryOperator<Type> unaryOperator) {
         throw new UnsupportedOperationException();
+    }
+
+
+    // --- ListIterator --- //
+    private class UnmodifiableTypesListIterator implements ListIterator<Type> {
+        protected ListIterator<Type> listIterator;
+
+        public UnmodifiableTypesListIterator(ListIterator<Type> listIterator) {
+            this.listIterator = listIterator;
+        }
+
+        @Override public int nextIndex() { return listIterator.nextIndex(); }
+        @Override public int previousIndex() { return listIterator.previousIndex(); }
+        @Override public boolean hasNext() { return listIterator.hasNext(); }
+        @Override public boolean hasPrevious() { return listIterator.hasPrevious(); }
+        @Override public Type next() { return listIterator.next(); }
+        @Override public Type previous() { return listIterator.previous(); }
+
+        @Override public void set(Type element) { throw new UnsupportedOperationException(); }
+        @Override public void add(Type element) { throw new UnsupportedOperationException(); }
+        @Override public void remove() { throw new UnsupportedOperationException(); }
     }
 }

@@ -165,6 +165,17 @@ public class ObjectType implements Type {
         }
     }
 
+    public boolean rawEquals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ObjectType that = (ObjectType) o;
+
+        if (dimension != that.dimension) return false;
+
+        return internalName.equals(that.internalName);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

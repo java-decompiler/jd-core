@@ -13,6 +13,8 @@ import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.*;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileFormatException;
@@ -21,9 +23,7 @@ import org.jd.core.v1.service.deserializer.classfile.ClassFileReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
@@ -55,7 +55,8 @@ public class TypeMaker {
     private HashMap<String, ObjectType> descriptorToObjectType = new HashMap<>(1024);
     private HashMap<String, ObjectType> internalTypeNameToObjectType = new HashMap<>(1024);
     private HashMap<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
-    private HashMap<String, Boolean> internalTypeNameMethodNameParameterCountToBoolean = new HashMap<>(1024);
+    private HashMap<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToDeclaredParameterTypes = new HashMap<>(1024);
+    private HashMap<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToParameterTypes = new HashMap<>(1024);
     private HashMap<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
     private HashMap<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
 
@@ -878,7 +879,7 @@ public class TypeMaker {
     }
 
     public boolean isAssignable(Map<String, BaseType> typeBounds, ObjectType left, ObjectType right) {
-        if ((left == TYPE_UNDEFINED_OBJECT) || left.equals(TYPE_OBJECT) || left.equals(right)) {
+        if ((right == TYPE_UNDEFINED_OBJECT) || (left == TYPE_UNDEFINED_OBJECT) || left.equals(TYPE_OBJECT) || left.equals(right)) {
             return true;
         } else if ((left.getDimension() > 0) || (right.getDimension() > 0)) {
             return false;
@@ -1211,7 +1212,7 @@ public class TypeMaker {
         if ((type != null) && (typeArguments != null)) {
             TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
-            if (typeTypes.typeParameters != null) {
+            if ((typeTypes != null) && (typeTypes.typeParameters != null)) {
                 BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
                 HashMap<String, TypeArgument> bindings = new HashMap<>();
 
@@ -1563,11 +1564,15 @@ public class TypeMaker {
 
                 int parameterCount = (methodTypes.parameterTypes == null) ? 0 : methodTypes.parameterTypes.size();
                 key = internalTypeName + ':' + name + ':' + parameterCount;
+                Set<BaseType> set = internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.get(key);
 
-                if (internalTypeNameMethodNameParameterCountToBoolean.containsKey(key)) {
-                    internalTypeNameMethodNameParameterCountToBoolean.put(key, Boolean.TRUE);
-                } else {
-                    internalTypeNameMethodNameParameterCountToBoolean.put(key, Boolean.FALSE);
+                if (parameterCount > 0) {
+                    if (set == null) {
+                        internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.put(key, set = new HashSet<>());
+                    }
+                    set.add(methodTypes.parameterTypes);
+                } else if (set == null) {
+                    internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.put(key, Collections.emptySet());
                 }
             }
         }
@@ -1776,50 +1781,107 @@ public class TypeMaker {
         }
     }
 
-    public boolean multipleMethods(String internalTypeName, String name, int parameterCount) {
+    public int matchCount(String internalTypeName, String name, int parameterCount, boolean constructor) {
         String suffixKey = ":" + name + ':' + parameterCount;
-        Boolean bool = multipleMethods(internalTypeName, suffixKey);
-        return (bool == null) ? false : bool.booleanValue();
+        return getSetOfParameterTypes(internalTypeName, suffixKey, constructor).size();
     }
 
-    private Boolean multipleMethods(String internalTypeName, String suffixKey) {
+    public int matchCount(Map<String, BaseType> typeBounds, String internalTypeName, String name, BaseExpression parameters, boolean constructor) {
+        int parameterCount = parameters.size();
+
+        String suffixKey = ":" + name + ':' + parameterCount;
+        Set<BaseType> setOfParameterTypes = getSetOfParameterTypes(internalTypeName, suffixKey, constructor);
+
+        if (parameterCount == 0) {
+            return setOfParameterTypes.size();
+        }
+
+        if (setOfParameterTypes.size() <= 1) {
+            return setOfParameterTypes.size();
+        } else {
+            int counter = 0;
+
+            for (BaseType parameterTypes : setOfParameterTypes) {
+                if (match(typeBounds, parameterTypes, parameters)) {
+                    counter++;
+                }
+            }
+
+            return counter;
+        }
+    }
+
+    private Set<BaseType> getSetOfParameterTypes(String internalTypeName, String suffixKey, boolean constructor) {
         String key = internalTypeName + suffixKey;
-        Boolean bool = internalTypeNameMethodNameParameterCountToBoolean.get(key);
+        Set<BaseType> setOfParameterTypes = internalTypeNameMethodNameParameterCountToParameterTypes.get(key);
 
-        if (bool == null) {
-            // Load methods
-            if (loadFieldsAndMethods(internalTypeName)) {
-                bool = internalTypeNameMethodNameParameterCountToBoolean.get(key);
+        if (setOfParameterTypes == null) {
+            setOfParameterTypes = new HashSet<>();
 
-                if (bool == null) {
-                    TypeTypes typeTypes = makeTypeTypes(internalTypeName);
+            if (!constructor) {
+                TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
-                    if (typeTypes != null) {
-                        if (typeTypes.superType != null) {
-                            bool = multipleMethods(typeTypes.superType.getInternalName(), suffixKey);
-                        }
+                if ((typeTypes != null) && (typeTypes.superType != null)) {
+                    setOfParameterTypes.addAll(getSetOfParameterTypes(typeTypes.superType.getInternalName(), suffixKey, constructor));
+                }
+            }
 
-                        if ((bool == null) && (typeTypes.interfaces != null)) {
-                            if (typeTypes.interfaces.isList()) {
-                                for (Type interfaze : typeTypes.interfaces) {
-                                    bool = multipleMethods(((ObjectType)interfaze).getInternalName(), suffixKey);
-                                    if (bool != null)
-                                        break;
-                                }
-                            } else {
-                                bool = multipleMethods(((ObjectType)typeTypes.interfaces.getFirst()).getInternalName(), suffixKey);
-                            }
-                        }
+            Set<BaseType> declaredParameterTypes = internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.get(key);
+
+            if ((declaredParameterTypes == null) && loadFieldsAndMethods(internalTypeName)) {
+                declaredParameterTypes = internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.get(key);
+            }
+            if (declaredParameterTypes != null) {
+                setOfParameterTypes.addAll(declaredParameterTypes);
+            }
+
+            internalTypeNameMethodNameParameterCountToParameterTypes.put(key, setOfParameterTypes);
+        }
+
+        return setOfParameterTypes;
+    }
+
+    private boolean match(Map<String, BaseType> typeBounds, BaseType parameterTypes, BaseExpression parameters) {
+        if (parameterTypes.size() != parameters.size()) {
+            return false;
+        }
+
+        switch (parameterTypes.size()) {
+            case 0:
+                return true;
+            case 1:
+                return match(typeBounds, parameterTypes.getFirst(), parameters.getFirst().getType());
+            default:
+                Iterator<Type> iteratorType = parameterTypes.getList().iterator();
+                Iterator<Expression> iteratorExpression = parameters.getList().iterator();
+
+                while (iteratorType.hasNext()) {
+                    if (!match(typeBounds, iteratorType.next(), iteratorExpression.next().getType())) {
+                        return false;
                     }
                 }
 
-                if (bool != null) {
-                    internalTypeNameMethodNameParameterCountToBoolean.put(key, bool);
-                }
-            }
+                return true;
+        }
+    }
+
+    private boolean match(Map<String, BaseType> typeBounds, Type leftType, Type rightType) {
+        if (leftType.equals(rightType)) {
+            return true;
         }
 
-        return bool;
+        if (leftType.isPrimitiveType() && rightType.isPrimitiveType()) {
+            int flags = ((PrimitiveType)leftType).getFlags() | ((PrimitiveType)rightType).getFlags();
+            return flags != 0;
+        }
+
+        if (leftType.isObjectType() && rightType.isObjectType()) {
+            ObjectType ot1 = (ObjectType)leftType;
+            ObjectType ot2 = (ObjectType)rightType;
+            return isAssignable(typeBounds, ot1, ot2);
+        }
+
+        return false;
     }
 
     public static class TypeTypes {
