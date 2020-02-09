@@ -70,6 +70,34 @@ public class JavaMethodOverloadingTest extends TestCase {
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
 
+    @Test
+    // https://github.com/java-decompiler/jd-core/issues/32
+//    public void testGenericParameterMethod() throws Exception {
+//        class GenericParameterMethod {
+//            /* static */ void use(Integer i) {
+//                System.out.println("use(Integer)");
+//            }
+//            /* static */ <T> void use(T t) {
+//                System.out.println("use(T)");
+//            }
+//
+//            public /* static */ void main(String... args) {
+//                use(1);
+//                use((Object) 1); // Calls use(T)
+//            }
+//        }
+//
+//        String internalClassName = GenericParameterMethod.class.getName().replace('.', '/');
+//        String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+//
+//        // Check decompiled source code
+//        assertTrue(source.matches(PatternMaker.make(": 85 */", "use(1);")));
+//        assertTrue(source.matches(PatternMaker.make(": 86 */", "use((Object)1);")));
+//
+//        // Recompile decompiled source code and check errors
+//        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+//    }
+
     protected String decompile(Loader loader, Printer printer, String internalTypeName) throws Exception {
         return decompile(loader, printer, internalTypeName, Collections.emptyMap());
     }

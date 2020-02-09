@@ -16,6 +16,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor {
     protected static final AggregateFieldsVisitor AGGREGATE_FIELDS_VISITOR = new AggregateFieldsVisitor();
     protected static final SortMembersVisitor SORT_MEMBERS_VISITOR = new SortMembersVisitor();
+    protected static final AutoboxingVisitor AUTOBOXING_VISITOR = new AutoboxingVisitor();
 
     protected InitStaticFieldVisitor initStaticFieldVisitor = new InitStaticFieldVisitor();
     protected InitInstanceFieldVisitor initInstanceFieldVisitor = new InitInstanceFieldVisitor();
@@ -66,6 +67,9 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
 
             // Add cast expressions
             addCastExpressionVisitor.visit(declaration);
+
+            // Autoboxing
+            AUTOBOXING_VISITOR.visit(declaration);
         }
     }
 

@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration;
 
+import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.declaration.BaseMemberDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFileMemberDeclaration {
+    protected ClassFile classFile;
     protected List<ClassFileFieldDeclaration> fieldDeclarations;
     protected List<ClassFileConstructorOrMethodDeclaration> methodDeclarations;
     protected List<ClassFileTypeDeclaration> innerTypeDeclarations;
@@ -31,8 +33,9 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     protected Map<String, TypeArgument> bindings;
     protected Map<String, BaseType> typeBounds;
 
-    public ClassFileBodyDeclaration(String internalTypeName, Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, ClassFileBodyDeclaration outerBodyDeclaration) {
-        super(internalTypeName, null);
+    public ClassFileBodyDeclaration(ClassFile classFile, Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, ClassFileBodyDeclaration outerBodyDeclaration) {
+        super(classFile.getInternalTypeName(), null);
+        this.classFile = classFile;
         this.bindings = bindings;
         this.typeBounds = typeBounds;
         this.outerBodyDeclaration = outerBodyDeclaration;
@@ -108,6 +111,10 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
                 break;
             }
         }
+    }
+
+    public ClassFile getClassFile() {
+        return classFile;
     }
 
     @Override

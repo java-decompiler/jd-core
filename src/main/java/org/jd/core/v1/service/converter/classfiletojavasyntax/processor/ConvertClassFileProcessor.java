@@ -142,7 +142,7 @@ public class ConvertClassFileProcessor implements Processor {
             typeParameters.accept(populateBindingsWithTypeParameterVisitor);
         }
 
-        ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile.getInternalTypeName(), bindings, typeBounds, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile, bindings, typeBounds, outerClassFileBodyDeclaration);
 
         bodyDeclaration.setFieldDeclarations(convertFields(parser, converter, classFile));
         bodyDeclaration.setMethodDeclarations(convertMethods(parser, converter, bodyDeclaration, classFile));

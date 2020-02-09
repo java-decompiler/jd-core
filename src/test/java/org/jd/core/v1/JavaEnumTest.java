@@ -60,7 +60,7 @@ public class JavaEnumTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 49 */", "double earthWeight = Double.parseDouble(args[0]);")));
         assertTrue(source.matches(PatternMaker.make(": 50 */", "double mass = earthWeight / EARTH.surfaceGravity();")));
         assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values()) {")));
-        assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, Double.valueOf(p.surfaceWeight(mass)) } );")));
+        assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, p.surfaceWeight(mass) } );")));
 
         assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 
@@ -90,7 +90,7 @@ public class JavaEnumTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 49 */", "double earthWeight = Double.parseDouble(args[0]);")));
         assertTrue(source.matches(PatternMaker.make(": 50 */", "double mass = earthWeight / EARTH.surfaceGravity();")));
         assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values()) {")));
-        assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, Double.valueOf(p.surfaceWeight(mass)) } );")));
+        assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, p.surfaceWeight(mass) } );")));
 
         assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 
@@ -120,7 +120,7 @@ public class JavaEnumTest extends TestCase {
         assertTrue(source.matches(PatternMaker.make(": 49 */", "double earthWeight = Double.parseDouble(args[0]);")));
         assertTrue(source.matches(PatternMaker.make(": 50 */", "double mass = earthWeight / EARTH.surfaceGravity();")));
         assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values()) {")));
-        assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, Double.valueOf(p.surfaceWeight(mass)) } );")));
+        assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, p.surfaceWeight(mass) } );")));
 
         assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 

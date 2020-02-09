@@ -52,7 +52,7 @@ public class JavaLambdaTest extends TestCase {
         assertTrue(source.indexOf("Consumer<String> println = s -> System.out.println(s);") != -1);
         assertTrue(source.matches(PatternMaker.make(": 27 */", "list.stream().filter(filter).forEach(println);")));
         assertTrue(source.matches(PatternMaker.make(": 31 */", "((Map)list.stream()")));
-        assertTrue(source.matches(PatternMaker.make(": 32 */", ".collect(Collectors.toMap(lambda -> Integer.valueOf(lambda.index), Function.identity())))")));
+        assertTrue(source.matches(PatternMaker.make(": 32 */", ".collect(Collectors.toMap(lambda -> lambda.index, Function.identity())))")));
         assertTrue(source.matches(PatternMaker.make(": 33 */", ".forEach((key, value) ->")));
         assertTrue(source.matches(PatternMaker.make(": 48 */", "Thread thread = new Thread(() -> {")));
         assertTrue(source.matches(PatternMaker.make(": 58 */", "Consumer<String> staticMethodReference = String::valueOf;")));

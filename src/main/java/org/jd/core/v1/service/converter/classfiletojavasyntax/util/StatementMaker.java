@@ -44,7 +44,6 @@ public class StatementMaker {
     protected static final SwitchCaseComparator SWITCH_CASE_COMPARATOR = new SwitchCaseComparator();
     protected static final NullExpression FINALLY_EXCEPTION_EXPRESSION = new NullExpression(new ObjectType("java/lang/Exception", "java.lang.Exception", "Exception"));
     protected static final MergeTryWithResourcesStatementVisitor MERGE_TRY_WITH_RESOURCES_STATEMENT_VISITOR = new MergeTryWithResourcesStatementVisitor();
-    protected static final AutoboxingVisitor AUTOBOXING_VISITOR = new AutoboxingVisitor();
 
     protected TypeMaker typeMaker;
     protected Map<String, BaseType> typeBounds;
@@ -61,7 +60,6 @@ public class StatementMaker {
     protected MemberVisitor memberVisitor = new MemberVisitor();
     protected boolean removeFinallyStatementsFlag = false;
     protected boolean mergeTryWithResourcesStatementFlag = false;
-    protected boolean autoBoxingSupported;
 
     public StatementMaker(
             TypeMaker typeMaker, LocalVariableMaker localVariableMaker,
@@ -76,7 +74,6 @@ public class StatementMaker {
         this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor(localVariableMaker);
         this.removeBinaryOpReturnStatementsVisitor = new RemoveBinaryOpReturnStatementsVisitor(localVariableMaker);
         this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(comd.getReturnedType());
-        this.autoBoxingSupported = (majorVersion >= 49); // (majorVersion >= Java 5)
     }
 
     public Statements make(ControlFlowGraph cfg) {
@@ -115,10 +112,6 @@ public class StatementMaker {
 
         // Change ++i; with i++;
         replacePreOperatorWithPostOperator(statements);
-
-        if (autoBoxingSupported) {
-            statements.accept(AUTOBOXING_VISITOR);
-        }
 
         if (!jumps.isEmpty()) {
             updateJumpStatements(jumps);
