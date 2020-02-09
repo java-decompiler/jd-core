@@ -26,6 +26,7 @@ public class ConstructorReferenceExpression extends AbstractLineNumberTypeExpres
         this.descriptor = descriptor;
     }
 
+    @Override
     public ObjectType getObjectType() {
         return objectType;
     }

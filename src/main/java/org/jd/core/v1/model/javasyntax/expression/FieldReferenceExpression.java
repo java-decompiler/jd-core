@@ -40,6 +40,7 @@ public class FieldReferenceExpression extends AbstractLineNumberTypeExpression {
         this.expression = expression;
     }
 
+    @Override
     public String getInternalTypeName() {
         return internalTypeName;
     }

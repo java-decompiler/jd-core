@@ -30,6 +30,7 @@ public class NewExpression extends AbstractLineNumberExpression {
         this.bodyDeclaration = bodyDeclaration;
     }
 
+    @Override
     public ObjectType getObjectType() {
         return type;
     }

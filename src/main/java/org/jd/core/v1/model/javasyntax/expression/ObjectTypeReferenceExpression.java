@@ -42,6 +42,7 @@ public class ObjectTypeReferenceExpression implements Expression {
         return lineNumber;
     }
 
+    @Override
     public ObjectType getObjectType() {
         return type;
     }

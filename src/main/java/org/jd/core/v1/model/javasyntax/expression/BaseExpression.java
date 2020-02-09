@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.model.javasyntax.expression;
 
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.util.Base;
 
 import static org.jd.core.v1.model.javasyntax.expression.NoExpression.NO_EXPRESSION;
@@ -55,7 +56,9 @@ public interface BaseExpression extends Base<Expression> {
     default double getDoubleValue() { return 0D; }
     default float getFloatValue() { return 0F; }
     default int getIntegerValue() { return 0; }
+    default String getInternalTypeName() { return ""; }
     default long getLongValue() { return 0L; }
     default String getName() { return ""; }
+    default ObjectType getObjectType() { return ObjectType.TYPE_UNDEFINED_OBJECT; }
     default String getOperator() { return ""; }
 }
