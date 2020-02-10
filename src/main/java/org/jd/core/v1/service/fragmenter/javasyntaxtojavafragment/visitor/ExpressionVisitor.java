@@ -369,7 +369,7 @@ public class ExpressionVisitor extends TypeVisitor {
         if (exp.isThisExpression()) {
             // Nothing to do : do not print 'this.method(...)'
         } else if (exp.isObjectTypeReferenceExpression()) {
-            ObjectType ot = ((ObjectTypeReferenceExpression)exp).getObjectType();
+            ObjectType ot = exp.getObjectType();
 
             if (! ot.getInternalName().equals(currentInternalTypeName)) {
                 visit(expression, exp);
@@ -378,8 +378,14 @@ public class ExpressionVisitor extends TypeVisitor {
                 dot = true;
             }
         } else {
-            visit(expression, exp);
-            tokens.addLineNumberToken(expression);
+            if (exp.isFieldReferenceExpression() || exp.isLocalVariableReferenceExpression()) {
+                tokens.addLineNumberToken(expression);
+                visit(expression, exp);
+            } else {
+                visit(expression, exp);
+                tokens.addLineNumberToken(expression);
+            }
+
             tokens.add(TextToken.DOT);
             dot = true;
         }
