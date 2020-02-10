@@ -43,17 +43,15 @@ public class StringConcatenationUtil {
                     String internalTypeName = expr.getType().getDescriptor();
 
                     if ("Ljava/lang/StringBuilder;".equals(internalTypeName) || "Ljava/lang/StringBuffer;".equals(internalTypeName)) {
-                        ClassFileNewExpression ne = (ClassFileNewExpression) expr;
-
-                        if (ne.getParameters() == null) {
+                        if (expr.getParameters() == null) {
                             if (!firstParameterHaveGenericType) {
                                 return concatenatedStringExpression;
                             }
-                        } else if (!ne.getParameters().isList()) {
-                            expr = ne.getParameters().getFirst();
+                        } else if (!expr.getParameters().isList()) {
+                            expr = expr.getParameters().getFirst();
 
                             if (ObjectType.TYPE_STRING.equals(expr.getType())) {
-                                return new BinaryOperatorExpression(ne.getLineNumber(), ObjectType.TYPE_STRING, expr, "+", concatenatedStringExpression, 4);
+                                return new BinaryOperatorExpression(expr.getLineNumber(), ObjectType.TYPE_STRING, expr, "+", concatenatedStringExpression, 4);
                             }
                         }
                     }
