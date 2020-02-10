@@ -24,7 +24,8 @@ public class StringConstantExpression extends AbstractLineNumberExpression {
         this.string = string;
     }
 
-    public String getString() {
+    @Override
+    public String getStringValue() {
         return string;
     }
 

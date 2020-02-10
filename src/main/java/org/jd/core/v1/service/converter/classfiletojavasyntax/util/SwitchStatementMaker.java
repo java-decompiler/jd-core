@@ -85,7 +85,7 @@ public class SwitchStatementMaker {
                                                             break;
                                                         }
 
-                                                        String string = ((StringConstantExpression) expression).getString();
+                                                        String string = expression.getStringValue();
 
                                                         expression = stmt.getStatements().getFirst().getExpression().getRightExpression();
 

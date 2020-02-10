@@ -960,7 +960,7 @@ public class StatementMaker {
             }
         }
 
-        String typeName = ((StringConstantExpression) mie.getParameters()).getString();
+        String typeName = mie.getParameters().getStringValue();
         ObjectType ot = typeMaker.makeFromInternalTypeName(typeName.replace('.', '/'));
 
         return new TypeReferenceDotClassExpression(lineNumber, ot);

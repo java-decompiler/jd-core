@@ -61,4 +61,5 @@ public interface BaseExpression extends Base<Expression> {
     default String getName() { return ""; }
     default ObjectType getObjectType() { return ObjectType.TYPE_UNDEFINED_OBJECT; }
     default String getOperator() { return ""; }
+    default String getStringValue() { return ""; }
 }

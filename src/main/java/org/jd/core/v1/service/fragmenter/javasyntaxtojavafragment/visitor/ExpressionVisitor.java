@@ -558,7 +558,7 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(StringConstantExpression expression) {
         tokens.addLineNumberToken(expression);
-        tokens.add(new StringConstantToken(StringUtil.escapeString(expression.getString()), currentInternalTypeName));
+        tokens.add(new StringConstantToken(StringUtil.escapeString(expression.getStringValue()), currentInternalTypeName));
     }
 
     @Override
