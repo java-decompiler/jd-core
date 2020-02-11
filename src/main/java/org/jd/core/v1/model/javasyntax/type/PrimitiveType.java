@@ -183,12 +183,14 @@ public class PrimitiveType implements Type {
     public int getJavaPrimitiveFlags() {
         if ((flags & FLAG_BOOLEAN) != 0)
             return FLAG_BOOLEAN;
-        else if ((flags & FLAG_BYTE) != 0)
-            return FLAG_BYTE;
+        else if ((flags & FLAG_INT) != 0)
+            return FLAG_INT;
         else if ((flags & FLAG_CHAR) != 0)
             return FLAG_CHAR;
         else if ((flags & FLAG_SHORT) != 0)
             return FLAG_SHORT;
+        else if ((flags & FLAG_BYTE) != 0)
+            return FLAG_BYTE;
 
         return flags;
     }

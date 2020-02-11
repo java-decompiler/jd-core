@@ -118,8 +118,8 @@ public class JavaBasicTest extends TestCase {
 
         assertTrue(source.matches(PatternMaker.make("String str1 = \"3 == \" + (paramInt + 1) + \" ?\";")));
         assertTrue(source.indexOf("String str2 = String.valueOf(\"abc \\b \\f \\n \\r \\t \\\" \\007 def\");") != -1);
-        assertTrue(source.matches(PatternMaker.make("char c2 = '€';")));
-        assertTrue(source.matches(PatternMaker.make("char c4 = c3 = c2 = c1 = Character.toUpperCase('x');")));
+        assertTrue(source.matches(PatternMaker.make("int j = 8364;")));
+        assertTrue(source.matches(PatternMaker.make("int m = k = j = i = Character.toUpperCase('x');")));
         assertTrue(source.matches(PatternMaker.make("Class<String> clazz3 = String.class;")));
         assertTrue(source.matches(PatternMaker.make("Class<String> clazz2 = clazz3;")));
         assertTrue(source.matches(PatternMaker.make("Class<String> clazz1 = clazz2;")));

@@ -308,12 +308,11 @@ public class JavaLoopTest extends TestCase {
         String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make("for (byte b = 0; b < 10; b++)")));
-        assertTrue(source.matches(PatternMaker.make("for (byte b = 0;; b++)")));
-        assertTrue(source.matches(PatternMaker.make("for (byte b = 0; b < 10; b++)")));
+        assertTrue(source.matches(PatternMaker.make("for (int i = 0; i < 10; i++)")));
+        assertTrue(source.matches(PatternMaker.make("for (int i = 0;; i++)")));
         assertTrue(source.matches(PatternMaker.make("for (String str : paramList)")));
         assertTrue(source.matches(PatternMaker.make("for (paramInt = 0; paramInt < 10; paramInt++)")));
-        assertTrue(source.matches(PatternMaker.make("for (int i : new int[] { 4 })")));
+        assertTrue(source.matches(PatternMaker.make("for (int j : new int[] { 4 })")));
         assertTrue(source.matches(PatternMaker.make("for (String str : paramArrayOfString)")));
         assertTrue(source.matches(PatternMaker.make("for (String str : paramList)")));
 
@@ -330,16 +329,16 @@ public class JavaLoopTest extends TestCase {
         String source = decompile(loader, new PlainTextPrinter(), internalClassName, configuration);
 
         // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(":  20 */", "for (byte b = 0; b < 10; b++)")));
+        assertTrue(source.matches(PatternMaker.make(":  20 */", "for (int i = 0; i < 10; i++)")));
         assertTrue(source.matches(PatternMaker.make(":  88 */", "while (paramInt < 10)")));
         assertTrue(source.matches(PatternMaker.make(": 273 */", "for (paramInt = 0; paramInt < 10; paramInt++)")));
-        assertTrue(source.matches(PatternMaker.make(": 310 */", "for (int i : new int[] { 4 })")));
+        assertTrue(source.matches(PatternMaker.make(": 310 */", "for (int j : new int[] { 4 })")));
         assertTrue(source.matches(PatternMaker.make("/* 347:   0 */", "do {")));
-        assertTrue(source.matches(PatternMaker.make(": 349 */", "while (b < 10);")));
+        assertTrue(source.matches(PatternMaker.make(": 349 */", "while (i < 10);")));
         assertTrue(source.matches(PatternMaker.make(": 385 */", "for (String str : paramArrayOfString)")));
         assertTrue(source.matches(PatternMaker.make(": 399 */", "for (String str : paramList)")));
         assertTrue(source.matches(PatternMaker.make(": 411 */", "Iterator<Class<?>> iterator = Arrays.<Class<?>>asList(getClass().getInterfaces()).iterator()")));
-        assertTrue(source.matches(PatternMaker.make(": 427 */", "for (byte b = 0; b < 3; b++)")));
+        assertTrue(source.matches(PatternMaker.make(": 427 */", "for (int i = 0; i < 3; i++)")));
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));

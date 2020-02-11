@@ -974,7 +974,10 @@ public class ByteCodeParser {
         if (value.isNullExpression()) {
             return localVariableMaker.getLocalVariableInNullAssignment(index, offset, valueType);
         } else if (value.isLocalVariableReferenceExpression()) {
-            return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, ((ClassFileLocalVariableReferenceExpression)value).getLocalVariable());
+            AbstractLocalVariable valueLocalVariable = ((ClassFileLocalVariableReferenceExpression)value).getLocalVariable();
+            AbstractLocalVariable lv = localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueLocalVariable);
+            valueLocalVariable.variableOnLeft(typeBounds, lv);
+            return lv;
         } else if (value.isMethodInvocationExpression()) {
             if (valueType.isObjectType()) {
                 // Remove type arguments
@@ -982,7 +985,6 @@ public class ByteCodeParser {
             } else if (valueType.isGenericType()) {
                 valueType = TYPE_UNDEFINED_OBJECT;
             }
-
             return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueType);
         } else {
             return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueType);
