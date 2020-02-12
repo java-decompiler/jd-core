@@ -1025,12 +1025,16 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(LocalVariableDeclarator declarator) {
-        tokens.addLineNumberToken(declarator.getLineNumber());
-        tokens.add(newTextToken(declarator.getName()));
+        if (declarator.getVariableInitializer() == null) {
+            tokens.addLineNumberToken(declarator.getLineNumber());
+            tokens.add(newTextToken(declarator.getName()));
 
-        visitDimension(declarator.getDimension());
+            visitDimension(declarator.getDimension());
+        } else {
+            tokens.add(newTextToken(declarator.getName()));
 
-        if (declarator.getVariableInitializer() != null) {
+            visitDimension(declarator.getDimension());
+
             tokens.add(TextToken.SPACE_EQUAL_SPACE);
             declarator.getVariableInitializer().accept(this);
         }
