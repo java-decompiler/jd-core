@@ -494,8 +494,8 @@ public class LocalVariableMaker {
     }
 
     public void make(boolean containsLineNumber, TypeMaker typeMaker) {
-        currentFrame.createNames(blackListNames);
         currentFrame.updateLocalVariableInForStatements(typeMaker);
+        currentFrame.createNames(blackListNames);
         currentFrame.createDeclarations(containsLineNumber);
     }
 

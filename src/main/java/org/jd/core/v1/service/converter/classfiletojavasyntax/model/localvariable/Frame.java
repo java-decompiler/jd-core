@@ -270,7 +270,7 @@ public class Frame {
 
     @SuppressWarnings("unchecked")
     public void updateLocalVariableInForStatements(TypeMaker typeMaker) {
-        // Recursive call
+        // Recursive call first
         if (children != null) {
             for (Frame child : children) {
                 child.updateLocalVariableInForStatements(typeMaker);
@@ -366,7 +366,6 @@ public class Frame {
         AbstractLocalVariable newLV = createLocalVariableVisitor.getLocalVariable();
 
         newLV.setToOffset(toOffset, true);
-        newLV.setName(lv.getName());
         addLocalVariable(newLV);
         Iterator<LocalVariableReference> iteratorLVR = lv.getReferences().iterator();
 
@@ -641,7 +640,6 @@ public class Frame {
             if (!expression.isBinaryOperatorExpression()) {
                 return;
             }
-
             if (!expression.getLeftExpression().isLocalVariableReferenceExpression()) {
                 return;
             }
@@ -659,16 +657,28 @@ public class Frame {
             } else {
                 Type type2 = localVariable.getType();
 
-                if (!type1.equals(type2) && !type0.equals(type2.createType(0))) {
+                if (type1.isPrimitiveType() && type2.isPrimitiveType()) {
+                    Type type = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType)type1, (PrimitiveType)type2);
+
+                    if (type == null) {
+                        return;
+                    }
+
+                    type0 = type;
+                    type1 = type.createType(type1.getDimension());
+                    type2 = type.createType(type2.getDimension());
+                } else if (!type1.equals(type2) && !type0.equals(type2.createType(0))) {
                     return;
                 }
 
                 int dimension = type2.getDimension();
 
-                if (minDimension > dimension)
+                if (minDimension > dimension) {
                     minDimension = dimension;
-                if (maxDimension < dimension)
+                }
+                if (maxDimension < dimension) {
                     maxDimension = dimension;
+                }
             }
 
             localVariables.add(localVariable);
@@ -803,20 +813,33 @@ public class Frame {
                         lineNumber1 = lineNumber2;
 
                         Type type2 = lvds2.getType();
-                        int dimension = type2.getDimension();
 
-                        if (type1.equals(type2)) {
-                            declarations.add(lvds2);
-                        } else if (type0.equals(type2.createType(0))) {
-                            if (minDimension > dimension)
-                                minDimension = dimension;
-                            if (maxDimension < dimension)
-                                maxDimension = dimension;
-                            declarations.add(lvds2);
-                        } else {
+                        if (type1.isPrimitiveType() && type2.isPrimitiveType()) {
+                            Type type = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType)type1, (PrimitiveType)type2);
+
+                            if (type == null) {
+                                iterator.previous();
+                                break;
+                            }
+
+                            type0 = type;
+                            type1 = type.createType(type1.getDimension());
+                            type2 = type.createType(type2.getDimension());
+                        } else if (!type1.equals(type2) && !type0.equals(type2.createType(0))) {
                             iterator.previous();
                             break;
                         }
+
+                        int dimension = type2.getDimension();
+
+                        if (minDimension > dimension) {
+                            minDimension = dimension;
+                        }
+                        if (maxDimension < dimension) {
+                            maxDimension = dimension;
+                        }
+
+                        declarations.add(lvds2);
                     }
 
                     int declarationSize = declarations.size();
