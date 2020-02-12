@@ -1825,15 +1825,21 @@ public class ByteCodeParser {
                     leftVariable.typeOnRight(typeBounds, type = TYPE_BOOLEAN);
                 }
             }
-        } else {
-            if (rightExpression.isLocalVariableReferenceExpression()) {
-                if (leftExpression.getType() == TYPE_BOOLEAN) {
-                    AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
-
-                    rightVariable.typeOnRight(typeBounds, type = TYPE_BOOLEAN);
-                }
+        } else if (rightExpression.isLocalVariableReferenceExpression()) {
+            if (leftExpression.getType() == TYPE_BOOLEAN) {
+                AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
+                rightVariable.typeOnRight(typeBounds, type = TYPE_BOOLEAN);
             }
         }
+
+        if (type == TYPE_INT) {
+            if ((leftExpression.getType() == TYPE_BOOLEAN) || (rightExpression.getType() == TYPE_BOOLEAN)) {
+                type = TYPE_BOOLEAN;
+            }
+        }
+
+        bindParameterTypesWithArgumentTypes(leftExpression.getType(), rightExpression);
+        bindParameterTypesWithArgumentTypes(rightExpression.getType(), leftExpression);
 
         return new BinaryOperatorExpression(lineNumber, type, leftExpression, operator, rightExpression, priority);
     }
@@ -1858,12 +1864,10 @@ public class ByteCodeParser {
                     leftVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
                 }
             }
-        } else {
-            if (rightExpression.isLocalVariableReferenceExpression()) {
-                if (leftExpression.getType() == TYPE_BOOLEAN) {
-                    AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
-                    rightVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
-                }
+        } else if (rightExpression.isLocalVariableReferenceExpression()) {
+            if (leftExpression.getType() == TYPE_BOOLEAN) {
+                AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
+                rightVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
             }
         }
 
@@ -1887,6 +1891,9 @@ public class ByteCodeParser {
             AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
             rightVariable.typeOnLeft(typeBounds, MAYBE_BYTE_TYPE);
         }
+
+        bindParameterTypesWithArgumentTypes(leftExpression.getType(), rightExpression);
+        bindParameterTypesWithArgumentTypes(rightExpression.getType(), leftExpression);
 
         return new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, leftExpression, operator, rightExpression, priority);
     }
