@@ -17,16 +17,6 @@ public class LocalVariableDeclarator implements BaseLocalVariableDeclarator {
         this.name = name;
     }
 
-    public LocalVariableDeclarator(int lineNumber, String name) {
-        this.lineNumber = lineNumber;
-        this.name = name;
-    }
-
-    public LocalVariableDeclarator(String name, int dimension) {
-        this.name = name;
-        this.dimension = dimension;
-    }
-
     public LocalVariableDeclarator(String name, VariableInitializer variableInitializer) {
         this.name = name;
         this.variableInitializer = variableInitializer;
@@ -35,19 +25,6 @@ public class LocalVariableDeclarator implements BaseLocalVariableDeclarator {
     public LocalVariableDeclarator(int lineNumber, String name, VariableInitializer variableInitializer) {
         this.lineNumber = lineNumber;
         this.name = name;
-        this.variableInitializer = variableInitializer;
-    }
-
-    public LocalVariableDeclarator(String name, int dimension, VariableInitializer variableInitializer) {
-        this.name = name;
-        this.dimension = dimension;
-        this.variableInitializer = variableInitializer;
-    }
-
-    public LocalVariableDeclarator(int lineNumber, String name, int dimension, VariableInitializer variableInitializer) {
-        this.lineNumber = lineNumber;
-        this.name = name;
-        this.dimension = dimension;
         this.variableInitializer = variableInitializer;
     }
 

@@ -13,7 +13,6 @@ import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
@@ -113,7 +112,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                         Expression e = expression.getLeftExpression();
 
                         if (e.isFieldReferenceExpression()) {
-                            String name = ((FieldReferenceExpression)e).getName();
+                            String name = e.getName();
 
                             if (name.startsWith("this$")) {
                                 outerType = (ObjectType) expression.getRightExpression().getType();

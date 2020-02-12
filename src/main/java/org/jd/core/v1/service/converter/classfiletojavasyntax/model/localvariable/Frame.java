@@ -11,6 +11,7 @@ import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileLocalVariableDeclarator;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
@@ -444,7 +445,7 @@ public class Frame {
 
                             for (AbstractLocalVariable lv : sorted) {
                                 // Add declaration before current statement
-                                iterator.add(new LocalVariableDeclarationStatement(lv.getType(), new LocalVariableDeclarator(lv.getName())));
+                                iterator.add(new LocalVariableDeclarationStatement(lv.getType(), new ClassFileLocalVariableDeclarator(lv)));
                                 lv.setDeclared(true);
                                 undeclaredLocalVariables.remove(lv);
                             }
@@ -560,7 +561,7 @@ public class Frame {
             variableInitializer = new ExpressionVariableInitializer(boe.getRightExpression());
         }
 
-        return new LocalVariableDeclarationStatement(type, new LocalVariableDeclarator(boe.getLineNumber(), reference.getName(), variableInitializer));
+        return new LocalVariableDeclarationStatement(type, new ClassFileLocalVariableDeclarator(boe.getLineNumber(), reference.getLocalVariable(), variableInitializer));
     }
 
     @SuppressWarnings("unchecked")
@@ -622,7 +623,7 @@ public class Frame {
                 ((NewInitializedArray)init.getRightExpression()).getArrayInitializer() :
                 new ExpressionVariableInitializer(init.getRightExpression());
 
-        forStatement.setDeclaration(new LocalVariableDeclaration(localVariable.getType(), new LocalVariableDeclarator(init.getLineNumber(), reference.getName(), variableInitializer)));
+        forStatement.setDeclaration(new LocalVariableDeclaration(localVariable.getType(), new ClassFileLocalVariableDeclarator(init.getLineNumber(), reference.getLocalVariable(), variableInitializer)));
         forStatement.setInit(null);
     }
 
@@ -709,7 +710,7 @@ public class Frame {
             VariableInitializer variableInitializer = boe.getRightExpression().isNewInitializedArray() ?
                     ((NewInitializedArray) boe.getRightExpression()).getArrayInitializer() :
                     new ExpressionVariableInitializer(boe.getRightExpression());
-            LocalVariableDeclarator declarator = new LocalVariableDeclarator(boe.getLineNumber(), reference.getName(), variableInitializer);
+            LocalVariableDeclarator declarator = new ClassFileLocalVariableDeclarator(boe.getLineNumber(), reference.getLocalVariable(), variableInitializer);
 
             if (setDimension) {
                 declarator.setDimension(reference.getLocalVariable().getDimension());
@@ -734,7 +735,7 @@ public class Frame {
                     if (addIndex == -1) {
                         addIndex = getAddIndex();
                     }
-                    statements.add(addIndex, new LocalVariableDeclarationStatement(lv.getType(), new LocalVariableDeclarator(lv.getName())));
+                    statements.add(addIndex, new LocalVariableDeclarationStatement(lv.getType(), new ClassFileLocalVariableDeclarator(lv)));
                     lv.setDeclared(true);
                 }
 
