@@ -26,6 +26,7 @@ import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_BRIDGE;
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
 
 public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
@@ -229,7 +230,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if ((parameters != null) && (parameters.size() > 0)) {
             boolean unique = typeMaker.matchCount(expression.getObjectType().getInternalName(), "<init>", parameters.size(), true) <= 1;
             boolean forceCast = !unique && (typeMaker.matchCount(typeBounds, expression.getObjectType().getInternalName(), "<init>", parameters, true) > 1);
-            expression.setParameters(updateExpressions(((ClassFileSuperConstructorInvocationExpression)expression).getParameterTypes(), parameters, forceCast, unique));
+            expression.setParameters(updateParameters(((ClassFileSuperConstructorInvocationExpression)expression).getParameterTypes(), parameters, forceCast, unique));
         }
     }
 
@@ -240,7 +241,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if ((parameters != null) && (parameters.size() > 0)) {
             boolean unique = typeMaker.matchCount(expression.getObjectType().getInternalName(), "<init>", parameters.size(), true) <= 1;
             boolean forceCast = !unique && (typeMaker.matchCount(typeBounds, expression.getObjectType().getInternalName(), "<init>", parameters, true) > 1);
-            expression.setParameters(updateExpressions(((ClassFileConstructorInvocationExpression)expression).getParameterTypes(), parameters, forceCast, unique));
+            expression.setParameters(updateParameters(((ClassFileConstructorInvocationExpression)expression).getParameterTypes(), parameters, forceCast, unique));
         }
     }
 
@@ -251,7 +252,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if ((parameters != null) && (parameters.size() > 0)) {
             boolean unique = typeMaker.matchCount(expression.getInternalTypeName(), expression.getName(), parameters.size(), false) <= 1;
             boolean forceCast = !unique && (typeMaker.matchCount(typeBounds, expression.getInternalTypeName(), expression.getName(), parameters, false) > 1);
-            expression.setParameters(updateExpressions(((ClassFileMethodInvocationExpression)expression).getParameterTypes(), parameters, forceCast, unique));
+            expression.setParameters(updateParameters(((ClassFileMethodInvocationExpression)expression).getParameterTypes(), parameters, forceCast, unique));
         }
         
         expression.getExpression().accept(this);
@@ -264,7 +265,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if (parameters != null) {
             boolean unique = typeMaker.matchCount(expression.getObjectType().getInternalName(), "<init>", parameters.size(), true) <= 1;
             boolean forceCast = !unique && (typeMaker.matchCount(typeBounds, expression.getObjectType().getInternalName(), "<init>", parameters, true) > 1);
-            expression.setParameters(updateExpressions(((ClassFileNewExpression)expression).getParameterTypes(), parameters, forceCast, unique));
+            expression.setParameters(updateParameters(((ClassFileNewExpression)expression).getParameterTypes(), parameters, forceCast, unique));
         }
     }
 
@@ -328,21 +329,33 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @SuppressWarnings("unchecked")
-    protected BaseExpression updateExpressions(BaseType types, BaseExpression expressions, boolean forceCast, boolean unique) {
+    protected BaseExpression updateParameters(BaseType types, BaseExpression expressions, boolean forceCast, boolean unique) {
         if (expressions != null) {
             if (expressions.isList()) {
-                DefaultList<Type> t = types.getList();
-                DefaultList<Expression> e = expressions.getList();
+                DefaultList<Type> typeList = types.getList();
+                DefaultList<Expression> expressionList = expressions.getList();
 
-                for (int i = e.size() - 1; i >= 0; i--) {
-                    e.set(i, updateExpression(t.get(i), e.get(i), forceCast, unique));
+                for (int i = expressionList.size() - 1; i >= 0; i--) {
+                    expressionList.set(i, updateParameter(typeList.get(i), expressionList.get(i), forceCast, unique));
                 }
             } else {
-                expressions = updateExpression(types.getFirst(), expressions.getFirst(), forceCast, unique);
+                expressions = updateParameter(types.getFirst(), expressions.getFirst(), forceCast, unique);
             }
         }
 
         return expressions;
+    }
+
+    private Expression updateParameter(Type type, Expression expression, boolean forceCast, boolean unique) {
+        expression = updateExpression(type, expression, forceCast, unique);
+
+        if (type == TYPE_BYTE) {
+            if (expression.isIntegerConstantExpression() || expression.isTernaryOperatorExpression()) {
+                expression = new CastExpression(TYPE_BYTE, expression);
+            }
+        }
+
+        return expression;
     }
 
     private Expression updateExpression(Type type, Expression expression, boolean forceCast, boolean unique) {
