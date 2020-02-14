@@ -53,8 +53,9 @@ public class TypeParametersToTypeArgumentsBinder {
             int lineNumber, ObjectType objectType, String descriptor,
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
 
+        Map<String, TypeArgument> bindings = new HashMap<>();
         BaseType parameterTypes = clone(methodTypes.parameterTypes);
-        Map<String, TypeArgument> bindings = createBindings(null, null, null, methodTypes.typeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
+        createBindings(bindings, null, null, null, methodTypes.typeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
 
         parameterTypes = bind(bindings, parameterTypes);
         bindParameters(parameterTypes, parameters);
@@ -74,11 +75,12 @@ public class TypeParametersToTypeArgumentsBinder {
             TypeMaker.TypeTypes superTypeTypes = typeMaker.makeTypeTypes(objectType.getInternalName());
 
             if (superTypeTypes != null) {
+                bindings = new HashMap<>();
                 BaseTypeParameter typeParameters = superTypeTypes.typeParameters;
                 BaseTypeArgument typeArguments = typeTypes.superType.getTypeArguments();
                 BaseTypeParameter methodTypeParameters = methodTypes.typeParameters;
 
-                bindings = createBindings(null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
+                createBindings(bindings, null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
             }
         }
 
@@ -115,10 +117,11 @@ public class TypeParametersToTypeArgumentsBinder {
                         if (typeTypes == null) {
                             bindings = contextualBindings;
                         } else {
+                            bindings = new HashMap<>();
                             BaseTypeParameter typeParameters = typeTypes.typeParameters;
                             BaseTypeArgument typeArguments = expressionObjectType.getTypeArguments();
 
-                            bindings = createBindings(expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
+                            createBindings(bindings, expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
                         }
 
                         type = (Type)bind(bindings, type);
@@ -210,13 +213,13 @@ public class TypeParametersToTypeArgumentsBinder {
                     }
                 }
 
-                Map<String, TypeArgument> bindings = createBindings(expression, typeParameters, typeArguments, methodTypeParameters, type, t, parameterTypes, parameters);
-                boolean bindingsContainsNull = bindings.containsValue(null);
+                Map<String, TypeArgument> bindings = new HashMap<>();
+                boolean partialBinding = createBindings(bindings, expression, typeParameters, typeArguments, methodTypeParameters, type, t, parameterTypes, parameters);
 
                 mie.setParameterTypes(parameterTypes = bind(bindings, parameterTypes));
                 mie.setType((Type) bind(bindings, mie.getType()));
 
-                if ((methodTypeParameters != null) && !bindingsContainsNull) {
+                if ((methodTypeParameters != null) && !partialBinding) {
                     bindTypeParametersToNonWildcardTypeArgumentsVisitor.init(bindings);
                     methodTypeParameters.accept(bindTypeParametersToNonWildcardTypeArgumentsVisitor);
                     mie.setNonWildcardTypeArguments(bindTypeParametersToNonWildcardTypeArgumentsVisitor.getTypeArgument());
@@ -225,7 +228,7 @@ public class TypeParametersToTypeArgumentsBinder {
                 if (expressionType.isObjectType()) {
                     ObjectType expressionObjectType = (ObjectType) expressionType;
 
-                    if (bindings.isEmpty() || bindingsContainsNull) {
+                    if (bindings.isEmpty() || partialBinding) {
                         expressionType = expressionObjectType.createType(null);
                     } else {
                         if (expression.isObjectTypeReferenceExpression() || (typeParameters == null)) {
@@ -241,7 +244,7 @@ public class TypeParametersToTypeArgumentsBinder {
                         }
                     }
                 } else if (expressionType.isGenericType()) {
-                    if (bindings.isEmpty() || bindingsContainsNull) {
+                    if (bindings.isEmpty() || partialBinding) {
                         expressionType = ObjectType.TYPE_OBJECT;
                     } else {
                         TypeArgument typeArgument = bindings.get(expressionType.getName());
@@ -297,7 +300,8 @@ public class TypeParametersToTypeArgumentsBinder {
                     }
                 }
 
-                Map<String, TypeArgument> bindings = createBindings(null, typeParameters, typeArguments, null, type, t, parameterTypes, parameters);
+                Map<String, TypeArgument> bindings = new HashMap<>();
+                boolean partialBinding = createBindings(bindings, null, typeParameters, typeArguments, null, type, t, parameterTypes, parameters);
 
                 ne.setParameterTypes(parameterTypes = bind(bindings, parameterTypes));
 
@@ -308,7 +312,9 @@ public class TypeParametersToTypeArgumentsBinder {
                     entry.setValue(typeArgumentToTypeVisitor.getType());
                 }
 
-                ne.setType((ObjectType) bind(bindings, neObjectType));
+                if (!partialBinding) {
+                    ne.setType((ObjectType) bind(bindings, neObjectType));
+                }
             }
         }
 
@@ -347,12 +353,10 @@ public class TypeParametersToTypeArgumentsBinder {
         }
     }
 
-    protected Map<String, TypeArgument> createBindings(
-            Expression expression,
+    protected boolean createBindings(
+            Map<String, TypeArgument> bindings, Expression expression,
             BaseTypeParameter typeParameters, BaseTypeArgument typeArguments, BaseTypeParameter methodTypeParameters,
             Type returnType, Type returnExpressionType, BaseType parameterTypes, BaseExpression parameters) {
-
-        Map<String, TypeArgument> bindings = new HashMap<>();
         Map<String, BaseType> typeBounds = new HashMap<>();
         boolean statik = (expression != null) && expression.isObjectTypeReferenceExpression();
 
@@ -401,7 +405,9 @@ public class TypeParametersToTypeArgumentsBinder {
             }
         }
 
-        if (bindings.containsValue(null)) {
+        boolean bindingsContainsNull = bindings.containsValue(null);
+
+        if (bindingsContainsNull) {
             if (eraseTypeArguments(expression, typeParameters, typeArguments)) {
                 for (Map.Entry<String, TypeArgument> entry : bindings.entrySet()) {
                     entry.setValue(null);
@@ -428,7 +434,7 @@ public class TypeParametersToTypeArgumentsBinder {
             }
         }
 
-        return bindings;
+        return bindingsContainsNull;
     }
 
     protected boolean eraseTypeArguments(Expression expression, BaseTypeParameter typeParameters, BaseTypeArgument typeArguments) {
