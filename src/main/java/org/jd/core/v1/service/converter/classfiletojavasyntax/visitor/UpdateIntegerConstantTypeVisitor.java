@@ -393,6 +393,7 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                             default:
                                 if ((icePrimitiveType.getFlags() & primitiveType.getFlags()) != 0) {
                                     ice.setType(type);
+                                    return new CastExpression(ice.getLineNumber(), PrimitiveType.TYPE_BYTE, ice);
                                 } else {
                                     ice.setType(TYPE_INT);
                                 }
