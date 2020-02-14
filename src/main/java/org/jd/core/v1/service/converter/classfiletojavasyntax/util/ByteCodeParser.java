@@ -1833,8 +1833,22 @@ public class ByteCodeParser {
         }
 
         if (type == TYPE_INT) {
-            if ((leftExpression.getType() == TYPE_BOOLEAN) || (rightExpression.getType() == TYPE_BOOLEAN)) {
-                type = TYPE_BOOLEAN;
+            if (leftExpression.getType().isPrimitiveType() && rightExpression.getType().isPrimitiveType()) {
+                int leftFlags = ((PrimitiveType)leftExpression.getType()).getFlags();
+                int rightFlags = ((PrimitiveType)rightExpression.getType()).getFlags();
+                boolean leftBoolean = (leftFlags & FLAG_BOOLEAN) != 0;
+                boolean rightBoolean = (rightFlags & FLAG_BOOLEAN) != 0;
+                int commonflags = leftFlags | rightFlags;
+
+                if (!leftBoolean || !rightBoolean) {
+                    commonflags &= ~FLAG_BOOLEAN;
+                }
+
+                type = PrimitiveTypeUtil.getPrimitiveTypeFromFlags(commonflags);
+
+                if (type == null) {
+                    type = TYPE_INT;
+                }
             }
         }
 
