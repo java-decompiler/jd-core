@@ -46,8 +46,8 @@ public interface BaseExpression extends Base<Expression> {
 
     default Expression getCondition() { return NO_EXPRESSION; }
     default Expression getExpression() { return NO_EXPRESSION; }
-    default Expression getExpressionTrue() { return NO_EXPRESSION; }
-    default Expression getExpressionFalse() { return NO_EXPRESSION; }
+    default Expression getTrueExpression() { return NO_EXPRESSION; }
+    default Expression getFalseExpression() { return NO_EXPRESSION; }
     default Expression getIndex() { return NO_EXPRESSION; }
     default Expression getLeftExpression() { return NO_EXPRESSION; }
     default Expression getRightExpression() { return NO_EXPRESSION; }

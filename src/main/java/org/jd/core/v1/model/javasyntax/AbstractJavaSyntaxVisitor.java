@@ -392,8 +392,8 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     @Override
     public void visit(TernaryOperatorExpression expression) {
         expression.getCondition().accept(this);
-        expression.getExpressionTrue().accept(this);
-        expression.getExpressionFalse().accept(this);
+        expression.getTrueExpression().accept(this);
+        expression.getFalseExpression().accept(this);
     }
 
     @Override

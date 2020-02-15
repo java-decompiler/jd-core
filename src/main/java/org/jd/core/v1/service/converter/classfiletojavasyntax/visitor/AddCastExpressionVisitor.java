@@ -324,8 +324,8 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         Type expressionType = expression.getType();
 
         expression.getCondition().accept(this);
-        expression.setExpressionTrue(updateExpression(expressionType, expression.getExpressionTrue(), false, true));
-        expression.setExpressionFalse(updateExpression(expressionType, expression.getExpressionFalse(), false, true));
+        expression.setTrueExpression(updateExpression(expressionType, expression.getTrueExpression(), false, true));
+        expression.setFalseExpression(updateExpression(expressionType, expression.getFalseExpression(), false, true));
     }
 
     @SuppressWarnings("unchecked")
@@ -350,8 +350,20 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         expression = updateExpression(type, expression, forceCast, unique);
 
         if (type == TYPE_BYTE) {
-            if (expression.isIntegerConstantExpression() || expression.isTernaryOperatorExpression()) {
+            if (expression.isIntegerConstantExpression()) {
                 expression = new CastExpression(TYPE_BYTE, expression);
+            } else if (expression.isTernaryOperatorExpression()) {
+                Expression exp = expression.getTrueExpression();
+
+                if (exp.isIntegerConstantExpression() || exp.isTernaryOperatorExpression()) {
+                    expression = new CastExpression(TYPE_BYTE, expression);
+                } else {
+                    exp = expression.getFalseExpression();
+
+                    if (exp.isIntegerConstantExpression() || exp.isTernaryOperatorExpression()) {
+                        expression = new CastExpression(TYPE_BYTE, expression);
+                    }
+                }
             }
         }
 

@@ -246,26 +246,26 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
 
     @Override
     public void visit(TernaryOperatorExpression expression) {
-        Type trueType = expression.getExpressionTrue().getType();
-        Type falseType = expression.getExpressionFalse().getType();
+        Type trueType = expression.getTrueExpression().getType();
+        Type falseType = expression.getFalseExpression().getType();
 
         expression.setCondition(updateBooleanExpression(expression.getCondition()));
 
         if (trueType.isPrimitiveType()) {
             if (falseType.isPrimitiveType()) {
-                expression.setExpressionTrue(updateExpression(TYPE_INT, expression.getExpressionTrue()));
-                expression.setExpressionFalse(updateExpression(TYPE_INT, expression.getExpressionFalse()));
+                expression.setTrueExpression(updateExpression(TYPE_INT, expression.getTrueExpression()));
+                expression.setFalseExpression(updateExpression(TYPE_INT, expression.getFalseExpression()));
             } else {
-                expression.getExpressionTrue().accept(this);
-                expression.setExpressionTrue(updateExpression(falseType, expression.getExpressionTrue()));
+                expression.getTrueExpression().accept(this);
+                expression.setTrueExpression(updateExpression(falseType, expression.getTrueExpression()));
             }
         } else {
             if (falseType.isPrimitiveType()) {
-                expression.setExpressionFalse(updateExpression(trueType, expression.getExpressionFalse()));
-                expression.getExpressionFalse().accept(this);
+                expression.setFalseExpression(updateExpression(trueType, expression.getFalseExpression()));
+                expression.getFalseExpression().accept(this);
             } else {
-                expression.getExpressionTrue().accept(this);
-                expression.getExpressionFalse().accept(this);
+                expression.getTrueExpression().accept(this);
+                expression.getFalseExpression().accept(this);
             }
         }
     }
@@ -442,8 +442,8 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
 
             toe.setType(type);
             toe.setCondition(updateBooleanExpression(toe.getCondition()));
-            toe.setExpressionTrue(updateExpression(type, toe.getExpressionTrue()));
-            toe.setExpressionFalse(updateExpression(type, toe.getExpressionFalse()));
+            toe.setTrueExpression(updateExpression(type, toe.getTrueExpression()));
+            toe.setFalseExpression(updateExpression(type, toe.getFalseExpression()));
 
             return expression;
         }
@@ -465,8 +465,8 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
 
                 toe.setType(TYPE_BOOLEAN);
                 toe.setCondition(updateBooleanExpression(toe.getCondition()));
-                toe.setExpressionTrue(updateBooleanExpression(toe.getExpressionTrue()));
-                toe.setExpressionFalse(updateBooleanExpression(toe.getExpressionFalse()));
+                toe.setTrueExpression(updateBooleanExpression(toe.getTrueExpression()));
+                toe.setFalseExpression(updateBooleanExpression(toe.getFalseExpression()));
 
                 return expression;
             }

@@ -595,9 +595,9 @@ public class TypeParametersToTypeArgumentsBinder {
             Type t = type;
 
             expression.setType(t);
-            expression.getExpressionTrue().accept(this);
+            expression.getTrueExpression().accept(this);
             type = t;
-            expression.getExpressionFalse().accept(this);
+            expression.getFalseExpression().accept(this);
         }
 
         @Override

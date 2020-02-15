@@ -11,21 +11,21 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression {
     protected Expression condition;
-    protected Expression expressionTrue;
-    protected Expression expressionFalse;
+    protected Expression trueExpression;
+    protected Expression falseExpression;
 
-    public TernaryOperatorExpression(Type type, Expression condition, Expression expressionTrue, Expression expressionFalse) {
+    public TernaryOperatorExpression(Type type, Expression condition, Expression trueExpression, Expression falseExpression) {
         super(type);
         this.condition = condition;
-        this.expressionTrue = expressionTrue;
-        this.expressionFalse = expressionFalse;
+        this.trueExpression = trueExpression;
+        this.falseExpression = falseExpression;
     }
 
-    public TernaryOperatorExpression(int lineNumber, Type type, Expression condition, Expression expressionTrue, Expression expressionFalse) {
+    public TernaryOperatorExpression(int lineNumber, Type type, Expression condition, Expression trueExpression, Expression falseExpression) {
         super(lineNumber, type);
         this.condition = condition;
-        this.expressionTrue = expressionTrue;
-        this.expressionFalse = expressionFalse;
+        this.trueExpression = trueExpression;
+        this.falseExpression = falseExpression;
     }
 
     public Expression getCondition() {
@@ -37,21 +37,21 @@ public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression 
     }
 
     @Override
-    public Expression getExpressionTrue() {
-        return expressionTrue;
+    public Expression getTrueExpression() {
+        return trueExpression;
     }
 
-    public void setExpressionTrue(Expression expressionTrue) {
-        this.expressionTrue = expressionTrue;
+    public void setTrueExpression(Expression trueExpression) {
+        this.trueExpression = trueExpression;
     }
 
     @Override
-    public Expression getExpressionFalse() {
-        return expressionFalse;
+    public Expression getFalseExpression() {
+        return falseExpression;
     }
 
-    public void setExpressionFalse(Expression expressionFalse) {
-        this.expressionFalse = expressionFalse;
+    public void setFalseExpression(Expression falseExpression) {
+        this.falseExpression = falseExpression;
     }
 
     @Override
@@ -69,6 +69,6 @@ public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression 
 
     @Override
     public String toString() {
-        return "TernaryOperatorExpression{" + condition + " ? " + expressionTrue + " : " + expressionFalse + "}";
+        return "TernaryOperatorExpression{" + condition + " ? " + trueExpression + " : " + falseExpression + "}";
     }
 }

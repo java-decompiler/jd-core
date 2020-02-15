@@ -592,9 +592,9 @@ public class ExpressionVisitor extends TypeVisitor {
     public void visit(TernaryOperatorExpression expression) {
         tokens.addLineNumberToken(expression.getCondition());
 
-        if (expression.getExpressionTrue().isBooleanExpression() && expression.getExpressionFalse().isBooleanExpression()) {
-            BooleanExpression be1 = (BooleanExpression)expression.getExpressionTrue();
-            BooleanExpression be2 = (BooleanExpression)expression.getExpressionFalse();
+        if (expression.getTrueExpression().isBooleanExpression() && expression.getFalseExpression().isBooleanExpression()) {
+            BooleanExpression be1 = (BooleanExpression)expression.getTrueExpression();
+            BooleanExpression be2 = (BooleanExpression)expression.getFalseExpression();
 
             if (be1.isTrue() && be2.isFalse()) {
                 printTernaryOperatorExpression(expression.getCondition());
@@ -610,9 +610,9 @@ public class ExpressionVisitor extends TypeVisitor {
 
         printTernaryOperatorExpression(expression.getCondition());
         tokens.add(TextToken.SPACE_QUESTION_SPACE);
-        printTernaryOperatorExpression(expression.getExpressionTrue());
+        printTernaryOperatorExpression(expression.getTrueExpression());
         tokens.add(TextToken.SPACE_COLON_SPACE);
-        printTernaryOperatorExpression(expression.getExpressionFalse());
+        printTernaryOperatorExpression(expression.getFalseExpression());
     }
 
     protected void printTernaryOperatorExpression(Expression expression) {

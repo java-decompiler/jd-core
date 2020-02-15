@@ -229,11 +229,11 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
     @Override
     public void visit(TernaryOperatorExpression expression) {
         expression.setCondition(updateExpression(expression.getCondition()));
-        expression.setExpressionTrue(updateExpression(expression.getExpressionTrue()));
-        expression.setExpressionFalse(updateExpression(expression.getExpressionFalse()));
+        expression.setTrueExpression(updateExpression(expression.getTrueExpression()));
+        expression.setFalseExpression(updateExpression(expression.getFalseExpression()));
         expression.getCondition().accept(this);
-        expression.getExpressionTrue().accept(this);
-        expression.getExpressionFalse().accept(this);
+        expression.getTrueExpression().accept(this);
+        expression.getFalseExpression().accept(this);
     }
 
     @Override
