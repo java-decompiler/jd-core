@@ -900,85 +900,70 @@ public class TypeMaker {
         }
     }
 
-    private ObjectType searchSuperParameterizedType(long superHashCode, String superInternalTypeName, ObjectType objectType) {
-        if (objectType.equals(TYPE_OBJECT)) {
+    private ObjectType searchSuperParameterizedType(long leftHashCode, String leftInternalTypeName, ObjectType right) {
+        if (right.equals(TYPE_OBJECT)) {
             return null;
         }
 
-        Long key = Long.valueOf(superHashCode + objectType.hashCode());
+        Long key = Long.valueOf(leftHashCode + right.hashCode());
 
         if (superParameterizedObjectTypes.containsKey(key)) {
             return superParameterizedObjectTypes.get(key);
         }
 
-        String rightInternalName = objectType.getInternalName();
+        String rightInternalTypeName = right.getInternalName();
 
-        if (superInternalTypeName.equals(rightInternalName)) {
-            superParameterizedObjectTypes.put(key, objectType);
-            return objectType;
+        if (leftInternalTypeName.equals(rightInternalTypeName)) {
+            superParameterizedObjectTypes.put(key, right);
+            return right;
         }
 
-        TypeTypes rightTypeTypes = makeTypeTypes(rightInternalName);
+        TypeTypes rightTypeTypes = makeTypeTypes(rightInternalTypeName);
 
         if (rightTypeTypes != null) {
-            if ((rightTypeTypes.typeParameters == null) || (objectType.getTypeArguments() == null)) {
-                if (rightTypeTypes.superType != null) {
-                    ObjectType ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, rightTypeTypes.superType.createType(null));
+            BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
+            Map<String, TypeArgument> bindings;
 
-                    if (ot != null) {
-                        superParameterizedObjectTypes.put(key, ot);
-                        return ot;
-                    }
-                }
-                if (rightTypeTypes.interfaces != null) {
-                    for (Type interfaze : rightTypeTypes.interfaces) {
-                        ObjectType ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, ((ObjectType)interfaze).createType(null));
-
-                        if (ot != null) {
-                            superParameterizedObjectTypes.put(key, ot);
-                            return ot;
-                        }
-                    }
-                }
+            if ((rightTypeTypes.typeParameters == null) || (right.getTypeArguments() == null)) {
+                bindings = Collections.emptyMap();
             } else {
-                BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
-                HashMap<String, TypeArgument> bindings = new HashMap<>();
+                bindings = new HashMap<>();
 
-                if (rightTypeTypes.typeParameters.isList() && objectType.getTypeArguments().isTypeArgumentList()) {
+                if (rightTypeTypes.typeParameters.isList() && right.getTypeArguments().isTypeArgumentList()) {
                     Iterator<TypeParameter> iteratorTypeParameter = rightTypeTypes.typeParameters.iterator();
-                    Iterator<TypeArgument> iteratorTypeArgument = objectType.getTypeArguments().getTypeArgumentList().iterator();
+                    Iterator<TypeArgument> iteratorTypeArgument = right.getTypeArguments().getTypeArgumentList().iterator();
 
                     while (iteratorTypeParameter.hasNext()) {
                         bindings.put(iteratorTypeParameter.next().getIdentifier(), iteratorTypeArgument.next());
                     }
                 } else {
-                    bindings.put(rightTypeTypes.typeParameters.getFirst().getIdentifier(), objectType.getTypeArguments().getTypeArgumentFirst());
+                    bindings.put(rightTypeTypes.typeParameters.getFirst().getIdentifier(), right.getTypeArguments().getTypeArgumentFirst());
                 }
+            }
 
-                bindTypesToTypesVisitor.setBindings(bindings);
+            bindTypesToTypesVisitor.setBindings(bindings);
 
-                if (rightTypeTypes.superType != null) {
+            if (rightTypeTypes.superType != null) {
+                bindTypesToTypesVisitor.init();
+                rightTypeTypes.superType.accept(bindTypesToTypesVisitor);
+                ObjectType ot = (ObjectType) bindTypesToTypesVisitor.getType();
+                ot = searchSuperParameterizedType(leftHashCode, leftInternalTypeName, ot);
+
+                if (ot != null) {
+                    superParameterizedObjectTypes.put(key, ot);
+                    return ot;
+                }
+            }
+            if (rightTypeTypes.interfaces != null) {
+                for (Type interfaze : rightTypeTypes.interfaces) {
                     bindTypesToTypesVisitor.init();
-                    rightTypeTypes.superType.accept(bindTypesToTypesVisitor);
+                    interfaze.accept(bindTypesToTypesVisitor);
                     ObjectType ot = (ObjectType) bindTypesToTypesVisitor.getType();
-                    ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, ot);
+                    ot = searchSuperParameterizedType(leftHashCode, leftInternalTypeName, ot);
 
                     if (ot != null) {
                         superParameterizedObjectTypes.put(key, ot);
                         return ot;
-                    }
-                }
-                if (rightTypeTypes.interfaces != null) {
-                    for (Type interfaze : rightTypeTypes.interfaces) {
-                        bindTypesToTypesVisitor.init();
-                        interfaze.accept(bindTypesToTypesVisitor);
-                        ObjectType ot = (ObjectType) bindTypesToTypesVisitor.getType();
-                        ot = searchSuperParameterizedType(superHashCode, superInternalTypeName, ot);
-
-                        if (ot != null) {
-                            superParameterizedObjectTypes.put(key, ot);
-                            return ot;
-                        }
                     }
                 }
             }
