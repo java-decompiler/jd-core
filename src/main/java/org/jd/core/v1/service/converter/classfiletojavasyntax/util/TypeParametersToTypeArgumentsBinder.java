@@ -547,7 +547,10 @@ public class TypeParametersToTypeArgumentsBinder {
         @Override
         public void visit(LocalVariableReferenceExpression expression) {
             AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable();
-            localVariable.typeOnLeft(contextualTypeBounds, checkTypeArguments(type, localVariable));
+            if (localVariable.getFromOffset() > 0) {
+                // Do not update parameter
+                localVariable.typeOnLeft(contextualTypeBounds, checkTypeArguments(type, localVariable));
+            }
         }
 
         @Override
