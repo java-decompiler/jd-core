@@ -19,6 +19,7 @@ public class ClassFileMethodInvocationExpression extends MethodInvocationExpress
     protected AbstractTypeParametersToTypeArgumentsBinder binder;
     protected BaseTypeParameter typeParameters;
     protected BaseType parameterTypes;
+    protected boolean binded = false;
 
     public ClassFileMethodInvocationExpression(
             AbstractTypeParametersToTypeArgumentsBinder binder,
@@ -44,5 +45,13 @@ public class ClassFileMethodInvocationExpression extends MethodInvocationExpress
 
     public void setParameterTypes(BaseType parameterTypes) {
         this.parameterTypes = parameterTypes;
+    }
+
+    public boolean isBinded() {
+        return binded;
+    }
+
+    public void setBinded(boolean binded) {
+        this.binded = binded;
     }
 }
