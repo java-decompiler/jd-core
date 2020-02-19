@@ -1773,9 +1773,9 @@ public class ByteCodeParser {
                 }
 
                 if (declaration.getInterfaces() != null) {
-                    return new ClassFileNewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), bodyDeclaration);
+                    return new ClassFileNewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), bodyDeclaration, true);
                 } else if (declaration.getSuperType() != null) {
-                    return new ClassFileNewExpression(lineNumber, declaration.getSuperType(), bodyDeclaration);
+                    return new ClassFileNewExpression(lineNumber, declaration.getSuperType(), bodyDeclaration, true);
                 } else {
                     return new ClassFileNewExpression(lineNumber, ObjectType.TYPE_OBJECT, bodyDeclaration);
                 }

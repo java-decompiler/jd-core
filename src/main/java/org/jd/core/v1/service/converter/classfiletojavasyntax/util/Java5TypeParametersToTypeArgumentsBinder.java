@@ -365,7 +365,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
     public void visit(MethodInvocationExpression expression) {
         ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
 
-        if (! mie.isBinded()) {
+        if (! mie.isBound()) {
             BaseType parameterTypes = mie.getParameterTypes();
             BaseExpression parameters = mie.getParameters();
             Expression exp = mie.getExpression();
@@ -466,7 +466,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
 
             bindParameters(parameterTypes, parameters);
 
-            mie.setBinded(true);
+            mie.setBound(true);
         }
     }
 
@@ -483,7 +483,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
     public void visit(NewExpression expression) {
         ClassFileNewExpression ne = (ClassFileNewExpression)expression;
 
-        if (! ne.isBinded()) {
+        if (! ne.isBound()) {
             BaseType parameterTypes = ne.getParameterTypes();
             BaseExpression parameters = ne.getParameters();
             ObjectType neObjectType = ne.getObjectType();
@@ -537,7 +537,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
 
             bindParameters(parameterTypes, parameters);
 
-            ne.setBinded(true);
+            ne.setBound(true);
         }
     }
 
