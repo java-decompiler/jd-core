@@ -14,14 +14,13 @@ import org.jd.core.v1.model.javasyntax.statement.*;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.model.javasyntax.type.Types;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeParametersToTypeArgumentsBinder;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AbstractTypeParametersToTypeArgumentsBinder;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
@@ -51,7 +50,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         expression.setExpression(updateExpression(exp));
 
         if (exp != expression.getExpression()) {
-            TypeParametersToTypeArgumentsBinder.staticBindParameterTypesWithArgumentTypes(expression.getType(), expression);
+            AbstractTypeParametersToTypeArgumentsBinder.staticBindParameterTypesWithArgumentTypes(expression.getType(), expression);
         }
 
         if (expression.getParameters() != null) {

@@ -14,14 +14,14 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_STRING;
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.*;
 
-public class TypeParametersToTypeArgumentsBinder {
+public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParametersToTypeArgumentsBinder implements ExpressionVisitor {
     protected static final RemoveNonWildcardTypeArgumentsVisitor REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR = new RemoveNonWildcardTypeArgumentsVisitor();
 
     protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
@@ -31,7 +31,6 @@ public class TypeParametersToTypeArgumentsBinder {
     protected BaseTypeToTypeArgumentVisitor baseTypeToTypeArgumentVisitor = new BaseTypeToTypeArgumentVisitor();
     protected GetTypeArgumentVisitor getTypeArgumentVisitor = new GetTypeArgumentVisitor();
     protected BindTypeParametersToNonWildcardTypeArgumentsVisitor bindTypeParametersToNonWildcardTypeArgumentsVisitor = new BindTypeParametersToNonWildcardTypeArgumentsVisitor();
-    protected BindVisitor bindVisitor = new BindVisitor();
 
     protected TypeMaker typeMaker;
     protected String internalTypeName;
@@ -40,7 +39,7 @@ public class TypeParametersToTypeArgumentsBinder {
     protected Map<String, TypeArgument> contextualBindings;
     protected Map<String, BaseType> contextualTypeBounds;
 
-    public TypeParametersToTypeArgumentsBinder(TypeMaker typeMaker, String internalTypeName, ClassFileConstructorOrMethodDeclaration comd) {
+    public Java5TypeParametersToTypeArgumentsBinder(TypeMaker typeMaker, String internalTypeName, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
         this.internalTypeName = internalTypeName;
         this.staticMethod = ((comd.getFlags() & FLAG_STATIC) != 0);
@@ -49,13 +48,14 @@ public class TypeParametersToTypeArgumentsBinder {
         this.contextualTypeBounds = comd.getTypeBounds();
     }
 
+    @Override
     public ClassFileConstructorInvocationExpression newConstructorInvocationExpression(
             int lineNumber, ObjectType objectType, String descriptor,
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
 
         Map<String, TypeArgument> bindings = new HashMap<>();
         BaseType parameterTypes = clone(methodTypes.parameterTypes);
-        createBindings(bindings, null, null, null, methodTypes.typeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
+        populateBindings(bindings, null, null, null, methodTypes.typeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
 
         parameterTypes = bind(bindings, parameterTypes);
         bindParameters(parameterTypes, parameters);
@@ -63,6 +63,7 @@ public class TypeParametersToTypeArgumentsBinder {
         return new ClassFileConstructorInvocationExpression(lineNumber, objectType, descriptor, parameterTypes, parameters);
     }
 
+    @Override
     public ClassFileSuperConstructorInvocationExpression newSuperConstructorInvocationExpression(
             int lineNumber, ObjectType objectType, String descriptor,
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
@@ -80,7 +81,7 @@ public class TypeParametersToTypeArgumentsBinder {
                 BaseTypeArgument typeArguments = typeTypes.superType.getTypeArguments();
                 BaseTypeParameter methodTypeParameters = methodTypes.typeParameters;
 
-                createBindings(bindings, null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
+                populateBindings(bindings, null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
             }
         }
 
@@ -90,6 +91,7 @@ public class TypeParametersToTypeArgumentsBinder {
         return new ClassFileSuperConstructorInvocationExpression(lineNumber, objectType, descriptor, parameterTypes, parameters);
     }
 
+    @Override
     public ClassFileMethodInvocationExpression newMethodInvocationExpression(
             int lineNumber, Expression expression, ObjectType objectType, String name, String descriptor,
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
@@ -98,6 +100,7 @@ public class TypeParametersToTypeArgumentsBinder {
             objectType.getInternalName(), name, descriptor, clone(methodTypes.parameterTypes), parameters);
     }
 
+    @Override
     public FieldReferenceExpression newFieldReferenceExpression(
             int lineNumber, Type type, Expression expression, ObjectType objectType, String name, String descriptor) {
 
@@ -121,7 +124,7 @@ public class TypeParametersToTypeArgumentsBinder {
                             BaseTypeParameter typeParameters = typeTypes.typeParameters;
                             BaseTypeArgument typeArguments = expressionObjectType.getTypeArguments();
 
-                            createBindings(bindings, expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
+                            populateBindings(bindings, expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
                         }
 
                         type = (Type)bind(bindings, type);
@@ -133,13 +136,10 @@ public class TypeParametersToTypeArgumentsBinder {
         return new FieldReferenceExpression(lineNumber, type, expression, objectType.getInternalName(), name, descriptor);
     }
 
-    public void updateNewExpression(ClassFileNewExpression ne, String descriptor, TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
-        ne.set(descriptor, clone(methodTypes.parameterTypes), parameters);
-    }
-
+    @Override
     public void bindParameterTypesWithArgumentTypes(Type type, Expression expression) {
-        bindVisitor.init(type);
-        expression.accept(bindVisitor);
+        this.type = type;
+        expression.accept(this);
         expression.accept(REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR);
     }
 
@@ -164,163 +164,6 @@ public class TypeParametersToTypeArgumentsBinder {
         return type;
     }
 
-    protected void bind(Type type, ClassFileMethodInvocationExpression mie) {
-        BaseType parameterTypes = mie.getParameterTypes();
-        BaseExpression parameters = mie.getParameters();
-        Expression expression = mie.getExpression();
-        Type expressionType = expression.getType();
-
-        if (staticMethod || (mie.getTypeParameters() != null) || !mie.getInternalTypeName().equals(internalTypeName)) {
-            TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(mie.getInternalTypeName());
-
-            if (typeTypes != null) {
-                BaseTypeParameter typeParameters = typeTypes.typeParameters;
-                BaseTypeParameter methodTypeParameters = mie.getTypeParameters();
-                BaseTypeArgument typeArguments;
-
-                if (expression.isSuperExpression()) {
-                    typeTypes = typeMaker.makeTypeTypes(internalTypeName);
-                    typeArguments = (typeTypes.superType == null) ? null : typeTypes.superType.getTypeArguments();
-                } else if (expression.isMethodInvocationExpression()) {
-                    Type t = getExpressionType((ClassFileMethodInvocationExpression) expression);
-                    if ((t != null) && t.isObjectType()) {
-                        typeArguments = ((ObjectType)t).getTypeArguments();
-                    } else {
-                        typeArguments = null;
-                    }
-                } else if (expressionType.isGenericType()) {
-                    BaseType typeBound = contextualTypeBounds.get(expressionType.getName());
-
-                    if (typeBound != null) {
-                        getTypeArgumentVisitor.init();
-                        typeBound.accept(getTypeArgumentVisitor);
-                        typeArguments = getTypeArgumentVisitor.getTypeArguments();
-                    } else {
-                        typeArguments = null;
-                    }
-                } else {
-                    typeArguments = ((ObjectType)expressionType).getTypeArguments();
-                }
-
-                Type t = mie.getType();
-
-                if (type.isObjectType() && t.isObjectType()) {
-                    ObjectType objectType = (ObjectType) type;
-                    ObjectType mieTypeObjectType = (ObjectType) t;
-                    t = typeMaker.searchSuperParameterizedType(objectType, mieTypeObjectType);
-                    if (t == null) {
-                        t = mie.getType();
-                    }
-                }
-
-                Map<String, TypeArgument> bindings = new HashMap<>();
-                boolean partialBinding = createBindings(bindings, expression, typeParameters, typeArguments, methodTypeParameters, type, t, parameterTypes, parameters);
-
-                mie.setParameterTypes(parameterTypes = bind(bindings, parameterTypes));
-                mie.setType((Type) bind(bindings, mie.getType()));
-
-                if ((methodTypeParameters != null) && !partialBinding) {
-                    bindTypeParametersToNonWildcardTypeArgumentsVisitor.init(bindings);
-                    methodTypeParameters.accept(bindTypeParametersToNonWildcardTypeArgumentsVisitor);
-                    mie.setNonWildcardTypeArguments(bindTypeParametersToNonWildcardTypeArgumentsVisitor.getTypeArgument());
-                }
-
-                if (expressionType.isObjectType()) {
-                    ObjectType expressionObjectType = (ObjectType) expressionType;
-
-                    if (bindings.isEmpty() || partialBinding) {
-                        expressionType = expressionObjectType.createType(null);
-                    } else {
-                        if (expression.isObjectTypeReferenceExpression() || (typeParameters == null)) {
-                            expressionType = expressionObjectType.createType(null);
-                        } else if (typeParameters.isList()) {
-                            TypeArguments tas = new TypeArguments(typeParameters.size());
-                            for (TypeParameter typeParameter : typeParameters) {
-                                tas.add(bindings.get(typeParameter.getIdentifier()));
-                            }
-                            expressionType = expressionObjectType.createType(tas);
-                        } else {
-                            expressionType = expressionObjectType.createType(bindings.get(typeParameters.getFirst().getIdentifier()));
-                        }
-                    }
-                } else if (expressionType.isGenericType()) {
-                    if (bindings.isEmpty() || partialBinding) {
-                        expressionType = ObjectType.TYPE_OBJECT;
-                    } else {
-                        TypeArgument typeArgument = bindings.get(expressionType.getName());
-                        if (typeArgument == null) {
-                            expressionType = ObjectType.TYPE_OBJECT;
-                        } else {
-                            typeArgumentToTypeVisitor.init();
-                            typeArgument.accept(typeArgumentToTypeVisitor);
-                            expressionType = typeArgumentToTypeVisitor.getType();
-                        }
-                    }
-                }
-            }
-        }
-
-        bindVisitor.init(expressionType);
-        expression.accept(bindVisitor);
-
-        bindParameters(parameterTypes, parameters);
-    }
-
-    protected void bind(Type type, ClassFileNewExpression ne) {
-        BaseType parameterTypes = ne.getParameterTypes();
-        BaseExpression parameters = ne.getParameters();
-        ObjectType neObjectType = ne.getObjectType();
-
-        if (staticMethod || !neObjectType.getInternalName().equals(internalTypeName)) {
-            TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(neObjectType.getInternalName());
-
-            if (typeTypes != null) {
-                BaseTypeParameter typeParameters = typeTypes.typeParameters;
-                BaseTypeArgument typeArguments = neObjectType.getTypeArguments();
-
-                if ((typeParameters != null) && (typeArguments == null)) {
-                    if (typeParameters.isList()) {
-                        TypeArguments tas = new TypeArguments(typeParameters.size());
-                        for (TypeParameter typeParameter : typeParameters) {
-                            tas.add(new GenericType(typeParameter.getIdentifier()));
-                        }
-                        neObjectType = neObjectType.createType(tas);
-                    } else {
-                        neObjectType = neObjectType.createType(new GenericType(typeParameters.getFirst().getIdentifier()));
-                    }
-                }
-
-                Type t = neObjectType;
-
-                if (type.isObjectType()) {
-                    ObjectType objectType = (ObjectType)type;
-                    t = typeMaker.searchSuperParameterizedType(objectType, neObjectType);
-                    if (t == null) {
-                        t = neObjectType;
-                    }
-                }
-
-                Map<String, TypeArgument> bindings = new HashMap<>();
-                boolean partialBinding = createBindings(bindings, null, typeParameters, typeArguments, null, type, t, parameterTypes, parameters);
-
-                ne.setParameterTypes(parameterTypes = bind(bindings, parameterTypes));
-
-                // Replace wildcards
-                for (Map.Entry<String, TypeArgument> entry : bindings.entrySet()) {
-                    typeArgumentToTypeVisitor.init();
-                    entry.getValue().accept(typeArgumentToTypeVisitor);
-                    entry.setValue(typeArgumentToTypeVisitor.getType());
-                }
-
-                if (!partialBinding) {
-                    ne.setType((ObjectType) bind(bindings, neObjectType));
-                }
-            }
-        }
-
-        bindParameters(parameterTypes, parameters);
-    }
-
     protected void bindParameters(BaseType parameterTypes, BaseExpression parameters) {
         if (parameterTypes != null) {
             if (parameterTypes.isList() && parameters.isList()) {
@@ -329,31 +172,20 @@ public class TypeParametersToTypeArgumentsBinder {
 
                 while (parametersIterator.hasNext()) {
                     Expression parameter = parametersIterator.next();
-                    bindVisitor.init(parameterTypesIterator.next());
-                    parameter.accept(bindVisitor);
+                    this.type = parameterTypesIterator.next();
+                    parameter.accept(this);
                     parameter.accept(REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR);
                 }
             } else {
                 Expression parameter = parameters.getFirst();
-                bindVisitor.init(parameterTypes.getFirst());
-                parameter.accept(bindVisitor);
+                this.type = parameterTypes.getFirst();
+                parameter.accept(this);
                 parameter.accept(REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR);
             }
         }
     }
 
-    public static void staticBindParameterTypesWithArgumentTypes(Type type, Expression expression) {
-        if (expression.isMethodInvocationExpression()) {
-            ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
-            TypeParametersToTypeArgumentsBinder binder = mie.getBinder();
-
-            if (binder != null) {
-                binder.bindParameterTypesWithArgumentTypes(type, mie);
-            }
-        }
-    }
-
-    protected boolean createBindings(
+    protected boolean populateBindings(
             Map<String, TypeArgument> bindings, Expression expression,
             BaseTypeParameter typeParameters, BaseTypeArgument typeArguments, BaseTypeParameter methodTypeParameters,
             Type returnType, Type returnExpressionType, BaseType parameterTypes, BaseExpression parameters) {
@@ -470,18 +302,6 @@ public class TypeParametersToTypeArgumentsBinder {
         return parameterTypes;
     }
 
-    protected static BaseType clone(BaseType parameterTypes) {
-        if ((parameterTypes != null) && parameterTypes.isList()) {
-            switch (parameterTypes.size()) {
-                case 0: parameterTypes = null; break;
-                case 1: parameterTypes = parameterTypes.getFirst(); break;
-                default: parameterTypes = new Types(parameterTypes.getList()); break;
-            }
-        }
-
-        return parameterTypes;
-    }
-
     protected Type getExpressionType(Expression expression) {
         if (expression.isMethodInvocationExpression()) {
             return getExpressionType((ClassFileMethodInvocationExpression)expression);
@@ -531,96 +351,271 @@ public class TypeParametersToTypeArgumentsBinder {
         return ot;
     }
 
-    protected class BindVisitor extends AbstractNopExpressionVisitor {
-        protected Type type;
-
-        public void init(Type type) {
-            this.type = type;
-        }
-
-        @Override
-        public void visit(MethodInvocationExpression expression) {
-            ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
-            bind(type, mie);
-        }
-
-        @Override
-        public void visit(LocalVariableReferenceExpression expression) {
-            AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable();
-            if (localVariable.getFromOffset() > 0) {
-                // Do not update parameter
-                localVariable.typeOnLeft(contextualTypeBounds, checkTypeArguments(type, localVariable));
-            }
-        }
-
-        @Override
-        public void visit(NewExpression expression) {
-            ClassFileNewExpression ne = (ClassFileNewExpression)expression;
-            bind(type, ne);
-        }
-
-        @Override
-        public void visit(CastExpression expression) {
-            assert TYPE_OBJECT.equals(type) || (type.getDimension() == expression.getType().getDimension()) : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid array type";
-
-            if (type.isObjectType()) {
-                ObjectType objectType = (ObjectType)type;
-
-                if ((objectType.getTypeArguments() != null) && !objectType.getTypeArguments().equals(WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT)) {
-                    assert expression.getType().isObjectType() : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid object type";
-
-                    ObjectType expressionObjectType = (ObjectType) expression.getType();
-
-                    if (objectType.getInternalName().equals(expressionObjectType.getInternalName())) {
-                        Type expressionExpressionType = expression.getExpression().getType();
-
-                        if (expressionExpressionType.isObjectType()) {
-                            ObjectType expressionExpressionObjectType = (ObjectType)expressionExpressionType;
-
-                            if (expressionExpressionObjectType.getTypeArguments() == null) {
-                                expression.setType(objectType);
-                            } else if (objectType.getTypeArguments().isTypeArgumentAssignableFrom(contextualTypeBounds, expressionExpressionObjectType.getTypeArguments())) {
-                                expression.setType(objectType);
-                            }
-                        } else if (expressionExpressionType.isGenericType()) {
-                            expression.setType(objectType);
-                        }
-                    }
-                }
-            }
-
-            type = expression.getType();
-            expression.getExpression().accept(this);
-        }
-
-        @Override
-        public void visit(TernaryOperatorExpression expression) {
-            Type t = type;
-
-            expression.setType(t);
-            expression.getTrueExpression().accept(this);
-            type = t;
-            expression.getFalseExpression().accept(this);
-        }
-
-        @Override
-        public void visit(BinaryOperatorExpression expression) {
-            if ((expression.getType() == TYPE_STRING) && "+".equals(expression.getOperator())) {
-                type = TYPE_OBJECT;
-            }
-
-            Type t = type;
-
-            expression.getLeftExpression().accept(this);
-            type = t;
-            expression.getRightExpression().accept(this);
-        }
-    }
-
     protected static class RemoveNonWildcardTypeArgumentsVisitor extends AbstractNopExpressionVisitor {
         @Override
         public void visit(MethodInvocationExpression expression) {
             expression.setNonWildcardTypeArguments(null);
         }
     }
+
+    // --- ExpressionVisitor --- //
+    protected Type type;
+
+    @Override
+    public void visit(MethodInvocationExpression expression) {
+        ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
+        BaseType parameterTypes = mie.getParameterTypes();
+        BaseExpression parameters = mie.getParameters();
+        Expression exp = mie.getExpression();
+        Type expressionType = exp.getType();
+
+        if (staticMethod || (mie.getTypeParameters() != null) || !mie.getInternalTypeName().equals(internalTypeName)) {
+            TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(mie.getInternalTypeName());
+
+            if (typeTypes != null) {
+                BaseTypeParameter typeParameters = typeTypes.typeParameters;
+                BaseTypeParameter methodTypeParameters = mie.getTypeParameters();
+                BaseTypeArgument typeArguments;
+
+                if (exp.isSuperExpression()) {
+                    typeTypes = typeMaker.makeTypeTypes(internalTypeName);
+                    typeArguments = (typeTypes.superType == null) ? null : typeTypes.superType.getTypeArguments();
+                } else if (exp.isMethodInvocationExpression()) {
+                    Type t = getExpressionType((ClassFileMethodInvocationExpression) exp);
+                    if ((t != null) && t.isObjectType()) {
+                        typeArguments = ((ObjectType)t).getTypeArguments();
+                    } else {
+                        typeArguments = null;
+                    }
+                } else if (expressionType.isGenericType()) {
+                    BaseType typeBound = contextualTypeBounds.get(expressionType.getName());
+
+                    if (typeBound != null) {
+                        getTypeArgumentVisitor.init();
+                        typeBound.accept(getTypeArgumentVisitor);
+                        typeArguments = getTypeArgumentVisitor.getTypeArguments();
+                    } else {
+                        typeArguments = null;
+                    }
+                } else {
+                    typeArguments = ((ObjectType)expressionType).getTypeArguments();
+                }
+
+                Type t = mie.getType();
+
+                if (type.isObjectType() && t.isObjectType()) {
+                    ObjectType objectType = (ObjectType) type;
+                    ObjectType mieTypeObjectType = (ObjectType) t;
+                    t = typeMaker.searchSuperParameterizedType(objectType, mieTypeObjectType);
+                    if (t == null) {
+                        t = mie.getType();
+                    }
+                }
+
+                Map<String, TypeArgument> bindings = new HashMap<>();
+                boolean partialBinding = populateBindings(bindings, exp, typeParameters, typeArguments, methodTypeParameters, type, t, parameterTypes, parameters);
+
+                mie.setParameterTypes(parameterTypes = bind(bindings, parameterTypes));
+                mie.setType((Type) bind(bindings, mie.getType()));
+
+                if ((methodTypeParameters != null) && !partialBinding) {
+                    bindTypeParametersToNonWildcardTypeArgumentsVisitor.init(bindings);
+                    methodTypeParameters.accept(bindTypeParametersToNonWildcardTypeArgumentsVisitor);
+                    mie.setNonWildcardTypeArguments(bindTypeParametersToNonWildcardTypeArgumentsVisitor.getTypeArgument());
+                }
+
+                if (expressionType.isObjectType()) {
+                    ObjectType expressionObjectType = (ObjectType) expressionType;
+
+                    if (bindings.isEmpty() || partialBinding) {
+                        expressionType = expressionObjectType.createType(null);
+                    } else {
+                        if (exp.isObjectTypeReferenceExpression() || (typeParameters == null)) {
+                            expressionType = expressionObjectType.createType(null);
+                        } else if (typeParameters.isList()) {
+                            TypeArguments tas = new TypeArguments(typeParameters.size());
+                            for (TypeParameter typeParameter : typeParameters) {
+                                tas.add(bindings.get(typeParameter.getIdentifier()));
+                            }
+                            expressionType = expressionObjectType.createType(tas);
+                        } else {
+                            expressionType = expressionObjectType.createType(bindings.get(typeParameters.getFirst().getIdentifier()));
+                        }
+                    }
+                } else if (expressionType.isGenericType()) {
+                    if (bindings.isEmpty() || partialBinding) {
+                        expressionType = ObjectType.TYPE_OBJECT;
+                    } else {
+                        TypeArgument typeArgument = bindings.get(expressionType.getName());
+                        if (typeArgument == null) {
+                            expressionType = ObjectType.TYPE_OBJECT;
+                        } else {
+                            typeArgumentToTypeVisitor.init();
+                            typeArgument.accept(typeArgumentToTypeVisitor);
+                            expressionType = typeArgumentToTypeVisitor.getType();
+                        }
+                    }
+                }
+            }
+        }
+
+        this.type = expressionType;
+        exp.accept(this);
+
+        bindParameters(parameterTypes, parameters);
+    }
+
+    @Override
+    public void visit(LocalVariableReferenceExpression expression) {
+        AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression) expression).getLocalVariable();
+        if (localVariable.getFromOffset() > 0) {
+            // Do not update parameter
+            localVariable.typeOnLeft(contextualTypeBounds, checkTypeArguments(type, localVariable));
+        }
+    }
+
+    @Override
+    public void visit(NewExpression expression) {
+        ClassFileNewExpression ne = (ClassFileNewExpression)expression;
+        BaseType parameterTypes = ne.getParameterTypes();
+        BaseExpression parameters = ne.getParameters();
+        ObjectType neObjectType = ne.getObjectType();
+
+        if (staticMethod || !neObjectType.getInternalName().equals(internalTypeName)) {
+            TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(neObjectType.getInternalName());
+
+            if (typeTypes != null) {
+                BaseTypeParameter typeParameters = typeTypes.typeParameters;
+                BaseTypeArgument typeArguments = neObjectType.getTypeArguments();
+
+                if ((typeParameters != null) && (typeArguments == null)) {
+                    if (typeParameters.isList()) {
+                        TypeArguments tas = new TypeArguments(typeParameters.size());
+                        for (TypeParameter typeParameter : typeParameters) {
+                            tas.add(new GenericType(typeParameter.getIdentifier()));
+                        }
+                        neObjectType = neObjectType.createType(tas);
+                    } else {
+                        neObjectType = neObjectType.createType(new GenericType(typeParameters.getFirst().getIdentifier()));
+                    }
+                }
+
+                Type t = neObjectType;
+
+                if (type.isObjectType()) {
+                    ObjectType objectType = (ObjectType)type;
+                    t = typeMaker.searchSuperParameterizedType(objectType, neObjectType);
+                    if (t == null) {
+                        t = neObjectType;
+                    }
+                }
+
+                Map<String, TypeArgument> bindings = new HashMap<>();
+                boolean partialBinding = populateBindings(bindings, null, typeParameters, typeArguments, null, type, t, parameterTypes, parameters);
+
+                ne.setParameterTypes(parameterTypes = bind(bindings, parameterTypes));
+
+                // Replace wildcards
+                for (Map.Entry<String, TypeArgument> entry : bindings.entrySet()) {
+                    typeArgumentToTypeVisitor.init();
+                    entry.getValue().accept(typeArgumentToTypeVisitor);
+                    entry.setValue(typeArgumentToTypeVisitor.getType());
+                }
+
+                if (!partialBinding) {
+                    ne.setType((ObjectType) bind(bindings, neObjectType));
+                }
+            }
+        }
+
+        bindParameters(parameterTypes, parameters);
+    }
+
+    @Override
+    public void visit(CastExpression expression) {
+        assert TYPE_OBJECT.equals(type) || (type.getDimension() == expression.getType().getDimension()) : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid array type";
+
+        if (type.isObjectType()) {
+            ObjectType objectType = (ObjectType)type;
+
+            if ((objectType.getTypeArguments() != null) && !objectType.getTypeArguments().equals(WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT)) {
+                assert expression.getType().isObjectType() : "TypeParametersToTypeArgumentsBinder.visit(CastExpression ce) : invalid object type";
+
+                ObjectType expressionObjectType = (ObjectType) expression.getType();
+
+                if (objectType.getInternalName().equals(expressionObjectType.getInternalName())) {
+                    Type expressionExpressionType = expression.getExpression().getType();
+
+                    if (expressionExpressionType.isObjectType()) {
+                        ObjectType expressionExpressionObjectType = (ObjectType)expressionExpressionType;
+
+                        if (expressionExpressionObjectType.getTypeArguments() == null) {
+                            expression.setType(objectType);
+                        } else if (objectType.getTypeArguments().isTypeArgumentAssignableFrom(contextualTypeBounds, expressionExpressionObjectType.getTypeArguments())) {
+                            expression.setType(objectType);
+                        }
+                    } else if (expressionExpressionType.isGenericType()) {
+                        expression.setType(objectType);
+                    }
+                }
+            }
+        }
+
+        type = expression.getType();
+        expression.getExpression().accept(this);
+    }
+
+    @Override
+    public void visit(TernaryOperatorExpression expression) {
+        Type t = type;
+
+        expression.setType(t);
+        expression.getTrueExpression().accept(this);
+        type = t;
+        expression.getFalseExpression().accept(this);
+    }
+
+    @Override
+    public void visit(BinaryOperatorExpression expression) {
+        if ((expression.getType() == TYPE_STRING) && "+".equals(expression.getOperator())) {
+            type = TYPE_OBJECT;
+        }
+
+        Type t = type;
+
+        expression.getLeftExpression().accept(this);
+        type = t;
+        expression.getRightExpression().accept(this);
+    }
+
+    @Override public void visit(ArrayExpression expression) {}
+    @Override public void visit(BooleanExpression expression) {}
+    @Override public void visit(CommentExpression expression) {}
+    @Override public void visit(ConstructorInvocationExpression expression) {}
+    @Override public void visit(ConstructorReferenceExpression expression) {}
+    @Override public void visit(DoubleConstantExpression expression) {}
+    @Override public void visit(EnumConstantReferenceExpression expression) {}
+    @Override public void visit(Expressions expression) {}
+    @Override public void visit(FieldReferenceExpression expression) {}
+    @Override public void visit(FloatConstantExpression expression) {}
+    @Override public void visit(IntegerConstantExpression expression) {}
+    @Override public void visit(InstanceOfExpression expression) {}
+    @Override public void visit(LambdaFormalParametersExpression expression) {}
+    @Override public void visit(LambdaIdentifiersExpression expression) {}
+    @Override public void visit(LengthExpression expression) {}
+    @Override public void visit(LongConstantExpression expression) {}
+    @Override public void visit(MethodReferenceExpression expression) {}
+    @Override public void visit(NewArray expression) {}
+    @Override public void visit(NewInitializedArray expression) {}
+    @Override public void visit(NoExpression expression) {}
+    @Override public void visit(NullExpression expression) {}
+    @Override public void visit(ObjectTypeReferenceExpression expression) {}
+    @Override public void visit(ParenthesesExpression expression) {}
+    @Override public void visit(PostOperatorExpression expression) {}
+    @Override public void visit(PreOperatorExpression expression) {}
+    @Override public void visit(StringConstantExpression expression) {}
+    @Override public void visit(SuperConstructorInvocationExpression expression) {}
+    @Override public void visit(SuperExpression expression) {}
+    @Override public void visit(ThisExpression expression) {}
+    @Override public void visit(TypeReferenceDotClassExpression expression) {}
 }

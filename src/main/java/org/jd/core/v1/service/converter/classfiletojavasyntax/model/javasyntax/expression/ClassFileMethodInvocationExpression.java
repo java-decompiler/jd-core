@@ -13,15 +13,15 @@ import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeParametersToTypeArgumentsBinder;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AbstractTypeParametersToTypeArgumentsBinder;
 
 public class ClassFileMethodInvocationExpression extends MethodInvocationExpression {
-    protected TypeParametersToTypeArgumentsBinder binder;
+    protected AbstractTypeParametersToTypeArgumentsBinder binder;
     protected BaseTypeParameter typeParameters;
     protected BaseType parameterTypes;
 
     public ClassFileMethodInvocationExpression(
-            TypeParametersToTypeArgumentsBinder binder,
+            AbstractTypeParametersToTypeArgumentsBinder binder,
             int lineNumber, BaseTypeParameter typeParameters, Type type, Expression expression,
             String internalTypeName, String name, String descriptor, BaseType parameterTypes, BaseExpression parameters) {
         super(lineNumber, type, expression, internalTypeName, name, descriptor, parameters);
@@ -30,7 +30,7 @@ public class ClassFileMethodInvocationExpression extends MethodInvocationExpress
         this.parameterTypes = parameterTypes;
     }
 
-    public TypeParametersToTypeArgumentsBinder getBinder() {
+    public AbstractTypeParametersToTypeArgumentsBinder getBinder() {
         return binder;
     }
 
