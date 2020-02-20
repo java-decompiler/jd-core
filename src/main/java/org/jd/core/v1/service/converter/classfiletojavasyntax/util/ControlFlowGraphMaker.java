@@ -531,7 +531,7 @@ public class ControlFlowGraphMaker {
                 Set<BasicBlock> predecessors;
 
                 if ((bb.getType() == TYPE_STATEMENTS) && (next.getPredecessors().size() == 1)) {
-                    if ((next.getType() == TYPE_GOTO) && (ByteCodeParser.evalStackDepth(constants, code, bb) > 0)) {
+                    if ((next.getType() == TYPE_GOTO) && (ByteCodeUtil.evalStackDepth(constants, code, bb) > 0)) {
                         // Transform STATEMENTS and GOTO to GOTO_IN_TERNARY_OPERATOR
                         bb.setType(TYPE_GOTO_IN_TERNARY_OPERATOR);
                         bb.setToOffset(next.getToOffset());
@@ -540,7 +540,7 @@ public class ControlFlowGraphMaker {
                         predecessors.remove(next);
                         predecessors.add(bb);
                         next.setType(TYPE_DELETED);
-                    } else if ((next.getType() == TYPE_CONDITIONAL_BRANCH) && (ByteCodeParser.evalStackDepth(constants, code, bb) > 0)) {
+                    } else if ((next.getType() == TYPE_CONDITIONAL_BRANCH) && (ByteCodeUtil.evalStackDepth(constants, code, bb) > 0)) {
                         // Merge STATEMENTS and CONDITIONAL_BRANCH
                         bb.setType(TYPE_CONDITIONAL_BRANCH);
                         bb.setToOffset(next.getToOffset());

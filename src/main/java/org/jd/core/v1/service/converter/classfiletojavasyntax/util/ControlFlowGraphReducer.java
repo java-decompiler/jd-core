@@ -279,7 +279,7 @@ public class ControlFlowGraphReducer {
 
             if (nextNext.matchType(TYPE_CONDITIONAL_BRANCH|TYPE_CONDITION)) {
                 if (branch.matchType(TYPE_STATEMENTS|TYPE_GOTO_IN_TERNARY_OPERATOR) && (nextNext == branch.getNext()) && (branch.getPredecessors().size() == 1) && (nextNext.getPredecessors().size() == 2)) {
-                    if (ByteCodeParser.getMinDepth(nextNext) == -1) {
+                    if (ByteCodeUtil.getMinDepth(nextNext) == -1) {
                         updateConditionTernaryOperator(basicBlock, nextNext);
                         return true;
                     }
@@ -292,7 +292,7 @@ public class ControlFlowGraphReducer {
 
                         if (nextNextNextNext.matchType(TYPE_CONDITIONAL_BRANCH|TYPE_CONDITION)) {
                             if (nextNextBranch.matchType(TYPE_STATEMENTS|TYPE_GOTO_IN_TERNARY_OPERATOR) && (nextNextNextNext == nextNextBranch.getNext()) && (nextNextBranch.getPredecessors().size() == 1) && (nextNextNextNext.getPredecessors().size() == 2)) {
-                                if (ByteCodeParser.getMinDepth(nextNextNextNext) == -2) {
+                                if (ByteCodeUtil.getMinDepth(nextNextNextNext) == -2) {
                                     updateCondition(basicBlock, nextNext, nextNextNextNext);
                                     return true;
                                 }
@@ -888,7 +888,7 @@ public class ControlFlowGraphReducer {
     }
 
     protected static boolean checkEclipseFinallyPattern(BasicBlock basicBlock, BasicBlock finallyBB, int maxOffset) {
-        int nextOpcode = ByteCodeParser.searchNextOpcode(basicBlock, maxOffset);
+        int nextOpcode = ByteCodeUtil.searchNextOpcode(basicBlock, maxOffset);
 
         if ((nextOpcode == 0)   ||
             (nextOpcode == 167) || // GOTO
@@ -1080,7 +1080,7 @@ public class ControlFlowGraphReducer {
             int delta = basicBlock.getToOffset() - basicBlock.getFromOffset();
 
             if (delta > 3) {
-                int opcode = ByteCodeParser.getLastOpcode(basicBlock);
+                int opcode = ByteCodeUtil.getLastOpcode(basicBlock);
 
                 if (opcode == 168) { // JSR
                     basicBlock.setType(TYPE_STATEMENTS);
@@ -1412,14 +1412,14 @@ public class ControlFlowGraphReducer {
 
                 if (basicBlock.getFirstLineNumber() == Expression.UNKNOWN_LINE_NUMBER) {
                     if (subBasicBlock.matchType(GROUP_SINGLE_SUCCESSOR) && (subBasicBlock.getNext().getType() == TYPE_LOOP_START)) {
-                        int stackDepth = ByteCodeParser.evalStackDepth(subBasicBlock);
+                        int stackDepth = ByteCodeUtil.evalStackDepth(subBasicBlock);
 
                         while (stackDepth != 0) {
                             Set<BasicBlock> predecessors = subBasicBlock.getPredecessors();
                             if (predecessors.size() != 1) {
                                 break;
                             }
-                            stackDepth += ByteCodeParser.evalStackDepth(subBasicBlock = predecessors.iterator().next());
+                            stackDepth += ByteCodeUtil.evalStackDepth(subBasicBlock = predecessors.iterator().next());
                         }
 
                         removePredecessors(subBasicBlock);

@@ -406,7 +406,7 @@ public class ControlFlowGraphLoopReducer {
     }
 
     private static int checkSynchronizedBlockOffset(BasicBlock basicBlock) {
-        if ((basicBlock.getNext().getType() == TYPE_TRY_DECLARATION) && (ByteCodeParser.getLastOpcode(basicBlock) == 194)) { // MONITORENTER
+        if ((basicBlock.getNext().getType() == TYPE_TRY_DECLARATION) && (ByteCodeUtil.getLastOpcode(basicBlock) == 194)) { // MONITORENTER
             return checkThrowBlockOffset(basicBlock.getNext().getExceptionHandlers().getFirst().getBasicBlock());
         }
 
