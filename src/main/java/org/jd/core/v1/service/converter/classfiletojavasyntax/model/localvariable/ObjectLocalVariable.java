@@ -65,7 +65,12 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
         StringBuilder sb = new StringBuilder();
 
         sb.append("ObjectLocalVariable{");
-        sb.append(type.getName());
+        
+        if (type.getName() == null) {
+            sb.append(type.getInternalName());
+        } else {
+            sb.append(type.getName());
+        }
 
         if (type.getDimension() > 0) {
             sb.append(new String(new char[type.getDimension()]).replaceAll("\0", "[]"));
