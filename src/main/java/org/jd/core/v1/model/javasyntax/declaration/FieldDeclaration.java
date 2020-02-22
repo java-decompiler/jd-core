@@ -47,6 +47,10 @@ public class FieldDeclaration implements MemberDeclaration {
         return type;
     }
 
+    public void setType(Type type) {
+        this.type = type;
+    }
+
     public BaseFieldDeclarator getFieldDeclarators() {
         return fieldDeclarators;
     }

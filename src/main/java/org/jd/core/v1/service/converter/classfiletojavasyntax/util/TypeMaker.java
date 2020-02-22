@@ -1138,6 +1138,11 @@ public class TypeMaker {
         return typeTypes;
     }
 
+    public void setFieldType(String internalTypeName, String fieldName, Type type) {
+        String key = internalTypeName + ':' + fieldName;
+        internalTypeNameFieldNameToType.put(key, type);
+    }
+
     public Type makeFieldType(String internalTypeName, String fieldName, String descriptor) {
         Type type = loadFieldType(internalTypeName, fieldName, descriptor);
 

@@ -11,6 +11,7 @@ import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep0Visitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep1Visitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep2Visitor;
 
@@ -27,10 +28,8 @@ public class UpdateJavaSyntaxTreeProcessor implements Processor {
         TypeMaker typeMaker = message.getHeader("typeMaker");
         CompilationUnit compilationUnit = message.getBody();
 
-        UpdateJavaSyntaxTreeStep1Visitor updateJavaSyntaxTreeStep1Visitor = new UpdateJavaSyntaxTreeStep1Visitor(typeMaker);
-        updateJavaSyntaxTreeStep1Visitor.visit(compilationUnit);
-
-        UpdateJavaSyntaxTreeStep2Visitor updateJavaSyntaxTreeStep2Visitor = new UpdateJavaSyntaxTreeStep2Visitor(typeMaker);
-        updateJavaSyntaxTreeStep2Visitor.visit(compilationUnit);
+        new UpdateJavaSyntaxTreeStep0Visitor(typeMaker).visit(compilationUnit);
+        new UpdateJavaSyntaxTreeStep1Visitor(typeMaker).visit(compilationUnit);
+        new UpdateJavaSyntaxTreeStep2Visitor(typeMaker).visit(compilationUnit);
     }
 }
