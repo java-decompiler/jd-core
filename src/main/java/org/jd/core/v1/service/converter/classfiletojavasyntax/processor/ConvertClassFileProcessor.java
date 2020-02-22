@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
+import static org.jd.core.v1.model.classfile.Constants.*;
 
 /**
  * Convert ClassFile model to Java syntax model.<br><br>
@@ -60,16 +60,15 @@ public class ConvertClassFileProcessor implements Processor {
 
         AnnotationConverter annotationConverter = new AnnotationConverter(typeMaker);
 
-        int flags = classFile.getAccessFlags();
         TypeDeclaration typeDeclaration;
 
-        if ((flags & Constants.ACC_ENUM) != 0) {
+        if (classFile.matchAccessFlags(ACC_ENUM)) {
             typeDeclaration = convertEnumDeclaration(typeMaker, annotationConverter, classFile, null);
-        } else if ((flags & Constants.ACC_ANNOTATION) != 0) {
+        } else if (classFile.matchAccessFlags(ACC_ANNOTATION)) {
             typeDeclaration = convertAnnotationDeclaration(typeMaker, annotationConverter, classFile, null);
-        } else if ((flags & Constants.ACC_MODULE) != 0) {
+        } else if (classFile.matchAccessFlags(ACC_MODULE)) {
             typeDeclaration = convertModuleDeclaration(classFile);
-        } else if ((flags & Constants.ACC_INTERFACE) != 0) {
+        } else if (classFile.matchAccessFlags(ACC_INTERFACE)) {
             typeDeclaration = convertInterfaceDeclaration(typeMaker, annotationConverter, classFile, null);
         } else {
             typeDeclaration = convertClassDeclaration(typeMaker, annotationConverter, classFile, null);
@@ -129,7 +128,7 @@ public class ConvertClassFileProcessor implements Processor {
         Map<String, TypeArgument> bindings;
         Map<String, BaseType> typeBounds;
 
-        if (((classFile.getAccessFlags() & ACC_STATIC) == 0) && (outerClassFileBodyDeclaration != null)) {
+        if (!classFile.matchAccessFlags(ACC_STATIC) && (outerClassFileBodyDeclaration != null)) {
             bindings = outerClassFileBodyDeclaration.getBindings();
             typeBounds = outerClassFileBodyDeclaration.getTypeBounds();
         } else {
@@ -228,7 +227,7 @@ public class ConvertClassFileProcessor implements Processor {
                             bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
                             methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptionTypes, defaultAnnotationValue,
                             bindings, typeBounds, firstLineNumber);
-                    if ((classFile.getAccessFlags() & Constants.ACC_INTERFACE) != 0) {
+                    if (classFile.matchAccessFlags(ACC_INTERFACE)) {
                         if (methodDeclaration.getFlags() == Constants.ACC_PUBLIC) {
                             // For interfaces, add 'default' access flag on public methods
                             methodDeclaration.setFlags(Declaration.FLAG_PUBLIC|Declaration.FLAG_DEFAULT);
@@ -251,14 +250,13 @@ public class ConvertClassFileProcessor implements Processor {
             DefaultList<ClassFileTypeDeclaration> list = new DefaultList<>(innerClassFiles.size());
 
             for (ClassFile innerClassFile : innerClassFiles) {
-                int flags = innerClassFile.getAccessFlags();
                 ClassFileTypeDeclaration innerTypeDeclaration;
 
-                if ((flags & Constants.ACC_ENUM) != 0) {
+                if (innerClassFile.matchAccessFlags(ACC_ENUM)) {
                     innerTypeDeclaration = convertEnumDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
-                } else if ((flags & Constants.ACC_ANNOTATION) != 0) {
+                } else if (innerClassFile.matchAccessFlags(ACC_ANNOTATION)) {
                     innerTypeDeclaration = convertAnnotationDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
-                } else if ((flags & Constants.ACC_INTERFACE) != 0) {
+                } else if (innerClassFile.matchAccessFlags(ACC_INTERFACE)) {
                     innerTypeDeclaration = convertInterfaceDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
                 } else {
                     innerTypeDeclaration = convertClassDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);

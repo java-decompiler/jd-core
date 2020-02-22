@@ -52,6 +52,9 @@ public class ClassFile {
     public void setAccessFlags(int accessFlags) {
         this.accessFlags = accessFlags;
     }
+    public boolean matchAccessFlags(int flags) {
+        return (this.accessFlags & flags) != 0;
+    }
 
     public String getInternalTypeName() {
         return internalTypeName;

@@ -101,7 +101,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
                     if (expression.isConstructorInvocationExpression()) {
                         // 'this(...)'
-                        if ((outerClassFile != null) && ((classFile.getAccessFlags() & ACC_STATIC) == 0)) {
+                        if ((outerClassFile != null) && !classFile.matchAccessFlags(ACC_STATIC)) {
                             // Inner non-static class --> First parameter is the synthetic outer reference
                             outerType = (ObjectType) cfcd.getParameterTypes().getFirst();
                         }
@@ -520,7 +520,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 // Remove outer 'this' reference parameter
                 Type firstParameterType = parameters.getFirst().getType();
 
-                if (firstParameterType.isObjectType() && ((classFile.getAccessFlags() & ACC_STATIC) == 0) && (bodyDeclaration.getOuterType() != null)) {
+                if (firstParameterType.isObjectType() && !classFile.matchAccessFlags(ACC_STATIC) && (bodyDeclaration.getOuterType() != null)) {
                     TypeMaker.TypeTypes superTypeTypes = typeMaker.makeTypeTypes(classFile.getSuperTypeName());
 
                     if ((superTypeTypes != null) && superTypeTypes.thisType.isInnerObjectType()) {

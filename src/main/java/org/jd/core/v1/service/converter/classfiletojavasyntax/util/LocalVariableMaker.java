@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import static org.jd.core.v1.model.classfile.Constants.ACC_ENUM;
+import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
 import static org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration.*;
 
 public class LocalVariableMaker {
@@ -103,7 +105,7 @@ public class LocalVariableMaker {
         }
 
         if (constructor) {
-            if ((classFile.getAccessFlags() & FLAG_ENUM) != 0) {
+            if (classFile.matchAccessFlags(ACC_ENUM)) {
                 if (localVariableSet.root(1) == null) {
                     // Local variable missing
                     localVariableSet.add(1, new ObjectLocalVariable(typeMaker, 1, 0, ObjectType.TYPE_STRING, "this$enum$name"));
@@ -112,7 +114,7 @@ public class LocalVariableMaker {
                     // Local variable missing
                     localVariableSet.add(2, new PrimitiveLocalVariable(2, 0, PrimitiveType.TYPE_INT, "this$enum$index"));
                 }
-            } else if ((classFile.getOuterClassFile() != null) && ((classFile.getAccessFlags() & FLAG_STATIC) == 0)) {
+            } else if ((classFile.getOuterClassFile() != null) && !classFile.matchAccessFlags(ACC_STATIC)) {
                 if (localVariableSet.root(1) == null) {
                     // Local variable missing
                     localVariableSet.add(1, new ObjectLocalVariable(typeMaker, 1, 0, typeMaker.makeFromInternalTypeName(classFile.getOuterClassFile().getInternalTypeName()), "this$0"));
