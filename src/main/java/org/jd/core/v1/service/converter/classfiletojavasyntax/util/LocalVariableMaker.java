@@ -45,9 +45,10 @@ public class LocalVariableMaker {
     protected CreateLocalVariableVisitor createLocalVariableVisitor;
 
     @SuppressWarnings("unchecked")
-    public LocalVariableMaker(TypeMaker typeMaker, ClassFileConstructorOrMethodDeclaration comd, boolean constructor, BaseType parameterTypes) {
+    public LocalVariableMaker(TypeMaker typeMaker, ClassFileConstructorOrMethodDeclaration comd, boolean constructor) {
         ClassFile classFile = comd.getClassFile();
         Method method = comd.getMethod();
+        BaseType parameterTypes = comd.getParameterTypes();
 
         this.typeMaker = typeMaker;
         this.typeBounds = comd.getTypeBounds();

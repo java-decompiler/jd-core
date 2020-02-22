@@ -87,65 +87,57 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        ClassFileConstructorOrMethodDeclaration comd = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comd, true, comd.getParameterTypes());
-
-        createParametersVariablesAndStatements(comd, localVariableMaker);
+        createParametersVariablesAndStatements((ClassFileConstructorOrMethodDeclaration)declaration, true);
     }
 
     @Override
     public void visit(MethodDeclaration declaration) {
-        ClassFileConstructorOrMethodDeclaration comd = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comd, false, comd.getParameterTypes());
-
-        createParametersVariablesAndStatements(comd, localVariableMaker);
+        createParametersVariablesAndStatements((ClassFileConstructorOrMethodDeclaration)declaration, false);
     }
 
     @Override
     public void visit(StaticInitializerDeclaration declaration) {
-        ClassFileConstructorOrMethodDeclaration comd = (ClassFileConstructorOrMethodDeclaration)declaration;
-        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comd, false, null);
-
-        createParametersVariablesAndStatements(comd, localVariableMaker);
+        createParametersVariablesAndStatements((ClassFileConstructorOrMethodDeclaration)declaration, false);
     }
 
-    protected void createParametersVariablesAndStatements(ClassFileConstructorOrMethodDeclaration comd, LocalVariableMaker localVariableMaker) {
+    protected void createParametersVariablesAndStatements(ClassFileConstructorOrMethodDeclaration comd, boolean constructor) {
         ClassFile classFile = comd.getClassFile();
-        ClassFileBodyDeclaration bodyDeclaration = comd.getBodyDeclaration();
         Method method = comd.getMethod();
-        StatementMaker statementMaker = new StatementMaker(typeMaker, localVariableMaker, classFile, bodyDeclaration, comd);
+        AttributeCode attributeCode = method.getAttribute("Code");
+        LocalVariableMaker localVariableMaker = new LocalVariableMaker(typeMaker, comd, constructor);
 
-        try {
-            ControlFlowGraph cfg = ControlFlowGraphMaker.make(method);
+        if (attributeCode == null) {
+            localVariableMaker.make(false, typeMaker);
+        } else {
+            StatementMaker statementMaker = new StatementMaker(typeMaker, localVariableMaker, comd);
+            boolean containsLineNumber = (attributeCode.getAttribute("LineNumberTable") != null);
 
-            if (cfg != null) {
-                ControlFlowGraphGotoReducer.reduce(cfg);
-                ControlFlowGraphLoopReducer.reduce(cfg);
+            try {
+                ControlFlowGraph cfg = ControlFlowGraphMaker.make(method);
 
-                if (ControlFlowGraphReducer.reduce(cfg)) {
-                    comd.setStatements(statementMaker.make(cfg));
-                } else {
-                    comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
+                if (cfg != null) {
+                    ControlFlowGraphGotoReducer.reduce(cfg);
+                    ControlFlowGraphLoopReducer.reduce(cfg);
+
+                    if (ControlFlowGraphReducer.reduce(cfg)) {
+                        comd.setStatements(statementMaker.make(cfg));
+                    } else {
+                        comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
+                    }
                 }
+            } catch (Exception e) {
+                assert ExceptionUtil.printStackTrace(e);
+                comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
             }
-        } catch (Exception e) {
-            assert ExceptionUtil.printStackTrace(e);
-            comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
+
+            localVariableMaker.make(containsLineNumber, typeMaker);
         }
+
+        comd.setFormalParameters(localVariableMaker.getFormalParameters());
 
         if ((classFile.getAccessFlags() & FLAG_INTERFACE) != 0) {
             comd.setFlags(comd.getFlags() & ~(FLAG_PUBLIC|FLAG_ABSTRACT));
         }
-
-        boolean containsLineNumber = false;
-        AttributeCode attributeCode = method.getAttribute("Code");
-
-        if (attributeCode != null) {
-            containsLineNumber = (attributeCode.getAttribute("LineNumberTable") != null);
-        }
-
-        localVariableMaker.make(containsLineNumber, typeMaker);
-        comd.setFormalParameters(localVariableMaker.getFormalParameters());
     }
 
     @Override

@@ -61,16 +61,16 @@ public class StatementMaker {
     protected boolean removeFinallyStatementsFlag = false;
     protected boolean mergeTryWithResourcesStatementFlag = false;
 
-    public StatementMaker(
-            TypeMaker typeMaker, LocalVariableMaker localVariableMaker,
-            ClassFile classFile, ClassFileBodyDeclaration bodyDeclaration, ClassFileConstructorOrMethodDeclaration comd) {
+    public StatementMaker(TypeMaker typeMaker, LocalVariableMaker localVariableMaker, ClassFileConstructorOrMethodDeclaration comd) {
+        ClassFile classFile = comd.getClassFile();
+
         this.typeMaker = typeMaker;
         this.typeBounds = comd.getTypeBounds();
         this.localVariableMaker = localVariableMaker;
         this.majorVersion = classFile.getMajorVersion();
         this.internalTypeName = classFile.getInternalTypeName();
-        this.bodyDeclaration = bodyDeclaration;
-        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, classFile, bodyDeclaration, comd);
+        this.bodyDeclaration = comd.getBodyDeclaration();
+        this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, classFile, this.bodyDeclaration, comd);
         this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor(localVariableMaker);
         this.removeBinaryOpReturnStatementsVisitor = new RemoveBinaryOpReturnStatementsVisitor(localVariableMaker);
         this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(comd.getReturnedType());
