@@ -637,7 +637,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
             iterator.next().accept(this);
     }
 
-    protected void visit(TypeDeclaration declaration) {
+    public void visit(TypeDeclaration declaration) {
         safeAccept(declaration.getAnnotationReferences());
     }
 
@@ -653,64 +653,64 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
         }
     }
 
-    protected void acceptListDeclaration(List<? extends Declaration> list) {
+    public void acceptListDeclaration(List<? extends Declaration> list) {
         for (Declaration declaration : list)
             declaration.accept(this);
     }
 
-    protected void acceptListExpression(List<? extends Expression> list) {
+    public void acceptListExpression(List<? extends Expression> list) {
         for (Expression expression : list)
             expression.accept(this);
     }
 
-    protected void acceptListReference(List<? extends Reference> list) {
+    public void acceptListReference(List<? extends Reference> list) {
         for (Reference reference : list)
             reference.accept(this);
     }
 
-    protected void acceptListStatement(List<? extends Statement> list) {
+    public void acceptListStatement(List<? extends Statement> list) {
         for (Statement statement : list)
             statement.accept(this);
     }
 
-    protected void safeAccept(Declaration declaration) {
+    public void safeAccept(Declaration declaration) {
         if (declaration != null)
             declaration.accept(this);
     }
 
-    protected void safeAccept(BaseExpression expression) {
+    public void safeAccept(BaseExpression expression) {
         if (expression != null)
             expression.accept(this);
     }
 
-    protected void safeAccept(Reference reference) {
+    public void safeAccept(Reference reference) {
         if (reference != null)
             reference.accept(this);
     }
 
-    protected void safeAccept(BaseStatement list) {
+    public void safeAccept(BaseStatement list) {
         if (list != null)
             list.accept(this);
     }
 
-    protected void safeAccept(BaseType list) {
+    public void safeAccept(BaseType list) {
         if (list != null)
             list.accept(this);
     }
 
-    protected void safeAccept(BaseTypeParameter list) {
+    public void safeAccept(BaseTypeParameter list) {
         if (list != null)
             list.accept(this);
     }
 
-    protected void safeAcceptListDeclaration(List<? extends Declaration> list) {
+    public void safeAcceptListDeclaration(List<? extends Declaration> list) {
         if (list != null) {
             for (Declaration declaration : list)
                 declaration.accept(this);
         }
     }
 
-    protected void safeAcceptListStatement(List<? extends Statement> list) {
+    public void safeAcceptListStatement(List<? extends Statement> list) {
         if (list != null) {
             for (Statement statement : list)
                 statement.accept(this);

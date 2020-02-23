@@ -191,7 +191,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         statementCount = 2;
     }
 
-    protected void acceptListStatement(List<? extends Statement> list) {
+    public void acceptListStatement(List<? extends Statement> list) {
         int size = list.size();
 
         switch (size) {
@@ -214,7 +214,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    protected void safeAcceptListStatement(List<? extends Statement> list) {
+    public void safeAcceptListStatement(List<? extends Statement> list) {
         if (list == null) {
             minLineNumber = maxLineNumber = 0;
         } else {
@@ -284,7 +284,7 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    protected void acceptListExpression(List<? extends Expression> list) {
+    public void acceptListExpression(List<? extends Expression> list) {
         int size = list.size();
 
         if (size == 0) {

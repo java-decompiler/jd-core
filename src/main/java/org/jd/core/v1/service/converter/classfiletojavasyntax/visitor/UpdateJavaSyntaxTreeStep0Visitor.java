@@ -9,18 +9,24 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class UpdateJavaSyntaxTreeStep0Visitor extends AbstractJavaSyntaxVisitor {
-    protected UpdateOuterFieldTypeVisitor updateSyntheticMemberVisitor;
+    protected UpdateOuterFieldTypeVisitor updateOuterFieldTypeVisitor;
 
     public UpdateJavaSyntaxTreeStep0Visitor(TypeMaker typeMaker) {
-        updateSyntheticMemberVisitor = new UpdateOuterFieldTypeVisitor(typeMaker);
+        updateOuterFieldTypeVisitor = new UpdateOuterFieldTypeVisitor(typeMaker);
     }
 
     @Override
     public void visit(BodyDeclaration declaration) {
-        updateSyntheticMemberVisitor.visit(declaration);
+        ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
+        boolean genericTypesSupported = (bodyDeclaration.getClassFile().getMajorVersion() >= 49); // (majorVersion >= Java 5)
+
+        if (genericTypesSupported) {
+            updateOuterFieldTypeVisitor.safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
+        }
     }
 
     @Override

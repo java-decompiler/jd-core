@@ -37,12 +37,12 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
-        boolean genericTypesSupported = (bodyDeclaration.getClassFile().getMajorVersion() >= 49); // (majorVersion >= Java 5)
 
-        if (genericTypesSupported) {
+        if (!bodyDeclaration.getClassFile().matchAccessFlags(ACC_STATIC)) {
             safeAcceptListDeclaration(bodyDeclaration.getMethodDeclarations());
-            safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
         }
+
+        safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
     }
 
     @Override
