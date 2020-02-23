@@ -11,7 +11,6 @@ import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.declaration.BaseMemberDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import org.jd.core.v1.util.DefaultList;
 
@@ -27,7 +26,7 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     protected List<ClassFileTypeDeclaration> innerTypeDeclarations;
     protected Map<String, ClassFileTypeDeclaration> innerTypeMap = Collections.emptyMap();
     protected int firstLineNumber;
-    protected ObjectType outerType;
+    protected String outerTypeFieldName;
     protected DefaultList<String> syntheticInnerFieldNames;
     protected ClassFileBodyDeclaration outerBodyDeclaration;
     protected Map<String, TypeArgument> bindings;
@@ -122,12 +121,12 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
         return firstLineNumber;
     }
 
-    public ObjectType getOuterType() {
-        return outerType;
+    public String getOuterTypeFieldName() {
+        return outerTypeFieldName;
     }
 
-    public void setOuterType(ObjectType outerType) {
-        this.outerType = outerType;
+    public void setOuterTypeFieldName(String outerTypeFieldName) {
+        this.outerTypeFieldName = outerTypeFieldName;
     }
 
     public DefaultList<String> getSyntheticInnerFieldNames() {
