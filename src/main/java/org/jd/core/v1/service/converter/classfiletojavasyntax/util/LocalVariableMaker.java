@@ -105,7 +105,7 @@ public class LocalVariableMaker {
         }
 
         if (constructor) {
-            if (classFile.matchAccessFlags(ACC_ENUM)) {
+            if (classFile.isEnum()) {
                 if (localVariableSet.root(1) == null) {
                     // Local variable missing
                     localVariableSet.add(1, new ObjectLocalVariable(typeMaker, 1, 0, ObjectType.TYPE_STRING, "this$enum$name"));
@@ -114,7 +114,7 @@ public class LocalVariableMaker {
                     // Local variable missing
                     localVariableSet.add(2, new PrimitiveLocalVariable(2, 0, PrimitiveType.TYPE_INT, "this$enum$index"));
                 }
-            } else if ((classFile.getOuterClassFile() != null) && !classFile.matchAccessFlags(ACC_STATIC)) {
+            } else if ((classFile.getOuterClassFile() != null) && !classFile.isStatic()) {
                 if (localVariableSet.root(1) == null) {
                     // Local variable missing
                     localVariableSet.add(1, new ObjectLocalVariable(typeMaker, 1, 0, typeMaker.makeFromInternalTypeName(classFile.getOuterClassFile().getInternalTypeName()), "this$0"));

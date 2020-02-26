@@ -21,7 +21,6 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
 
 import java.util.List;
 
-import static org.jd.core.v1.model.classfile.Constants.ACC_INTERFACE;
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
 
 public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
@@ -136,7 +135,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
 
         comd.setFormalParameters(localVariableMaker.getFormalParameters());
 
-        if (classFile.matchAccessFlags(ACC_INTERFACE)) {
+        if (classFile.isInterface()) {
             comd.setFlags(comd.getFlags() & ~(FLAG_PUBLIC|FLAG_ABSTRACT));
         }
     }

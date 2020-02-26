@@ -12,6 +12,8 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 
+import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
+
 public class ConstructorDeclaration implements MemberDeclaration {
     protected BaseAnnotationReference annotationReferences;
     protected int flags;
@@ -41,10 +43,11 @@ public class ConstructorDeclaration implements MemberDeclaration {
     public int getFlags() {
         return flags;
     }
-
     public void setFlags(int flags) {
         this.flags = flags;
     }
+
+    public boolean isStatic() { return (flags & ACC_STATIC) != 0; }
 
     public BaseAnnotationReference getAnnotationReferences() {
         return annotationReferences;

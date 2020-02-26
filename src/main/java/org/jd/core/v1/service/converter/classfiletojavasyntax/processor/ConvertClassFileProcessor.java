@@ -62,13 +62,13 @@ public class ConvertClassFileProcessor implements Processor {
 
         TypeDeclaration typeDeclaration;
 
-        if (classFile.matchAccessFlags(ACC_ENUM)) {
+        if (classFile.isEnum()) {
             typeDeclaration = convertEnumDeclaration(typeMaker, annotationConverter, classFile, null);
-        } else if (classFile.matchAccessFlags(ACC_ANNOTATION)) {
+        } else if (classFile.isAnnotation()) {
             typeDeclaration = convertAnnotationDeclaration(typeMaker, annotationConverter, classFile, null);
-        } else if (classFile.matchAccessFlags(ACC_MODULE)) {
+        } else if (classFile.isModule()) {
             typeDeclaration = convertModuleDeclaration(classFile);
-        } else if (classFile.matchAccessFlags(ACC_INTERFACE)) {
+        } else if (classFile.isInterface()) {
             typeDeclaration = convertInterfaceDeclaration(typeMaker, annotationConverter, classFile, null);
         } else {
             typeDeclaration = convertClassDeclaration(typeMaker, annotationConverter, classFile, null);
@@ -128,7 +128,7 @@ public class ConvertClassFileProcessor implements Processor {
         Map<String, TypeArgument> bindings;
         Map<String, BaseType> typeBounds;
 
-        if (!classFile.matchAccessFlags(ACC_STATIC) && (outerClassFileBodyDeclaration != null)) {
+        if (!classFile.isStatic() && (outerClassFileBodyDeclaration != null)) {
             bindings = outerClassFileBodyDeclaration.getBindings();
             typeBounds = outerClassFileBodyDeclaration.getTypeBounds();
         } else {
@@ -227,7 +227,7 @@ public class ConvertClassFileProcessor implements Processor {
                             bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
                             methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptionTypes, defaultAnnotationValue,
                             bindings, typeBounds, firstLineNumber);
-                    if (classFile.matchAccessFlags(ACC_INTERFACE)) {
+                    if (classFile.isInterface()) {
                         if (methodDeclaration.getFlags() == Constants.ACC_PUBLIC) {
                             // For interfaces, add 'default' access flag on public methods
                             methodDeclaration.setFlags(Declaration.FLAG_PUBLIC|Declaration.FLAG_DEFAULT);
@@ -252,11 +252,11 @@ public class ConvertClassFileProcessor implements Processor {
             for (ClassFile innerClassFile : innerClassFiles) {
                 ClassFileTypeDeclaration innerTypeDeclaration;
 
-                if (innerClassFile.matchAccessFlags(ACC_ENUM)) {
+                if (innerClassFile.isEnum()) {
                     innerTypeDeclaration = convertEnumDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
-                } else if (innerClassFile.matchAccessFlags(ACC_ANNOTATION)) {
+                } else if (innerClassFile.isAnnotation()) {
                     innerTypeDeclaration = convertAnnotationDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
-                } else if (innerClassFile.matchAccessFlags(ACC_INTERFACE)) {
+                } else if (innerClassFile.isInterface()) {
                     innerTypeDeclaration = convertInterfaceDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);
                 } else {
                     innerTypeDeclaration = convertClassDeclaration(parser, converter, innerClassFile, outerClassFileBodyDeclaration);

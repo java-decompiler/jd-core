@@ -14,6 +14,8 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
+import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
+
 public class MethodDeclaration implements MemberDeclaration {
     protected BaseAnnotationReference annotationReferences;
     protected int flags;
@@ -87,6 +89,8 @@ public class MethodDeclaration implements MemberDeclaration {
     public int getFlags() {
         return flags;
     }
+
+    public boolean isStatic() { return (flags & ACC_STATIC) != 0; }
 
     public String getName() {
         return name;

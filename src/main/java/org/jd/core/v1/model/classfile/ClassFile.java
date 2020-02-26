@@ -13,6 +13,8 @@ import org.jd.core.v1.model.classfile.attribute.Attribute;
 import java.util.List;
 import java.util.Map;
 
+import static org.jd.core.v1.model.classfile.Constants.*;
+
 public class ClassFile {
     protected int majorVersion;
     protected int minorVersion;
@@ -39,12 +41,8 @@ public class ClassFile {
         this.attributes = attributes;
     }
 
-    public int getMinorVersion() {
-        return minorVersion;
-    }
-    public int getMajorVersion() {
-        return majorVersion;
-    }
+    public int getMinorVersion() { return minorVersion; }
+    public int getMajorVersion() { return majorVersion; }
 
     public int getAccessFlags() {
         return accessFlags;
@@ -52,9 +50,12 @@ public class ClassFile {
     public void setAccessFlags(int accessFlags) {
         this.accessFlags = accessFlags;
     }
-    public boolean matchAccessFlags(int flags) {
-        return (this.accessFlags & flags) != 0;
-    }
+
+    public boolean isEnum()       { return (accessFlags & ACC_ENUM) != 0; }
+    public boolean isAnnotation() { return (accessFlags & ACC_ANNOTATION) != 0; }
+    public boolean isInterface()  { return (accessFlags & ACC_INTERFACE) != 0; }
+    public boolean isModule()     { return (accessFlags & ACC_MODULE) != 0; }
+    public boolean isStatic()     { return (accessFlags & ACC_STATIC) != 0; }
 
     public String getInternalTypeName() {
         return internalTypeName;
