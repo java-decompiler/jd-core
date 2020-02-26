@@ -59,7 +59,7 @@ public class StringConcatenationUtil {
             }
         }
 
-        return new ClassFileMethodInvocationExpression(null, lineNumber, null, ObjectType.TYPE_STRING, expression, typeName, "toString", "()Ljava/lang/String;", null, null);
+        return new ClassFileMethodInvocationExpression(lineNumber, null, ObjectType.TYPE_STRING, expression, typeName, "toString", "()Ljava/lang/String;", null, null);
     }
 
     public static Expression create(String recipe, BaseExpression parameters) {

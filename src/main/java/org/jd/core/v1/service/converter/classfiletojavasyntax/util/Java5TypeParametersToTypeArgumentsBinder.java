@@ -55,7 +55,9 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
 
         Map<String, TypeArgument> bindings = new HashMap<>();
         BaseType parameterTypes = clone(methodTypes.parameterTypes);
-        populateBindings(bindings, null, null, null, methodTypes.typeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
+        BaseTypeParameter methodTypeParameters = methodTypes.typeParameters;
+
+        populateBindings(bindings, null, null, null, methodTypeParameters, TYPE_OBJECT, null, null, null);
 
         parameterTypes = bind(bindings, parameterTypes);
         bindParameters(parameterTypes, parameters);
@@ -81,7 +83,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
                 BaseTypeArgument typeArguments = typeTypes.superType.getTypeArguments();
                 BaseTypeParameter methodTypeParameters = methodTypes.typeParameters;
 
-                populateBindings(bindings, null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, parameterTypes, parameters);
+                populateBindings(bindings, null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, null, null);
             }
         }
 
@@ -96,7 +98,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
             int lineNumber, Expression expression, ObjectType objectType, String name, String descriptor,
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
         return new ClassFileMethodInvocationExpression(
-            this, lineNumber, methodTypes.typeParameters, methodTypes.returnedType, expression,
+            lineNumber, methodTypes.typeParameters, methodTypes.returnedType, expression,
             objectType.getInternalName(), name, descriptor, clone(methodTypes.parameterTypes), parameters);
     }
 
@@ -114,20 +116,20 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
                     ObjectType ot = (ObjectType) type;
 
                     if (ot.getTypeArguments() != null) {
-                        Map<String, TypeArgument> bindings;
                         TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(expressionObjectType.getInternalName());
 
                         if (typeTypes == null) {
-                            bindings = contextualBindings;
+                            type = (Type)bind(contextualBindings, type);
                         } else {
-                            bindings = new HashMap<>();
+                            Map<String, TypeArgument> bindings = new HashMap<>();
                             BaseTypeParameter typeParameters = typeTypes.typeParameters;
                             BaseTypeArgument typeArguments = expressionObjectType.getTypeArguments();
+                            boolean partialBinding = populateBindings(bindings, expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
 
-                            populateBindings(bindings, expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
+                            if (!partialBinding) {
+                                type = (Type) bind(bindings, type);
+                            }
                         }
-
-                        type = (Type)bind(bindings, type);
                     }
                 }
             }
@@ -381,7 +383,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
 
                     if (exp.isSuperExpression()) {
                         typeTypes = typeMaker.makeTypeTypes(internalTypeName);
-                        typeArguments = (typeTypes.superType == null) ? null : typeTypes.superType.getTypeArguments();
+                        typeArguments = (typeTypes == null || typeTypes.superType == null) ? null : typeTypes.superType.getTypeArguments();
                     } else if (exp.isMethodInvocationExpression()) {
                         Type t = getExpressionType((ClassFileMethodInvocationExpression) exp);
                         if ((t != null) && t.isObjectType()) {

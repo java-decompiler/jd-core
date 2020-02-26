@@ -1228,6 +1228,10 @@ public class TypeMaker {
         return type;
     }
 
+    public void setMethodReturnedType(String internalTypeName, String methodName, String descriptor, Type type) {
+        makeMethodTypes(internalTypeName, methodName, descriptor).returnedType = type;
+    }
+
     public MethodTypes makeMethodTypes(String descriptor) {
         return parseMethodSignature(descriptor, null);
     }

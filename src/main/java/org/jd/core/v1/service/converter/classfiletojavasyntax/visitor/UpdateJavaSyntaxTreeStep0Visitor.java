@@ -14,9 +14,11 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class UpdateJavaSyntaxTreeStep0Visitor extends AbstractJavaSyntaxVisitor {
     protected UpdateOuterFieldTypeVisitor updateOuterFieldTypeVisitor;
+    protected UpdateBridgeMethodTypeVisitor updateBridgeMethodTypeVisitor;
 
     public UpdateJavaSyntaxTreeStep0Visitor(TypeMaker typeMaker) {
-        updateOuterFieldTypeVisitor = new UpdateOuterFieldTypeVisitor(typeMaker);
+        this.updateOuterFieldTypeVisitor = new UpdateOuterFieldTypeVisitor(typeMaker);
+        this.updateBridgeMethodTypeVisitor = new UpdateBridgeMethodTypeVisitor(typeMaker);
     }
 
     @Override
@@ -26,6 +28,7 @@ public class UpdateJavaSyntaxTreeStep0Visitor extends AbstractJavaSyntaxVisitor 
 
         if (genericTypesSupported) {
             updateOuterFieldTypeVisitor.safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
+            updateBridgeMethodTypeVisitor.visit(declaration);
         }
     }
 

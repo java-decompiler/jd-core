@@ -29,7 +29,7 @@ public class JavaTypeParametersToTypeArgumentsBinder extends AbstractTypeParamet
             int lineNumber, Expression expression, ObjectType objectType, String name, String descriptor,
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
         return new ClassFileMethodInvocationExpression(
-            this, lineNumber, methodTypes.typeParameters, methodTypes.returnedType, expression,
+            lineNumber, methodTypes.typeParameters, methodTypes.returnedType, expression,
             objectType.getInternalName(), name, descriptor, clone(methodTypes.parameterTypes), parameters);
     }
 

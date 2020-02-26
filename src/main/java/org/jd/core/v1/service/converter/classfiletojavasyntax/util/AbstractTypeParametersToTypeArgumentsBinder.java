@@ -33,17 +33,6 @@ public abstract class AbstractTypeParametersToTypeArgumentsBinder {
         ne.set(descriptor, clone(methodTypes.parameterTypes), parameters);
     }
 
-    public static void staticBindParameterTypesWithArgumentTypes(Type type, Expression expression) {
-        if (expression.isMethodInvocationExpression()) {
-            ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression)expression;
-            AbstractTypeParametersToTypeArgumentsBinder binder = mie.getBinder();
-
-            if (binder != null) {
-                binder.bindParameterTypesWithArgumentTypes(type, mie);
-            }
-        }
-    }
-
     protected static BaseType clone(BaseType parameterTypes) {
         if ((parameterTypes != null) && parameterTypes.isList()) {
             switch (parameterTypes.size()) {
