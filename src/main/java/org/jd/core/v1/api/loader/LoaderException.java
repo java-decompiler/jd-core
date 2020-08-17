@@ -15,4 +15,6 @@ public class LoaderException extends Exception {
     public LoaderException(String msg) { super(msg); }
 
     public LoaderException(Throwable cause) { super(cause); }
+
+    public LoaderException(String msg, Throwable cause) { super(msg, cause); }
 }
