@@ -9,6 +9,7 @@ package org.jd.core.v1.model.message;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.jd.core.v1.api.loader.Loader;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class DecompileContext {
     protected String mainInternalTypeName;
     protected Map<String, Object> configuration = new HashMap<>();
+    protected Loader loader;
 
     @Deprecated
     protected HashMap<String, Object> headers = new HashMap<>();

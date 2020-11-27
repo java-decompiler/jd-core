@@ -29,7 +29,7 @@ public class ClassFileToJavaSyntaxProcessor implements Processor {
     protected static final UpdateJavaSyntaxTreeProcessor UPDATE_JAVA_SYNTAX_TREE_PROCESSOR = new UpdateJavaSyntaxTreeProcessor();
 
     public void process(DecompileContext decompileContext) throws Exception {
-        Loader loader = decompileContext.getHeader("loader");
+        Loader loader = decompileContext.getLoader();
         Map<String, Object> configuration = decompileContext.getConfiguration();
 
         if (configuration == null) {

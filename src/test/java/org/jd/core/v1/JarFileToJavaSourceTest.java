@@ -147,7 +147,7 @@ public class JarFileToJavaSourceTest extends TestCase {
             configuration.put("realignLineNumbers", Boolean.TRUE);
 
             DecompileContext decompileContext = new DecompileContext();
-            decompileContext.setHeader("loader", loader);
+            decompileContext.setLoader(loader);
             decompileContext.setHeader("printer", printer);
             decompileContext.setConfiguration(configuration);
 

@@ -79,7 +79,7 @@ public class CfrTest extends TestCase {
 
     protected String decompile(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("loader", loader);
+        decompileContext.setLoader(loader);
         decompileContext.setHeader("printer", printer);
         decompileContext.setHeader("mainInternalTypeName", internalTypeName);
         decompileContext.setConfiguration(configuration);

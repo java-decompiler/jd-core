@@ -24,7 +24,7 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.Search
 public class JavaSyntaxToJavaFragmentProcessor implements Processor {
 
     public void process(DecompileContext decompileContext) throws Exception {
-        Loader loader = decompileContext.getHeader("loader");
+        Loader loader = decompileContext.getLoader();
         String mainInternalTypeName = decompileContext.getMainInternalTypeName();
         int majorVersion = decompileContext.getHeader("majorVersion");
         CompilationUnit compilationUnit = decompileContext.getBody();

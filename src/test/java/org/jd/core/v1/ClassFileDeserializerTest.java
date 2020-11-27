@@ -59,7 +59,7 @@ public class ClassFileDeserializerTest extends TestCase {
 
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
-        decompileContext.setHeader("loader", loader);
+        decompileContext.setLoader(loader);
 
         deserializer.process(decompileContext);
 

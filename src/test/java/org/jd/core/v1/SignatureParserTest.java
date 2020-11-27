@@ -33,7 +33,7 @@ public class SignatureParserTest extends TestCase {
 
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
-        decompileContext.setHeader("loader", loader);
+        decompileContext.setLoader(loader);
 
         deserializer.process(decompileContext);
 
@@ -151,7 +151,7 @@ public class SignatureParserTest extends TestCase {
 
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/GenericClass");
-        decompileContext.setHeader("loader", loader);
+        decompileContext.setLoader(loader);
 
         deserializer.process(decompileContext);
 
