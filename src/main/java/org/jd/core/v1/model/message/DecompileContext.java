@@ -26,6 +26,7 @@ public class DecompileContext {
 
     protected TypeMaker typeMaker;
     protected int majorVersion;
+    protected int minorVersion;
 
     @Deprecated
     protected HashMap<String, Object> headers = new HashMap<>();

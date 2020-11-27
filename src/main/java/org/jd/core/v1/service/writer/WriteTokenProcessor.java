@@ -30,7 +30,7 @@ public class WriteTokenProcessor implements Processor {
         PrintTokenVisitor visitor = new PrintTokenVisitor();
         int maxLineNumber = decompileContext.getHeader("maxLineNumber");
         int majorVersion = decompileContext.getMajorVersion();
-        int minorVersion = decompileContext.getHeader("minorVersion");
+        int minorVersion = decompileContext.getMinorVersion();
 
         printer.start(maxLineNumber, majorVersion, minorVersion);
         visitor.start(printer, tokens);

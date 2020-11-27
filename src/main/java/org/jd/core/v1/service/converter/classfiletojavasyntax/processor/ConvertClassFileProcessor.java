@@ -75,7 +75,7 @@ public class ConvertClassFileProcessor implements Processor {
         }
 
         decompileContext.setMajorVersion(classFile.getMajorVersion());
-        decompileContext.setHeader("minorVersion", classFile.getMinorVersion());
+        decompileContext.setMinorVersion(classFile.getMinorVersion());
         decompileContext.setBody(new CompilationUnit(typeDeclaration));
     }
 

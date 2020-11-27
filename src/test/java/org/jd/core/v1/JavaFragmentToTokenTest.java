@@ -60,7 +60,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -83,7 +83,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 3);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -108,7 +108,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 4);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -131,7 +131,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -154,7 +154,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 3);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -180,7 +180,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 5);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -204,7 +204,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -225,7 +225,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -248,7 +248,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 1);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -272,7 +272,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 2);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -296,7 +296,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 3);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -322,7 +322,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 4);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -348,7 +348,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 5);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -373,7 +373,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 6);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -397,7 +397,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 7);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -424,7 +424,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 8);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -451,7 +451,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 9);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -479,7 +479,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 10);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -506,7 +506,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 3);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -531,7 +531,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 4);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -554,7 +554,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 8);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -581,7 +581,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 9);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -609,7 +609,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 10);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -640,7 +640,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 11);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -671,7 +671,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 12);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -702,7 +702,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 14);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -730,7 +730,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 22);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -751,7 +751,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -774,7 +774,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 44);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -797,7 +797,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 66);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -820,7 +820,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 8);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -843,7 +843,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 16);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
@@ -866,7 +866,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 22);
         decompileContext.setMajorVersion(0);
-        decompileContext.setHeader("minorVersion", 0);
+        decompileContext.setMinorVersion(0);
 
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
