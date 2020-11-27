@@ -32,7 +32,7 @@ public class AnnotationConverterTest extends TestCase {
         DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/AnnotatedClass");
         decompileContext.setLoader(loader);
 
         deserializer.process(decompileContext);

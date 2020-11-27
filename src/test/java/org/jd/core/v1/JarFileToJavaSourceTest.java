@@ -160,7 +160,7 @@ public class JarFileToJavaSourceTest extends TestCase {
                     // TODO DEBUG if (!internalTypeName.endsWith("/Debug")) continue;
                     //if (!internalTypeName.endsWith("/MapUtils")) continue;
 
-                    decompileContext.setHeader("mainInternalTypeName", internalTypeName);
+                    decompileContext.setMainInternalTypeName(internalTypeName);
                     printer.init();
 
                     fileCounter++;

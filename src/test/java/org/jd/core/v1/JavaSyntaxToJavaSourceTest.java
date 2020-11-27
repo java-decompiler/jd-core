@@ -142,7 +142,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
         DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/TokenWriterTest");
+        decompileContext.setMainInternalTypeName("org/jd/core/v1/service/test/TokenWriterTest");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
@@ -183,7 +183,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/InterfaceTest");
+        decompileContext.setMainInternalTypeName("org/jd/core/v1/service/test/InterfaceTest");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setMaxLineNumber(0);
@@ -233,7 +233,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/Day");
+        decompileContext.setMainInternalTypeName("org/jd/core/v1/service/test/Day");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setMaxLineNumber(0);
@@ -517,7 +517,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/Planet");
+        decompileContext.setMainInternalTypeName("org/jd/core/v1/service/test/Planet");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setMaxLineNumber(0);
@@ -586,7 +586,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/SwitchTest");
+        decompileContext.setMainInternalTypeName("org/jd/core/v1/service/test/SwitchTest");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setMaxLineNumber(0);
@@ -642,7 +642,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/SyntheticAttributeTest");
+        decompileContext.setMainInternalTypeName("org/jd/core/v1/service/test/SyntheticAttributeTest");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setMaxLineNumber(0);

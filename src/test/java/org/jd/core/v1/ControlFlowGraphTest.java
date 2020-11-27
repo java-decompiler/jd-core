@@ -2652,7 +2652,7 @@ public class ControlFlowGraphTest extends TestCase {
 
     protected Method searchMethod(Loader loader, TypeMaker typeMaker, String internalTypeName, String methodName, String methodDescriptor) throws Exception {
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", internalTypeName);
+        decompileContext.setMainInternalTypeName(internalTypeName);
         decompileContext.setLoader(loader);
         decompileContext.setTypeMaker(typeMaker);
 

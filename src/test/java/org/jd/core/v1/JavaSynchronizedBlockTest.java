@@ -76,7 +76,7 @@ public class JavaSynchronizedBlockTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("mainInternalTypeName", internalTypeName);
+        decompileContext.setMainInternalTypeName(internalTypeName);
         decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);

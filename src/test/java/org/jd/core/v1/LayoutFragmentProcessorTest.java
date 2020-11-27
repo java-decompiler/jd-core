@@ -44,7 +44,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Basic");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/Basic");
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
@@ -72,7 +72,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/TryCatchFinally");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/TryCatchFinally");
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
@@ -100,7 +100,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/TryCatchFinally");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/TryCatchFinally");
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
@@ -128,7 +128,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/AnonymousClass");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/AnonymousClass");
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
@@ -158,7 +158,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/OuterClass");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/OuterClass");
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
@@ -187,7 +187,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Enum");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/Enum");
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
 
@@ -217,7 +217,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/annotation/Quality");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/annotation/Quality");
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
@@ -247,7 +247,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
 
         DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Array");
+        decompileContext.setMainInternalTypeName("org/jd/core/test/Array");
         decompileContext.setLoader(loader);
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
