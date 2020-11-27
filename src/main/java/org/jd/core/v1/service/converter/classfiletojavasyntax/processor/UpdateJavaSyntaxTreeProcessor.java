@@ -9,7 +9,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.processor;
 
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep0Visitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJavaSyntaxTreeStep1Visitor;
@@ -21,9 +20,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJava
  * Input:  {@link CompilationUnit}<br>
  * Output: {@link CompilationUnit}<br>
  */
-public class UpdateJavaSyntaxTreeProcessor implements Processor {
+public class UpdateJavaSyntaxTreeProcessor {
 
-    @Override
     public void process(DecompileContext decompileContext) throws Exception {
         TypeMaker typeMaker = decompileContext.getTypeMaker();
         CompilationUnit compilationUnit = decompileContext.getBody();

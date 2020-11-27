@@ -11,7 +11,6 @@ import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.javafragment.ImportsFragment;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.CompilationUnitVisitor;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.SearchImportsVisitor;
 
@@ -21,7 +20,7 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.Search
  * Input:  {@link org.jd.core.v1.model.javasyntax.CompilationUnit}<br>
  * Output: List<{@link org.jd.core.v1.model.fragment.Fragment}><br>
  */
-public class JavaSyntaxToJavaFragmentProcessor implements Processor {
+public class JavaSyntaxToJavaFragmentProcessor {
 
     public void process(DecompileContext decompileContext) throws Exception {
         Loader loader = decompileContext.getLoader();

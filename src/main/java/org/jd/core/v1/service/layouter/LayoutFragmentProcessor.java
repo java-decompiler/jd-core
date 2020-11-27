@@ -11,7 +11,6 @@ import org.jd.core.v1.model.fragment.FixedFragment;
 import org.jd.core.v1.model.fragment.FlexibleFragment;
 import org.jd.core.v1.model.fragment.Fragment;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.layouter.model.Section;
 import org.jd.core.v1.service.layouter.util.VisitorsHolder;
 import org.jd.core.v1.service.layouter.visitor.BuildSectionsVisitor;
@@ -29,9 +28,8 @@ import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
  * Input:  List<{@link Fragment}><br>
  * Output: List<{@link Fragment}><br>
  */
-public class LayoutFragmentProcessor implements Processor {
+public class LayoutFragmentProcessor {
 
-    @Override
     public void process(DecompileContext decompileContext) throws Exception {
         int maxLineNumber = decompileContext.getMaxLineNumber();
         boolean containsByteCode = decompileContext.isContainsByteCode();

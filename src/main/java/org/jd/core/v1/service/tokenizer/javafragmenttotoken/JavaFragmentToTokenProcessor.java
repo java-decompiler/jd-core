@@ -9,7 +9,6 @@ package org.jd.core.v1.service.tokenizer.javafragmenttotoken;
 
 import org.jd.core.v1.model.javafragment.JavaFragment;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.visitor.TokenizeJavaFragmentVisitor;
 
 import java.util.List;
@@ -20,9 +19,8 @@ import java.util.List;
  * Input:  List<{@link org.jd.core.v1.model.fragment.Fragment}><br>
  * Output: List<{@link org.jd.core.v1.model.token.Token}><br>
  */
-public class JavaFragmentToTokenProcessor implements Processor {
+public class JavaFragmentToTokenProcessor {
 
-    @Override
     public void process(DecompileContext decompileContext) throws Exception {
         List<JavaFragment> fragments = decompileContext.getBody();
         TokenizeJavaFragmentVisitor visitor = new TokenizeJavaFragmentVisitor(fragments.size() * 3);

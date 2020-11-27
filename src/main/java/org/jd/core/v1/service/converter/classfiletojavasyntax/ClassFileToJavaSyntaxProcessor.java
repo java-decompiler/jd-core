@@ -9,7 +9,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.ConvertClassFileProcessor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.UpdateJavaSyntaxTreeProcessor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
@@ -24,7 +23,7 @@ import java.util.Map;
  *
  * @see ConvertClassFileProcessor
  */
-public class ClassFileToJavaSyntaxProcessor implements Processor {
+public class ClassFileToJavaSyntaxProcessor {
     protected static final ConvertClassFileProcessor CONVERT_CLASS_FILE_PROCESSOR = new ConvertClassFileProcessor();
     protected static final UpdateJavaSyntaxTreeProcessor UPDATE_JAVA_SYNTAX_TREE_PROCESSOR = new UpdateJavaSyntaxTreeProcessor();
 

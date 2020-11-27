@@ -10,7 +10,6 @@ package org.jd.core.v1.service.deserializer.classfile;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.processor.Processor;
 
 /**
  * Create a ClassFile model from a loader and a internal type name.<br><br>
@@ -18,9 +17,8 @@ import org.jd.core.v1.model.processor.Processor;
  * Input:  -<br>
  * Output: {@link org.jd.core.v1.model.classfile.ClassFile}<br>
  */
-public class DeserializeClassFileProcessor extends ClassFileDeserializer implements Processor {
+public class DeserializeClassFileProcessor extends ClassFileDeserializer {
 
-    @Override
     public void process(DecompileContext decompileContext) throws Exception {
         Loader loader = decompileContext.getLoader();
         String internalTypeName = decompileContext.getMainInternalTypeName();

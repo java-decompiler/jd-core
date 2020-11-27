@@ -9,14 +9,12 @@ package org.jd.core.v1.services.tokenizer.javafragmenttotoken;
 
 import org.jd.core.v1.model.javafragment.JavaFragment;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.services.tokenizer.javafragmenttotoken.visitor.TokenizeJavaFragmentTestVisitor;
 
 import java.util.List;
 
-public class TestTokenizeJavaFragmentProcessor implements Processor {
+public class TestTokenizeJavaFragmentProcessor {
 
-    @Override
     public void process(DecompileContext decompileContext) throws Exception {
         List<JavaFragment> fragments = decompileContext.getBody();
         TokenizeJavaFragmentTestVisitor visitor = new TokenizeJavaFragmentTestVisitor(fragments.size() * 3);

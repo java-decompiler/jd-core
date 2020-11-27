@@ -9,7 +9,6 @@ package org.jd.core.v1.service.writer;
 
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.service.writer.visitor.PrintTokenVisitor;
 
@@ -21,9 +20,8 @@ import java.util.List;
  * Input:  List<{@link org.jd.core.v1.model.token.Token}><br>
  * Output: -<br>
  */
-public class WriteTokenProcessor implements Processor {
+public class WriteTokenProcessor {
 
-    @Override
     public void process(DecompileContext decompileContext) throws Exception {
         Printer printer = decompileContext.getPrinter();
         List<Token> tokens = decompileContext.getBody();
