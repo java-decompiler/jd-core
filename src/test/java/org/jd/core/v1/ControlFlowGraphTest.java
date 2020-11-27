@@ -9,20 +9,34 @@ package org.jd.core.v1;
 
 import junit.framework.TestCase;
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
+import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BaseTypeDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.Loop;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMemberDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.ConvertClassFileProcessor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
-import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphGotoReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphLoopReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.WatchDog;
+import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -35,7 +49,7 @@ import java.util.List;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
 public class ControlFlowGraphTest extends TestCase {
-    protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
+    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
     protected ConvertClassFileProcessor converter = new ConvertClassFileProcessor();
     protected ClassPathLoader loader = new ClassPathLoader();
     protected TypeMaker typeMaker = new TypeMaker(loader);
@@ -2656,7 +2670,9 @@ public class ControlFlowGraphTest extends TestCase {
         decompileContext.setLoader(loader);
         decompileContext.setTypeMaker(typeMaker);
 
-        deserializer.process(decompileContext);
+        ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
+        decompileContext.setBody(classFile);
+
         converter.process(decompileContext);
 
         CompilationUnit compilationUnit = decompileContext.getBody();

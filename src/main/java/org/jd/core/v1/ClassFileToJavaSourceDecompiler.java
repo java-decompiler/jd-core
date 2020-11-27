@@ -10,9 +10,10 @@ package org.jd.core.v1;
 import org.jd.core.v1.api.Decompiler;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
+import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
+import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
@@ -21,7 +22,7 @@ import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import java.util.Map;
 
 public class ClassFileToJavaSourceDecompiler implements Decompiler {
-    protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
+    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
     protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
     protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
     protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
@@ -50,7 +51,10 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     }
 
     protected void decompile(DecompileContext decompileContext) throws Exception {
-        this.deserializer.process(decompileContext);
+        ClassFile classFile = this.deserializer.loadClassFile(decompileContext.getLoader(),
+                decompileContext.getMainInternalTypeName());
+        decompileContext.setBody(classFile);
+
         this.converter.process(decompileContext);
         this.fragmenter.process(decompileContext);
         this.layouter.process(decompileContext);

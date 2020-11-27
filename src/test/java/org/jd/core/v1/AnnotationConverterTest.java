@@ -11,11 +11,14 @@ import junit.framework.TestCase;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.attribute.Annotations;
-import org.jd.core.v1.model.javasyntax.reference.*;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationReference;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationReferences;
+import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
+import org.jd.core.v1.model.javasyntax.reference.ElementValuePairs;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
+import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -29,15 +32,14 @@ public class AnnotationConverterTest extends TestCase {
         ZipLoader loader = new ZipLoader(is);
         TypeMaker typeMaker = new TypeMaker(loader);
         AnnotationConverter converter = new AnnotationConverter(typeMaker);
-        DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
+        ClassFileDeserializer deserializer = new ClassFileDeserializer();
 
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setMainInternalTypeName("org/jd/core/test/AnnotatedClass");
         decompileContext.setLoader(loader);
 
-        deserializer.process(decompileContext);
-
-        ClassFile classFile = decompileContext.getBody();
+        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
+        decompileContext.setBody(classFile);
 
         // Check class
         assertNotNull(classFile);

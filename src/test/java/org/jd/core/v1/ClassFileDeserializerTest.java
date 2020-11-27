@@ -8,7 +8,6 @@
 package org.jd.core.v1;
 
 import junit.framework.TestCase;
-
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.loader.ZipLoader;
@@ -21,7 +20,6 @@ import org.jd.core.v1.model.classfile.constant.ConstantInteger;
 import org.jd.core.v1.model.classfile.constant.ConstantUtf8;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -55,15 +53,14 @@ public class ClassFileDeserializerTest extends TestCase {
     public void testAnnotatedClass() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
-        DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
+        ClassFileDeserializer deserializer = new ClassFileDeserializer();
 
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setMainInternalTypeName("org/jd/core/test/AnnotatedClass");
         decompileContext.setLoader(loader);
 
-        deserializer.process(decompileContext);
-
-        ClassFile classFile = decompileContext.getBody();
+        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
+        decompileContext.setBody(classFile);
 
         // Check class
         assertNotNull(classFile);

@@ -11,10 +11,15 @@ import junit.framework.TestCase;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
+import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.services.javasyntax.type.visitor.PrintTypeVisitor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,7 +27,7 @@ import org.junit.Test;
 import java.io.InputStream;
 
 public class SignatureParserTest extends TestCase {
-    protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
+    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
 
     @Test
     public void testAnnotatedClass() throws Exception {
@@ -35,9 +40,8 @@ public class SignatureParserTest extends TestCase {
         decompileContext.setMainInternalTypeName("org/jd/core/test/AnnotatedClass");
         decompileContext.setLoader(loader);
 
-        deserializer.process(decompileContext);
-
-        ClassFile classFile = decompileContext.getBody();
+        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
+        decompileContext.setBody(classFile);
 
         // Check type
         TypeMaker.TypeTypes typeTypes = typeMaker.parseClassFileSignature(classFile);
@@ -153,9 +157,8 @@ public class SignatureParserTest extends TestCase {
         decompileContext.setMainInternalTypeName("org/jd/core/test/GenericClass");
         decompileContext.setLoader(loader);
 
-        deserializer.process(decompileContext);
-
-        ClassFile classFile = decompileContext.getBody();
+        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
+        decompileContext.setBody(classFile);
 
         // Check type
         TypeMaker.TypeTypes typeTypes = typeMaker.parseClassFileSignature(classFile);

@@ -14,11 +14,12 @@ import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
+import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
+import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
@@ -30,7 +31,7 @@ import java.util.Collections;
 import java.util.Map;
 
 public class JavaArrayTest extends TestCase {
-    protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
+    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
     protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
     protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
     protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
@@ -139,7 +140,9 @@ public class JavaArrayTest extends TestCase {
         decompileContext.setMainInternalTypeName(internalTypeName);
         decompileContext.setConfiguration(configuration);
 
-        deserializer.process(decompileContext);
+        ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
+        decompileContext.setBody(classFile);
+
         converter.process(decompileContext);
         fragmenter.process(decompileContext);
         layouter.process(decompileContext);
