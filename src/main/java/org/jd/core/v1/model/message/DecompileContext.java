@@ -28,6 +28,8 @@ public class DecompileContext {
     protected int majorVersion;
     protected int minorVersion;
     protected int maxLineNumber = Printer.UNKNOWN_LINE_NUMBER;
+    protected boolean containsByteCode;
+    protected boolean showBridgeAndSynthetic;
 
     @Deprecated
     protected HashMap<String, Object> headers = new HashMap<>();
