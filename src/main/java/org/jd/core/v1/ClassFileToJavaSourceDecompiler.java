@@ -33,7 +33,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
 
         decompileContext.setMainInternalTypeName(internalName);
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
 
         decompile(decompileContext);
     }
@@ -44,7 +44,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
         decompileContext.setMainInternalTypeName(internalName);
         decompileContext.setConfiguration(configuration);
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
 
         decompile(decompileContext);
     }

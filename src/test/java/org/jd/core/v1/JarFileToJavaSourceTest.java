@@ -148,7 +148,7 @@ public class JarFileToJavaSourceTest extends TestCase {
 
             DecompileContext decompileContext = new DecompileContext();
             decompileContext.setLoader(loader);
-            decompileContext.setHeader("printer", printer);
+            decompileContext.setPrinter(printer);
             decompileContext.setConfiguration(configuration);
 
             long time0 = System.currentTimeMillis();

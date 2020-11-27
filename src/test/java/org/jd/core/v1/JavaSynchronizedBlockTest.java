@@ -75,7 +75,7 @@ public class JavaSynchronizedBlockTest extends TestCase {
     protected String decompile(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("mainInternalTypeName", internalTypeName);
         decompileContext.setConfiguration(configuration);
 

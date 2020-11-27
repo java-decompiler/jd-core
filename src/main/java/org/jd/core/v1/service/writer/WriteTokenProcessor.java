@@ -25,7 +25,7 @@ public class WriteTokenProcessor implements Processor {
 
     @Override
     public void process(DecompileContext decompileContext) throws Exception {
-        Printer printer = decompileContext.getHeader("printer");
+        Printer printer = decompileContext.getPrinter();
         List<Token> tokens = decompileContext.getBody();
         PrintTokenVisitor visitor = new PrintTokenVisitor();
         int maxLineNumber = decompileContext.getHeader("maxLineNumber");

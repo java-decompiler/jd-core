@@ -199,7 +199,7 @@ public class WriteTokenTest {
         WriteTokenProcessor writer = new WriteTokenProcessor();
 
         DecompileContext decompileContext = new DecompileContext(tokens);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 22);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -280,7 +280,7 @@ public class WriteTokenTest {
         WriteTokenProcessor writer = new WriteTokenProcessor();
 
         DecompileContext decompileContext = new DecompileContext(tokens);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);

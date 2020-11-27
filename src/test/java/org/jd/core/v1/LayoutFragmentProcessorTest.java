@@ -46,7 +46,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Basic");
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);
@@ -74,7 +74,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/TryCatchFinally");
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);
@@ -102,7 +102,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/TryCatchFinally");
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);
@@ -130,7 +130,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/AnonymousClass");
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);
@@ -160,7 +160,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/OuterClass");
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);
@@ -189,7 +189,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Enum");
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
 
         deserializer.process(decompileContext);
         converter.process(decompileContext);
@@ -219,7 +219,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/annotation/Quality");
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);
@@ -249,7 +249,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Array");
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);

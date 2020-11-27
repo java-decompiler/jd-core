@@ -57,7 +57,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         DecompileContext decompileContext = createMessageToTestIfReturn(0, 0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -79,7 +79,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 3);
         decompileContext.setHeader("majorVersion", 0);
@@ -104,7 +104,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 4);
         decompileContext.setHeader("majorVersion", 0);
@@ -128,7 +128,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         DecompileContext decompileContext = createMessageToTestIfAssignation(0, 0, 0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -150,7 +150,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 3);
         decompileContext.setHeader("majorVersion", 0);
@@ -176,7 +176,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 5);
         decompileContext.setHeader("majorVersion", 0);
@@ -201,7 +201,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         DecompileContext decompileContext = createMessageToTestClassDeclarationWithoutImports(0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -222,7 +222,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         DecompileContext decompileContext = createMessageToTestClassDeclaration(0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -244,7 +244,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 1);
         decompileContext.setHeader("majorVersion", 0);
@@ -268,7 +268,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 2);
         decompileContext.setHeader("majorVersion", 0);
@@ -292,7 +292,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 3);
         decompileContext.setHeader("majorVersion", 0);
@@ -318,7 +318,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 4);
         decompileContext.setHeader("majorVersion", 0);
@@ -344,7 +344,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 5);
         decompileContext.setHeader("majorVersion", 0);
@@ -369,7 +369,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 6);
         decompileContext.setHeader("majorVersion", 0);
@@ -394,7 +394,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         DecompileContext decompileContext = createMessageToTestClassDeclaration(7);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 7);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -420,7 +420,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 8);
         decompileContext.setHeader("majorVersion", 0);
@@ -447,7 +447,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 9);
         decompileContext.setHeader("majorVersion", 0);
@@ -475,7 +475,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 10);
         decompileContext.setHeader("majorVersion", 0);
@@ -502,7 +502,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 3);
         decompileContext.setHeader("majorVersion", 0);
@@ -527,7 +527,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 4);
         decompileContext.setHeader("majorVersion", 0);
@@ -551,7 +551,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(8);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 8);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -577,7 +577,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 9);
         decompileContext.setHeader("majorVersion", 0);
@@ -605,7 +605,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 10);
         decompileContext.setHeader("majorVersion", 0);
@@ -636,7 +636,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 11);
         decompileContext.setHeader("majorVersion", 0);
@@ -667,7 +667,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 12);
         decompileContext.setHeader("majorVersion", 0);
@@ -698,7 +698,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 14);
         decompileContext.setHeader("majorVersion", 0);
@@ -727,7 +727,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         DecompileContext decompileContext = createSimpleMessage(1);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 22);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -748,7 +748,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         DecompileContext decompileContext = createSimpleMessage(0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
@@ -770,7 +770,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 44);
         decompileContext.setHeader("majorVersion", 0);
@@ -793,7 +793,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 66);
         decompileContext.setHeader("majorVersion", 0);
@@ -816,7 +816,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 8);
         decompileContext.setHeader("majorVersion", 0);
@@ -839,7 +839,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 16);
         decompileContext.setHeader("majorVersion", 0);
@@ -862,7 +862,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        decompileContext.setHeader("printer", printer);
+        decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 22);
         decompileContext.setHeader("majorVersion", 0);
