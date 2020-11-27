@@ -58,7 +58,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -81,7 +81,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 3);
+        decompileContext.setMaxLineNumber(3);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -106,7 +106,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 4);
+        decompileContext.setMaxLineNumber(4);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -129,7 +129,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -152,7 +152,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 3);
+        decompileContext.setMaxLineNumber(3);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -178,7 +178,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 5);
+        decompileContext.setMaxLineNumber(5);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -202,7 +202,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -223,7 +223,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -246,7 +246,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 1);
+        decompileContext.setMaxLineNumber(1);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -270,7 +270,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 2);
+        decompileContext.setMaxLineNumber(2);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -294,7 +294,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 3);
+        decompileContext.setMaxLineNumber(3);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -320,7 +320,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 4);
+        decompileContext.setMaxLineNumber(4);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -346,7 +346,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 5);
+        decompileContext.setMaxLineNumber(5);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -371,7 +371,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 6);
+        decompileContext.setMaxLineNumber(6);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -395,7 +395,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 7);
+        decompileContext.setMaxLineNumber(7);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -422,7 +422,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 8);
+        decompileContext.setMaxLineNumber(8);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -449,7 +449,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 9);
+        decompileContext.setMaxLineNumber(9);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -477,7 +477,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 10);
+        decompileContext.setMaxLineNumber(10);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -504,7 +504,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 3);
+        decompileContext.setMaxLineNumber(3);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -529,7 +529,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 4);
+        decompileContext.setMaxLineNumber(4);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -552,7 +552,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 8);
+        decompileContext.setMaxLineNumber(8);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -579,7 +579,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 9);
+        decompileContext.setMaxLineNumber(9);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -607,7 +607,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 10);
+        decompileContext.setMaxLineNumber(10);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -638,7 +638,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 11);
+        decompileContext.setMaxLineNumber(11);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -669,7 +669,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 12);
+        decompileContext.setMaxLineNumber(12);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -700,7 +700,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 14);
+        decompileContext.setMaxLineNumber(14);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -728,7 +728,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 22);
+        decompileContext.setMaxLineNumber(22);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -749,7 +749,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -772,7 +772,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 44);
+        decompileContext.setMaxLineNumber(44);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -795,7 +795,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 66);
+        decompileContext.setMaxLineNumber(66);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -818,7 +818,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 8);
+        decompileContext.setMaxLineNumber(8);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -841,7 +841,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 16);
+        decompileContext.setMaxLineNumber(16);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -864,7 +864,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 22);
+        decompileContext.setMaxLineNumber(22);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -939,7 +939,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addSpacerBetweenStatements(fragments);
 
         DecompileContext decompileContext = new DecompileContext(fragments);
-        decompileContext.setHeader("maxLineNumber", Integer.valueOf(lineNumber2));
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber2));
 
         return decompileContext;
     }
@@ -1010,7 +1010,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addSpacerBetweenStatements(fragments);
 
         DecompileContext decompileContext = new DecompileContext(fragments);
-        decompileContext.setHeader("maxLineNumber", Integer.valueOf(lineNumber3));
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber3));
 
         return decompileContext;
     }
@@ -1100,7 +1100,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addEndTypeBody(fragments, classStart);
 
         DecompileContext decompileContext = new DecompileContext(fragments);
-        decompileContext.setHeader("maxLineNumber", Integer.valueOf(lineNumber));
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber));
 
         return decompileContext;
     }
@@ -1179,7 +1179,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addEndTypeBody(fragments, classStart);
 
         DecompileContext decompileContext = new DecompileContext(fragments);
-        decompileContext.setHeader("maxLineNumber", Integer.valueOf(lineNumber));
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber));
 
         return decompileContext;
     }
@@ -1283,7 +1283,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addEndTypeBody(fragments, startMainClass);
 
         DecompileContext decompileContext = new DecompileContext(fragments);
-        decompileContext.setHeader("maxLineNumber", Integer.valueOf(lineNumber));
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber));
 
         return decompileContext;
     }
@@ -1532,7 +1532,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         DecompileContext decompileContext = new DecompileContext(fragments);
         if (factor != 0)
-            decompileContext.setHeader("maxLineNumber", Integer.valueOf(22 * factor));
+            decompileContext.setMaxLineNumber(Integer.valueOf(22 * factor));
 
         return decompileContext;
     }
@@ -1667,7 +1667,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
 
         DecompileContext decompileContext = new DecompileContext(fragments);
-        decompileContext.setHeader("maxLineNumber", Integer.valueOf(8));
+        decompileContext.setMaxLineNumber(Integer.valueOf(8));
         //message.setStart("containsByteCode", Boolean.TRUE);
 
         return decompileContext;
@@ -1812,7 +1812,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
 
         DecompileContext decompileContext = new DecompileContext(fragments);
-        decompileContext.setHeader("maxLineNumber", Integer.valueOf(8));
+        decompileContext.setMaxLineNumber(Integer.valueOf(8));
         //message.setStart("containsByteCode", Boolean.TRUE);
 
         return decompileContext;

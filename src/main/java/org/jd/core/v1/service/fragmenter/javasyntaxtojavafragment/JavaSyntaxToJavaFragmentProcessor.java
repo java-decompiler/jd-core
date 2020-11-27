@@ -32,7 +32,7 @@ public class JavaSyntaxToJavaFragmentProcessor implements Processor {
         SearchImportsVisitor importsVisitor = new SearchImportsVisitor(loader, mainInternalTypeName);
         importsVisitor.visit(compilationUnit);
         ImportsFragment importsFragment = importsVisitor.getImportsFragment();
-        decompileContext.setHeader("maxLineNumber", importsVisitor.getMaxLineNumber());
+        decompileContext.setMaxLineNumber(importsVisitor.getMaxLineNumber());
 
         CompilationUnitVisitor visitor = new CompilationUnitVisitor(loader, mainInternalTypeName, majorVersion, importsFragment);
         visitor.visit(compilationUnit);

@@ -33,7 +33,7 @@ public class LayoutFragmentProcessor implements Processor {
 
     @Override
     public void process(DecompileContext decompileContext) throws Exception {
-        int maxLineNumber = decompileContext.getHeader("maxLineNumber", UNKNOWN_LINE_NUMBER);
+        int maxLineNumber = decompileContext.getMaxLineNumber();
         boolean containsByteCode = decompileContext.getHeader("containsByteCode", Boolean.FALSE);
         boolean showBridgeAndSynthetic = decompileContext.getHeader("showBridgeAndSynthetic", Boolean.FALSE);
         Map<String, Object> configuration = decompileContext.getConfiguration();

@@ -27,6 +27,7 @@ public class DecompileContext {
     protected TypeMaker typeMaker;
     protected int majorVersion;
     protected int minorVersion;
+    protected int maxLineNumber = Printer.UNKNOWN_LINE_NUMBER;
 
     @Deprecated
     protected HashMap<String, Object> headers = new HashMap<>();

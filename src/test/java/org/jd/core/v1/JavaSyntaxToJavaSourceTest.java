@@ -146,7 +146,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
-        decompileContext.setHeader("maxLineNumber", 22);
+        decompileContext.setMaxLineNumber(22);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -186,7 +186,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/InterfaceTest");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(49);
         decompileContext.setMinorVersion(0);
 
@@ -236,7 +236,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/Day");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -520,7 +520,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/Planet");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -589,7 +589,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/SwitchTest");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
@@ -645,7 +645,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/SyntheticAttributeTest");
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
-        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
