@@ -31,8 +31,6 @@ public class DecompileContext {
     protected boolean containsByteCode;
     protected boolean showBridgeAndSynthetic;
 
-    @Deprecated
-    protected HashMap<String, Object> headers = new HashMap<>();
     protected Object body;
 
     public DecompileContext() {}
@@ -40,31 +38,7 @@ public class DecompileContext {
     public DecompileContext(Object body) {
         this.body = body;
     }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getHeader(String name) {
-        return (T)headers.get(name);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> T getHeader(String name, T defaultValue) {
-        Object value = headers.get(name);
-
-        if (value == null) {
-            return defaultValue;
-        } else {
-            return (T)value;
-        }
-    }
-
-    public void setHeader(String name, Object value) {
-        headers.put(name, value);
-    }
-
-    public Object removeHeader(String name) {
-        return headers.remove(name);
-    }
-
+    
     @SuppressWarnings("unchecked")
     public <T> T getBody() {
         return (T)body;
