@@ -55,7 +55,7 @@ public class ConvertClassFileProcessor implements Processor {
 
     @Override
     public void process(DecompileContext decompileContext) throws Exception {
-        TypeMaker typeMaker = decompileContext.getHeader("typeMaker");
+        TypeMaker typeMaker = decompileContext.getTypeMaker();
         ClassFile classFile = decompileContext.getBody();
 
         AnnotationConverter annotationConverter = new AnnotationConverter(typeMaker);

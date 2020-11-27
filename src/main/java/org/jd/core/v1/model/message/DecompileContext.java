@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,8 @@ public class DecompileContext {
     protected Map<String, Object> configuration = new HashMap<>();
     protected Loader loader;
     protected Printer printer;
+
+    protected TypeMaker typeMaker;
 
     @Deprecated
     protected HashMap<String, Object> headers = new HashMap<>();

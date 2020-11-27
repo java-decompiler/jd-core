@@ -33,7 +33,7 @@ public class ClassFileToJavaSyntaxProcessor implements Processor {
         Map<String, Object> configuration = decompileContext.getConfiguration();
 
         if (configuration == null) {
-            decompileContext.setHeader("typeMaker", new TypeMaker(loader));
+            decompileContext.setTypeMaker(new TypeMaker(loader));
         } else {
             TypeMaker typeMaker = null;
 
@@ -50,7 +50,7 @@ public class ClassFileToJavaSyntaxProcessor implements Processor {
                 }
             }
 
-            decompileContext.setHeader("typeMaker", typeMaker);
+            decompileContext.setTypeMaker(typeMaker);
         }
 
         CONVERT_CLASS_FILE_PROCESSOR.process(decompileContext);

@@ -2654,7 +2654,7 @@ public class ControlFlowGraphTest extends TestCase {
         DecompileContext decompileContext = new DecompileContext();
         decompileContext.setHeader("mainInternalTypeName", internalTypeName);
         decompileContext.setLoader(loader);
-        decompileContext.setHeader("typeMaker", typeMaker);
+        decompileContext.setTypeMaker(typeMaker);
 
         deserializer.process(decompileContext);
         converter.process(decompileContext);
