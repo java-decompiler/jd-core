@@ -31,7 +31,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     public void decompile(Loader loader, Printer printer, String internalName) throws Exception {
         DecompileContext decompileContext = new DecompileContext();
 
-        decompileContext.setHeader("mainInternalTypeName", internalName);
+        decompileContext.setMainInternalTypeName(internalName);
         decompileContext.setHeader("loader", loader);
         decompileContext.setHeader("printer", printer);
 
@@ -41,7 +41,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     public void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws Exception {
         DecompileContext decompileContext = new DecompileContext();
 
-        decompileContext.setHeader("mainInternalTypeName", internalName);
+        decompileContext.setMainInternalTypeName(internalName);
         decompileContext.setHeader("configuration", configuration);
         decompileContext.setHeader("loader", loader);
         decompileContext.setHeader("printer", printer);

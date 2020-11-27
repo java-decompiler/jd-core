@@ -23,7 +23,7 @@ public class DeserializeClassFileProcessor extends ClassFileDeserializer impleme
     @Override
     public void process(DecompileContext decompileContext) throws Exception {
         Loader loader = decompileContext.getHeader("loader");
-        String internalTypeName = decompileContext.getHeader("mainInternalTypeName");
+        String internalTypeName = decompileContext.getMainInternalTypeName();
         ClassFile classFile = loadClassFile(loader, internalTypeName);
 
         decompileContext.setBody(classFile);

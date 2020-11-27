@@ -7,9 +7,15 @@
 
 package org.jd.core.v1.model.message;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.HashMap;
 
+@Getter
+@Setter
 public class DecompileContext {
+    protected String mainInternalTypeName;
     protected HashMap<String, Object> headers = new HashMap<>();
     protected Object body;
 
