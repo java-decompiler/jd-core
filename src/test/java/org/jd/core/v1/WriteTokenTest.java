@@ -7,7 +7,7 @@
 
 package org.jd.core.v1;
 
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.printer.PlainTextMetaPrinter;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
@@ -198,13 +198,13 @@ public class WriteTokenTest {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         WriteTokenProcessor writer = new WriteTokenProcessor();
 
-        Message message = new Message(tokens);
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 22);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        DecompileContext decompileContext = new DecompileContext(tokens);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("maxLineNumber", 22);
+        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setHeader("minorVersion", 0);
 
-        writer.process(message);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -279,13 +279,13 @@ public class WriteTokenTest {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         WriteTokenProcessor writer = new WriteTokenProcessor();
 
-        Message message = new Message(tokens);
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        DecompileContext decompileContext = new DecompileContext(tokens);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setHeader("minorVersion", 0);
 
-        writer.process(message);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 

@@ -10,7 +10,7 @@ package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.javafragment.ImportsFragment;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.CompilationUnitVisitor;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.SearchImportsVisitor;
@@ -23,19 +23,19 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.Search
  */
 public class JavaSyntaxToJavaFragmentProcessor implements Processor {
 
-    public void process(Message message) throws Exception {
-        Loader loader = message.getHeader("loader");
-        String mainInternalTypeName = message.getHeader("mainInternalTypeName");
-        int majorVersion = message.getHeader("majorVersion");
-        CompilationUnit compilationUnit = message.getBody();
+    public void process(DecompileContext decompileContext) throws Exception {
+        Loader loader = decompileContext.getHeader("loader");
+        String mainInternalTypeName = decompileContext.getHeader("mainInternalTypeName");
+        int majorVersion = decompileContext.getHeader("majorVersion");
+        CompilationUnit compilationUnit = decompileContext.getBody();
 
         SearchImportsVisitor importsVisitor = new SearchImportsVisitor(loader, mainInternalTypeName);
         importsVisitor.visit(compilationUnit);
         ImportsFragment importsFragment = importsVisitor.getImportsFragment();
-        message.setHeader("maxLineNumber", importsVisitor.getMaxLineNumber());
+        decompileContext.setHeader("maxLineNumber", importsVisitor.getMaxLineNumber());
 
         CompilationUnitVisitor visitor = new CompilationUnitVisitor(loader, mainInternalTypeName, majorVersion, importsFragment);
         visitor.visit(compilationUnit);
-        message.setBody(visitor.getFragments());
+        decompileContext.setBody(visitor.getFragments());
     }
 }

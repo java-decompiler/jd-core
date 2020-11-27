@@ -14,7 +14,7 @@ import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
@@ -281,18 +281,18 @@ public class JavaBasicTest extends TestCase {
     }
 
     protected String decompile(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
-        Message message = new Message();
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("mainInternalTypeName", internalTypeName);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("mainInternalTypeName", internalTypeName);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 

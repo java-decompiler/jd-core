@@ -12,7 +12,7 @@ import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.attribute.Annotations;
 import org.jd.core.v1.model.javasyntax.reference.*;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
@@ -31,13 +31,13 @@ public class AnnotationConverterTest extends TestCase {
         AnnotationConverter converter = new AnnotationConverter(typeMaker);
         DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
-        message.setHeader("loader", loader);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
+        decompileContext.setHeader("loader", loader);
 
-        deserializer.process(message);
+        deserializer.process(decompileContext);
 
-        ClassFile classFile = message.getBody();
+        ClassFile classFile = decompileContext.getBody();
 
         // Check class
         assertNotNull(classFile);

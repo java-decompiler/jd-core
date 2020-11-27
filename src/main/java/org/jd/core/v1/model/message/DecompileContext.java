@@ -9,13 +9,13 @@ package org.jd.core.v1.model.message;
 
 import java.util.HashMap;
 
-public class Message {
+public class DecompileContext {
     protected HashMap<String, Object> headers = new HashMap<>();
     protected Object body;
 
-    public Message() {}
+    public DecompileContext() {}
 
-    public Message(Object body) {
+    public DecompileContext(Object body) {
         this.body = body;
     }
 

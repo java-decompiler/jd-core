@@ -12,9 +12,8 @@ import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
-import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
@@ -25,9 +24,7 @@ import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenP
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.junit.Test;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 
@@ -396,18 +393,18 @@ public class JavaLoopTest extends TestCase {
     }
 
     protected String decompile(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
-        Message message = new Message();
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("mainInternalTypeName", internalTypeName);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("mainInternalTypeName", internalTypeName);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 

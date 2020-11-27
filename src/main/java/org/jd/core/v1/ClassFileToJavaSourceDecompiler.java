@@ -10,7 +10,7 @@ package org.jd.core.v1;
 import org.jd.core.v1.api.Decompiler;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
@@ -29,32 +29,32 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     protected WriteTokenProcessor writer = new WriteTokenProcessor();
 
     public void decompile(Loader loader, Printer printer, String internalName) throws Exception {
-        Message message = new Message();
+        DecompileContext decompileContext = new DecompileContext();
 
-        message.setHeader("mainInternalTypeName", internalName);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
+        decompileContext.setHeader("mainInternalTypeName", internalName);
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
 
-        decompile(message);
+        decompile(decompileContext);
     }
 
     public void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws Exception {
-        Message message = new Message();
+        DecompileContext decompileContext = new DecompileContext();
 
-        message.setHeader("mainInternalTypeName", internalName);
-        message.setHeader("configuration", configuration);
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
+        decompileContext.setHeader("mainInternalTypeName", internalName);
+        decompileContext.setHeader("configuration", configuration);
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
 
-        decompile(message);
+        decompile(decompileContext);
     }
 
-    protected void decompile(Message message) throws Exception {
-        this.deserializer.process(message);
-        this.converter.process(message);
-        this.fragmenter.process(message);
-        this.layouter.process(message);
-        this.tokenizer.process(message);
-        this.writer.process(message);
+    protected void decompile(DecompileContext decompileContext) throws Exception {
+        this.deserializer.process(decompileContext);
+        this.converter.process(decompileContext);
+        this.fragmenter.process(decompileContext);
+        this.layouter.process(decompileContext);
+        this.tokenizer.process(decompileContext);
+        this.writer.process(decompileContext);
     }
 }

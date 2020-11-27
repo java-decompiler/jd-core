@@ -9,7 +9,7 @@ package org.jd.core.v1.service.deserializer.classfile;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.processor.Processor;
 
 /**
@@ -21,11 +21,11 @@ import org.jd.core.v1.model.processor.Processor;
 public class DeserializeClassFileProcessor extends ClassFileDeserializer implements Processor {
 
     @Override
-    public void process(Message message) throws Exception {
-        Loader loader = message.getHeader("loader");
-        String internalTypeName = message.getHeader("mainInternalTypeName");
+    public void process(DecompileContext decompileContext) throws Exception {
+        Loader loader = decompileContext.getHeader("loader");
+        String internalTypeName = decompileContext.getHeader("mainInternalTypeName");
         ClassFile classFile = loadClassFile(loader, internalTypeName);
 
-        message.setBody(classFile);
+        decompileContext.setBody(classFile);
     }
 }

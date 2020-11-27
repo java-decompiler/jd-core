@@ -19,7 +19,7 @@ import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.reference.ElementValue;
 import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
@@ -54,9 +54,9 @@ public class ConvertClassFileProcessor implements Processor {
     };
 
     @Override
-    public void process(Message message) throws Exception {
-        TypeMaker typeMaker = message.getHeader("typeMaker");
-        ClassFile classFile = message.getBody();
+    public void process(DecompileContext decompileContext) throws Exception {
+        TypeMaker typeMaker = decompileContext.getHeader("typeMaker");
+        ClassFile classFile = decompileContext.getBody();
 
         AnnotationConverter annotationConverter = new AnnotationConverter(typeMaker);
 
@@ -74,9 +74,9 @@ public class ConvertClassFileProcessor implements Processor {
             typeDeclaration = convertClassDeclaration(typeMaker, annotationConverter, classFile, null);
         }
 
-        message.setHeader("majorVersion", classFile.getMajorVersion());
-        message.setHeader("minorVersion", classFile.getMinorVersion());
-        message.setBody(new CompilationUnit(typeDeclaration));
+        decompileContext.setHeader("majorVersion", classFile.getMajorVersion());
+        decompileContext.setHeader("minorVersion", classFile.getMinorVersion());
+        decompileContext.setBody(new CompilationUnit(typeDeclaration));
     }
 
     protected ClassFileInterfaceDeclaration convertInterfaceDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {

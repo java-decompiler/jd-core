@@ -17,7 +17,7 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.model.javasyntax.type.Types;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextMetaPrinter;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
@@ -140,20 +140,20 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-        Message message = new Message(compilationUnit);
+        DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        message.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/TokenWriterTest");
-        message.setHeader("loader", new NopLoader());
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 22);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/TokenWriterTest");
+        decompileContext.setHeader("loader", new NopLoader());
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("configuration", configuration);
+        decompileContext.setHeader("maxLineNumber", 22);
+        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setHeader("minorVersion", 0);
 
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -181,19 +181,19 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        Message message = new Message(compilationUnit);
+        DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        message.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/InterfaceTest");
-        message.setHeader("loader", new NopLoader());
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 49);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/InterfaceTest");
+        decompileContext.setHeader("loader", new NopLoader());
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setHeader("majorVersion", 49);
+        decompileContext.setHeader("minorVersion", 0);
 
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -231,19 +231,19 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        Message message = new Message(compilationUnit);
+        DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        message.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/Day");
-        message.setHeader("loader", new NopLoader());
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/Day");
+        decompileContext.setHeader("loader", new NopLoader());
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setHeader("minorVersion", 0);
 
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -515,20 +515,20 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        Message message = new Message(compilationUnit);
+        DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        message.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/Planet");
-        message.setHeader("loader", new NopLoader());
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/Planet");
+        decompileContext.setHeader("loader", new NopLoader());
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setHeader("minorVersion", 0);
 
-        fragmenter.process(message);
-        layouter.process(message);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
         //tokenizer.process(message);
-        new JavaFragmentToTokenProcessor().process(message);
-        writer.process(message);
+        new JavaFragmentToTokenProcessor().process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -584,19 +584,19 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        Message message = new Message(compilationUnit);
+        DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        message.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/SwitchTest");
-        message.setHeader("loader", new NopLoader());
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/SwitchTest");
+        decompileContext.setHeader("loader", new NopLoader());
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setHeader("minorVersion", 0);
 
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -640,19 +640,19 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         );
 
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        Message message = new Message(compilationUnit);
+        DecompileContext decompileContext = new DecompileContext(compilationUnit);
 
-        message.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/SyntheticAttributeTest");
-        message.setHeader("loader", new NopLoader());
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/SyntheticAttributeTest");
+        decompileContext.setHeader("loader", new NopLoader());
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("maxLineNumber", 0);
+        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setHeader("minorVersion", 0);
 
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 

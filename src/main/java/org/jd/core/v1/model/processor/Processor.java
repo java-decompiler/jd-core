@@ -7,8 +7,8 @@
 
 package org.jd.core.v1.model.processor;
 
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 
 public interface Processor {
-    void process(Message message) throws Exception;
+    void process(DecompileContext decompileContext) throws Exception;
 }

@@ -14,7 +14,7 @@ import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.Loop;
@@ -2651,15 +2651,15 @@ public class ControlFlowGraphTest extends TestCase {
     }
 
     protected Method searchMethod(Loader loader, TypeMaker typeMaker, String internalTypeName, String methodName, String methodDescriptor) throws Exception {
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", internalTypeName);
-        message.setHeader("loader", loader);
-        message.setHeader("typeMaker", typeMaker);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", internalTypeName);
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("typeMaker", typeMaker);
 
-        deserializer.process(message);
-        converter.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
 
-        CompilationUnit compilationUnit = message.getBody();
+        CompilationUnit compilationUnit = decompileContext.getBody();
 
         assertNotNull(compilationUnit);
 

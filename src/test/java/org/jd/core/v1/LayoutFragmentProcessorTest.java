@@ -9,7 +9,7 @@ package org.jd.core.v1;
 
 import junit.framework.TestCase;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
@@ -43,18 +43,18 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/Basic");
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Basic");
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -71,18 +71,18 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/TryCatchFinally");
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/TryCatchFinally");
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -99,18 +99,18 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/TryCatchFinally");
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/TryCatchFinally");
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -127,18 +127,18 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/AnonymousClass");
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/AnonymousClass");
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -157,18 +157,18 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/OuterClass");
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/OuterClass");
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -186,17 +186,17 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/Enum");
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Enum");
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -216,18 +216,18 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/annotation/Quality");
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/annotation/Quality");
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -246,18 +246,18 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/Array");
-        message.setHeader("loader", loader);
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/Array");
+        decompileContext.setHeader("loader", loader);
+        decompileContext.setHeader("printer", printer);
+        decompileContext.setHeader("configuration", configuration);
 
-        deserializer.process(message);
-        converter.process(message);
-        fragmenter.process(message);
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        deserializer.process(decompileContext);
+        converter.process(decompileContext);
+        fragmenter.process(decompileContext);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 

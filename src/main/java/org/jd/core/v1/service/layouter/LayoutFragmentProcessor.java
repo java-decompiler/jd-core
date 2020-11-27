@@ -10,7 +10,7 @@ package org.jd.core.v1.service.layouter;
 import org.jd.core.v1.model.fragment.FixedFragment;
 import org.jd.core.v1.model.fragment.FlexibleFragment;
 import org.jd.core.v1.model.fragment.Fragment;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.processor.Processor;
 import org.jd.core.v1.service.layouter.model.Section;
 import org.jd.core.v1.service.layouter.util.VisitorsHolder;
@@ -32,15 +32,15 @@ import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
 public class LayoutFragmentProcessor implements Processor {
 
     @Override
-    public void process(Message message) throws Exception {
-        int maxLineNumber = message.getHeader("maxLineNumber", UNKNOWN_LINE_NUMBER);
-        boolean containsByteCode = message.getHeader("containsByteCode", Boolean.FALSE);
-        boolean showBridgeAndSynthetic = message.getHeader("showBridgeAndSynthetic", Boolean.FALSE);
-        Map<String, Object> configuration = message.getHeader("configuration");
+    public void process(DecompileContext decompileContext) throws Exception {
+        int maxLineNumber = decompileContext.getHeader("maxLineNumber", UNKNOWN_LINE_NUMBER);
+        boolean containsByteCode = decompileContext.getHeader("containsByteCode", Boolean.FALSE);
+        boolean showBridgeAndSynthetic = decompileContext.getHeader("showBridgeAndSynthetic", Boolean.FALSE);
+        Map<String, Object> configuration = decompileContext.getHeader("configuration");
         Object realignLineNumbersConfiguration = (configuration == null) ? "false" : configuration.get("realignLineNumbers");
         boolean realignLineNumbers = (realignLineNumbersConfiguration == null) ? false : "true".equals(realignLineNumbersConfiguration.toString());
 
-        List<Fragment> fragments = message.getBody();
+        List<Fragment> fragments = decompileContext.getBody();
 
         if ((maxLineNumber != UNKNOWN_LINE_NUMBER) && !containsByteCode && !showBridgeAndSynthetic && realignLineNumbers) {
             BuildSectionsVisitor buildSectionsVisitor = new BuildSectionsVisitor();

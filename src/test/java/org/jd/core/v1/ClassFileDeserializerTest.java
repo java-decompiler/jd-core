@@ -19,7 +19,7 @@ import org.jd.core.v1.model.classfile.attribute.ElementValueAnnotationValue;
 import org.jd.core.v1.model.classfile.attribute.ElementValuePrimitiveType;
 import org.jd.core.v1.model.classfile.constant.ConstantInteger;
 import org.jd.core.v1.model.classfile.constant.ConstantUtf8;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
 import org.junit.Test;
@@ -57,13 +57,13 @@ public class ClassFileDeserializerTest extends TestCase {
         ZipLoader loader = new ZipLoader(is);
         DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
-        message.setHeader("loader", loader);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
+        decompileContext.setHeader("loader", loader);
 
-        deserializer.process(message);
+        deserializer.process(decompileContext);
 
-        ClassFile classFile = message.getBody();
+        ClassFile classFile = decompileContext.getBody();
 
         // Check class
         assertNotNull(classFile);
