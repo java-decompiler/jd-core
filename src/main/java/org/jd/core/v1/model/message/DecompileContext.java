@@ -11,11 +11,15 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @Setter
 public class DecompileContext {
     protected String mainInternalTypeName;
+    protected Map<String, Object> configuration = new HashMap<>();
+
+    @Deprecated
     protected HashMap<String, Object> headers = new HashMap<>();
     protected Object body;
 

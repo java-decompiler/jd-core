@@ -30,7 +30,7 @@ public class ClassFileToJavaSyntaxProcessor implements Processor {
 
     public void process(DecompileContext decompileContext) throws Exception {
         Loader loader = decompileContext.getHeader("loader");
-        Map<String, Object> configuration = decompileContext.getHeader("configuration");
+        Map<String, Object> configuration = decompileContext.getConfiguration();
 
         if (configuration == null) {
             decompileContext.setHeader("typeMaker", new TypeMaker(loader));

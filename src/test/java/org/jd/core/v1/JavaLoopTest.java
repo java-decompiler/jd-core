@@ -397,7 +397,7 @@ public class JavaLoopTest extends TestCase {
         decompileContext.setHeader("loader", loader);
         decompileContext.setHeader("printer", printer);
         decompileContext.setHeader("mainInternalTypeName", internalTypeName);
-        decompileContext.setHeader("configuration", configuration);
+        decompileContext.setConfiguration(configuration);
 
         deserializer.process(decompileContext);
         converter.process(decompileContext);

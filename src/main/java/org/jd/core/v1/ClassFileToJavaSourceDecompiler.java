@@ -42,7 +42,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
         DecompileContext decompileContext = new DecompileContext();
 
         decompileContext.setMainInternalTypeName(internalName);
-        decompileContext.setHeader("configuration", configuration);
+        decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("loader", loader);
         decompileContext.setHeader("printer", printer);
 

@@ -36,7 +36,7 @@ public class LayoutFragmentProcessor implements Processor {
         int maxLineNumber = decompileContext.getHeader("maxLineNumber", UNKNOWN_LINE_NUMBER);
         boolean containsByteCode = decompileContext.getHeader("containsByteCode", Boolean.FALSE);
         boolean showBridgeAndSynthetic = decompileContext.getHeader("showBridgeAndSynthetic", Boolean.FALSE);
-        Map<String, Object> configuration = decompileContext.getHeader("configuration");
+        Map<String, Object> configuration = decompileContext.getConfiguration();
         Object realignLineNumbersConfiguration = (configuration == null) ? "false" : configuration.get("realignLineNumbers");
         boolean realignLineNumbers = (realignLineNumbersConfiguration == null) ? false : "true".equals(realignLineNumbersConfiguration.toString());
 

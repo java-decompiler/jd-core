@@ -145,7 +145,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setHeader("mainInternalTypeName", "org/jd/core/v1/service/test/TokenWriterTest");
         decompileContext.setHeader("loader", new NopLoader());
         decompileContext.setHeader("printer", printer);
-        decompileContext.setHeader("configuration", configuration);
+        decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 22);
         decompileContext.setHeader("majorVersion", 0);
         decompileContext.setHeader("minorVersion", 0);
