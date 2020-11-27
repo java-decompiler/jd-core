@@ -74,7 +74,7 @@ public class ConvertClassFileProcessor implements Processor {
             typeDeclaration = convertClassDeclaration(typeMaker, annotationConverter, classFile, null);
         }
 
-        decompileContext.setHeader("majorVersion", classFile.getMajorVersion());
+        decompileContext.setMajorVersion(classFile.getMajorVersion());
         decompileContext.setHeader("minorVersion", classFile.getMinorVersion());
         decompileContext.setBody(new CompilationUnit(typeDeclaration));
     }

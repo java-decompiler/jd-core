@@ -201,7 +201,7 @@ public class WriteTokenTest {
         DecompileContext decompileContext = new DecompileContext(tokens);
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 22);
-        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setMajorVersion(0);
         decompileContext.setHeader("minorVersion", 0);
 
         writer.process(decompileContext);
@@ -282,7 +282,7 @@ public class WriteTokenTest {
         DecompileContext decompileContext = new DecompileContext(tokens);
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
-        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setMajorVersion(0);
         decompileContext.setHeader("minorVersion", 0);
 
         writer.process(decompileContext);

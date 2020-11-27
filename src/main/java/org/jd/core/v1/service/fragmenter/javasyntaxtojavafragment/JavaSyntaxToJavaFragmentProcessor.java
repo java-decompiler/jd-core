@@ -26,7 +26,7 @@ public class JavaSyntaxToJavaFragmentProcessor implements Processor {
     public void process(DecompileContext decompileContext) throws Exception {
         Loader loader = decompileContext.getLoader();
         String mainInternalTypeName = decompileContext.getMainInternalTypeName();
-        int majorVersion = decompileContext.getHeader("majorVersion");
+        int majorVersion = decompileContext.getMajorVersion();
         CompilationUnit compilationUnit = decompileContext.getBody();
 
         SearchImportsVisitor importsVisitor = new SearchImportsVisitor(loader, mainInternalTypeName);

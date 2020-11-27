@@ -147,7 +147,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setPrinter(printer);
         decompileContext.setConfiguration(configuration);
         decompileContext.setHeader("maxLineNumber", 22);
-        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setMajorVersion(0);
         decompileContext.setHeader("minorVersion", 0);
 
         fragmenter.process(decompileContext);
@@ -187,7 +187,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
-        decompileContext.setHeader("majorVersion", 49);
+        decompileContext.setMajorVersion(49);
         decompileContext.setHeader("minorVersion", 0);
 
         fragmenter.process(decompileContext);
@@ -237,7 +237,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
-        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setMajorVersion(0);
         decompileContext.setHeader("minorVersion", 0);
 
         fragmenter.process(decompileContext);
@@ -521,7 +521,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
-        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setMajorVersion(0);
         decompileContext.setHeader("minorVersion", 0);
 
         fragmenter.process(decompileContext);
@@ -590,7 +590,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
-        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setMajorVersion(0);
         decompileContext.setHeader("minorVersion", 0);
 
         fragmenter.process(decompileContext);
@@ -646,7 +646,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setLoader(new NopLoader());
         decompileContext.setPrinter(printer);
         decompileContext.setHeader("maxLineNumber", 0);
-        decompileContext.setHeader("majorVersion", 0);
+        decompileContext.setMajorVersion(0);
         decompileContext.setHeader("minorVersion", 0);
 
         fragmenter.process(decompileContext);

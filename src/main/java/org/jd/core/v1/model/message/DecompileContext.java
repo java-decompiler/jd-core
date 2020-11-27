@@ -25,6 +25,7 @@ public class DecompileContext {
     protected Printer printer;
 
     protected TypeMaker typeMaker;
+    protected int majorVersion;
 
     @Deprecated
     protected HashMap<String, Object> headers = new HashMap<>();
