@@ -14,8 +14,6 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.ConvertC
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.UpdateJavaSyntaxTreeProcessor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
-import java.util.Map;
-
 /**
  * Convert ClassFile model to Java syntax model.<br><br>
  *
@@ -30,27 +28,12 @@ public class ClassFileToJavaSyntaxProcessor {
 
     public CompilationUnit process(DecompileContext decompileContext) throws Exception {
         Loader loader = decompileContext.getLoader();
-        Map<String, Object> configuration = decompileContext.getConfiguration();
 
-        TypeMaker typeMaker = null;
-        if (configuration == null) {
+        TypeMaker typeMaker = decompileContext.getTypeMaker();
+        if (typeMaker == null) {
             typeMaker = new TypeMaker(loader);
-        } else {
-            try {
-                typeMaker = (TypeMaker)configuration.get("typeMaker");
-
-                if (typeMaker == null) {
-                    // Store the heavy weight object 'typeMaker' in 'configuration' to reuse it
-                    configuration.put("typeMaker", typeMaker=new TypeMaker(loader));
-                }
-            } catch (Exception e) {
-                if (typeMaker == null) {
-                    typeMaker = new TypeMaker(loader);
-                }
-            }
-
+            decompileContext.setTypeMaker(typeMaker);
         }
-        decompileContext.setTypeMaker(typeMaker);
 
         CompilationUnit compilationUnit = CONVERT_CLASS_FILE_PROCESSOR.process(decompileContext.getClassFile(), typeMaker, decompileContext);
         decompileContext.setCompilationUnit(compilationUnit);
