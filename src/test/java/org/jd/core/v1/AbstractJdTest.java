@@ -6,12 +6,14 @@ import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
+import org.jd.core.v1.util.DefaultList;
 
 import java.util.Collections;
 import java.util.Map;
@@ -37,7 +39,8 @@ public abstract class AbstractJdTest extends TestCase {
         CompilationUnit compilationUnit = converter.process(decompileContext);
         fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
+        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+        decompileContext.setTokens(tokens);
         writer.process(decompileContext);
 
         String source = printer.toString();

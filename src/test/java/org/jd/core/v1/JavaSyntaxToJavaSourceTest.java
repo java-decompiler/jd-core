@@ -18,11 +18,13 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.model.javasyntax.type.Types;
 import org.jd.core.v1.model.message.DecompileContext;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.printer.PlainTextMetaPrinter;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
+import org.jd.core.v1.util.DefaultList;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -153,7 +155,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
+        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+        decompileContext.setTokens(tokens);
         writer.process(decompileContext);
 
         String source = printer.toString();
@@ -194,7 +197,9 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
+        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+        decompileContext.setTokens(tokens);
+
         writer.process(decompileContext);
 
         String source = printer.toString();
@@ -245,7 +250,9 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
+        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+        decompileContext.setTokens(tokens);
+
         writer.process(decompileContext);
 
         String source = printer.toString();
@@ -529,9 +536,11 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setMinorVersion(0);
 
         fragmenter.process(compilationUnit, decompileContext);
-        layouter.process(decompileContext);
+        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+        decompileContext.setTokens(tokens);
+
         //tokenizer.process(message);
-        new JavaFragmentToTokenProcessor().process(decompileContext);
+        tokens = new JavaFragmentToTokenProcessor().process(decompileContext.getBody());
         writer.process(decompileContext);
 
         String source = printer.toString();
@@ -600,7 +609,9 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
+        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+        decompileContext.setTokens(tokens);
+
         writer.process(decompileContext);
 
         String source = printer.toString();
@@ -657,7 +668,9 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
+        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+        decompileContext.setTokens(tokens);
+
         writer.process(decompileContext);
 
         String source = printer.toString();

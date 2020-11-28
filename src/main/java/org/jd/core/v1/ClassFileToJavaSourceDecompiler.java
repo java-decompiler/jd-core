@@ -13,12 +13,14 @@ import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
+import org.jd.core.v1.util.DefaultList;
 
 import java.util.Map;
 
@@ -59,7 +61,8 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
         CompilationUnit compilationUnit = this.converter.process(decompileContext);
         this.fragmenter.process(compilationUnit, decompileContext);
         this.layouter.process(decompileContext);
-        this.tokenizer.process(decompileContext);
+        DefaultList<Token> tokens = this.tokenizer.process(decompileContext.getBody());
+        decompileContext.setTokens(tokens);
         this.writer.process(decompileContext);
     }
 }

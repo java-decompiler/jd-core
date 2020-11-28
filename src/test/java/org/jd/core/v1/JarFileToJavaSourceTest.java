@@ -13,6 +13,7 @@ import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.util.DefaultList;
 import org.junit.Test;
@@ -162,7 +163,8 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
                         CompilationUnit compilationUnit = converter.process(decompileContext);
                         fragmenter.process(compilationUnit, decompileContext);
                         layouter.process(decompileContext);
-                        tokenizer.process(decompileContext);
+                        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+                        decompileContext.setTokens(tokens);
                         writer.process(decompileContext);
                     } catch (AssertionError e) {
                         String msg = (e.getMessage() == null) ? "<?>" : e.getMessage();
