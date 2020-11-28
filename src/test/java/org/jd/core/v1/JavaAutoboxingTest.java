@@ -23,6 +23,7 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJa
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
+import org.jd.core.v1.stub.AutoboxingAndUnboxing;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -40,19 +41,12 @@ public class JavaAutoboxingTest extends TestCase {
     @Test
     // https://github.com/java-decompiler/jd-core/issues/14
     public void testAutoboxing() throws Exception {
-        class AutoboxingAndUnboxing {
-            void test() {
-                Integer intObj = 10;
-                int i = intObj;
-            }
-        }
-
         String internalClassName = AutoboxingAndUnboxing.class.getName().replace('.', '/');
         String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(": 44 */", "Integer intObj = 10;")));
-        assertTrue(source.matches(PatternMaker.make(": 45 */", "int i = intObj;")));
+        assertTrue(source.matches(PatternMaker.make(": 5 */", "Integer intObj = 10;")));
+        assertTrue(source.matches(PatternMaker.make(": 6 */", "int i = intObj;")));
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));

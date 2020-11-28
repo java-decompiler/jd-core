@@ -23,6 +23,7 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJa
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
+import org.jd.core.v1.stub.ArrayMethodOverloading;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -40,32 +41,14 @@ public class JavaMethodOverloadingTest extends TestCase {
     @Test
     // https://github.com/java-decompiler/jd-core/issues/33
     public void testArrayMethodOverloading() throws Exception {
-        class ArrayMethodOverloading {
-            void use(Object[] o) { }
-            void use(Object o) { }
-
-            void test1() {
-                use("string");
-            }
-            void test2() {
-                use((Object) new Object[] {""});
-            }
-            void test3() {
-                use(null);
-            }
-            void test4() {
-                use((Object)null);
-            }
-        }
-
         String internalClassName = ArrayMethodOverloading.class.getName().replace('.', '/');
         String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(": 47 */", "use(\"string\");")));
-        assertTrue(source.matches(PatternMaker.make(": 50 */", "use((Object)new Object[] { \"\" });")));
-        assertTrue(source.matches(PatternMaker.make(": 53 */", "use((Object[])null);")));
-        assertTrue(source.matches(PatternMaker.make(": 56 */", "use((Object)null);")));
+        assertTrue(source.matches(PatternMaker.make(": 11 */", "use(\"string\");")));
+        assertTrue(source.matches(PatternMaker.make(": 15 */", "use((Object)new Object[] { \"\" });")));
+        assertTrue(source.matches(PatternMaker.make(": 19 */", "use((Object[])null);")));
+        assertTrue(source.matches(PatternMaker.make(": 23 */", "use((Object)null);")));
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
