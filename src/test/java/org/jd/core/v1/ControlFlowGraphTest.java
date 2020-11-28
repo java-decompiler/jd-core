@@ -2673,9 +2673,7 @@ public class ControlFlowGraphTest extends TestCase {
         ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
         decompileContext.setClassFile(classFile);
 
-        converter.process(decompileContext);
-
-        CompilationUnit compilationUnit = decompileContext.getCompilationUnit();
+        CompilationUnit compilationUnit = converter.process(classFile, typeMaker, decompileContext);
 
         assertNotNull(compilationUnit);
 

@@ -151,7 +151,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
-        fragmenter.process(decompileContext);
+        fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
         writer.process(decompileContext);
@@ -192,7 +192,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setMajorVersion(49);
         decompileContext.setMinorVersion(0);
 
-        fragmenter.process(decompileContext);
+        fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
         writer.process(decompileContext);
@@ -243,7 +243,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
-        fragmenter.process(decompileContext);
+        fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
         writer.process(decompileContext);
@@ -528,7 +528,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
-        fragmenter.process(decompileContext);
+        fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
         //tokenizer.process(message);
         new JavaFragmentToTokenProcessor().process(decompileContext);
@@ -598,7 +598,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
-        fragmenter.process(decompileContext);
+        fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
         writer.process(decompileContext);
@@ -655,7 +655,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         decompileContext.setMajorVersion(0);
         decompileContext.setMinorVersion(0);
 
-        fragmenter.process(decompileContext);
+        fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
         writer.process(decompileContext);

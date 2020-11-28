@@ -11,6 +11,7 @@ import org.jd.core.v1.api.Decompiler;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.classfile.ClassFile;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
@@ -55,8 +56,8 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
                 decompileContext.getMainInternalTypeName());
         decompileContext.setClassFile(classFile);
 
-        this.converter.process(decompileContext);
-        this.fragmenter.process(decompileContext);
+        CompilationUnit compilationUnit = this.converter.process(decompileContext);
+        this.fragmenter.process(compilationUnit, decompileContext);
         this.layouter.process(decompileContext);
         this.tokenizer.process(decompileContext);
         this.writer.process(decompileContext);

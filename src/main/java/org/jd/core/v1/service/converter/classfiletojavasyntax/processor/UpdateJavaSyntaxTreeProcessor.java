@@ -22,10 +22,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateJava
  */
 public class UpdateJavaSyntaxTreeProcessor {
 
-    public void process(DecompileContext decompileContext) throws Exception {
-        TypeMaker typeMaker = decompileContext.getTypeMaker();
-        CompilationUnit compilationUnit = decompileContext.getCompilationUnit();
-
+    public void process(CompilationUnit compilationUnit, TypeMaker typeMaker) throws Exception {
         new UpdateJavaSyntaxTreeStep0Visitor(typeMaker).visit(compilationUnit);
         new UpdateJavaSyntaxTreeStep1Visitor(typeMaker).visit(compilationUnit);
         new UpdateJavaSyntaxTreeStep2Visitor(typeMaker).visit(compilationUnit);

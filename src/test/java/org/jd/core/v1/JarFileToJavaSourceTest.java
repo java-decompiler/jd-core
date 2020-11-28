@@ -7,19 +7,13 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
-import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
-import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
-import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.util.DefaultList;
 import org.junit.Test;
 
@@ -165,8 +159,8 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
                         ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
                         decompileContext.setClassFile(classFile);
 
-                        converter.process(decompileContext);
-                        fragmenter.process(decompileContext);
+                        CompilationUnit compilationUnit = converter.process(decompileContext);
+                        fragmenter.process(compilationUnit, decompileContext);
                         layouter.process(decompileContext);
                         tokenizer.process(decompileContext);
                         writer.process(decompileContext);

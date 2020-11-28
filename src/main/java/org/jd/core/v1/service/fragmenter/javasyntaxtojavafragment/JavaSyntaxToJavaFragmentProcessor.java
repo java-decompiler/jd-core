@@ -22,11 +22,10 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.Search
  */
 public class JavaSyntaxToJavaFragmentProcessor {
 
-    public void process(DecompileContext decompileContext) throws Exception {
+    public void process(CompilationUnit compilationUnit, DecompileContext decompileContext) throws Exception {
         Loader loader = decompileContext.getLoader();
         String mainInternalTypeName = decompileContext.getMainInternalTypeName();
         int majorVersion = decompileContext.getMajorVersion();
-        CompilationUnit compilationUnit = decompileContext.getCompilationUnit();
 
         SearchImportsVisitor importsVisitor = new SearchImportsVisitor(loader, mainInternalTypeName);
         importsVisitor.visit(compilationUnit);

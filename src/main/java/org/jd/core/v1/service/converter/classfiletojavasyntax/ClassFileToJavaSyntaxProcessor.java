@@ -8,6 +8,7 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax;
 
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.ConvertClassFileProcessor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.UpdateJavaSyntaxTreeProcessor;
@@ -27,15 +28,14 @@ public class ClassFileToJavaSyntaxProcessor {
     protected static final ConvertClassFileProcessor CONVERT_CLASS_FILE_PROCESSOR = new ConvertClassFileProcessor();
     protected static final UpdateJavaSyntaxTreeProcessor UPDATE_JAVA_SYNTAX_TREE_PROCESSOR = new UpdateJavaSyntaxTreeProcessor();
 
-    public void process(DecompileContext decompileContext) throws Exception {
+    public CompilationUnit process(DecompileContext decompileContext) throws Exception {
         Loader loader = decompileContext.getLoader();
         Map<String, Object> configuration = decompileContext.getConfiguration();
 
+        TypeMaker typeMaker = null;
         if (configuration == null) {
-            decompileContext.setTypeMaker(new TypeMaker(loader));
+            typeMaker = new TypeMaker(loader);
         } else {
-            TypeMaker typeMaker = null;
-
             try {
                 typeMaker = (TypeMaker)configuration.get("typeMaker");
 
@@ -49,10 +49,13 @@ public class ClassFileToJavaSyntaxProcessor {
                 }
             }
 
-            decompileContext.setTypeMaker(typeMaker);
         }
+        decompileContext.setTypeMaker(typeMaker);
 
-        CONVERT_CLASS_FILE_PROCESSOR.process(decompileContext);
-        UPDATE_JAVA_SYNTAX_TREE_PROCESSOR.process(decompileContext);
+        CompilationUnit compilationUnit = CONVERT_CLASS_FILE_PROCESSOR.process(decompileContext.getClassFile(), typeMaker, decompileContext);
+        decompileContext.setCompilationUnit(compilationUnit);
+
+        UPDATE_JAVA_SYNTAX_TREE_PROCESSOR.process(compilationUnit, typeMaker);
+        return compilationUnit;
     }
 }

@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.classfile.ClassFile;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
@@ -33,8 +34,8 @@ public abstract class AbstractJdTest extends TestCase {
         ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
         decompileContext.setClassFile(classFile);
 
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
+        CompilationUnit compilationUnit = converter.process(decompileContext);
+        fragmenter.process(compilationUnit, decompileContext);
         layouter.process(decompileContext);
         tokenizer.process(decompileContext);
         writer.process(decompileContext);
