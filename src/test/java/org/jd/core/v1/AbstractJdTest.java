@@ -50,10 +50,14 @@ public abstract class AbstractJdTest extends TestCase {
         return decompile(loader, printer, internalTypeName, Collections.emptyMap());
     }
 
-    protected String decompileSuccess(Loader loader, Printer printer, String internalTypeName) throws Exception {
-        String source = decompile(loader, printer, internalTypeName, Collections.emptyMap());
+    protected String decompileSuccess(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
+        String source = decompile(loader, printer, internalTypeName, configuration);
         assertTrue(source.indexOf("// Byte code:") == -1);
         return source;
+    }
+
+    protected String decompileSuccess(Loader loader, Printer printer, String internalTypeName) throws Exception {
+        return decompileSuccess(loader, printer, internalTypeName, Collections.emptyMap());
     }
 
     protected void printSource(String source) {

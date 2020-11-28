@@ -7,18 +7,9 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
-import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
-import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
-import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.services.tokenizer.javafragmenttotoken.TestTokenizeJavaFragmentProcessor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,14 +18,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
-public class LayoutFragmentProcessorTest extends TestCase {
-    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
-    protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
-    protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
-    protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
-    //protected TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-    protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
-    protected WriteTokenProcessor writer = new WriteTokenProcessor();
+public class LayoutFragmentProcessorTest extends AbstractJdTest {
 
     @Test
     public void testJdk118Basic() throws Exception {
@@ -44,23 +28,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName("org/jd/core/test/Basic");
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/Basic", configuration);
 
         assertTrue(source.indexOf("/* 188: 188 */") != -1);
     }
@@ -73,24 +41,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName("org/jd/core/test/TryCatchFinally");
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
-
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/TryCatchFinally", configuration);
 
         assertTrue(source.indexOf("/* 902: 902 */") != -1);
     }
@@ -102,25 +53,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName("org/jd/core/test/TryCatchFinally");
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
-
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/TryCatchFinally", configuration);
 
         assertTrue(source.indexOf("/* 902: 902 */") != -1);
     }
@@ -133,23 +66,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName("org/jd/core/test/AnonymousClass");
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/AnonymousClass", configuration);
 
         assertTrue(source.indexOf("/* 111: 111 */") != -1);
 
@@ -164,23 +81,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName("org/jd/core/test/OuterClass");
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/OuterClass", configuration);
 
         assertTrue(source.indexOf("/* 182: 182 */") != -1);
     }
@@ -194,22 +95,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
 
         TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
 
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName("org/jd/core/test/Enum");
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/Enum");
 
         assertTrue(source.indexOf("NEPTUNE(1.024E26D, 2.4746E7D);") != -1);
         assertTrue(source.indexOf("public static final double G = 6.673E-11D;") != -1);
@@ -222,26 +108,7 @@ public class LayoutFragmentProcessorTest extends TestCase {
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName("org/jd/core/test/annotation/Quality");
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/annotation/Quality", configuration);
 
         assertTrue(source.indexOf("/* 9: 0 */   }") != -1);
     }
@@ -253,35 +120,10 @@ public class LayoutFragmentProcessorTest extends TestCase {
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-
-        TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName("org/jd/core/test/Array");
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
+        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/Array", configuration);
 
         Assert.assertTrue(source.matches(PatternMaker.make("/* 30: 30 */", "int[][] ia", "0, 1, 2")));
 
         assertTrue(source.indexOf("/* 75: 75 */") != -1);
-    }
-
-    protected void printSource(String source) {
-        System.out.println("- - - - - - - - ");
-        System.out.println(source);
-        System.out.println("- - - - - - - - ");
     }
 }

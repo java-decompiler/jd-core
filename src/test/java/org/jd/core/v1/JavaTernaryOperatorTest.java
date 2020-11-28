@@ -7,43 +7,24 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
-import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
-import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
-import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Map;
 
-public class JavaTernaryOperatorTest extends TestCase {
-    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
-    protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
-    protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
-    protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
-    //protected TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-    protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
-    protected WriteTokenProcessor writer = new WriteTokenProcessor();
+public class JavaTernaryOperatorTest extends AbstractJdTest {
 
     @Test
     public void testJdk118TernaryOperator() throws Exception {
         String internalClassName = "org/jd/core/test/TernaryOperator";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.1.8.zip");
         Loader loader = new ZipLoader(is);
-        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
+        String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  13 */", "this.str =")));
@@ -70,7 +51,7 @@ public class JavaTernaryOperatorTest extends TestCase {
         String internalClassName = "org/jd/core/test/TernaryOperator";
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         Loader loader = new ZipLoader(is);
-        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
+        String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  13 */", "this.str = (s == null) ? \"1\" : \"2\";")));
@@ -87,40 +68,5 @@ public class JavaTernaryOperatorTest extends TestCase {
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
-    }
-
-    protected String decompile(Loader loader, Printer printer, String internalTypeName) throws Exception {
-        return decompile(loader, printer, internalTypeName, Collections.emptyMap());
-    }
-
-    protected String decompile(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setMainInternalTypeName(internalTypeName);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
-        decompileContext.setBody(classFile);
-
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
-        return source;
-    }
-
-    protected void printSource(String source) {
-        System.out.println("- - - - - - - - ");
-        System.out.println(source);
-        System.out.println("- - - - - - - - ");
     }
 }
