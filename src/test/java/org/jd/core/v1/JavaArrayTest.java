@@ -24,6 +24,7 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJa
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
+import org.jd.core.v1.stub.InitializedArrayInTernaryOperator;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -89,41 +90,17 @@ public class JavaArrayTest extends TestCase {
 
     @Test
     public void testInitializedArrayInTernaryOperator() throws Exception {
-        class InitializedArrayInTernaryOperator {
-            Class[] test0(int i) {
-                return (i == 0) ? new Class[] { Object.class } : null;
-            }
-            Class[] test2(int i) {
-                return (i == 0) ? new Class[] { Object.class, String.class, Number.class } : null;
-            }
-            Class[][] test3(int i) {
-                return (i == 0) ? new Class[][] { { Object.class }, { String.class, Number.class} } : null;
-            }
-            Class[] test4(int i) {
-                return (i == 0) ? null : new Class[] { Object.class };
-            }
-            Class[] test5(int i) {
-                return (i == 0) ? null : new Class[] { Object.class, String.class, Number.class };
-            }
-            Class[][] test6(int i) {
-                return (i == 0) ? null : new Class[][] { { Object.class }, { String.class, Number.class} };
-            }
-            Class[] test7(int i) {
-                return (i == 0) ? new Class[] { Object.class } : new Class[] { String.class, Number.class };
-            }
-        }
-
         String internalClassName = InitializedArrayInTernaryOperator.class.getName().replace('.', '/');
         String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(":  93 */", "return (i == 0) ? new Class<?>[] { Object.class } : null;")));
-        assertTrue(source.matches(PatternMaker.make(":  96 */", "return (i == 0) ? new Class<?>[] { Object.class, String.class, Number.class } : null;")));
-        assertTrue(source.matches(PatternMaker.make(":  99 */", "return (i == 0) ? new Class[][] { { Object.class }, { String.class, Number.class } } : null;")));
-        assertTrue(source.matches(PatternMaker.make(": 102 */", "return (i == 0) ? null : new Class<?>[] { Object.class };")));
-        assertTrue(source.matches(PatternMaker.make(": 105 */", "return (i == 0) ? null : new Class<?>[] { Object.class, String.class, Number.class };")));
-        assertTrue(source.matches(PatternMaker.make(": 108 */", "return (i == 0) ? null : new Class[][] { { Object.class }, { String.class, Number.class} };")));
-        assertTrue(source.matches(PatternMaker.make(": 111 */", "return (i == 0) ? new Class<?>[] { Object.class } : new Class<?>[] { String.class, Number.class };")));
+        assertTrue(source.matches(PatternMaker.make(":  5 */", "return (i == 0) ? new Class<?>[] { Object.class } : null;")));
+        assertTrue(source.matches(PatternMaker.make(":  8 */", "return (i == 0) ? new Class<?>[] { Object.class, String.class, Number.class } : null;")));
+        assertTrue(source.matches(PatternMaker.make(": 11 */", "return (i == 0) ? new Class[][] { { Object.class }, { String.class, Number.class } } : null;")));
+        assertTrue(source.matches(PatternMaker.make(": 14 */", "return (i == 0) ? null : new Class<?>[] { Object.class };")));
+        assertTrue(source.matches(PatternMaker.make(": 17 */", "return (i == 0) ? null : new Class<?>[] { Object.class, String.class, Number.class };")));
+        assertTrue(source.matches(PatternMaker.make(": 20 */", "return (i == 0) ? null : new Class[][] { { Object.class }, { String.class, Number.class} };")));
+        assertTrue(source.matches(PatternMaker.make(": 23 */", "return (i == 0) ? new Class<?>[] { Object.class } : new Class<?>[] { String.class, Number.class };")));
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
