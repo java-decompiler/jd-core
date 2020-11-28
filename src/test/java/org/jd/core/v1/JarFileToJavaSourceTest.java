@@ -29,14 +29,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JarFileToJavaSourceTest extends TestCase {
-    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
-    protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
-    protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
-    protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
-    //protected TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-    protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
-    protected WriteTokenProcessor writer = new WriteTokenProcessor();
+public class JarFileToJavaSourceTest extends AbstractJdTest {
 
     @Test
     public void testCommonsCodec() throws Exception {
