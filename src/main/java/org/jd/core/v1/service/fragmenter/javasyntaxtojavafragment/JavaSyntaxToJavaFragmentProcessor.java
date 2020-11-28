@@ -26,7 +26,7 @@ public class JavaSyntaxToJavaFragmentProcessor {
         Loader loader = decompileContext.getLoader();
         String mainInternalTypeName = decompileContext.getMainInternalTypeName();
         int majorVersion = decompileContext.getMajorVersion();
-        CompilationUnit compilationUnit = decompileContext.getBody();
+        CompilationUnit compilationUnit = decompileContext.getCompilationUnit();
 
         SearchImportsVisitor importsVisitor = new SearchImportsVisitor(loader, mainInternalTypeName);
         importsVisitor.visit(compilationUnit);

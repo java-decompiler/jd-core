@@ -198,7 +198,8 @@ public class WriteTokenTest {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         WriteTokenProcessor writer = new WriteTokenProcessor();
 
-        DecompileContext decompileContext = new DecompileContext(tokens);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setTokens(tokens);
         decompileContext.setPrinter(printer);
         decompileContext.setMaxLineNumber(22);
         decompileContext.setMajorVersion(0);
@@ -279,7 +280,8 @@ public class WriteTokenTest {
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         WriteTokenProcessor writer = new WriteTokenProcessor();
 
-        DecompileContext decompileContext = new DecompileContext(tokens);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setTokens(tokens);
         decompileContext.setPrinter(printer);
         decompileContext.setMaxLineNumber(0);
         decompileContext.setMajorVersion(0);

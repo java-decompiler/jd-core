@@ -939,6 +939,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addSpacerBetweenStatements(fragments);
 
         DecompileContext decompileContext = new DecompileContext(fragments);
+        decompileContext.setBody(fragments);
         decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber2));
 
         return decompileContext;

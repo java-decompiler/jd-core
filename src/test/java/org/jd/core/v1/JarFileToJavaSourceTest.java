@@ -163,7 +163,7 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
                     try {
                         // Decompile class
                         ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
-                        decompileContext.setBody(classFile);
+                        decompileContext.setClassFile(classFile);
 
                         converter.process(decompileContext);
                         fragmenter.process(decompileContext);

@@ -24,7 +24,7 @@ public class UpdateJavaSyntaxTreeProcessor {
 
     public void process(DecompileContext decompileContext) throws Exception {
         TypeMaker typeMaker = decompileContext.getTypeMaker();
-        CompilationUnit compilationUnit = decompileContext.getBody();
+        CompilationUnit compilationUnit = decompileContext.getCompilationUnit();
 
         new UpdateJavaSyntaxTreeStep0Visitor(typeMaker).visit(compilationUnit);
         new UpdateJavaSyntaxTreeStep1Visitor(typeMaker).visit(compilationUnit);

@@ -93,7 +93,7 @@ public class ConvertClassFileProcessor {
 
     public void process(DecompileContext decompileContext) throws Exception {
         TypeMaker typeMaker = decompileContext.getTypeMaker();
-        ClassFile classFile = decompileContext.getBody();
+        ClassFile classFile = decompileContext.getClassFile();
 
         AnnotationConverter annotationConverter = new AnnotationConverter(typeMaker);
 
@@ -113,7 +113,7 @@ public class ConvertClassFileProcessor {
 
         decompileContext.setMajorVersion(classFile.getMajorVersion());
         decompileContext.setMinorVersion(classFile.getMinorVersion());
-        decompileContext.setBody(new CompilationUnit(typeDeclaration));
+        decompileContext.setCompilationUnit(new CompilationUnit(typeDeclaration));
     }
 
     protected ClassFileInterfaceDeclaration convertInterfaceDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {

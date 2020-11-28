@@ -53,7 +53,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     protected void decompile(DecompileContext decompileContext) throws Exception {
         ClassFile classFile = this.deserializer.loadClassFile(decompileContext.getLoader(),
                 decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
+        decompileContext.setClassFile(classFile);
 
         this.converter.process(decompileContext);
         this.fragmenter.process(decompileContext);

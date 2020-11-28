@@ -39,7 +39,7 @@ public class AnnotationConverterTest extends TestCase {
         decompileContext.setLoader(loader);
 
         ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
+        decompileContext.setClassFile(classFile);
 
         // Check class
         assertNotNull(classFile);

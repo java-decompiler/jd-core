@@ -31,7 +31,7 @@ public abstract class AbstractJdTest extends TestCase {
         decompileContext.setConfiguration(configuration);
 
         ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
-        decompileContext.setBody(classFile);
+        decompileContext.setClassFile(classFile);
 
         converter.process(decompileContext);
         fragmenter.process(decompileContext);

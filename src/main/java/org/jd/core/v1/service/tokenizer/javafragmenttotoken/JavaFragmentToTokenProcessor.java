@@ -30,6 +30,6 @@ public class JavaFragmentToTokenProcessor {
             fragment.accept(visitor);
         }
 
-        decompileContext.setBody(visitor.getTokens());
+        decompileContext.setTokens(visitor.getTokens());
     }
 }

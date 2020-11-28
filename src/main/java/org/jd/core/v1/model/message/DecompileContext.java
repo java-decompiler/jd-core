@@ -11,7 +11,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
+import org.jd.core.v1.model.classfile.ClassFile;
+import org.jd.core.v1.model.fragment.Fragment;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,19 +36,27 @@ public class DecompileContext {
     protected boolean containsByteCode;
     protected boolean showBridgeAndSynthetic;
 
+    protected ClassFile classFile;
+    protected CompilationUnit compilationUnit;
+    protected DefaultList<Token> tokens;
+
+    @Deprecated
     protected Object body;
 
     public DecompileContext() {}
 
-    public DecompileContext(Object body) {
-        this.body = body;
+    @Deprecated
+    public DecompileContext(DefaultList<Fragment> fragments) {
+        this.body = fragments;
     }
     
     @SuppressWarnings("unchecked")
+    @Deprecated
     public <T> T getBody() {
         return (T)body;
     }
 
+    @Deprecated
     public void setBody(Object body) {
         this.body = body;
     }

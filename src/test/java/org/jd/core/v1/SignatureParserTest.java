@@ -41,7 +41,7 @@ public class SignatureParserTest extends TestCase {
         decompileContext.setLoader(loader);
 
         ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
+        decompileContext.setClassFile(classFile);
 
         // Check type
         TypeMaker.TypeTypes typeTypes = typeMaker.parseClassFileSignature(classFile);
@@ -158,7 +158,7 @@ public class SignatureParserTest extends TestCase {
         decompileContext.setLoader(loader);
 
         ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
-        decompileContext.setBody(classFile);
+        decompileContext.setClassFile(classFile);
 
         // Check type
         TypeMaker.TypeTypes typeTypes = typeMaker.parseClassFileSignature(classFile);

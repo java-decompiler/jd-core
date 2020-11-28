@@ -2671,11 +2671,11 @@ public class ControlFlowGraphTest extends TestCase {
         decompileContext.setTypeMaker(typeMaker);
 
         ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
-        decompileContext.setBody(classFile);
+        decompileContext.setClassFile(classFile);
 
         converter.process(decompileContext);
 
-        CompilationUnit compilationUnit = decompileContext.getBody();
+        CompilationUnit compilationUnit = decompileContext.getCompilationUnit();
 
         assertNotNull(compilationUnit);
 
