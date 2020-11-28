@@ -7,42 +7,24 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
-import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
-import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
-import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
-import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
-import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.stub.FloatingPointCasting;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.Map;
 
-public class CfrTest extends TestCase {
-    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
-    protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
-    protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
-    protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
-    //protected TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-    protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
-    protected WriteTokenProcessor writer = new WriteTokenProcessor();
+public class CfrTest extends AbstractJdTest {
 
     @Test
     // https://github.com/java-decompiler/jd-core/issues/34
     public void testFloatingPointCasting() throws Exception {
         String internalClassName = FloatingPointCasting.class.getName().replace('.', '/');
-        String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+        String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName, Collections.emptyMap());
+        assertTrue(source.indexOf("// Byte code:") == -1);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(": 12 */", "long b = (long)(double)")));
@@ -51,40 +33,5 @@ public class CfrTest extends TestCase {
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
-    }
-
-    protected String decompile(Loader loader, Printer printer, String internalTypeName) throws Exception {
-        return decompile(loader, printer, internalTypeName, Collections.emptyMap());
-    }
-
-    protected String decompile(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-        decompileContext.setMainInternalTypeName(internalTypeName);
-        decompileContext.setConfiguration(configuration);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
-        decompileContext.setBody(classFile);
-
-        converter.process(decompileContext);
-        fragmenter.process(decompileContext);
-        layouter.process(decompileContext);
-        tokenizer.process(decompileContext);
-        writer.process(decompileContext);
-
-        String source = printer.toString();
-
-        printSource(source);
-
-        assertTrue(source.indexOf("// Byte code:") == -1);
-
-        return source;
-    }
-
-    protected void printSource(String source) {
-        System.out.println("- - - - - - - - ");
-        System.out.println(source);
-        System.out.println("- - - - - - - - ");
     }
 }
