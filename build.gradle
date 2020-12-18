@@ -5,6 +5,9 @@ apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
 dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
     testCompile 'commons-codec:commons-codec:1.13'
     testCompile 'org.apache.commons:commons-collections4:4.1'
     testCompile 'org.apache.commons:commons-imaging:1.0-alpha1'

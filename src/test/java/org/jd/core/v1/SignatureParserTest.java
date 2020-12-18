@@ -11,10 +11,15 @@ import junit.framework.TestCase;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
+import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.services.javasyntax.type.visitor.PrintTypeVisitor;
 import org.junit.Assert;
 import org.junit.Test;
@@ -22,7 +27,7 @@ import org.junit.Test;
 import java.io.InputStream;
 
 public class SignatureParserTest extends TestCase {
-    protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
+    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
 
     @Test
     public void testAnnotatedClass() throws Exception {
@@ -31,13 +36,12 @@ public class SignatureParserTest extends TestCase {
         ZipLoader loader = new ZipLoader(is);
         TypeMaker typeMaker = new TypeMaker(loader);
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/AnnotatedClass");
-        message.setHeader("loader", loader);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setMainInternalTypeName("org/jd/core/test/AnnotatedClass");
+        decompileContext.setLoader(loader);
 
-        deserializer.process(message);
-
-        ClassFile classFile = message.getBody();
+        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
+        decompileContext.setClassFile(classFile);
 
         // Check type
         TypeMaker.TypeTypes typeTypes = typeMaker.parseClassFileSignature(classFile);
@@ -149,13 +153,12 @@ public class SignatureParserTest extends TestCase {
         ZipLoader loader = new ZipLoader(is);
         TypeMaker typeMaker = new TypeMaker(loader);
 
-        Message message = new Message();
-        message.setHeader("mainInternalTypeName", "org/jd/core/test/GenericClass");
-        message.setHeader("loader", loader);
+        DecompileContext decompileContext = new DecompileContext();
+        decompileContext.setMainInternalTypeName("org/jd/core/test/GenericClass");
+        decompileContext.setLoader(loader);
 
-        deserializer.process(message);
-
-        ClassFile classFile = message.getBody();
+        ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
+        decompileContext.setClassFile(classFile);
 
         // Check type
         TypeMaker.TypeTypes typeTypes = typeMaker.parseClassFileSignature(classFile);
