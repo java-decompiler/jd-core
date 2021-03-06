@@ -32,11 +32,11 @@ public interface InterfaceWithDefaultMethods {
         return getZonedDateTime(getLocalDateTime(), getZoneId(zoneString));
     }
 
-    private static ZoneId unsafeGetZoneId(String zoneString) throws DateTimeException {
+    static ZoneId unsafeGetZoneId(String zoneString) throws DateTimeException {
         return ZoneId.of(zoneString);
     }
 
-    private ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId) {
+    default ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId) {
         return ZonedDateTime.of(localDateTime, zoneId);
     }
 }
