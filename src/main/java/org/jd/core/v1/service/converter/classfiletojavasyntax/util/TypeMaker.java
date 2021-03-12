@@ -120,7 +120,7 @@ public class TypeMaker {
             String superTypeName = classFile.getSuperTypeName();
             String[] interfaceTypeNames = classFile.getInterfaceTypeNames();
 
-            if (! "java/lang/Object".equals(superTypeName)) {
+            if (superTypeName != null  && ! "java/lang/Object".equals(superTypeName)) {
                 typeTypes.superType = makeFromInternalTypeName(superTypeName);
             }
 

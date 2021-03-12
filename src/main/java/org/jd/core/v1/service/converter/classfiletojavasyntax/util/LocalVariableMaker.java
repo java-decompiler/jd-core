@@ -137,11 +137,12 @@ public class LocalVariableMaker {
             if ((rvpa == null) && (ripa == null)) {
                 for (int parameterIndex=0, variableIndex=firstVariableIndex; parameterIndex<=lastParameterIndex; parameterIndex++, variableIndex++) {
                     AbstractLocalVariable lv = localVariableSet.root(variableIndex);
+                    if (lv != null) {
+                        formalParameters.add(new ClassFileFormalParameter(lv, varargs && (parameterIndex == lastParameterIndex)));
 
-                    formalParameters.add(new ClassFileFormalParameter(lv, varargs && (parameterIndex==lastParameterIndex)));
-
-                    if (PrimitiveType.TYPE_LONG.equals(lv.getType()) || PrimitiveType.TYPE_DOUBLE.equals(lv.getType())) {
-                        variableIndex++;
+                        if (PrimitiveType.TYPE_LONG.equals(lv.getType()) || PrimitiveType.TYPE_DOUBLE.equals(lv.getType())) {
+                            variableIndex++;
+                        }
                     }
                 }
             } else {
