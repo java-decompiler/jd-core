@@ -146,7 +146,9 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 if (count > 0) {
                     // Remove outer local variable reference
                     int size = list.size();
-                    list.subList(size - count, size).clear();
+                    if (size > 0 && count <= size) {
+                        list.subList(size - count, size).clear();
+                    }
                 }
             } else if (removeFirstParameter || !syntheticInnerFieldNames.isEmpty()) {
                 // Remove outer this and outer local variable reference
