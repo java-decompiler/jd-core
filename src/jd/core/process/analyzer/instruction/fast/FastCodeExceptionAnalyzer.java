@@ -459,7 +459,7 @@ public class FastCodeExceptionAnalyzer
 	}
 
 	/*
-	 * Recherche l'offset apres le bloc try-catch-finally
+	 * Recherche l'offset après le bloc try-catch-finally
 	 */
 	private static int SearchAfterOffset(List<Instruction> list, int offset)
 	{
@@ -493,7 +493,7 @@ public class FastCodeExceptionAnalyzer
 		case ByteCodeConstants.RET:
 			// Particularite de la structure try-catch-finally du JDK 1.1.8:  
 			// une sous routine termine le bloc precedent 'offset'. 
-			// Strategie : recheche de l'instruction goto, sautant apres 
+			// Strategie : recheche de l'instruction goto, sautant après 
 			// 'offset', et suivie par le sequence d'instructions suivante :
 		    //  30: goto +105 -> 135
 		    //  33: astore_3
@@ -1166,7 +1166,7 @@ public class FastCodeExceptionAnalyzer
 					{
 						// L'un des deux cas les plus complexes : 
 						// - le bloc 'finally' est dupliqué deux fois.
-						// - aucun 'goto' ne saute apres le dernier bloc finally.
+						// - aucun 'goto' ne saute après le dernier bloc finally.
 						// Methode de calcul de 'afterOffset' : 
 						// - compter le nombre d'instructions entre le début du 1er bloc 
 						//   'finally' et le saut du goto en fin de bloc 'try'.
@@ -1201,7 +1201,7 @@ public class FastCodeExceptionAnalyzer
 			{
 				// L'un des deux cas les plus complexes : 
 				// - le bloc 'finally' est dupliqué deux ou trois fois.
-				// - aucun 'goto' ne saute apres le dernier bloc finally.
+				// - aucun 'goto' ne saute après le dernier bloc finally.
 				// Methode de calcul de 'afterOffset' : 
 				// - compter le nombre d'instructions entre le début du 1er bloc 
 				//   'finally' et le saut du goto en fin de bloc 'try'.
@@ -1278,8 +1278,8 @@ public class FastCodeExceptionAnalyzer
 		case FastConstants.TYPE_118_FINALLY:
 			{
 				// Re-estimation de la valeur de l'attribut 'afterOffset'.
-				// Strategie : le bon offset, apres le bloc 'try-finally', se 
-				// trouve apres l'instruction 'ret' de la sous procedure du 
+				// Strategie : le bon offset, après le bloc 'try-finally', se 
+				// trouve après l'instruction 'ret' de la sous procedure du 
 				// bloc 'finally'.
 				int index = InstructionUtil.getIndexForOffset(
 						list, fastCodeException.finallyFromOffset);
@@ -1356,7 +1356,7 @@ public class FastCodeExceptionAnalyzer
 				// négatif allant en deca du debut du dernier block. Le parcours
 				// du bytecode doit prendre en compte les sauts positifs.
 				
-				// Calcul de l'offset apres la structure try-catch
+				// Calcul de l'offset après la structure try-catch
 				int afterOffset = fastCodeException.afterOffset;
 				if (afterOffset == -1)
 					afterOffset = list.get(length-1).offset + 1;
@@ -1385,7 +1385,7 @@ public class FastCodeExceptionAnalyzer
 						fastCodeExceptions, fastCodeException.tryFromOffset, 
 						fastCodeException.maxOffset, afterOffset);
 						
-				// Recherche de la 1ere exception débutant apres 'maxOffset' 
+				// Recherche de la 1ere exception débutant après 'maxOffset' 
 				int tryFromOffset = Integer.MAX_VALUE;
 				int tryIndex = fastCodeExceptionIndex + 1;
 				while (tryIndex < fastCodeExceptions.size())
@@ -1483,7 +1483,7 @@ public class FastCodeExceptionAnalyzer
 									else
 									{
 										// Dernier 'return' 
-										// => Instruction placee apres le bloc
+										// => Instruction placee après le bloc
 										fastCodeException.afterOffset = instruction.offset;
 									}
 								}
@@ -1513,7 +1513,7 @@ public class FastCodeExceptionAnalyzer
 										// Une instruction du bloc 
 										// 'try-catch-finally' saute vers 
 										// cette instruction.
-										// => Instruction placee apres le bloc
+										// => Instruction placee après le bloc
 										fastCodeException.afterOffset = instruction.offset;
 									}
 								}
@@ -1585,7 +1585,7 @@ public class FastCodeExceptionAnalyzer
 											// Une instruction du bloc 
 											// 'try-catch-finally' saute vers 
 											// cette instuction 
-											// => Instruction placée apres le bloc
+											// => Instruction placée après le bloc
 											fastCodeException.afterOffset = instruction.offset;
 										}
 									}
@@ -1800,8 +1800,8 @@ public class FastCodeExceptionAnalyzer
 						}
 						
 						// L'instruction a un numero de ligne inferieur aux
-						// instructions du bloc 'try'. A priori, elle doit etre
-						// place apres le bloc 'catch'.
+						// instructions du bloc 'try'. A priori, elle doit être
+						// place après le bloc 'catch'.
 						
 						// Est-ce une instruction de saut ? Si oui, est-ce que
 						// la placer hors du bloc 'catch' genererait deux points

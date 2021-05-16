@@ -20,9 +20,9 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
 
 /*
- * La construction de cette instruction ne suit pas les régles générales !
+ * La construction de cette instruction ne suit pas les règles générales !
  * C'est la seule exception. Cette instruction, appartement au package 
- * 'bytecode', ne peut etre construite qu'apres avoir aglomérée les instructions
+ * 'bytecode', ne peut être construite qu'après avoir aggloméré les instructions
  * 'if'. Cette instruction est affichée par une classe du package 'bytecode' et 
  * est construite par une classe du package 'fast'. 
  */

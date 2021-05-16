@@ -64,13 +64,13 @@ public class LocalVariableAnalyzer
 {	
 	/**
 	 * Indexe de signature pour les variables locales de type inconnu. Si le 
-	 * type de la variable n'a pu etre determiné, la variable sera type 
+	 * type de la variable n'a pu être determiné, la variable sera type 
 	 * 'Object'.
 	 */
 	private static final int UNDEFINED_TYPE = -1;
 	/**
 	 * Indexe de signature pour les variables locales de type numérique inconnu.
-	 * Si le type de la variable n'a pu etre determiné, la variable sera type 
+	 * Si le type de la variable n'a pu être determiné, la variable sera type 
 	 * 'int'.
 	 */
 	private static final int NUMBER_TYPE = -2;	
@@ -505,7 +505,7 @@ public class LocalVariableAnalyzer
 							{				
 								// Variable non trouvée. Recherche de la variable avec 
 								// l'offset suivant car les compilateurs place 'start_pc'
-								// une instruction plus apres.
+								// une instruction plus après.
 								int nextOffset = 
 									ByteCodeUtil.NextInstructionOffset(code, astore.offset);					
 								lv = localVariables.getLocalVariableWithIndexAndOffset(
@@ -597,7 +597,7 @@ public class LocalVariableAnalyzer
 		{
 			// Variable non trouvée. Recherche de la variable avec 
 			// l'offset suivant car les compilateurs place 'start_pc'
-			// une instruction plus apres.
+			// une instruction plus après.
 			int nextOffset = ByteCodeUtil.NextInstructionOffset(code, ii.offset);					
 			lv = localVariables.getLocalVariableWithIndexAndOffset(ii.index, nextOffset);					
 			if (lv != null)
@@ -794,7 +794,7 @@ public class LocalVariableAnalyzer
 				// decompilateur ne connait pas le graphe d'heritage des
 				// classes decompilées. Le type de la variable est valué à 
 				// 'Object'. Des instructions 'cast' supplémentaires doivent
-				// etre ajoutés. Voir la limitation de JAD sur ce point.
+				// être ajoutés. Voir la limitation de JAD sur ce point.
 				lv.signature_index = internalObjectSignatureIndex;
 				break;
 			}

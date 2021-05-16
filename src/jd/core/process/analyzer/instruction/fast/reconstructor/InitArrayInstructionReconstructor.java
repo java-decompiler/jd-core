@@ -42,7 +42,7 @@ import jd.core.process.analyzer.util.ReconstructorUtil;
  * ...
  * ???( DupLoadN )
  * 
- * Cette operation doit etre executee avant 'AssignmentInstructionReconstructor'.
+ * Cette operation doit être executee avant 'AssignmentInstructionReconstructor'.
  */
 public class InitArrayInstructionReconstructor 
 {

@@ -926,18 +926,18 @@ public class FastInstructionListBuilder {
 		// A executer avant 'ComparisonInstructionAnalyzer'
 		IfGotoToIfReconstructor.Reconstruct(list);
 		// Aggregation des instructions 'if'
-		// A executer apres 'AssignmentInstructionReconstructor',
+		// A executer après 'AssignmentInstructionReconstructor',
 		// 'IfGotoToIfReconstructor'
 		// A executer avant 'TernaryOpReconstructor'
 		ComparisonInstructionAnalyzer.Aggregate(list);
-		// Recontruction des instructions 'assert'. Cette operation doit etre
-		// executee apres 'ComparisonInstructionAnalyzer'.
+		// Recontruction des instructions 'assert'. Cette operation doit être
+		// executee après 'ComparisonInstructionAnalyzer'.
 		AssertInstructionReconstructor.Reconstruct(classFile, list);
 		// Create ternary operator before analisys of local variables.
 		// A executer après 'ComparisonInstructionAnalyzer'
 		TernaryOpReconstructor.Reconstruct(list);
 		// Recontruction des initialisations de tableaux
-		// Cette operation doit etre executee apres
+		// Cette operation doit être executee après
 		// 'AssignmentInstructionReconstructor'.
 		InitArrayInstructionReconstructor.Reconstruct(list);
 		// Recontruction des operations binaires d'assignement
@@ -1087,22 +1087,22 @@ public class FastInstructionListBuilder {
 	 * 
 	 * WHILE instruction avant boucle | goto | beforeSubListOffset instructions
 	 * | instruction | beforeLoopEntryOffset if a saut negatif |
-	 * loopEntryOffset, endLoopOffset, afterListOffset instruction apres boucle
+	 * loopEntryOffset, endLoopOffset, afterListOffset instruction après boucle
 	 * | afterLoopOffset
 	 * 
 	 * DO_WHILE instruction avant boucle | beforeListOffset instructions |
 	 * instruction | beforeLoopEntryOffset if a saut negatif | loopEntryOffset,
-	 * endLoopOffset, afterListOffset instruction apres boucle | afterLoopOffset
+	 * endLoopOffset, afterListOffset instruction après boucle | afterLoopOffset
 	 * 
 	 * FOR instruction avant boucle | goto | beforeListOffset instructions |
 	 * instruction | beforeLoopEntryOffset iinc | loopEntryOffset,
-	 * afterListOffset if a saut negatif | endLoopOffset instruction apres
+	 * afterListOffset if a saut negatif | endLoopOffset instruction après
 	 * boucle | afterLoopOffset
 	 * 
 	 * 
 	 * INFINITE_LOOP instruction avant boucle | beforeListOffset instructions |
 	 * instruction | beforeLoopEntryOffset goto a saut negatif |
-	 * loopEntryOffset, endLoopOffset, afterListOffset instruction apres boucle
+	 * loopEntryOffset, endLoopOffset, afterListOffset instruction après boucle
 	 * | afterLoopOffset
 	 */
 	private static void AnalyzeList(ClassFile classFile, Method method, List<Instruction> list,
@@ -1120,7 +1120,7 @@ public class FastInstructionListBuilder {
 		AnalyzeTryAndSynchronized(classFile, method, list, localVariables, offsetLabelSet, beforeLoopEntryOffset,
 				loopEntryOffset, afterBodyLoopOffset, beforeListOffset, afterListOffset, breakOffset, returnOffset);
 
-		// Recontruction de la sequence 'return (b1 == 1);' apres la
+		// Recontruction de la sequence 'return (b1 == 1);' après la
 		// determination des types de variable
 		// A executer après 'ComparisonInstructionAnalyzer'
 		TernaryOpInReturnReconstructor.Reconstruct(list);
@@ -2298,7 +2298,7 @@ public class FastInstructionListBuilder {
 					// 'lastBodyLoop' et 'test'
 					if (!InstructionUtil.CheckNoJumpToInterval(subList, 0, subListLength, lastBodyLoop.offset,
 							test.offset)) {
-						// 'lastBodyLoop' ne peut pas etre l'instruction
+						// 'lastBodyLoop' ne peut pas être l'instruction
 						// d'incrementation d'une boucle 'for'
 						lastBodyLoop = null;
 						beforeLastBodyLoop = null;
@@ -3282,13 +3282,13 @@ public class FastInstructionListBuilder {
 					// 'lastBodyLoop' et 'jumpInstruction'
 					if (!InstructionUtil.CheckNoJumpToInterval(subList, 0, subListLength, lastBodyLoop.offset,
 							jumpInstruction.offset)) {
-						// 'lastBodyLoop' ne peut pas etre l'instruction
+						// 'lastBodyLoop' ne peut pas être l'instruction
 						// d'incrementation d'une boucle 'for'
 						lastBodyLoop = null;
 						beforeLastBodyLoop = null;
 					} else if (!InstructionUtil.CheckNoJumpToInterval(subList, 0, subListLength, beforeListOffset,
 							firstOffset)) {
-						// 'lastBodyLoop' ne peut pas etre l'instruction
+						// 'lastBodyLoop' ne peut pas être l'instruction
 						// d'incrementation d'une boucle 'for'
 						lastBodyLoop = null;
 						beforeLastBodyLoop = null;

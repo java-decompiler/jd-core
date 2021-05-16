@@ -67,7 +67,7 @@ public class InstructionListBuilder
 				
 				// Declaration du tableau des sauts vers les sous procedures 
 				// (jsr ... ret). A chaque début de sous procedures, une pseudo 
-				// adresse de retour doit etre inseree sur la pile.
+				// adresse de retour doit être inseree sur la pile.
 				IntSet offsetSet = new IntSet();
 				
 				// Population des deux tableaux dans la meme passe.

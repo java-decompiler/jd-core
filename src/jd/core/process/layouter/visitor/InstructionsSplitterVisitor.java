@@ -143,7 +143,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 		if (this.firstLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
 		{
 			// Bloc executé si une instruction 'AnonymousNewInvoke' vient 
-			// d'etre traitee.
+			// d'être traitee.
 			this.firstLineNumber = instruction.lineNumber;
 		}
 		

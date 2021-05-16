@@ -135,7 +135,7 @@ public class ClassFileAnalyzer
 			
 			// L'analyse preliminaire permet d'identifier l'attribut de chaque
 			// classe interne non statique portant la reference vers la classe
-			// externe. 'PreAnalyzeMethods' doit etre execute avant l'analyse
+			// externe. 'PreAnalyzeMethods' doit être execute avant l'analyse
 			// des classes internes. Elle permet egalement de construire la liste
 			// des accesseurs et de parser les tableaux "SwitchMap" produit par le 
 			// compilateur d'Eclipse et utilisé pour le Switch+Enum.
@@ -797,14 +797,14 @@ public class ClassFileAnalyzer
 		    	// Set constant type of "String.indexOf(...)" methods
 		    	SetConstantTypeInStringIndexOfMethods(classFile, list);
 				// Elimine la séquence DupStore(this) ... DupLoad() ... DupLoad().
-				// Cette operation doit etre executee avant
+				// Cette operation doit être executee avant
 				// 'AssignmentInstructionReconstructor'.
 		    	DupStoreThisReconstructor.Reconstruct(list);
 				// Recontruction des affectations multiples
-		    	// Cette operation doit etre executee avant
+		    	// Cette operation doit être executee avant
 				// 'InitArrayInstructionReconstructor', 'TernaryOpReconstructor'
 				// et la construction des instructions try-catch et finally.
-		    	// Cette operation doit etre executee après 'DupStoreThisReconstructor'.
+		    	// Cette operation doit être executee après 'DupStoreThisReconstructor'.
 				AssignmentInstructionReconstructor.Reconstruct(list);
 		    	// Elimine les doubles casts et ajoute des casts devant les 
 				// constantes numeriques si necessaire.

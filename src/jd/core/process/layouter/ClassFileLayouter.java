@@ -687,7 +687,7 @@ public class ClassFileLayouter {
 					classFile, method.getAttributes(), subLayoutBlockList);
 				
 				// Information utilisee par 'PrintWriter' pour afficher un ';'
-				// apres les methodes sans code. Evite d'instancier un object
+				// après les methodes sans code. Evite d'instancier un object
 				// 'EmptyCodeLayoutBlock'.
 				boolean nullCodeFlag = (method.getCode() == null);
 				boolean displayThrowsFlag = false;
@@ -3294,7 +3294,7 @@ public class ClassFileLayouter {
 				}
 				if (mlb.other.index >= lastBlockIndex)
 				{
-					// Le marqueur de fin est apres la limite.
+					// Le marqueur de fin est après la limite.
 					return false;
 				}
 							
