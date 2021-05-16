@@ -121,13 +121,13 @@ public class ByteCodeParser {
                     stack.push(new IntegerConstantExpression(lineNumber, MAYBE_BYTE_TYPE, opcode - 3));
                     break;
                 case 9: case 10: // LCONST_0, LCONST_1
-                    stack.push(new LongConstantExpression(lineNumber, (long)(opcode - 9)));
+                    stack.push(new LongConstantExpression(lineNumber, opcode - 9));
                     break;
                 case 11: case 12: case 13: // FCONST_0, FCONST_1, FCONST_2
-                    stack.push(new FloatConstantExpression(lineNumber, (float)(opcode - 11)));
+                    stack.push(new FloatConstantExpression(lineNumber, opcode - 11));
                     break;
                 case 14: case 15: // DCONST_0, DCONST_1
-                    stack.push(new DoubleConstantExpression(lineNumber, (double)(opcode - 14)));
+                    stack.push(new DoubleConstantExpression(lineNumber, opcode - 14));
                     break;
                 case 16: // BIPUSH
                     value = (byte)(code[++offset] & 255);

@@ -115,7 +115,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     @Override
     @SuppressWarnings("unchecked")
     public void visit(FieldDeclarators list) {
-        acceptListDeclaration((List<? extends Declaration>)list);
+        acceptListDeclaration(list);
     }
 
     @Override

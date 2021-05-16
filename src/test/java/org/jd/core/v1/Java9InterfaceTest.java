@@ -12,7 +12,6 @@ import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
-import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.printer.PlainTextPrinter;

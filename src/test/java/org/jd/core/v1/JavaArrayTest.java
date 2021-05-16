@@ -25,9 +25,7 @@ import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenP
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.junit.Test;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
 
