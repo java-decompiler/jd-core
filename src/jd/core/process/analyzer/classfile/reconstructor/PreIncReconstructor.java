@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
 import java.util.List;
@@ -35,7 +51,7 @@ public class PreIncReconstructor
 			if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
 				continue;
 
-			// DupStore trouvé
+			// DupStore trouvï¿½
 			DupStore dupstore = (DupStore)list.get(dupStoreIndex);
 			
 			if ((dupstore.objectref.opcode != ByteCodeConstants.BINARYOP))
@@ -77,35 +93,35 @@ public class PreIncReconstructor
 					if ((boi.value1.opcode == ByteCodeConstants.ALOAD) && 
 						(((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 						(((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvï¿½
 						dupload = (DupLoad)((StoreInstruction)i).valueref;
 						break;
 				case ByteCodeConstants.ISTORE:
 					if ((boi.value1.opcode == ByteCodeConstants.ILOAD) &&
 						(((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 						(((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvï¿½
 						dupload = (DupLoad)((StoreInstruction)i).valueref;
 						break;
 				case ByteCodeConstants.STORE:
 					if ((boi.value1.opcode == ByteCodeConstants.LOAD) &&
 						(((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 						(((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvï¿½
 						dupload = (DupLoad)((StoreInstruction)i).valueref;
 					break;
 				case ByteCodeConstants.PUTFIELD:
 					if ((boi.value1.opcode == ByteCodeConstants.GETFIELD) &&
 						(((PutField)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 					    (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvï¿½
 						dupload = (DupLoad)((PutField)i).valueref;
 					break;
 				case ByteCodeConstants.PUTSTATIC:
 					if ((boi.value1.opcode == ByteCodeConstants.GETSTATIC) &&
 						(((PutStatic)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 				        (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
-						// 1er DupLoad trouvé
+						// 1er DupLoad trouvï¿½
 						dupload = (DupLoad)((PutStatic)i).valueref;
 					break;
 				}

@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
 import java.util.List;
@@ -49,14 +65,14 @@ public class AssignmentInstructionReconstructor
 			if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
 				continue;
 
-			// DupStore trouvé
+			// DupStore trouvï¿½
 			DupStore dupStore = (DupStore)list.get(dupStoreIndex);
 
 			int length = list.size();
 
 			// Ne pas prendre en compte les instructions DupStore suivie par une 
 			// instruction AASTORE ou ARRAYSTORE dont l'attribut arrayref pointe 
-			// vers l'instruction DupStore : ce cas est traité par
+			// vers l'instruction DupStore : ce cas est traitï¿½ par
 			// 'InitArrayInstructionReconstructor'.
 			if (dupStoreIndex+1 < length)
 			{
@@ -96,7 +112,7 @@ public class AssignmentInstructionReconstructor
 						if ((i.opcode == ByteCodeConstants.DUPLOAD) && 
 							(((DupLoad)i).dupStore == dupStore))
 						{
-							// 1er DupLoad trouvé
+							// 1er DupLoad trouvï¿½
 							dupload1 = (DupLoad)i;
 						}
 					}
@@ -140,7 +156,7 @@ public class AssignmentInstructionReconstructor
 					// Mise a jour de toutes les instructions TernaryOpStore
 					// pointant vers cette instruction d'assignation. 
 					// Explication:
-					//	ternaryOp2ndValueOffset est initialisée avec l'offset de
+					//	ternaryOp2ndValueOffset est initialisï¿½e avec l'offset de
 					//  la derniere instruction poussant une valeur sur la pile.
 					//  Dans le cas d'une instruction d'assignation contenue 
 					//  dans un operateur ternaire, ternaryOp2ndValueOffset est
@@ -153,7 +169,7 @@ public class AssignmentInstructionReconstructor
 					{
 						if (list.get(j).opcode == ByteCodeConstants.TERNARYOPSTORE)
 						{
-							// TernaryOpStore trouvé
+							// TernaryOpStore trouvï¿½
 							TernaryOpStore tos = (TernaryOpStore)list.get(j);
 							if (tos.ternaryOp2ndValueOffset == dupStore.offset)
 							{

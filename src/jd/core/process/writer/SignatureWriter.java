@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.writer;
 
 import java.util.HashSet;
@@ -113,7 +129,7 @@ public class SignatureWriter
 		// - var 2: index de la valeur => ne pas afficher
 		// Signature:
 		// - variableIndex = 1 + 1 + 1
-		// Le premier parametre des méthodes non statiques est 'this'
+		// Le premier parametre des mï¿½thodes non statiques est 'this'
 		printer.print('(');
 
 		int variableIndex = staticMethodFlag ? 0 : 1;
@@ -167,7 +183,7 @@ public class SignatureWriter
 
 				LocalVariable lv = null;
 
-				// TODO Test à retirer. Ce test a ete ajouter lors du codage
+				// TODO Test ï¿½ retirer. Ce test a ete ajouter lors du codage
 				// de la gestion des enum pour eviter un NullPointerException
 				if (method.getLocalVariables() != null) {
 					lv = method.getLocalVariables().searchLocalVariableWithIndexAndOffset(variableIndex, 0);
@@ -503,7 +519,7 @@ public class SignatureWriter
 
 				if (classFile.getInternalPackageName().equals(internalPackageName)) 
 				{
-					// Classe appartenant au même package que la classe courante
+					// Classe appartenant au mï¿½me package que la classe courante
 					if (classFile.getInnerClassFile(internalName) != null) 
 					{
 						// Dans le cas d'une classe interne, on retire le nom

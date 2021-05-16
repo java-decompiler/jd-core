@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.analyzer.classfile;
 
 import java.util.ArrayList;
@@ -65,7 +81,7 @@ public class ClassFileAnalyzer
 	public static void Analyze(ReferenceMap referenceMap, ClassFile classFile)
 	{
 		// Creation du tableau associatif [nom de classe interne, objet class].
-		// Ce tableau est utilisé pour la suppression des accesseurs des 
+		// Ce tableau est utilisï¿½ pour la suppression des accesseurs des 
 		// classes internes.
 		HashMap<String, ClassFile> innerClassesMap;
 		if (classFile.getInnerClassFiles() != null)
@@ -122,7 +138,7 @@ public class ClassFileAnalyzer
 			// externe. 'PreAnalyzeMethods' doit etre execute avant l'analyse
 			// des classes internes. Elle permet egalement de construire la liste
 			// des accesseurs et de parser les tableaux "SwitchMap" produit par le 
-			// compilateur d'Eclipse et utilisé pour le Switch+Enum.
+			// compilateur d'Eclipse et utilisï¿½ pour le Switch+Enum.
 			PreAnalyzeMethods(eclipseSwitchMaps, classFile);		
 	
 			// Analyse des classes internes avant l'analyse de la classe pour 
@@ -766,10 +782,10 @@ public class ClassFileAnalyzer
 		    	PreIncReconstructor.Reconstruct(list);	    	
 		    	// Recontruction des instructions de post-incrementation non entier
 		    	PostIncReconstructor.Reconstruct(list);
-	    		// Recontruction du mot clé '.class' pour le JDK 1.1.8 - A
+	    		// Recontruction du mot clï¿½ '.class' pour le JDK 1.1.8 - A
 	    		DotClass118AReconstructor.Reconstruct(
 	    			referenceMap, classFile, list);
-	    		// Recontruction du mot clé '.class' pour le JDK 1.4
+	    		// Recontruction du mot clï¿½ '.class' pour le JDK 1.4
 	    		DotClass14Reconstructor.Reconstruct(
 	    			referenceMap, classFile, list);
 		    	// Replace StringBuffer and StringBuilder in java source line
@@ -780,7 +796,7 @@ public class ClassFileAnalyzer
 		    	TransformTestOnLongOrDouble(list);
 		    	// Set constant type of "String.indexOf(...)" methods
 		    	SetConstantTypeInStringIndexOfMethods(classFile, list);
-				// Elimine la séquence DupStore(this) ... DupLoad() ... DupLoad().
+				// Elimine la sï¿½quence DupStore(this) ... DupLoad() ... DupLoad().
 				// Cette operation doit etre executee avant
 				// 'AssignmentInstructionReconstructor'.
 		    	DupStoreThisReconstructor.Reconstruct(list);
@@ -788,7 +804,7 @@ public class ClassFileAnalyzer
 		    	// Cette operation doit etre executee avant
 				// 'InitArrayInstructionReconstructor', 'TernaryOpReconstructor'
 				// et la construction des instructions try-catch et finally.
-		    	// Cette operation doit etre executee après 'DupStoreThisReconstructor'.
+		    	// Cette operation doit etre executee aprï¿½s 'DupStoreThisReconstructor'.
 				AssignmentInstructionReconstructor.Reconstruct(list);
 		    	// Elimine les doubles casts et ajoute des casts devant les 
 				// constantes numeriques si necessaire.
@@ -807,7 +823,7 @@ public class ClassFileAnalyzer
 		    	FastInstructionListBuilder.Build(
 		    		referenceMap, classFile, method, fastList);
 		    	
-		    	// Ajout des déclarations des variables locales temporaires
+		    	// Ajout des dï¿½clarations des variables locales temporaires
 		    	DupLocalVariableAnalyzer.Declare(classFile, method, fastList);
 			}
 		    catch (Exception e)
@@ -1082,7 +1098,7 @@ public class ClassFileAnalyzer
 									if (count == 2)
 									{
 										// Retrait de l'appel du constructeur s'il
-										// n'a que les deux paramètres standard.
+										// n'a que les deux paramï¿½tres standard.
 										list.remove(0);
 									}
 								}

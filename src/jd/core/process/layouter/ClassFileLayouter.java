@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.layouter;
 
 import java.util.ArrayList;
@@ -589,7 +605,7 @@ public class ClassFileLayouter {
 	    		AttributeSignature as = method.getAttributeSignature();
 	    		
 	    		// Le descripteur et la signature sont differentes pour les 
-	    		// constructeurs des Enums ! Cette information est passée à 
+	    		// constructeurs des Enums ! Cette information est passï¿½e ï¿½ 
 	    		// "SignatureWriter.WriteMethodSignature(...)".
 			    boolean descriptorFlag = (as == null);
 	    		int signatureIndex = descriptorFlag ? 
@@ -2829,13 +2845,13 @@ public class ClassFileLayouter {
 			
 			if (lb.tag == markerEndTag)
 			{
-				// Tag de marqueur de fin trouvé.
+				// Tag de marqueur de fin trouvï¿½.
 				MarkerLayoutBlock mlb = (MarkerLayoutBlock)lb;
 				
 				if (mlb.section != mlb.other.section)
 				{
-					// Le marqueur de début et le marqueur de fin ne font pas
-					// parti de la même section -> l'un des blocs entre eux deux 
+					// Le marqueur de dï¿½but et le marqueur de fin ne font pas
+					// parti de la mï¿½me section -> l'un des blocs entre eux deux 
 					// a un numero de ligne connu -> blocs indeplacables.
 					return false;
 				}
@@ -2845,7 +2861,7 @@ public class ClassFileLayouter {
 					return false;
 				}
 							
-				// Trouvé. 
+				// Trouvï¿½. 
 				
 				// -- 1 ----------------------------------------------------- //
 				int lastEndTagBlockIndex = blockIndex;
@@ -2867,13 +2883,13 @@ public class ClassFileLayouter {
 					}
 					else if (lb.tag == markerEndTag)
 					{
-						// Tag de marqueur de fin trouvé.
+						// Tag de marqueur de fin trouvï¿½.
 						mlb = (MarkerLayoutBlock)lb;
 						
 						if (mlb.section != mlb.other.section)
 						{
-							// Le marqueur de début et le marqueur de fin ne font pas
-							// parti de la même section -> l'un des blocs entre eux deux 
+							// Le marqueur de dï¿½but et le marqueur de fin ne font pas
+							// parti de la mï¿½me section -> l'un des blocs entre eux deux 
 							// a un numero de ligne connu -> blocs indeplacables.
 							break;
 						}					
@@ -2894,7 +2910,7 @@ public class ClassFileLayouter {
 					}
 				}
 				
-				// Un ou plusieurs blocs a deplacer trouvés.
+				// Un ou plusieurs blocs a deplacer trouvï¿½s.
 				
 				// Rechercher de l'index d'insertion =>
 				//  Trouver la section ayant le score le plus bas jusqu'a la 
@@ -2945,7 +2961,7 @@ public class ClassFileLayouter {
 					
 				if (lowerScore != lsSource.score)
 				{
-					// Trouvé. 
+					// Trouvï¿½. 
 					
 					// -- 2 ------------------------------------------------- //
 
@@ -2976,7 +2992,7 @@ public class ClassFileLayouter {
 						blockIndex--;
 					}
 					
-					// Trouvé.
+					// Trouvï¿½.
 					
 					// -- 3 ------------------------------------------------- //
 
@@ -3013,7 +3029,8 @@ public class ClassFileLayouter {
 						LayoutBlockConstants.SEPARATOR)
 					{
 						layoutBlockList.remove(blockIndex+1);
-						sourceDeltaIndex++;					}
+						sourceDeltaIndex++;
+					}
 					
 					// Modify separator brefore blocks if exists
 					if (layoutBlockList.get(blockIndex).tag == 
@@ -3022,7 +3039,7 @@ public class ClassFileLayouter {
 						layoutBlockList.get(blockIndex).preferedLineCount = 2;
 					}
 					
-					// Blocs pas encore inserés.
+					// Blocs pas encore inserï¿½s.
 					lowerScoreBlockIndex -= sourceDeltaIndex;
 					
 					int targetDeltaIndex = 0;
@@ -3265,13 +3282,13 @@ public class ClassFileLayouter {
 			
 			if (lb.tag == markerStartTag)
 			{
-				// Tag de marqueur de debut trouvé.
+				// Tag de marqueur de debut trouvï¿½.
 				MarkerLayoutBlock mlb = (MarkerLayoutBlock)lb;
 				
 				if (mlb.section != mlb.other.section)
 				{
-					// Le marqueur de début et le marqueur de fin ne font pas
-					// parti de la même section -> l'un des blocs entre eux deux 
+					// Le marqueur de dï¿½but et le marqueur de fin ne font pas
+					// parti de la mï¿½me section -> l'un des blocs entre eux deux 
 					// a un numero de ligne connu -> blocs indeplacables.
 					return false;
 				}
@@ -3281,7 +3298,7 @@ public class ClassFileLayouter {
 					return false;
 				}
 							
-				// Trouvé. 
+				// Trouvï¿½. 
 				
 				// -- 1 ----------------------------------------------------- //
 				int firstStartTagBlockIndex = blockIndex;
@@ -3303,13 +3320,13 @@ public class ClassFileLayouter {
 					}
 					else if (lb.tag == markerStartTag)
 					{
-						// Tag de marqueur de fin trouvé.
+						// Tag de marqueur de fin trouvï¿½.
 						mlb = (MarkerLayoutBlock)lb;
 						
 						if (mlb.section != mlb.other.section)
 						{
-							// Le marqueur de début et le marqueur de fin ne font pas
-							// parti de la même section -> l'un des blocs entre eux deux 
+							// Le marqueur de dï¿½but et le marqueur de fin ne font pas
+							// parti de la mï¿½me section -> l'un des blocs entre eux deux 
 							// a un numero de ligne connu -> blocs indeplacables.
 							break;
 						}					
@@ -3330,7 +3347,7 @@ public class ClassFileLayouter {
 					}
 				}
 				
-				// Un ou plusieurs blocs a deplacer trouvés.
+				// Un ou plusieurs blocs a deplacer trouvï¿½s.
 				
 				// Rechercher de l'index d'insertion =>
 				//  Trouver la section ayant le score le plus bas jusqu'a la 
@@ -3380,7 +3397,7 @@ public class ClassFileLayouter {
 					
 				if (lowerScore != lsSource.score)
 				{
-					// Trouvé. 
+					// Trouvï¿½. 
 					
 					// -- 2 ------------------------------------------------- //
 					
@@ -3411,7 +3428,7 @@ public class ClassFileLayouter {
 						blockIndex++;
 					}
 					
-					// Trouvé.
+					// Trouvï¿½.
 					
 					// -- 3 ------------------------------------------------- //
 					
@@ -3458,7 +3475,7 @@ public class ClassFileLayouter {
 						layoutBlockList.get(blockIndex).preferedLineCount = 2;
 					}
 					
-					// Blocs pas encore inserés.
+					// Blocs pas encore inserï¿½s.
 					lowerScoreBlockIndex++;
 
 					int targetDeltaIndex = 0;

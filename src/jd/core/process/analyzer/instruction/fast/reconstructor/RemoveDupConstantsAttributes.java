@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.analyzer.instruction.fast.reconstructor;
 
 import java.util.List;
@@ -9,7 +25,7 @@ import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
 
 
 /*
- * Retrait des instructions DupLoads & DupStore associés à une constante ou un 
+ * Retrait des instructions DupLoads & DupStore associï¿½s ï¿½ une constante ou un 
  * attribut:
  * DupStore( GetField | GetStatic | BIPush | SIPush | ALoad )
  * ...
@@ -26,7 +42,7 @@ public class RemoveDupConstantsAttributes
 			if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
 				continue;
 
-			// DupStore trouvé
+			// DupStore trouvï¿½
 			DupStore dupstore = (DupStore)list.get(dupStoreIndex);
 			
 			int opcode = dupstore.objectref.opcode;
