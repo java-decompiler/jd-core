@@ -752,7 +752,7 @@ public class ClassFileAnalyzer
 		int length = methods.length;
 
 		// Initialisation du reconstructeur traitant l'acces des champs et 
-		// methodes externes si la classe courante est une classe interne ou
+		// méthodes externes si la classe courante est une classe interne ou
 		// si elle contient des classes internes
 		OuterReferenceReconstructor outerReferenceReconstructor =	
 			(innerClassesMap != null) ?

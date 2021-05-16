@@ -30,7 +30,7 @@ public class LocalVariable
 	// Champ de bits utilisé pour determiner le type de la variable (byte, char, 
 	// short, int).
 	public int typesBitField;
-	// Champs utilisé lors de la generation des declarations de variables 
+	// Champs utilisé lors de la génération des déclarations de variables 
 	// locales (FastDeclarationAnalyzer.Analyze).
 	public boolean declarationFlag = false;
 

@@ -1375,7 +1375,7 @@ public class LocalVariableAnalyzer
 	{
 		final int length = listForAnalyze.size();
 		
-		// Affection du type des constantes depuis les instructions méres
+		// Affection du type des constantes depuis les instructions mères
 		for (int i=0; i<length; i++)
 		{
 			final Instruction instruction = listForAnalyze.get(i);
@@ -1677,7 +1677,7 @@ public class LocalVariableAnalyzer
 		
 		/*
 		 * Methode d'initialisation des instructions ExceptionLoad non 
-		 * initialisées. Cela se produit lorsque les methodes possédent un bloc 
+		 * initialisées. Cela se produit lorsque les méthodes possèdent un bloc 
 		 * de definition de variables locales. 
 		 * Les instructions ExceptionLoad appartenant aux blocs 'finally' ne 
 		 * sont pas initialisée.

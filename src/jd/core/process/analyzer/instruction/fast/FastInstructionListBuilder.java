@@ -124,7 +124,7 @@ public class FastInstructionListBuilder {
 	private static final boolean NOT_DECLARED = false;
 
 	/*
-	 * debut de liste fin de liste | | Liste ...
+	 * début de liste fin de liste | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ...
 	 */
 	public static void Build(ReferenceMap referenceMap, ClassFile classFile, Method method, List<Instruction> list)
@@ -132,7 +132,7 @@ public class FastInstructionListBuilder {
 		if ((list == null) || list.isEmpty())
 			return;
 
-		// Agregation des declarations CodeException
+		// Agregation des déclarations CodeException
 		List<FastCodeException> lfce = FastCodeExceptionAnalyzer.AggregateCodeExceptions(method, list);
 
 		// Initialyze delaclation flags
@@ -482,7 +482,7 @@ public class FastInstructionListBuilder {
 				}
 
 				if ((index + 1 < list.size()) && (list.get(index + 1).opcode == ByteCodeConstants.XRETURN)) {
-					// Si l'instruction retournée posséde un offset inferieur a
+					// Si l'instruction retournée possède un offset inférieur à
 					// celui de l'instruction 'monitorexit', l'instruction
 					// 'return' est ajoute au bloc synchronise.
 					Instruction monitorexit = list.get(index);
@@ -909,7 +909,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | | Liste ...
+	 * début de liste fin de liste | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -977,7 +977,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * Effacement de instruction 'return' inutile sauf celle en fin de methode
+	 * Effacement de instruction 'return' inutile sauf celle en fin de méthode
 	 * necessaire a 'InitInstanceFieldsReconstructor".
 	 */
 	private static void RemoveSyntheticReturn(List<Instruction> list, int afterListOffset, int returnOffset) {
@@ -1073,35 +1073,35 @@ public class FastInstructionListBuilder {
 	}
 	
 	/*
-	 * debut de liste fin de liste | | Liste ...
+	 * début de liste fin de liste | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
 	 * 
 	 * 
-	 * beforeLoopEntryOffset & loopEntryOffset: utile pour la generation
-	 * d'instructions 'continue' beforeListOffset: utile pour la generation de
-	 * declarations de variable endLoopOffset & afterLoopOffset: utile pour la
-	 * generation d'instructions 'break' afterListOffset: utile pour la
-	 * generation d'instructions 'if-else' = lastBodyWhileLoop.offset
+	 * beforeLoopEntryOffset & loopEntryOffset: utile pour la génération
+	 * d'instructions 'continue' beforeListOffset: utile pour la génération de
+	 * déclarations de variable endLoopOffset & afterLoopOffset: utile pour la
+	 * génération d'instructions 'break' afterListOffset: utile pour la
+	 * génération d'instructions 'if-else' = lastBodyWhileLoop.offset
 	 * 
 	 * WHILE instruction avant boucle | goto | beforeSubListOffset instructions
-	 * | instruction | beforeLoopEntryOffset if a saut negatif |
+	 * | instruction | beforeLoopEntryOffset if à saut négatif |
 	 * loopEntryOffset, endLoopOffset, afterListOffset instruction après boucle
 	 * | afterLoopOffset
 	 * 
 	 * DO_WHILE instruction avant boucle | beforeListOffset instructions |
-	 * instruction | beforeLoopEntryOffset if a saut negatif | loopEntryOffset,
+	 * instruction | beforeLoopEntryOffset if à saut négatif | loopEntryOffset,
 	 * endLoopOffset, afterListOffset instruction après boucle | afterLoopOffset
 	 * 
 	 * FOR instruction avant boucle | goto | beforeListOffset instructions |
 	 * instruction | beforeLoopEntryOffset iinc | loopEntryOffset,
-	 * afterListOffset if a saut negatif | endLoopOffset instruction après
+	 * afterListOffset if à saut négatif | endLoopOffset instruction après
 	 * boucle | afterLoopOffset
 	 * 
 	 * 
 	 * INFINITE_LOOP instruction avant boucle | beforeListOffset instructions |
-	 * instruction | beforeLoopEntryOffset goto a saut negatif |
+	 * instruction | beforeLoopEntryOffset goto à saut négatif |
 	 * loopEntryOffset, endLoopOffset, afterListOffset instruction après boucle
 	 * | afterLoopOffset
 	 */
@@ -1139,10 +1139,10 @@ public class FastInstructionListBuilder {
 		RemoveNopGoto(list);
 
 		// // Compacte les instructions 'store' suivies d'instruction 'return'
-		// // A executer avant l'ajout des declarations.
+		// // A executer avant l'ajout des déclarations.
 		// StoreReturnAnalyzer.Cleanup(list, localVariables);
 
-		// Add local variable declarations
+		// Add local variable déclarations
 		AddDeclarations(list, localVariables, beforeListOffset);
 
 		// Remove 'goto' jumping on next instruction
@@ -1253,7 +1253,7 @@ public class FastInstructionListBuilder {
 	 * portée est incluse à la liste, une declaration est insérée. 2) Le tableau
 	 * des variables locales est passé en revue. Pour toutes variables locales
 	 * non encore declarées et dont la portée est incluse à la liste courante,
-	 * on declare les variables en debut de bloc.
+	 * on declare les variables en début de bloc.
 	 */
 	private static void AddDeclarations(List<Instruction> list, LocalVariables localVariables, int beforeListOffset) {
 		int length = list.size();
@@ -1467,12 +1467,12 @@ public class FastInstructionListBuilder {
 									- bi.offset, bi, instructions));
 						} else {
 							// Si l'instruction saute vers un '?return' simple, 
-							// duplication de l'instruction cible pour eviter la 
-							// generation d'une instruction *_LABELED_BREAK.
+							// duplication de l'instruction cible pour éviter la 
+							// génération d'une instruction *_LABELED_BREAK.
 							byte[] code = method.getCode();
 							
 							// Reconnaissance bas niveau de la sequence 
-							// '?load_?' suivie de '?return' en fin de methode. 
+							// '?load_?' suivie de '?return' en fin de méthode. 
 							if (code.length == jumpOffset+2)
 							{
 								LoadInstruction load = DuplicateLoadInstruction(
@@ -1513,7 +1513,7 @@ public class FastInstructionListBuilder {
 						lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
 	
 					if ((beforeLoopEntryOffset < jumpOffset) && (jumpOffset <= loopEntryOffset)) {
-						// L'instruction 'goto' saute vers le debut de la boucle
+						// L'instruction 'goto' saute vers le début de la boucle
 						if ((afterListOffset == afterBodyLoopOffset) && (index + 1 == length)) {
 							// L'instruction 'goto' est la derniere instruction
 							// a s'executer dans la boucle. Elle ne sert a rien.
@@ -1535,12 +1535,12 @@ public class FastInstructionListBuilder {
 								ByteCodeConstants.RETURN, g.offset, lineNumber));
 						} else {
 							// Si l'instruction saute vers un '?return' simple, 
-							// duplication de l'instruction cible pour eviter la 
-							// generation d'une instruction *_LABELED_BREAK.
+							// duplication de l'instruction cible pour éviter la 
+							// génération d'une instruction *_LABELED_BREAK.
 							byte[] code = method.getCode();
 							
 							// Reconnaissance bas niveau de la sequence 
-							// '?load_?' suivie de '?return' en fin de methode. 
+							// '?load_?' suivie de '?return' en fin de méthode. 
 							if (code.length == jumpOffset+2)
 							{
 								LoadInstruction load = DuplicateLoadInstruction(
@@ -1660,7 +1660,7 @@ public class FastInstructionListBuilder {
 				int afterLoopInstructionOffset = list.get(index + 1).offset;
 
 				// Changement du calcul du saut : on considere que
-				// l'instruction vers laquelle le saut negatif pointe.
+				// l'instruction vers laquelle le saut négatif pointe.
 				// int afterLoopJumpOffset = SearchMinusJumpOffset(
 				// list, firstLoopInstructionIndex, index,
 				// jumpOffset-1, afterLoopInstructionOffset);
@@ -1850,7 +1850,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | | Liste ...
+	 * début de liste fin de liste | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -2154,7 +2154,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | | Liste ...
+	 * début de liste fin de liste | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -2182,7 +2182,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | | Liste ...
+	 * début de liste fin de liste | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -2220,7 +2220,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | testIndex | | | | Liste ...
+	 * début de liste fin de liste | testIndex | | | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -3218,7 +3218,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | gotoIndex | | | | Liste ...
+	 * début de liste fin de liste | gotoIndex | | | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -3507,7 +3507,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | testIndex | | | | Liste ...
+	 * début de liste fin de liste | testIndex | | | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -3531,7 +3531,7 @@ public class FastInstructionListBuilder {
 			(elseOffset <= loopEntryOffset)	&& 
 			(afterBodyLoopOffset == afterListOffset)) 
 		{
-			// L'instruction saute sur un debut de boucle et la liste termine
+			// L'instruction saute sur un début de boucle et la liste termine
 			// le block de la boucle.
 			elseOffset = afterListOffset;
 		}
@@ -3575,7 +3575,7 @@ public class FastInstructionListBuilder {
 								method.getCode(),
 								ByteCodeUtil.NextInstructionOffset(method.getCode(), lastListOffset), returnOffset))) {
 				// Si la derniere instruction est un 'return' et si son
-				// numero de ligne est inferieur a l'instruction precedente,
+				// numero de ligne est inférieur à l'instruction precedente,
 				// il s'agit d'une instruction synthetique ==> if-else
 				if (subList.get(subListLength - 2).lineNumber > beforeElseBlock.lineNumber) {
 					minusJumpOffset = (returnOffset == -1) ? lastListOffset + 1 : returnOffset;
@@ -3623,7 +3623,7 @@ public class FastInstructionListBuilder {
 					{					
 						// Cas des instructions de saut négatif dans une boucle qui
 						// participent tout de meme à une instruction if-else
-						// L'instruction saute sur un debut de boucle et la liste
+						// L'instruction saute sur un début de boucle et la liste
 						// termine le block de la boucle.
 						afterIfElseOffset = afterListOffset;
 					} else {
@@ -3710,7 +3710,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | switchIndex | | | | Liste ...
+	 * début de liste fin de liste | switchIndex | | | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -3825,7 +3825,7 @@ public class FastInstructionListBuilder {
 	}
 	
 	/*
-	 * debut de liste fin de liste | switchIndex | | | | Liste ...
+	 * début de liste fin de liste | switchIndex | | | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * beforeListOffset | | Offsets | loopEntryOffset endLoopOffset |
 	 * beforeLoopEntryOffset afterLoopOffset
@@ -4062,7 +4062,7 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * debut de liste fin de liste | switchIndex | | | | Liste ...
+	 * début de liste fin de liste | switchIndex | | | | Liste ...
 	 * --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ... | | | | | | |
 	 * | beforeListOff. | | | Offsets | loopEntryOffset switchOffset
 	 * endLoopOffset | beforeLoopEntryOffset afterLoopOffset

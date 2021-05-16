@@ -245,7 +245,7 @@ public class DotClass118AReconstructor
 						iconst0);
 				}
 				
-				// Ajout de la methode 'getClass'
+				// Ajout de la méthode 'getClass'
 				int methodNameIndex = constants.addConstantUtf8("getClass");
 				int methodDescriptorIndex = 
 					constants.addConstantUtf8("()Ljava/lang/Class;");
@@ -300,7 +300,7 @@ public class DotClass118AReconstructor
 				}
 			}
 			
-			// Recherche de la methode statique et ajout de l'attribut SYNTHETIC
+			// Recherche de la méthode statique et ajout de l'attribut SYNTHETIC
 			Method[] methods = classFile.getMethods();
 			j = methods.length;
 			

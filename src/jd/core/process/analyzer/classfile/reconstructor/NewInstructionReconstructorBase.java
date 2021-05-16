@@ -34,7 +34,7 @@ import jd.core.util.UtilConstants;
 public class NewInstructionReconstructorBase 
 {
 	/*
-	 * Methode permettznt l'affichage des variables locales d'une methode d'une
+	 * Methode permettznt l'affichage des variables locales d'une méthode d'une
 	 * outer class dans une inner class
 	 */
 	public static void InitAnonymousClassConstructorParameterName(
@@ -97,7 +97,7 @@ public class NewInstructionReconstructorBase
 									innerField.outerMethodLocalVariableNameIndex = 
 										innerConstants.addConstantUtf8(name);
 									// Ajout du flag 'final' sur la variable 
-									// locale de la methode contenant 
+									// locale de la méthode contenant 
 									// l'instruction "new"
 									lv.finalFlag = true;									
 								}

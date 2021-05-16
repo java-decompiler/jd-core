@@ -143,7 +143,7 @@ public class InstructionListBuilder
 						if (offset == exceptionOffset)
 						{
 							// Ajout d'une pseudo instruction de lecture 
-							// d'exception en debut de bloc catch
+							// d'exception en début de bloc catch
 							int catchType = 
 								codeExceptions[codeExceptionsIndex].catch_type;
 							int signatureIndex;
@@ -188,7 +188,7 @@ public class InstructionListBuilder
 						// Ajout de ReturnAddressLoad
 						if (offset == subProcOffset)
 						{
-							// Ajout d'une pseudo adresse de retour en debut de 
+							// Ajout d'une pseudo adresse de retour en début de 
 							// sous procedure. Lors de l'execution, cette 
 							// adresse est normalement placée sur la pile par 
 							// l'instruction JSR.

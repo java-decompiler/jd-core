@@ -33,7 +33,7 @@ public class LayoutBlockComparator implements Comparator<LayoutBlock>
 		{
 			if (lb2.lastLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
 			{
-				// Tri par l'index pour eviter les ecarts de tri entre la 
+				// Tri par l'index pour éviter les ecarts de tri entre la 
 				// version Java et C++ 
 				return lb1.index - lb2.index;
 			}

@@ -183,8 +183,8 @@ public class SignatureWriter
 
 				LocalVariable lv = null;
 
-				// TODO Test à retirer. Ce test a ete ajouter lors du codage
-				// de la gestion des enum pour eviter un NullPointerException
+				// TODO Test à retirer. Ce test a été ajouté lors du codage
+				// de la gestion des enum pour éviter un NullPointerException
 				if (method.getLocalVariables() != null) {
 					lv = method.getLocalVariables().searchLocalVariableWithIndexAndOffset(variableIndex, 0);
 

@@ -105,7 +105,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 			
 			if (initialFirstLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
 			{
-				// Si la methode possede des numeros de lignes
+				// Si la méthode possède des numeros de lignes
 				if (initialFirstLineNumber < instruction.lineNumber)
 				{
 					// Cas d'un statement qui suit un statement dont la derniere 

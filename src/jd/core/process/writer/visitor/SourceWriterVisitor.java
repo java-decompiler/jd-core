@@ -1553,7 +1553,7 @@ public class SourceWriterVisitor
 			(field.outerMethodLocalVariableNameIndex != UtilConstants.INVALID_INDEX))
 		{
 			// Specificite des classes anonymes : affichage du nom du champs de
-			// la methode englobante plutot que le nom du champs
+			// la méthode englobante plutot que le nom du champs
 			if ((this.firstOffset <= this.previousOffset) && 
 				(getField.offset <= this.lastOffset))
 			{
@@ -1835,7 +1835,7 @@ public class SourceWriterVisitor
 			}
 			else
 			{
-				// Appel a une methode privee?
+				// Appel a une méthode privee?
 				firstIndex = 0;
 			}
 		}
@@ -1869,7 +1869,7 @@ public class SourceWriterVisitor
 				}
 				else
 				{
-					// Appel a une methode privee?
+					// Appel a une méthode privee?
 					Method method = this.classFile.getMethod(
 						cnat.name_index, cnat.descriptor_index);
 					
@@ -2101,7 +2101,7 @@ public class SourceWriterVisitor
 			(ii.offset <= this.lastOffset))
 		{
 			// Dans les specs, LDC pointe vers une constante du pool. Lors de la
-			// declaration d'enumeration, le byte code de la methode 
+			// declaration d'enumeration, le byte code de la méthode 
 			// 'Enum.valueOf(Class<T> enumType, String name)' contient une
 			// instruction LDC pointant un objet de type 'ConstantClass'.
 			Constant cst = constants.get(ii.index);

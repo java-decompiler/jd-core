@@ -35,7 +35,7 @@ import jd.core.model.instruction.bytecode.instruction.TernaryOperator;
 public class ComparisonInstructionAnalyzer 
 {	
 	/*
-	 *                            debut de liste        fin de liste
+	 *                            début de liste        fin de liste
 	 *                            |                                |
 	 * Liste    ... --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ...
 	 */
@@ -89,7 +89,7 @@ public class ComparisonInstructionAnalyzer
 	}
 	
 	/*
-	 *                            debut de liste        fin de liste
+	 *                            début de liste        fin de liste
 	 *                            |               index            |
 	 *                            |                   |            |
 	 * Liste    ... --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ...

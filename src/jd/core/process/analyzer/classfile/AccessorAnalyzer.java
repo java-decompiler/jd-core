@@ -69,7 +69,7 @@ public class AccessorAnalyzer
 		if (SearchPutFieldAccessor(classFile, method) == true)
 			return;
 		
-		// Recherche des accesseurs de methodes
+		// Recherche des accesseurs de méthodes
 		//   static void access$100(EntitlementFunctionLibrary, EvaluationCtx, URI, Bag, Bag[])
 		SearchInvokeMethodAccessor(classFile, method);
 	}
@@ -313,7 +313,7 @@ public class AccessorAnalyzer
 		return true;
 	}
 	
-	/* Recherche des accesseurs de methodes:
+	/* Recherche des accesseurs de méthodes:
 	 *     static void access$100(EntitlementFunctionLibrary, EvaluationCtx, URI, Bag, Bag[])
      *     {
      *       Byte code:

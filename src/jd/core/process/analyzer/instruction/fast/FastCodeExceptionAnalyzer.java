@@ -452,7 +452,7 @@ public class FastCodeExceptionAnalyzer
 				fastCodeException.handler_pc));		
 		}
 		
-		// Approximation a affinée par la methode 'ComputeAfterOffset'
+		// Approximation a affinée par la méthode 'ComputeAfterOffset'
 		fce.afterOffset = SearchAfterOffset(list, fastCodeException.handler_pc);
 	
 		return fce;
@@ -1121,7 +1121,7 @@ public class FastCodeExceptionAnalyzer
 			}
 			break;
 		case FastConstants.TYPE_JIKES_122:
-			// Le traitement suivant etait faux pour reconstruire la methode
+			// Le traitement suivant etait faux pour reconstruire la méthode
 			// "basic.data.TestTryCatchFinally .methodTryFinally1()" compile 
 			// par "Eclipse Java Compiler v_677_R32x, 3.2.1 release".
 //			{
@@ -1350,10 +1350,10 @@ public class FastCodeExceptionAnalyzer
 				int length = list.size();
 	
 				// Re-estimation de la valeur de l'attribut 'afterOffset'.
-				// Strategie : parcours du bytecode jusqu'a trouver une 
+				// Strategie : parcours du bytecode jusqu'à trouver une 
 				// instruction de saut vers la derniere instruction 'return', 
 				// ou une instruction 'athrow' ou une instruction de saut 
-				// négatif allant en deca du debut du dernier block. Le parcours
+				// négatif allant en deca du début du dernier block. Le parcours
 				// du bytecode doit prendre en compte les sauts positifs.
 				
 				// Calcul de l'offset après la structure try-catch
@@ -1600,7 +1600,7 @@ public class FastCodeExceptionAnalyzer
 							}
 							else if (jumpOffsetTmp <= fastCodeException.tryFromOffset)
 							{
-								// Saut negatif
+								// Saut négatif
 								if ((index > 0) && 
 									(instruction.lineNumber != Instruction.UNKNOWN_LINE_NUMBER))
 								{
@@ -3227,17 +3227,17 @@ public class FastCodeExceptionAnalyzer
 						}
 						else
 						{
-							// Saut au delé des limites
+							// Saut au-delà des limites
 							if (instruction.offset >= beforeMaxOffset)
 								return index;	// Inclus au bloc 'try'
 						}
 					}
 					else
 					{
-						// Saut negatif
+						// Saut négatif
 						if (jumpOffset < fce.tryFromOffset)
 						{
-							// Saut au delé des limites
+							// Saut au-delà des limites
 							if (instruction.offset >= beforeMaxOffset)
 								return index;	// Inclus au bloc 'try'
 						}
@@ -3267,12 +3267,12 @@ public class FastCodeExceptionAnalyzer
 						}
 						// else
 						// {
-						// 	// Saut au delé des limites, 'break' ?
+						// 	// Saut au-delà des limites, 'break' ?
 						// }
 					}
 					// else
 					// {
-					// 	// Saut negatif, 'continue' ?						
+					// 	// Saut négatif, 'continue' ?						
 					//}		
 				}
 				break;
@@ -3303,12 +3303,12 @@ public class FastCodeExceptionAnalyzer
 						}
 						// else
 						// {
-						// 	// Saut au delé des limites, 'break' ?
+						// 	// Saut au-delà des limites, 'break' ?
 						// }
 					}
 					// else
 					// {
-					// 	// Saut negatif, 'continue' ?						
+					// 	// Saut négatif, 'continue' ?						
 					//}		
 					break;	
 				}
