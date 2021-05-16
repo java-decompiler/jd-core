@@ -2122,7 +2122,7 @@ public class SourceWriterVisitor
 			}
 			else
 			{
-				// Cas g�n�ral
+				// Cas général
 				this.printer.addNewLinesAndPrefix(lineNumber);
 		    	ConstantValueWriter.Write(
 		    		this.loader, this.printer, this.referenceMap, 
@@ -2272,7 +2272,7 @@ public class SourceWriterVisitor
 			this.printer.print(lineNumber, " = ");
 		}
 		
-		// Est-il necessaire de parenth�ser l'expression ?
+		// Est-il necessaire de parenthéser l'expression ?
 		// visit(putStatic, putStatic.valueref);
 		return visit(putStatic.valueref);
 	}
@@ -2305,7 +2305,7 @@ public class SourceWriterVisitor
 			this.printer.print(lineNumber, " = ");
 		}
 		
-		// Est-il necessaire de parenth�ser l'expression ?
+		// Est-il necessaire de parenthéser l'expression ?
 		// visit(storeInstruction, storeInstruction.valueref);
 		return visit(storeInstruction.valueref);
 	}

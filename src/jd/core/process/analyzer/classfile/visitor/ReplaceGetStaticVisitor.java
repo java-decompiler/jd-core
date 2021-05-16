@@ -563,7 +563,7 @@ public class ReplaceGetStaticVisitor
 	}
 	
 	/**
-	 * @return le dernier parent sur lequel une substitution a �t� faite
+	 * @return le dernier parent sur lequel une substitution a été faite
 	 */
 	public Instruction getParentFound() 
 	{

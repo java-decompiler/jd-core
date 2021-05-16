@@ -325,15 +325,15 @@ public class ComparisonInstructionAnalyzer
 
 				if (jumpOffsetValue1 == jumpOffsetValue2)
 				{
-					// Oui ! S�quence dans le bon sens
+					// Oui ! Séquence dans le bon sens
 					int nextOffset = nextInstruction.offset;
 					for (int j=g.offset+1; j<nextOffset; j++)
 						offsetToPreviousGotoFlag[j] = true;
 				}
 				else if (jumpOffset == jumpOffsetValue2)
 				{
-					// Oui ! S�quence inversee : les offsets du Goto et du 1er
-					// sous-test sont invers�s => il FAUT inverser le 1er test
+					// Oui ! Séquence inversee : les offsets du Goto et du 1er
+					// sous-test sont inversés => il FAUT inverser le 1er test
 					int nextOffset = nextInstruction.offset;
 					for (int j=g.offset+1; j<nextOffset; j++)
 						offsetToPreviousGotoFlag[j] = true;
@@ -830,7 +830,7 @@ public class ComparisonInstructionAnalyzer
 		while (--index > firstIndex)
 		{
 			// Verification que la potentielle derniere instruction de saut a 
-			// comme premiere instruction l'instruction � l'indexe 'firstIndex'
+			// comme premiere instruction l'instruction à l'indexe 'firstIndex'
 			// Recherche de l'indexe de la premiere instruction 'if' du bloc et 
 			// initialisation de 'offsetToPreviousGotoFlag'	
 			BranchInstruction lastBi = (BranchInstruction)list.get(index);
@@ -843,7 +843,7 @@ public class ComparisonInstructionAnalyzer
 			
 			if (firstIndex == firstIndexTmp)
 			{
-				// Trouv�
+				// Trouvé
 				break;
 			}
 		}

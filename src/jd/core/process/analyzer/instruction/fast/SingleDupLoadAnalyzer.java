@@ -26,7 +26,7 @@ import jd.core.process.analyzer.instruction.fast.visitor.CountDupLoadVisitor;
 
 
 /**
- * Efface les instructions DupStore si elles sont associ�es � une seule
+ * Efface les instructions DupStore si elles sont associées à une seule
  * instruction DupLoad.
  */
 public class SingleDupLoadAnalyzer 

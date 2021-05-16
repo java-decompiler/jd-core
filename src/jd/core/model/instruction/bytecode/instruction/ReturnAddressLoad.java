@@ -20,8 +20,8 @@ import jd.core.model.classfile.ConstantPool;
 import jd.core.model.classfile.LocalVariables;
 
 /*
- * Pseudo instruction plac�e en debut de sous procedure. Lors de l'execution, 
- * cette adresse est normalement plac�e sur la pile par l'instruction JSR.
+ * Pseudo instruction placée en debut de sous procedure. Lors de l'execution, 
+ * cette adresse est normalement placée sur la pile par l'instruction JSR.
  */
 public class ReturnAddressLoad extends Instruction 
 {

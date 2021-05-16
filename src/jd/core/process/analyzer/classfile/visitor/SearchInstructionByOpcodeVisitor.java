@@ -68,7 +68,7 @@ import jd.core.model.instruction.fast.instruction.FastTry.FastCatch;
 
 
 /*
- * Utilis� par TernaryOpReconstructor
+ * Utilisé par TernaryOpReconstructor
  */
 public class SearchInstructionByOpcodeVisitor 
 {

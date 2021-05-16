@@ -352,8 +352,8 @@ public class FastCodeExceptionAnalyzer
 		
 		if ((checkMonitorExit == false) && (index == length))
 		{
-			// Aucune instruction 'MonitorExit' n'a ete trouv�e. Cas de la 
-			// double instruction 'synchronized' imbriqu�e pour le JDK 1.1.8
+			// Aucune instruction 'MonitorExit' n'a ete trouvée. Cas de la 
+			// double instruction 'synchronized' imbriquée pour le JDK 1.1.8
 			return true;
 		}
 		
@@ -452,7 +452,7 @@ public class FastCodeExceptionAnalyzer
 				fastCodeException.handler_pc));		
 		}
 		
-		// Approximation a affin�e par la methode 'ComputeAfterOffset'
+		// Approximation a affinée par la methode 'ComputeAfterOffset'
 		fce.afterOffset = SearchAfterOffset(list, fastCodeException.handler_pc);
 	
 		return fce;
@@ -1073,7 +1073,7 @@ public class FastCodeExceptionAnalyzer
 				int retCounter = 0;
 				
 				// Search 'ret' instruction
-				// Permet de prendre en compte les sous routines imbriqu�es
+				// Permet de prendre en compte les sous routines imbriquées
 				while (++index < length)
 				{
 					Instruction i = list.get(index);
@@ -1165,12 +1165,12 @@ public class FastCodeExceptionAnalyzer
 				case ByteCodeConstants.ASTORE:
 					{
 						// L'un des deux cas les plus complexes : 
-						// - le bloc 'finally' est dupliqu� deux fois.
+						// - le bloc 'finally' est dupliqué deux fois.
 						// - aucun 'goto' ne saute apres le dernier bloc finally.
 						// Methode de calcul de 'afterOffset' : 
-						// - compter le nombre d'instructions entre le d�but du 1er bloc 
+						// - compter le nombre d'instructions entre le début du 1er bloc 
 						//   'finally' et le saut du goto en fin de bloc 'try'.
-						// - Ajouter ce nombre � l'index de l'instruction vers laquelle 
+						// - Ajouter ce nombre à l'index de l'instruction vers laquelle 
 						//   saute le 'goto' precedent le 1er bloc 'finally'.
 						int finallyStartIndex = index+1;
 						int exceptionIndex = ((AStore)instruction).index;
@@ -1200,12 +1200,12 @@ public class FastCodeExceptionAnalyzer
 		case FastConstants.TYPE_ECLIPSE_677_CATCH_FINALLY:	
 			{
 				// L'un des deux cas les plus complexes : 
-				// - le bloc 'finally' est dupliqu� deux ou trois fois.
+				// - le bloc 'finally' est dupliqué deux ou trois fois.
 				// - aucun 'goto' ne saute apres le dernier bloc finally.
 				// Methode de calcul de 'afterOffset' : 
-				// - compter le nombre d'instructions entre le d�but du 1er bloc 
+				// - compter le nombre d'instructions entre le début du 1er bloc 
 				//   'finally' et le saut du goto en fin de bloc 'try'.
-				// - Ajouter ce nombre � l'index de l'instruction vers laquelle 
+				// - Ajouter ce nombre à l'index de l'instruction vers laquelle 
 				//   saute le 'goto' precedent le 1er bloc 'finally'.
 				int index = InstructionUtil.getIndexForOffset(
 						list, fastCodeException.finallyFromOffset);
@@ -1353,7 +1353,7 @@ public class FastCodeExceptionAnalyzer
 				// Strategie : parcours du bytecode jusqu'a trouver une 
 				// instruction de saut vers la derniere instruction 'return', 
 				// ou une instruction 'athrow' ou une instruction de saut 
-				// n�gatif allant en deca du debut du dernier block. Le parcours
+				// négatif allant en deca du debut du dernier block. Le parcours
 				// du bytecode doit prendre en compte les sauts positifs.
 				
 				// Calcul de l'offset apres la structure try-catch
@@ -1385,7 +1385,7 @@ public class FastCodeExceptionAnalyzer
 						fastCodeExceptions, fastCodeException.tryFromOffset, 
 						fastCodeException.maxOffset, afterOffset);
 						
-				// Recherche de la 1ere exception d�butant apres 'maxOffset' 
+				// Recherche de la 1ere exception débutant apres 'maxOffset' 
 				int tryFromOffset = Integer.MAX_VALUE;
 				int tryIndex = fastCodeExceptionIndex + 1;
 				while (tryIndex < fastCodeExceptions.size())
@@ -1419,7 +1419,7 @@ public class FastCodeExceptionAnalyzer
 						int afterOffsetTmp = fce.afterOffset;
 						
 						// Recherche du plus grand offset de fin parmi toutes 
-						// les exceptions d�butant � l'offset 'tryFromOffset'
+						// les exceptions débutant à l'offset 'tryFromOffset'
 						for (;;)
 						{
 							if (++tryIndex >= fastCodeExceptions.size())
@@ -1585,7 +1585,7 @@ public class FastCodeExceptionAnalyzer
 											// Une instruction du bloc 
 											// 'try-catch-finally' saute vers 
 											// cette instuction 
-											// => Instruction plac�e apres le bloc
+											// => Instruction placée apres le bloc
 											fastCodeException.afterOffset = instruction.offset;
 										}
 									}
@@ -3227,7 +3227,7 @@ public class FastCodeExceptionAnalyzer
 						}
 						else
 						{
-							// Saut au del� des limites
+							// Saut au delé des limites
 							if (instruction.offset >= beforeMaxOffset)
 								return index;	// Inclus au bloc 'try'
 						}
@@ -3237,7 +3237,7 @@ public class FastCodeExceptionAnalyzer
 						// Saut negatif
 						if (jumpOffset < fce.tryFromOffset)
 						{
-							// Saut au del� des limites
+							// Saut au delé des limites
 							if (instruction.offset >= beforeMaxOffset)
 								return index;	// Inclus au bloc 'try'
 						}
@@ -3267,7 +3267,7 @@ public class FastCodeExceptionAnalyzer
 						}
 						// else
 						// {
-						// 	// Saut au del� des limites, 'break' ?
+						// 	// Saut au delé des limites, 'break' ?
 						// }
 					}
 					// else
@@ -3303,7 +3303,7 @@ public class FastCodeExceptionAnalyzer
 						}
 						// else
 						// {
-						// 	// Saut au del� des limites, 'break' ?
+						// 	// Saut au delé des limites, 'break' ?
 						// }
 					}
 					// else

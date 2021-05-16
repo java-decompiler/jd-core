@@ -61,7 +61,7 @@ import jd.core.model.instruction.fast.instruction.FastTry;
 
 
 /*
- * Utilis� par TernaryOpReconstructor
+ * Utilisé par TernaryOpReconstructor
  */
 public class ReplaceInstructionVisitor 
 {

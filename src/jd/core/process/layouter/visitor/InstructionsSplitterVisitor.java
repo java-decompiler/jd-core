@@ -93,7 +93,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 	{
 		if (this.firstLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
 		{
-			// Bloc execut� soit lors de la visite de 
+			// Bloc executé soit lors de la visite de 
 			// - du 1er statement
 			// - d'un statement qui suit un statement dont la derniere 
 			//   instruction est 'AnonymousNewInvoke'
@@ -142,7 +142,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 		
 		if (this.firstLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
 		{
-			// Bloc execut� si une instruction 'AnonymousNewInvoke' vient 
+			// Bloc executé si une instruction 'AnonymousNewInvoke' vient 
 			// d'etre traitee.
 			this.firstLineNumber = instruction.lineNumber;
 		}
@@ -175,8 +175,8 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 		{
 			if (lastLineNumber < this.firstLineNumber)
 			{
-				// Les instructions newAnonymousClass imbriqu�es n'ont pas de 
-				// num�ros de ligne correctes. Exemple: com.googlecode.dex2jar.v3.Dex2jar
+				// Les instructions newAnonymousClass imbriquées n'ont pas de 
+				// numéros de ligne correctes. Exemple: com.googlecode.dex2jar.v3.Dex2jar
 				lastLineNumber = this.firstLineNumber;
 			}
 			preferedLineCount = lastLineNumber - this.firstLineNumber;

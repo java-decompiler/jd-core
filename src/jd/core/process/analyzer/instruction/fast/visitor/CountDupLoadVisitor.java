@@ -403,7 +403,7 @@ public class CountDupLoadVisitor
 	}
 	
 	/**
-	 * @return le dernier parent sur lequel une substitution a �t� faite
+	 * @return le dernier parent sur lequel une substitution a été faite
 	 */
 	public int getCounter() 
 	{

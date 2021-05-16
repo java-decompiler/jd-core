@@ -91,7 +91,7 @@ public class GotoFactory extends InstructionFactory
 		{			
 			int opcode = code[offset] & 255;
 			
-			// on retient l'offset de la derniere op�ration placant une 
+			// on retient l'offset de la derniere opération placant une 
 			// information sur la pile.
 			switch (opcode)
 			{			

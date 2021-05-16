@@ -51,7 +51,7 @@ public class PostIncReconstructor
 			if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
 				continue;
 
-			// DupStore trouv�
+			// DupStore trouvé
 			DupStore dupstore = (DupStore)list.get(dupStoreIndex);
 						
 			int xstorePutfieldPutstaticIndex = dupStoreIndex;

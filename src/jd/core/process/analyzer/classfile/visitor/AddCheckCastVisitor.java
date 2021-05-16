@@ -164,7 +164,7 @@ public class AddCheckCastVisitor
 					
 					if (lv.signature_index > 0)
 					{
-						// AStore est associ� � une variable correctment typ�e
+						// AStore est associé à une variable correctment typée
 						if (lv.signature_index != this.constants.objectSignatureIndex)
 						{			
 							String signature = 

@@ -171,7 +171,7 @@ public class DotClass118AReconstructor
 
 			if (nameField.startsWith(StringConstants.CLASS_DOLLAR))
 			{
-				// motif 'x.class' classique trouv� !	
+				// motif 'x.class' classique trouvé !	
 				// Substitution par une constante de type 'ClassConstant'
 				ConstantString cs = (ConstantString)cv;
 				String signature = constants.getConstantUtf8(cs.string_index);
@@ -201,7 +201,7 @@ public class DotClass118AReconstructor
 			}
 			else if (nameField.startsWith(StringConstants.ARRAY_DOLLAR))
 			{
-				// motif 'x[].class' trouv� !	
+				// motif 'x[].class' trouvé !	
 				// Substitution par l'expression 'new x[0].getClass()'
 				ConstantString cs = (ConstantString)cv;
 				String signature = constants.getConstantUtf8(cs.string_index);

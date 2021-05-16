@@ -28,7 +28,7 @@ import jd.core.process.analyzer.classfile.visitor.ReplaceDupLoadVisitor;
 
 
 /*
- * Elimine la s�quence suivante:
+ * Elimine la séquence suivante:
  * DupStore( ALoad(0) )
  * ...
  * ???( DupLoad )
@@ -44,7 +44,7 @@ public class DupStoreThisReconstructor
 			if (list.get(dupStoreIndex).opcode != ByteCodeConstants.DUPSTORE)
 				continue;
 
-			// DupStore trouv�
+			// DupStore trouvé
 			DupStore dupStore = (DupStore)list.get(dupStoreIndex);
 
 			if ((dupStore.objectref.opcode != ByteCodeConstants.ALOAD) ||

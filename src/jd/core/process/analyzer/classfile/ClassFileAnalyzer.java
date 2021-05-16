@@ -81,7 +81,7 @@ public class ClassFileAnalyzer
 	public static void Analyze(ReferenceMap referenceMap, ClassFile classFile)
 	{
 		// Creation du tableau associatif [nom de classe interne, objet class].
-		// Ce tableau est utilis� pour la suppression des accesseurs des 
+		// Ce tableau est utilisé pour la suppression des accesseurs des 
 		// classes internes.
 		HashMap<String, ClassFile> innerClassesMap;
 		if (classFile.getInnerClassFiles() != null)
@@ -138,7 +138,7 @@ public class ClassFileAnalyzer
 			// externe. 'PreAnalyzeMethods' doit etre execute avant l'analyse
 			// des classes internes. Elle permet egalement de construire la liste
 			// des accesseurs et de parser les tableaux "SwitchMap" produit par le 
-			// compilateur d'Eclipse et utilis� pour le Switch+Enum.
+			// compilateur d'Eclipse et utilisé pour le Switch+Enum.
 			PreAnalyzeMethods(eclipseSwitchMaps, classFile);		
 	
 			// Analyse des classes internes avant l'analyse de la classe pour 
@@ -782,10 +782,10 @@ public class ClassFileAnalyzer
 		    	PreIncReconstructor.Reconstruct(list);	    	
 		    	// Recontruction des instructions de post-incrementation non entier
 		    	PostIncReconstructor.Reconstruct(list);
-	    		// Recontruction du mot cl� '.class' pour le JDK 1.1.8 - A
+	    		// Recontruction du mot clé '.class' pour le JDK 1.1.8 - A
 	    		DotClass118AReconstructor.Reconstruct(
 	    			referenceMap, classFile, list);
-	    		// Recontruction du mot cl� '.class' pour le JDK 1.4
+	    		// Recontruction du mot clé '.class' pour le JDK 1.4
 	    		DotClass14Reconstructor.Reconstruct(
 	    			referenceMap, classFile, list);
 		    	// Replace StringBuffer and StringBuilder in java source line
@@ -796,7 +796,7 @@ public class ClassFileAnalyzer
 		    	TransformTestOnLongOrDouble(list);
 		    	// Set constant type of "String.indexOf(...)" methods
 		    	SetConstantTypeInStringIndexOfMethods(classFile, list);
-				// Elimine la s�quence DupStore(this) ... DupLoad() ... DupLoad().
+				// Elimine la séquence DupStore(this) ... DupLoad() ... DupLoad().
 				// Cette operation doit etre executee avant
 				// 'AssignmentInstructionReconstructor'.
 		    	DupStoreThisReconstructor.Reconstruct(list);
@@ -804,7 +804,7 @@ public class ClassFileAnalyzer
 		    	// Cette operation doit etre executee avant
 				// 'InitArrayInstructionReconstructor', 'TernaryOpReconstructor'
 				// et la construction des instructions try-catch et finally.
-		    	// Cette operation doit etre executee apr�s 'DupStoreThisReconstructor'.
+		    	// Cette operation doit etre executee après 'DupStoreThisReconstructor'.
 				AssignmentInstructionReconstructor.Reconstruct(list);
 		    	// Elimine les doubles casts et ajoute des casts devant les 
 				// constantes numeriques si necessaire.
@@ -823,7 +823,7 @@ public class ClassFileAnalyzer
 		    	FastInstructionListBuilder.Build(
 		    		referenceMap, classFile, method, fastList);
 		    	
-		    	// Ajout des d�clarations des variables locales temporaires
+		    	// Ajout des déclarations des variables locales temporaires
 		    	DupLocalVariableAnalyzer.Declare(classFile, method, fastList);
 			}
 		    catch (Exception e)
@@ -1098,7 +1098,7 @@ public class ClassFileAnalyzer
 									if (count == 2)
 									{
 										// Retrait de l'appel du constructeur s'il
-										// n'a que les deux param�tres standard.
+										// n'a que les deux paramètres standard.
 										list.remove(0);
 									}
 								}

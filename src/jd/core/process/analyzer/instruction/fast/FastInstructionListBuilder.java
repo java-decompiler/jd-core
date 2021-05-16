@@ -189,7 +189,7 @@ public class FastInstructionListBuilder {
 		int synchronizedBlockJumpOffset = -1;
 
 		if (fce.type == FastConstants.TYPE_118_FINALLY) {
-			// Retrait de la sous proc�dure allant de "monitorexit" � "ret"
+			// Retrait de la sous procédure allant de "monitorexit" à "ret"
 			// Byte code:
 			// 0: aload_1
 			// 1: astore_3
@@ -205,7 +205,7 @@ public class FastInstructionListBuilder {
 			// 15: aload_3 <===== finallyFromOffset
 			// 16: monitorexit
 			// 17: athrow
-			// 18: astore 4 <~~~~~ Entr�e de la sous procecure ('jsr')
+			// 18: astore 4 <~~~~~ Entrée de la sous procecure ('jsr')
 			// 20: aload_3
 			// 21: monitorexit
 			// 22: ret 4 <-----
@@ -482,7 +482,7 @@ public class FastInstructionListBuilder {
 				}
 
 				if ((index + 1 < list.size()) && (list.get(index + 1).opcode == ByteCodeConstants.XRETURN)) {
-					// Si l'instruction retourn�e poss�de un offset inferieur a
+					// Si l'instruction retournée posséde un offset inferieur a
 					// celui de l'instruction 'monitorexit', l'instruction
 					// 'return' est ajoute au bloc synchronise.
 					Instruction monitorexit = list.get(index);
@@ -511,7 +511,7 @@ public class FastInstructionListBuilder {
 				list.set(index, fastSynchronized);
 			}
 		} else {
-			// Cas g�n�ral
+			// Cas général
 			if (fce.afterOffset > list.get(list.size() - 1).offset)
 				index = list.size();
 			else
@@ -916,11 +916,11 @@ public class FastInstructionListBuilder {
 	 */
 	private static void ExecuteReconstructors(ReferenceMap referenceMap, ClassFile classFile, List<Instruction> list,
 			LocalVariables localVariables) {
-		// Reconstruction des blocs synchronis�s vide
+		// Reconstruction des blocs synchronisés vide
 		EmptySynchronizedBlockReconstructor.Reconstruct(localVariables, list);
-		// Recontruction du mot cl� '.class' pour le JDK 1.1.8 - B
+		// Recontruction du mot clé '.class' pour le JDK 1.1.8 - B
 		DotClass118BReconstructor.Reconstruct(referenceMap, classFile, list);
-		// Recontruction du mot cl� '.class' pour le compilateur d'Eclipse
+		// Recontruction du mot clé '.class' pour le compilateur d'Eclipse
 		DotClassEclipseReconstructor.Reconstruct(referenceMap, classFile, list);
 		// Transformation de l'ensemble 'if-break' en simple 'if'
 		// A executer avant 'ComparisonInstructionAnalyzer'
@@ -934,7 +934,7 @@ public class FastInstructionListBuilder {
 		// executee apres 'ComparisonInstructionAnalyzer'.
 		AssertInstructionReconstructor.Reconstruct(classFile, list);
 		// Create ternary operator before analisys of local variables.
-		// A executer apr�s 'ComparisonInstructionAnalyzer'
+		// A executer après 'ComparisonInstructionAnalyzer'
 		TernaryOpReconstructor.Reconstruct(list);
 		// Recontruction des initialisations de tableaux
 		// Cette operation doit etre executee apres
@@ -942,7 +942,7 @@ public class FastInstructionListBuilder {
 		InitArrayInstructionReconstructor.Reconstruct(list);
 		// Recontruction des operations binaires d'assignement
 		AssignmentOperatorReconstructor.Reconstruct(list);
-		// Retrait des instructions DupLoads & DupStore associ�s �
+		// Retrait des instructions DupLoads & DupStore associés à
 		// une constante ou un attribut.
 		RemoveDupConstantsAttributes.Reconstruct(list);
 	}
@@ -1122,7 +1122,7 @@ public class FastInstructionListBuilder {
 
 		// Recontruction de la sequence 'return (b1 == 1);' apres la
 		// determination des types de variable
-		// A executer apr�s 'ComparisonInstructionAnalyzer'
+		// A executer après 'ComparisonInstructionAnalyzer'
 		TernaryOpInReturnReconstructor.Reconstruct(list);
 
 		// Create labeled 'break'
@@ -1159,7 +1159,7 @@ public class FastInstructionListBuilder {
 		CreateBreakAndContinue(method, list, offsetLabelSet, beforeLoopEntryOffset, loopEntryOffset,
 				afterBodyLoopOffset, afterListOffset, breakOffset, returnOffset);
 
-		// Retrait des instructions DupStore associ�es � une seule
+		// Retrait des instructions DupStore associées à une seule
 		// instruction DupLoad
 		SingleDupLoadAnalyzer.Cleanup(list);
 
@@ -1248,11 +1248,11 @@ public class FastInstructionListBuilder {
 	}
 
 	/*
-	 * Strategie : 1) Les instructions 'store' et 'for' sont pass�es en revue.
-	 * Si elles referencent une variables locales non encore declar�e et dont la
-	 * port�e est incluse � la liste, une declaration est ins�r�e. 2) Le tableau
-	 * des variables locales est pass� en revue. Pour toutes variables locales
-	 * non encore declar�es et dont la port�e est incluse � la liste courante,
+	 * Strategie : 1) Les instructions 'store' et 'for' sont passées en revue.
+	 * Si elles referencent une variables locales non encore declarée et dont la
+	 * portée est incluse à la liste, une declaration est insérée. 2) Le tableau
+	 * des variables locales est passé en revue. Pour toutes variables locales
+	 * non encore declarées et dont la portée est incluse à la liste courante,
 	 * on declare les variables en debut de bloc.
 	 */
 	private static void AddDeclarations(List<Instruction> list, LocalVariables localVariables, int beforeListOffset) {
@@ -1305,10 +1305,10 @@ public class FastInstructionListBuilder {
 			}
 
 			// 2) Ajout de declaration pour toutes variables non encore
-			// declar�es
+			// declarées
 			// TODO A affiner. Exemple:
 			// 128: String message; <--- Erreur de positionnement. La
-			// d�claration se limite � l'instruction
+			// déclaration se limite à l'instruction
 			// 'if-else'. Dupliquer dans chaque bloc.
 			// 237: if (!(partnerParameters.isActive()))
 			// {
@@ -1456,9 +1456,9 @@ public class FastInstructionListBuilder {
 						list.set(index, new FastInstruction(
 							FastConstants.IF_BREAK, bi.offset, bi.lineNumber, bi));
 					} else {
-						// Si la m�thode retourne 'void' et si l'instruction
+						// Si la méthode retourne 'void' et si l'instruction
 						// saute un goto qui saut sur un goto ... qui saute
-						// sur 'returnOffset', g�n�rer 'if-return'.
+						// sur 'returnOffset', générer 'if-return'.
 						if (ByteCodeUtil.JumpTo(method.getCode(), jumpOffset, returnOffset)) {
 							List<Instruction> instructions = new ArrayList<Instruction>(1);
 							instructions.add(new Return(ByteCodeConstants.RETURN, bi.offset,
@@ -1527,9 +1527,9 @@ public class FastInstructionListBuilder {
 						list.set(index, new FastInstruction(
 							FastConstants.GOTO_BREAK, g.offset, lineNumber, null));
 					} else {
-						// Si la m�thode retourne 'void' et si l'instruction
+						// Si la méthode retourne 'void' et si l'instruction
 						// saute un goto qui saut sur un goto ... qui saute
-						// sur 'returnOffset', g�n�rer 'return'.
+						// sur 'returnOffset', générer 'return'.
 						if (ByteCodeUtil.JumpTo(method.getCode(), jumpOffset, returnOffset)) {
 							list.set(index, new Return(
 								ByteCodeConstants.RETURN, g.offset, lineNumber));
@@ -1834,7 +1834,7 @@ public class FastInstructionListBuilder {
 		if ((g.offset >= jumpGotoOffset) || (jumpGotoOffset > afterGotoOffset))
 			return -1;
 
-		// Motif de code trouv�
+		// Motif de code trouvé
 		int newGotoOffset = g.offset + 1;
 
 		// 1) Modification de l'offset de saut
@@ -1955,7 +1955,7 @@ public class FastInstructionListBuilder {
 	private static boolean UnoptimizeLoopInLoop(List<Instruction> list, int beforeListOffset, int index,
 			Instruction instruction) {
 		// Retrait de l'optimisation des boucles dans les boucles c.a.d. rajout
-		// de l'instruction 'goto' supprim�e.
+		// de l'instruction 'goto' supprimée.
 		//
 		// Original: Optimisation:
 		// | |
@@ -2294,7 +2294,7 @@ public class FastInstructionListBuilder {
 				if (subListLength > 1) {
 					beforeLastBodyLoop = subList.get(1);
 
-					// V�rification qu'aucune instruction ne saute entre
+					// Vérification qu'aucune instruction ne saute entre
 					// 'lastBodyLoop' et 'test'
 					if (!InstructionUtil.CheckNoJumpToInterval(subList, 0, subListLength, lastBodyLoop.offset,
 							test.offset)) {
@@ -2748,7 +2748,7 @@ public class FastInstructionListBuilder {
 
 		if (astoreVariable.valueref.opcode == FastConstants.CHECKCAST)
 		{
-			// Une instruction Cast est utilis�e si le type de l'interation
+			// Une instruction Cast est utilisée si le type de l'interation
 			// n'est pas Object.
 			CheckCast cc = (CheckCast) astoreVariable.valueref;
 			if (cc.objectref.opcode != FastConstants.INVOKEINTERFACE)
@@ -3278,7 +3278,7 @@ public class FastInstructionListBuilder {
 					if (beforeLastBodyLoop == test)
 						beforeLastBodyLoop = null;
 
-					// V�rification qu'aucune instruction ne saute entre
+					// Vérification qu'aucune instruction ne saute entre
 					// 'lastBodyLoop' et 'jumpInstruction'
 					if (!InstructionUtil.CheckNoJumpToInterval(subList, 0, subListLength, lastBodyLoop.offset,
 							jumpInstruction.offset)) {
@@ -3621,8 +3621,8 @@ public class FastInstructionListBuilder {
 					if (((positiveJumpOffset == -1) || (positiveJumpOffset >= afterListOffset)) && 
 						(afterBodyLoopOffset == afterListOffset)) 
 					{					
-						// Cas des instructions de saut n�gatif dans une boucle qui
-						// participent tout de meme � une instruction if-else
+						// Cas des instructions de saut négatif dans une boucle qui
+						// participent tout de meme à une instruction if-else
 						// L'instruction saute sur un debut de boucle et la liste
 						// termine le block de la boucle.
 						afterIfElseOffset = afterListOffset;

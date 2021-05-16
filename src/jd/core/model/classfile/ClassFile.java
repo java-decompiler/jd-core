@@ -59,11 +59,11 @@ public class ClassFile extends Base
 	private Map<String, Map<String, Accessor>> accessors;
 	
 	// Attention :
-	// - Dans le cas des instructions Switch+Enum d'Eclipse, la cl� de la map 
-	//   est l'indexe du nom de la m�thode 
+	// - Dans le cas des instructions Switch+Enum d'Eclipse, la clé de la map 
+	//   est l'indexe du nom de la méthode 
 	//   "static int[] $SWITCH_TABLE$basic$data$TestEnum$enum1()".
 	// - Dans le cas des instructions Switch+Enum des autres compilateurs, la 
-	//   cl� de la map est l'indexe du nom de la classe interne "static class 1" 
+	//   clé de la map est l'indexe du nom de la classe interne "static class 1" 
 	//   contenant le tableau de correspondance 
 	//   "$SwitchMap$basic$data$TestEnum$enum1".
 	private Map<Integer, List<Integer>> switchMaps;

@@ -69,7 +69,7 @@ public class InitArrayInstructionReconstructor
 	private static void ReconstructAInstruction(
 		List<Instruction> list, int index, DupStore dupStore)
 	{
-		// 1er DupStore trouv�
+		// 1er DupStore trouvé
 		final int length = list.size();
 		int firstDupStoreIndex = index;
 		DupStore lastDupStore = dupStore;

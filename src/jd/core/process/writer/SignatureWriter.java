@@ -129,7 +129,7 @@ public class SignatureWriter
 		// - var 2: index de la valeur => ne pas afficher
 		// Signature:
 		// - variableIndex = 1 + 1 + 1
-		// Le premier parametre des m�thodes non statiques est 'this'
+		// Le premier parametre des méthodes non statiques est 'this'
 		printer.print('(');
 
 		int variableIndex = staticMethodFlag ? 0 : 1;
@@ -183,7 +183,7 @@ public class SignatureWriter
 
 				LocalVariable lv = null;
 
-				// TODO Test � retirer. Ce test a ete ajouter lors du codage
+				// TODO Test à retirer. Ce test a ete ajouter lors du codage
 				// de la gestion des enum pour eviter un NullPointerException
 				if (method.getLocalVariables() != null) {
 					lv = method.getLocalVariables().searchLocalVariableWithIndexAndOffset(variableIndex, 0);
@@ -519,7 +519,7 @@ public class SignatureWriter
 
 				if (classFile.getInternalPackageName().equals(internalPackageName)) 
 				{
-					// Classe appartenant au m�me package que la classe courante
+					// Classe appartenant au même package que la classe courante
 					if (classFile.getInnerClassFile(internalName) != null) 
 					{
 						// Dans le cas d'une classe interne, on retire le nom

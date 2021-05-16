@@ -64,19 +64,19 @@ public class LocalVariableAnalyzer
 {	
 	/**
 	 * Indexe de signature pour les variables locales de type inconnu. Si le 
-	 * type de la variable n'a pu etre determin�, la variable sera type 
+	 * type de la variable n'a pu etre determiné, la variable sera type 
 	 * 'Object'.
 	 */
 	private static final int UNDEFINED_TYPE = -1;
 	/**
-	 * Indexe de signature pour les variables locales de type num�rique inconnu.
-	 * Si le type de la variable n'a pu etre determin�, la variable sera type 
+	 * Indexe de signature pour les variables locales de type numérique inconnu.
+	 * Si le type de la variable n'a pu etre determiné, la variable sera type 
 	 * 'int'.
 	 */
 	private static final int NUMBER_TYPE = -2;	
 	/**
 	 * Indexe de signature pour les variables locales de type 'Object' et 
-	 * n�c�ssitant l'insertion d'instructions 'cast'. 
+	 * nécéssitant l'insertion d'instructions 'cast'. 
 	 */
 	private static final int OBJECT_TYPE = -3;	
 
@@ -98,7 +98,7 @@ public class LocalVariableAnalyzer
 				
 		if (localVariables == null)
 		{
-			// Ajout d'entr�es dans le tableau pour les parametres
+			// Ajout d'entrées dans le tableau pour les parametres
 			localVariables = new LocalVariables();			
 			method.setLocalVariables(localVariables);
 
@@ -149,7 +149,7 @@ public class LocalVariableAnalyzer
 		}
 		else
 		{
-			// Traitement des entr�es correspondant aux parametres
+			// Traitement des entrées correspondant aux parametres
 			AttributeSignature as = method.getAttributeSignature();
 			String methodSignature = constants.getConstantUtf8(
 					(as==null) ? method.descriptor_index : as.signature_index);
@@ -160,8 +160,8 @@ public class LocalVariableAnalyzer
 
 			if (indexOfFirstLocalVariable > localVariables.size())
 			{
-				// Dans le cas des m�thodes g�n�r�e automatiquement par le 
-				// compilateur (comme par exemple les m�thode des enums), le 
+				// Dans le cas des méthodes générée automatiquement par le 
+				// compilateur (comme par exemple les méthode des enums), le 
 				// tableau des variables locales est incomplet.
 				// Add Parameters
 				AnalyzeMethodParameter(
@@ -248,7 +248,7 @@ public class LocalVariableAnalyzer
 			        // - var 2: index de la valeur => ne pas afficher
 				// Signature:
 			        // - variableIndex = 1 + 1 + 1
-			// Le premier parametre des m�thodes non statiques est 'this'
+			// Le premier parametre des méthodes non statiques est 'this'
 			boolean staticMethodFlag = 
 				((method.access_flags & ClassFileConstants.ACC_STATIC) != 0);
 			int variableIndex = staticMethodFlag ? 0 : 1;
@@ -453,7 +453,7 @@ public class LocalVariableAnalyzer
 	 * Verification de la portee de chaque variable : la portee generee par les 
 	 * compilateurs est incorrecte : elle commence une instruction trop tard!
 	 * De plus, la longueur de la portee est tres importante. Elle est 
-	 * recalcul�e.
+	 * recalculée.
 	 */
 	private static void CheckLocalVariableRanges(
 			ConstantPool constants, byte[] code, LocalVariables localVariables, 
@@ -463,7 +463,7 @@ public class LocalVariableAnalyzer
 		// Reset length
 		int length = localVariables.size();
 		
-		  // Remise � 1 de la longueur des port�es
+		  // Remise à 1 de la longueur des portées
 		for (int i=localVariables.getIndexOfFirstLocalVariable(); i<length; i++)
 			localVariables.getLocalVariableAt(i).length = 1;
 		
@@ -503,7 +503,7 @@ public class LocalVariableAnalyzer
 							
 							if (lv == null)
 							{				
-								// Variable non trouv�e. Recherche de la variable avec 
+								// Variable non trouvée. Recherche de la variable avec 
 								// l'offset suivant car les compilateurs place 'start_pc'
 								// une instruction plus apres.
 								int nextOffset = 
@@ -529,8 +529,8 @@ public class LocalVariableAnalyzer
 								}
 								else
 								{
-									// Variable trouv�e. Mise � jour de 'start_pc' de la 
-									// port�e.
+									// Variable trouvée. Mise à jour de 'start_pc' de la 
+									// portée.
 									lv.updateRange(astore.offset);
 								}
 							}
@@ -595,20 +595,20 @@ public class LocalVariableAnalyzer
 		
 		if (lv == null)
 		{
-			// Variable non trouv�e. Recherche de la variable avec 
+			// Variable non trouvée. Recherche de la variable avec 
 			// l'offset suivant car les compilateurs place 'start_pc'
 			// une instruction plus apres.
 			int nextOffset = ByteCodeUtil.NextInstructionOffset(code, ii.offset);					
 			lv = localVariables.getLocalVariableWithIndexAndOffset(ii.index, nextOffset);					
 			if (lv != null)
 			{
-				// Variable trouv�e. Mise � jour de 'start_pc' de la 
-				// port�e.
+				// Variable trouvée. Mise à jour de 'start_pc' de la 
+				// portée.
 				lv.updateRange(ii.offset);
 			}
 			else
 			{
-				// Mise � jour de la longueur de la port�es de la 
+				// Mise à jour de la longueur de la portées de la 
 				// variable possedant le meme index et precedement 
 				// definie.
 				lv = localVariables.searchLocalVariableWithIndexAndOffset(ii.index, ii.offset);
@@ -618,7 +618,7 @@ public class LocalVariableAnalyzer
 		}
 		else
 		{
-			// Mise � jour de la longeur de la port�e
+			// Mise à jour de la longeur de la portée
 			lv.updateRange(ii.offset);
 		}
 	}
@@ -639,7 +639,7 @@ public class LocalVariableAnalyzer
     //    ...
     //   }	
 	/*
-	 * Fusion des entrees du tableau poss�dants les memes numero de slot, 
+	 * Fusion des entrees du tableau possédants les memes numero de slot, 
 	 * le meme nom et le meme type. Le tableau genere pour le code suivant 
 	 * contient deux entrees pour la variable 'a' !
 		int a;
@@ -678,7 +678,7 @@ public class LocalVariableAnalyzer
 	 * Strategie :
 	 * 	- Recherche de tous les instructions '?store' et '?load'
 	 *  - Determiner le type de la viariable
-	 *  - Si la variable n'est pas encore definie, ajouter une entr�e dans la 
+	 *  - Si la variable n'est pas encore definie, ajouter une entrée dans la 
 	 *    Liste
 	 *  - Sinon, si le type est compatible
 	 */
@@ -728,8 +728,8 @@ public class LocalVariableAnalyzer
 						StoreInstruction si = (StoreInstruction)instruction;
 						if (si.valueref.opcode == ByteCodeConstants.ILOAD)
 						{
-							// Contrainte du type de la variable li�e � ILoad par
-							// le type de la variable li�e � IStore.
+							// Contrainte du type de la variable liée à ILoad par
+							// le type de la variable liée à IStore.
 							change |= ReverseAnalyzeIStore(localVariables, si);
 						}
 					}
@@ -741,8 +741,8 @@ public class LocalVariableAnalyzer
 						{
 						case ByteCodeConstants.ILOAD:
 						case ByteCodeConstants.ALOAD:
-							// Contrainte du type de la variable li�e � ILoad par
-							// le type de la variable li�e � PutStatic.
+							// Contrainte du type de la variable liée à ILoad par
+							// le type de la variable liée à PutStatic.
 							LoadInstruction load = (LoadInstruction)ps.valueref;
 							change |= ReverseAnalyzePutStaticPutField(
 								constants, localVariables, ps, load);
@@ -756,8 +756,8 @@ public class LocalVariableAnalyzer
 						{
 						case ByteCodeConstants.ILOAD:
 						case ByteCodeConstants.ALOAD:
-							// Contrainte du type de la variable li�e � ILoad
-							// par le type de la variable li�e � PutField.
+							// Contrainte du type de la variable liée à ILoad
+							// par le type de la variable liée à PutField.
 							LoadInstruction load = (LoadInstruction)pf.valueref;
 							change |= ReverseAnalyzePutStaticPutField(
 								constants, localVariables, pf, load);
@@ -769,7 +769,7 @@ public class LocalVariableAnalyzer
 		}
 		while (change);
 		
-		// Selection d'un type pour les variables non encore typ�es.
+		// Selection d'un type pour les variables non encore typées.
 		int internalObjectSignatureIndex = 
 			constants.addConstantUtf8(StringConstants.INTERNAL_OBJECT_SIGNATURE);
 
@@ -790,11 +790,11 @@ public class LocalVariableAnalyzer
 					SignatureUtil.GetSignatureFromTypesBitField(lv.typesBitField));
 				break;
 			case OBJECT_TYPE:
-				// Plusieurs types sont affect�s � la m�me variable. Le 
+				// Plusieurs types sont affectés à la même variable. Le 
 				// decompilateur ne connait pas le graphe d'heritage des
-				// classes decompil�es. Le type de la variable est valu� � 
-				// 'Object'. Des instructions 'cast' suppl�mentaires doivent
-				// etre ajout�s. Voir la limitation de JAD sur ce point.
+				// classes decompilées. Le type de la variable est valué à 
+				// 'Object'. Des instructions 'cast' supplémentaires doivent
+				// etre ajoutés. Voir la limitation de JAD sur ce point.
 				lv.signature_index = internalObjectSignatureIndex;
 				break;
 			}
@@ -829,7 +829,7 @@ public class LocalVariableAnalyzer
 			// Variable locale deja traitee	
 			
 			  // Verification que l'attribut 'exception' est correctement
-			  // positionn�.
+			  // positionné.
 			if (firstInstruction.opcode == ByteCodeConstants.ASTORE)
 			{
 				AStore astore = (AStore)firstInstruction;
@@ -965,7 +965,7 @@ public class LocalVariableAnalyzer
 			}
 			else
 			{
-				// Une variable est trouv�e. Le type est il compatible ?
+				// Une variable est trouvée. Le type est il compatible ?
 				int typesBitField = 
 						SignatureUtil.CreateTypesBitField(signature);
 
@@ -1148,7 +1148,7 @@ public class LocalVariableAnalyzer
 								Constants.INTERNAL_OBJECT_SIGNATURE))
 						{
 							// La signature du parametre ne correspond pas
-							// a la signature de l'objet pass� en parametre
+							// a la signature de l'objet passé en parametre
 							lv.signature_index = OBJECT_TYPE;
 						}*/
 					}
@@ -1273,7 +1273,7 @@ public class LocalVariableAnalyzer
 		}
 		else
 		{
-			// Une variable est trouv�e. Le type est il compatible ?
+			// Une variable est trouvée. Le type est il compatible ?
 			if (lv.signature_index == signatureIndex)
 			{
 				lv.updateRange(offset);
@@ -1314,7 +1314,7 @@ public class LocalVariableAnalyzer
 		}
 		else if (isExceptionOrReturnAddress == false)
 		{
-			// Une variable est trouv�e. Le type est il compatible ?
+			// Une variable est trouvée. Le type est il compatible ?
 			if (lv.signature_index == UNDEFINED_TYPE)
 			{
 				// Cas particulier Jikes 1.2.2 bloc finally :
@@ -1375,7 +1375,7 @@ public class LocalVariableAnalyzer
 	{
 		final int length = listForAnalyze.size();
 		
-		// Affection du type des constantes depuis les instructions m�res
+		// Affection du type des constantes depuis les instructions méres
 		for (int i=0; i<length; i++)
 		{
 			final Instruction instruction = listForAnalyze.get(i);
@@ -1677,10 +1677,10 @@ public class LocalVariableAnalyzer
 		
 		/*
 		 * Methode d'initialisation des instructions ExceptionLoad non 
-		 * initialis�es. Cela se produit lorsque les methodes poss�dent un bloc 
+		 * initialisées. Cela se produit lorsque les methodes possédent un bloc 
 		 * de definition de variables locales. 
 		 * Les instructions ExceptionLoad appartenant aux blocs 'finally' ne 
-		 * sont pas initialis�e.
+		 * sont pas initialisée.
 		 */
 		for (int index=0; index<length; index++)
 		{
@@ -1700,11 +1700,11 @@ public class LocalVariableAnalyzer
 		}
 		
 		/*
-		 * Lorsque les exceptions ne sont pas utilis�es dans le block 'catch', 
-		 * aucune variable locale n'est cr��e. Une pseudo variable locale est 
-		 * alors cr��e pour afficher correctement l'instruction 
+		 * Lorsque les exceptions ne sont pas utilisées dans le block 'catch', 
+		 * aucune variable locale n'est créée. Une pseudo variable locale est 
+		 * alors créée pour afficher correctement l'instruction 
 		 * "catch (Exception localException)".
-		 * Aucun ajout d'instruction si "ExceptionLoad" correspond � une 
+		 * Aucun ajout d'instruction si "ExceptionLoad" correspond à une 
 		 * instruction "finally".
 		 */
 		for (int index=0; index<length; index++)

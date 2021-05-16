@@ -61,12 +61,12 @@ public class InstructionListBuilder
 				// Declaration du tableau de sauts utile pour reconstruire les 
 				// instructions de pre et post incrementation : si une 
 				// instruction 'iinc' est une instruction vers laquelle on 
-				// saute, elle ne sera pas agreg�e a l'instruction precedante 
+				// saute, elle ne sera pas agregée a l'instruction precedante 
 				// ou suivante.			
 				boolean[] jumps = new boolean[length];
 				
 				// Declaration du tableau des sauts vers les sous procedures 
-				// (jsr ... ret). A chaque d�but de sous procedures, une pseudo 
+				// (jsr ... ret). A chaque début de sous procedures, une pseudo 
 				// adresse de retour doit etre inseree sur la pile.
 				IntSet offsetSet = new IntSet();
 				
@@ -190,7 +190,7 @@ public class InstructionListBuilder
 						{
 							// Ajout d'une pseudo adresse de retour en debut de 
 							// sous procedure. Lors de l'execution, cette 
-							// adresse est normalement plac�e sur la pile par 
+							// adresse est normalement placée sur la pile par 
 							// l'instruction JSR.
 							stack.push(new ReturnAddressLoad(
 									ByteCodeConstants.RETURNADDRESSLOAD, 
