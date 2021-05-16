@@ -5,6 +5,9 @@
 	<groupId>jd-core</groupId>
 	<artifactId>jd-core</artifactId>
 	<version>0.7.2-SNAPSHOT</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
