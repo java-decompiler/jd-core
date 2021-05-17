@@ -54,10 +54,10 @@ public class IConst extends ConstInstruction
 				this.signature = "X";				
 			else if (value <= Byte.MAX_VALUE)
 				this.signature = "Y";				
+			else if (value <= Short.MAX_VALUE)
+			    this.signature = "S";				
 			else if (value <= Character.MAX_VALUE)
 				this.signature = "C";				
-			else if (value <= Short.MAX_VALUE)
-				this.signature = "S";				
 			else 
 				this.signature = "I";				
 		}
