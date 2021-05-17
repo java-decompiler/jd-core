@@ -218,31 +218,9 @@ public class MaxLineNumberVisitor
 			maxLineNumber = visit(((TernaryOpStore)instruction).objectref);
 			break;
 		case ByteCodeConstants.PREINC:
-			{	
-				IncInstruction ii = (IncInstruction)instruction;
-				
-				switch (ii.count)
-				{
-				case -1:
-				case 1:
-					maxLineNumber = visit(ii.value);
-					break;
-				}
-			}
-			break;
 		case ByteCodeConstants.POSTINC:	
-			{	
-				IncInstruction ii = (IncInstruction)instruction;
-				
-				switch (ii.count)
-				{
-				case -1:
-				case 1:
-					maxLineNumber = instruction.lineNumber;
-				default:
-					maxLineNumber = visit(ii.value);
-				}
-			}
+			IncInstruction ii = (IncInstruction)instruction;
+			maxLineNumber = visit(ii.value);
 			break;
 		case ByteCodeConstants.INITARRAY:
 		case ByteCodeConstants.NEWANDINITARRAY:
