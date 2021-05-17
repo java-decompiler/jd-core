@@ -1267,7 +1267,7 @@ public class FastInstructionListBuilder {
 
 			for (int i = 0; i < length; i++) 
 			{
-				Instruction instruction = (Instruction) list.get(i);
+				Instruction instruction = list.get(i);
 
 				switch (instruction.opcode) {
 				case ByteCodeConstants.ASTORE:

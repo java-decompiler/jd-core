@@ -94,35 +94,35 @@ public class PreIncReconstructor
 						(((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 						(((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
 						// 1er DupLoad trouvé
-						dupload = (DupLoad)((StoreInstruction)i).valueref;
+						dupload = ((StoreInstruction)i).valueref;
 						break;
 				case ByteCodeConstants.ISTORE:
 					if ((boi.value1.opcode == ByteCodeConstants.ILOAD) &&
 						(((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 						(((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
 						// 1er DupLoad trouvé
-						dupload = (DupLoad)((StoreInstruction)i).valueref;
+						dupload = ((StoreInstruction)i).valueref;
 						break;
 				case ByteCodeConstants.STORE:
 					if ((boi.value1.opcode == ByteCodeConstants.LOAD) &&
 						(((StoreInstruction)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 						(((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
 						// 1er DupLoad trouvé
-						dupload = (DupLoad)((StoreInstruction)i).valueref;
+						dupload = ((StoreInstruction)i).valueref;
 					break;
 				case ByteCodeConstants.PUTFIELD:
 					if ((boi.value1.opcode == ByteCodeConstants.GETFIELD) &&
 						(((PutField)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 					    (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
 						// 1er DupLoad trouvé
-						dupload = (DupLoad)((PutField)i).valueref;
+						dupload = ((PutField)i).valueref;
 					break;
 				case ByteCodeConstants.PUTSTATIC:
 					if ((boi.value1.opcode == ByteCodeConstants.GETSTATIC) &&
 						(((PutStatic)i).valueref.opcode == ByteCodeConstants.DUPLOAD) &&
 				        (((IndexInstruction)i).index == ((IndexInstruction)boi.value1).index))
 						// 1er DupLoad trouvé
-						dupload = (DupLoad)((PutStatic)i).valueref;
+						dupload = ((PutStatic)i).valueref;
 					break;
 				}
 					

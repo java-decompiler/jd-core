@@ -73,7 +73,7 @@ public class OuterPutFieldVisitor extends OuterGetStaticVisitor
 			(accessor.tag != AccessorConstants.ACCESSOR_PUTFIELD))
 			return null;
 		
-		return (PutFieldAccessor)accessor;
+		return accessor;
 	}
 	
 	protected Instruction newInstruction(Instruction i, Accessor a)

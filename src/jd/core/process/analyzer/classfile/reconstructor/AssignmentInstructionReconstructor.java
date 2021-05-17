@@ -113,7 +113,7 @@ public class AssignmentInstructionReconstructor
 							(((DupLoad)i).dupStore == dupStore))
 						{
 							// 1er DupLoad trouvé
-							dupload1 = (DupLoad)i;
+							dupload1 = i;
 						}
 					}
 					break;

@@ -573,7 +573,7 @@ public class OuterGetStaticVisitor
 			(accessor.tag != AccessorConstants.ACCESSOR_GETSTATIC))
 			return null;
 		
-		return (GetStaticAccessor)accessor;
+		return accessor;
 	}
 	
 	protected Instruction newInstruction(Instruction i, Accessor a)

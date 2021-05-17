@@ -50,6 +50,6 @@ public class LayoutSection implements Comparable<LayoutSection>
 
 	public int compareTo(LayoutSection o) 
 	{
-		return ((LayoutSection)o).score - this.score;
+		return o.score - this.score;
 	}
 }
