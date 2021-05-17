@@ -21,7 +21,6 @@ import java.util.List;
 import jd.core.model.instruction.bytecode.ByteCodeConstants;
 import jd.core.model.instruction.bytecode.instruction.BinaryOperatorInstruction;
 import jd.core.model.instruction.bytecode.instruction.ConstInstruction;
-import jd.core.model.instruction.bytecode.instruction.DupLoad;
 import jd.core.model.instruction.bytecode.instruction.DupStore;
 import jd.core.model.instruction.bytecode.instruction.IncInstruction;
 import jd.core.model.instruction.bytecode.instruction.IndexInstruction;
