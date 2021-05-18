@@ -63,7 +63,7 @@ public class ConstantValueWriter
 						loader, printer, referenceMap, classFile, 
 						"java/lang/Double", "NEGATIVE_INFINITY", "D");
 				}
-				else if (d == Double.NaN)
+				else if (Double.isNaN(d))
 				{
 					Write(
 						loader, printer, referenceMap, classFile, 
@@ -113,7 +113,7 @@ public class ConstantValueWriter
 						loader, printer, referenceMap, classFile, 
 						"java/lang/Float", "NEGATIVE_INFINITY", "F");
 				}
-				else if (value == Float.NaN)
+				else if (Float.isNaN(value))
 				{
 					Write(
 						loader, printer, referenceMap, classFile, 
