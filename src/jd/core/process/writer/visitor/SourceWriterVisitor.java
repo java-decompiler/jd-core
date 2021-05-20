@@ -2155,14 +2155,7 @@ public class SourceWriterVisitor
 			{
 				int nameIndex = lv.name_index;
 	
-				if (nameIndex == -1)
-				{
-					// Error
-					this.printer.startOfError();
-					this.printer.print(lineNumber, "???");
-					this.printer.endOfError();
-				}
-				else if (nameIndex == this.constants.thisLocalVariableNameIndex)
+				if (nameIndex == this.constants.thisLocalVariableNameIndex)
 				{
 					this.printer.printKeyword(
 						lineNumber, constants.getConstantUtf8(lv.name_index));
