@@ -218,9 +218,36 @@ public class MaxLineNumberVisitor
 			maxLineNumber = visit(((TernaryOpStore)instruction).objectref);
 			break;
 		case ByteCodeConstants.PREINC:
+			{	
+				IncInstruction ii = (IncInstruction)instruction;
+				
+				switch (ii.count)
+				{
+				case -1:
+				case 1:
+					maxLineNumber = visit(ii.value);
+					break;
+				}
+			}
+			break;
 		case ByteCodeConstants.POSTINC:	
+			{	
 			IncInstruction ii = (IncInstruction)instruction;
-			maxLineNumber = visit(ii.value);
+				
+				switch (ii.count)
+				{
+				case -1:
+				case 1:
+					// si la valeur à incrémenter est 1 ou -1 (soit i++ ou i--), 
+					// le numéro maximal est égal au numéro de ligne de l'expression.
+					maxLineNumber = instruction.lineNumber;
+					break;
+				default:
+					// si la valeur à incrémenter est autre (par exemple i += expression), 
+					// le numéro maximal de ligne est celui de l'expression à droite, on appelle récursivement l'algorithme pour parcourir l'arbre d'instructions.
+				    maxLineNumber = visit(ii.value);
+				}
+			}
 			break;
 		case ByteCodeConstants.INITARRAY:
 		case ByteCodeConstants.NEWANDINITARRAY:
