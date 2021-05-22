@@ -2393,8 +2393,37 @@ public class ControlFlowGraphTest extends TestCase {
     public void testJdk131MethodTryTryFinallyFinallyTryFinally() throws Exception {
         checkCFGReduction(searchMethod(getResource("zip/data-java-jdk-1.3.1.zip"), "org/jd/core/test/TryCatchFinally", "methodTryTryFinallyFinallyTryFinally"));
     }
+    
+    @Test
+    public void testJdk8u252ComplexBoolExpAddButton() throws Exception {
+        checkCFGReduction(searchMethod(getResource("jar/bool-exp-test-jdk8u252.jar"), "org/jd/core/test/BoolExpTest", "addButton"));
+    }
+    
+    @Test
+    public void testJdk8u252ComplexBoolExpIsValid() throws Exception {
+        checkCFGReduction(searchMethod(getResource("jar/bool-exp-test-jdk8u252.jar"), "org/jd/core/test/BoolExpTest", "isValid"));
+    }
 
+    @Test
+    public void testJdk8u252ComplexBoolExpIsValidChoice() throws Exception {
+        checkCFGReduction(searchMethod(getResource("jar/bool-exp-test-jdk8u252.jar"), "org/jd/core/test/BoolExpTest", "isValidChoice"));
+    }
 
+    @Test
+    public void testJdk5u22ComplexBoolExpAddButton() throws Exception {
+        checkCFGReduction(searchMethod(getResource("jar/bool-exp-test-jdk5u22.jar"), "org/jd/core/test/BoolExpTest", "addButton"));
+    }
+    
+    @Test
+    public void testJdk5u22ComplexBoolExpIsValid() throws Exception {
+        checkCFGReduction(searchMethod(getResource("jar/bool-exp-test-jdk5u22.jar"), "org/jd/core/test/BoolExpTest", "isValid"));
+    }
+    
+    @Test
+    public void testJdk5u22ComplexBoolExpIsValidChoice() throws Exception {
+        checkCFGReduction(searchMethod(getResource("jar/bool-exp-test-jdk5u22.jar"), "org/jd/core/test/BoolExpTest", "isValidChoice"));
+    }
+    
     protected ControlFlowGraph checkCFGReduction(Method method) throws Exception {
         ControlFlowGraph cfg = ControlFlowGraphMaker.make(method);
 
