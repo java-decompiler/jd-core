@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
 import java.util.ArrayList;
@@ -155,7 +171,7 @@ public class DotClass118AReconstructor
 
 			if (nameField.startsWith(StringConstants.CLASS_DOLLAR))
 			{
-				// motif 'x.class' classique trouv� !	
+				// motif 'x.class' classique trouvé !	
 				// Substitution par une constante de type 'ClassConstant'
 				ConstantString cs = (ConstantString)cv;
 				String signature = constants.getConstantUtf8(cs.string_index);
@@ -185,7 +201,7 @@ public class DotClass118AReconstructor
 			}
 			else if (nameField.startsWith(StringConstants.ARRAY_DOLLAR))
 			{
-				// motif 'x[].class' trouv� !	
+				// motif 'x[].class' trouvé !	
 				// Substitution par l'expression 'new x[0].getClass()'
 				ConstantString cs = (ConstantString)cv;
 				String signature = constants.getConstantUtf8(cs.string_index);
@@ -229,7 +245,7 @@ public class DotClass118AReconstructor
 						iconst0);
 				}
 				
-				// Ajout de la methode 'getClass'
+				// Ajout de la méthode 'getClass'
 				int methodNameIndex = constants.addConstantUtf8("getClass");
 				int methodDescriptorIndex = 
 					constants.addConstantUtf8("()Ljava/lang/Class;");
@@ -284,7 +300,7 @@ public class DotClass118AReconstructor
 				}
 			}
 			
-			// Recherche de la methode statique et ajout de l'attribut SYNTHETIC
+			// Recherche de la méthode statique et ajout de l'attribut SYNTHETIC
 			Method[] methods = classFile.getMethods();
 			j = methods.length;
 			

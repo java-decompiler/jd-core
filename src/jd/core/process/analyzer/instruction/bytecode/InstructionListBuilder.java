@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode;
 
 import java.util.Arrays;
@@ -45,13 +61,13 @@ public class InstructionListBuilder
 				// Declaration du tableau de sauts utile pour reconstruire les 
 				// instructions de pre et post incrementation : si une 
 				// instruction 'iinc' est une instruction vers laquelle on 
-				// saute, elle ne sera pas agreg�e a l'instruction precedante 
+				// saute, elle ne sera pas agregée a l'instruction precedante 
 				// ou suivante.			
 				boolean[] jumps = new boolean[length];
 				
 				// Declaration du tableau des sauts vers les sous procedures 
-				// (jsr ... ret). A chaque d�but de sous procedures, une pseudo 
-				// adresse de retour doit etre inseree sur la pile.
+				// (jsr ... ret). A chaque début de sous procedures, une pseudo 
+				// adresse de retour doit être inseree sur la pile.
 				IntSet offsetSet = new IntSet();
 				
 				// Population des deux tableaux dans la meme passe.
@@ -127,7 +143,7 @@ public class InstructionListBuilder
 						if (offset == exceptionOffset)
 						{
 							// Ajout d'une pseudo instruction de lecture 
-							// d'exception en debut de bloc catch
+							// d'exception en début de bloc catch
 							int catchType = 
 								codeExceptions[codeExceptionsIndex].catch_type;
 							int signatureIndex;
@@ -172,9 +188,9 @@ public class InstructionListBuilder
 						// Ajout de ReturnAddressLoad
 						if (offset == subProcOffset)
 						{
-							// Ajout d'une pseudo adresse de retour en debut de 
+							// Ajout d'une pseudo adresse de retour en début de 
 							// sous procedure. Lors de l'execution, cette 
-							// adresse est normalement plac�e sur la pile par 
+							// adresse est normalement placée sur la pile par 
 							// l'instruction JSR.
 							stack.push(new ReturnAddressLoad(
 									ByteCodeConstants.RETURNADDRESSLOAD, 

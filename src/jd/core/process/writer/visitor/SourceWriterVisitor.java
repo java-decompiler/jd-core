@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.writer.visitor;
 
 import java.util.HashSet;
@@ -1537,7 +1553,7 @@ public class SourceWriterVisitor
 			(field.outerMethodLocalVariableNameIndex != UtilConstants.INVALID_INDEX))
 		{
 			// Specificite des classes anonymes : affichage du nom du champs de
-			// la methode englobante plutot que le nom du champs
+			// la méthode englobante plutot que le nom du champs
 			if ((this.firstOffset <= this.previousOffset) && 
 				(getField.offset <= this.lastOffset))
 			{
@@ -1819,7 +1835,7 @@ public class SourceWriterVisitor
 			}
 			else
 			{
-				// Appel a une methode privee?
+				// Appel a une méthode privee?
 				firstIndex = 0;
 			}
 		}
@@ -1853,7 +1869,7 @@ public class SourceWriterVisitor
 				}
 				else
 				{
-					// Appel a une methode privee?
+					// Appel a une méthode privee?
 					Method method = this.classFile.getMethod(
 						cnat.name_index, cnat.descriptor_index);
 					
@@ -2085,7 +2101,7 @@ public class SourceWriterVisitor
 			(ii.offset <= this.lastOffset))
 		{
 			// Dans les specs, LDC pointe vers une constante du pool. Lors de la
-			// declaration d'enumeration, le byte code de la methode 
+			// declaration d'enumeration, le byte code de la méthode 
 			// 'Enum.valueOf(Class<T> enumType, String name)' contient une
 			// instruction LDC pointant un objet de type 'ConstantClass'.
 			Constant cst = constants.get(ii.index);
@@ -2106,7 +2122,7 @@ public class SourceWriterVisitor
 			}
 			else
 			{
-				// Cas g�n�ral
+				// Cas général
 				this.printer.addNewLinesAndPrefix(lineNumber);
 		    	ConstantValueWriter.Write(
 		    		this.loader, this.printer, this.referenceMap, 
@@ -2139,14 +2155,7 @@ public class SourceWriterVisitor
 			{
 				int nameIndex = lv.name_index;
 	
-				if (nameIndex == -1)
-				{
-					// Error
-					this.printer.startOfError();
-					this.printer.print(lineNumber, "???");
-					this.printer.endOfError();
-				}
-				else if (nameIndex == this.constants.thisLocalVariableNameIndex)
+				if (nameIndex == this.constants.thisLocalVariableNameIndex)
 				{
 					this.printer.printKeyword(
 						lineNumber, constants.getConstantUtf8(lv.name_index));
@@ -2256,7 +2265,7 @@ public class SourceWriterVisitor
 			this.printer.print(lineNumber, " = ");
 		}
 		
-		// Est-il necessaire de parenth�ser l'expression ?
+		// Est-il necessaire de parenthéser l'expression ?
 		// visit(putStatic, putStatic.valueref);
 		return visit(putStatic.valueref);
 	}
@@ -2289,7 +2298,7 @@ public class SourceWriterVisitor
 			this.printer.print(lineNumber, " = ");
 		}
 		
-		// Est-il necessaire de parenth�ser l'expression ?
+		// Est-il necessaire de parenthéser l'expression ?
 		// visit(storeInstruction, storeInstruction.valueref);
 		return visit(storeInstruction.valueref);
 	}

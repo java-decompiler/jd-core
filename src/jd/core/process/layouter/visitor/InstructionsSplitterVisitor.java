@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.layouter.visitor;
 
 import java.util.List;
@@ -77,7 +93,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 	{
 		if (this.firstLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
 		{
-			// Bloc executÈ soit lors de la visite de 
+			// Bloc execut√© soit lors de la visite de 
 			// - du 1er statement
 			// - d'un statement qui suit un statement dont la derniere 
 			//   instruction est 'AnonymousNewInvoke'
@@ -89,7 +105,7 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 			
 			if (initialFirstLineNumber != Instruction.UNKNOWN_LINE_NUMBER)
 			{
-				// Si la methode possede des numeros de lignes
+				// Si la m√©thode poss√®de des numeros de lignes
 				if (initialFirstLineNumber < instruction.lineNumber)
 				{
 					// Cas d'un statement qui suit un statement dont la derniere 
@@ -126,8 +142,8 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 		
 		if (this.firstLineNumber == Instruction.UNKNOWN_LINE_NUMBER)
 		{
-			// Bloc executÈ si une instruction 'AnonymousNewInvoke' vient 
-			// d'etre traitee.
+			// Bloc execut√© si une instruction 'AnonymousNewInvoke' vient 
+			// d'√™tre traitee.
 			this.firstLineNumber = instruction.lineNumber;
 		}
 		
@@ -159,8 +175,8 @@ public class InstructionsSplitterVisitor extends BaseInstructionSplitterVisitor
 		{
 			if (lastLineNumber < this.firstLineNumber)
 			{
-				// Les instructions newAnonymousClass imbriquÈes n'ont pas de 
-				// numÈros de ligne correctes. Exemple: com.googlecode.dex2jar.v3.Dex2jar
+				// Les instructions newAnonymousClass imbriqu√©es n'ont pas de 
+				// num√©ros de ligne correctes. Exemple: com.googlecode.dex2jar.v3.Dex2jar
 				lastLineNumber = this.firstLineNumber;
 			}
 			preferedLineCount = lastLineNumber - this.firstLineNumber;

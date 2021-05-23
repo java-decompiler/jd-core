@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.analyzer.classfile.reconstructor;
 
 import jd.core.model.classfile.ClassFile;
@@ -18,7 +34,7 @@ import jd.core.util.UtilConstants;
 public class NewInstructionReconstructorBase 
 {
 	/*
-	 * Methode permettznt l'affichage des variables locales d'une methode d'une
+	 * Methode permettznt l'affichage des variables locales d'une méthode d'une
 	 * outer class dans une inner class
 	 */
 	public static void InitAnonymousClassConstructorParameterName(
@@ -81,7 +97,7 @@ public class NewInstructionReconstructorBase
 									innerField.outerMethodLocalVariableNameIndex = 
 										innerConstants.addConstantUtf8(name);
 									// Ajout du flag 'final' sur la variable 
-									// locale de la methode contenant 
+									// locale de la méthode contenant 
 									// l'instruction "new"
 									lv.finalFlag = true;									
 								}

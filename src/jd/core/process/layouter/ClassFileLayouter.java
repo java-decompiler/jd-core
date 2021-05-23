@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.layouter;
 
 import java.util.ArrayList;
@@ -544,7 +560,7 @@ public class ClassFileLayouter {
 	
 	/**
 	 * @return liste de sequences de 'LayoutBlock'
-	 * Sequence produite pour chaque methode:
+	 * Sequence produite pour chaque méthode:
 	 *  - MethodBlockStartLayoutBlock
 	 *  -  CommentDeprecatedLayoutBlock ?
 	 *  -  AnnotationsLayoutBlock ?
@@ -589,7 +605,7 @@ public class ClassFileLayouter {
 	    		AttributeSignature as = method.getAttributeSignature();
 	    		
 	    		// Le descripteur et la signature sont differentes pour les 
-	    		// constructeurs des Enums ! Cette information est pass�e � 
+	    		// constructeurs des Enums ! Cette information est passée à 
 	    		// "SignatureWriter.WriteMethodSignature(...)".
 			    boolean descriptorFlag = (as == null);
 	    		int signatureIndex = descriptorFlag ? 
@@ -671,7 +687,7 @@ public class ClassFileLayouter {
 					classFile, method.getAttributes(), subLayoutBlockList);
 				
 				// Information utilisee par 'PrintWriter' pour afficher un ';'
-				// apres les methodes sans code. Evite d'instancier un object
+				// après les méthodes sans code. Evite d'instancier un object
 				// 'EmptyCodeLayoutBlock'.
 				boolean nullCodeFlag = (method.getCode() == null);
 				boolean displayThrowsFlag = false;
@@ -889,7 +905,7 @@ public class ClassFileLayouter {
 	private static List<SubListLayoutBlock> SortBlocks(
 		List<SubListLayoutBlock> blockList) 
 	{	
-		// Detection de l'ordre de generation des champs par le compilateur:
+		// Detection de l'ordre de génération des champs par le compilateur:
 		// ascendant (1), descendant (2) ou aleatoire (3)
 		int length = blockList.size();
 		int lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
@@ -952,7 +968,7 @@ public class ClassFileLayouter {
 	/* POURQUOI AVOIR UTILISE UNE SIGNATURE SI COMPLEXE A CONVERTIR EN C++ ?
 	 * private static <T extends LayoutBlock> List<T> SortBlocks(List<T> blockList) 
 	{	
-		// Detection de l'ordre de generation des champs par le compilateur:
+		// Detection de l'ordre de génération des champs par le compilateur:
 		// ascendant (1), descendant (2) ou aleatoire (3)
 		int length = blockList.size();
 		int lineNumber = Instruction.UNKNOWN_LINE_NUMBER;
@@ -1011,9 +1027,9 @@ public class ClassFileLayouter {
 	
 	/* Premiere phase du realignement,
 	 * 3 jeux de cartes,
-	 * Conserver l'ordre naturel jusqu'a une impossibilite:
+	 * Conserver l'ordre naturel jusqu'à une impossibilite:
 	 * Copie des blocs sans numero de ligne des champs au plus tot
-	 * Copie des blocs sans numero de ligne des methodes et des classes internes au plus tard
+	 * Copie des blocs sans numero de ligne des méthodes et des classes internes au plus tard
 	 */
 	private static int MergeBlocks(
 		List<LayoutBlock> layoutBlockList, 
@@ -1052,10 +1068,10 @@ public class ClassFileLayouter {
 					maxLineNumber = ExclusiveMergeFieldBlockList(
 						layoutBlockList, sortedFieldBlockList, 
 						minLineNumberInnerClass, maxLineNumber);
-					// Copie de toutes les methodes sans numero de ligne
+					// Copie de toutes les méthodes sans numero de ligne
 					maxLineNumber = MergeBlockList(
 						layoutBlockList, sortedMethodBlockList, maxLineNumber);
-					// Copie des classes internes jusqu'a l'inner classe ayant 
+					// Copie des classes internes jusqu'à l'inner classe ayant 
 					// le plus petit numero de ligne
 					maxLineNumber = InclusiveMergeBlockList(
 						layoutBlockList, sortedInnerClassBlockList, 
@@ -1073,7 +1089,7 @@ public class ClassFileLayouter {
 					maxLineNumber = ExclusiveMergeFieldBlockList(
 						layoutBlockList, sortedFieldBlockList, 
 						minLineNumberMethod, maxLineNumber);
-					// Copie des methodes jusqu'a la methode ayant le plus 
+					// Copie des méthodes jusqu'à la méthode ayant le plus 
 					// petit numero de ligne
 					maxLineNumber = InclusiveMergeBlockList(
 						layoutBlockList, sortedMethodBlockList,
@@ -1087,11 +1103,11 @@ public class ClassFileLayouter {
 					maxLineNumber = ExclusiveMergeFieldBlockList(
 						layoutBlockList, sortedFieldBlockList, 
 						minLineNumberInnerClass, maxLineNumber);
-					// Copie des methodes avec et sans numero de ligne
+					// Copie des méthodes avec et sans numero de ligne
 					maxLineNumber = ExclusiveMergeMethodOrInnerClassBlockList(
 						layoutBlockList, sortedMethodBlockList, 
 						minLineNumberInnerClass, maxLineNumber);
-					// Copie des classes internes jusqu'a l'inner classe ayant 
+					// Copie des classes internes jusqu'à l'inner classe ayant 
 					// le plus petit numero de ligne
 					maxLineNumber = InclusiveMergeBlockList(
 						layoutBlockList, sortedInnerClassBlockList, 
@@ -1113,11 +1129,11 @@ public class ClassFileLayouter {
 			}
 			else
 			{
-				// Copie des methodes avec et sans numero de ligne
+				// Copie des méthodes avec et sans numero de ligne
 				maxLineNumber = ExclusiveMergeMethodOrInnerClassBlockList(
 					layoutBlockList, sortedMethodBlockList, 
 					minLineNumberInnerClass, maxLineNumber);
-				// Copie des classes internes jusqu'a l'inner classe ayant le 
+				// Copie des classes internes jusqu'à l'inner classe ayant le 
 				// plus petit numero de ligne
 				maxLineNumber = InclusiveMergeBlockList(
 					layoutBlockList, sortedInnerClassBlockList, 
@@ -1799,7 +1815,7 @@ public class ClassFileLayouter {
 		{
 			oldDelta = delta;
 			
-			// Compact debut de bloc des methodes
+			// Compact début de bloc des méthodes
 			for (int i=lastIndex; (i>=firstIndex) && (delta>0); i--)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -1852,7 +1868,7 @@ public class ClassFileLayouter {
 		{
 			oldDelta = delta;
 			
-			// Compact fin de bloc des methodes
+			// Compact fin de bloc des méthodes
 			for (int i=lastIndex; (i>=firstIndex) && (delta>0); i--)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -1907,7 +1923,7 @@ public class ClassFileLayouter {
 		{
 			oldDelta = delta;
 			
-			// Compact fin de bloc des methodes
+			// Compact fin de bloc des méthodes
 			for (int i=firstIndex; (i<=lastIndex) && (delta>0); i++)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -1954,7 +1970,7 @@ public class ClassFileLayouter {
 		{
 			oldDelta = delta;
 			
-			// Compact fin de bloc des methodes
+			// Compact fin de bloc des méthodes
 			for (int i=lastIndex; (i>=firstIndex) && (delta>0); i--)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -2003,7 +2019,7 @@ public class ClassFileLayouter {
 		{
 			oldDelta = delta;
 			
-			// Compact debut de bloc des methodes
+			// Compact début de bloc des méthodes
 			for (int i=lastIndex; (i>=firstIndex) && (delta>0); i--)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -2058,7 +2074,7 @@ public class ClassFileLayouter {
 				}
 			}
 			
-			// Compact fin de bloc des methodes
+			// Compact fin de bloc des méthodes
 			for (int i=lastIndex; (i>=firstIndex) && (delta>0); i--)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -2286,7 +2302,7 @@ public class ClassFileLayouter {
 		{
 			oldDelta = delta;
 			
-			// Expand fin de bloc des methodes
+			// Expand fin de bloc des méthodes
 			for (int i=firstIndex; (i<=lastIndex) && (delta>0); i++)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -2328,7 +2344,7 @@ public class ClassFileLayouter {
 				}
 			}
 				
-			// Expand debut de bloc du corps des classes internes
+			// Expand début de bloc du corps des classes internes
 			for (int i=firstIndex; (i<=lastIndex) && (delta>0); i++)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -2423,7 +2439,7 @@ public class ClassFileLayouter {
 		{
 			oldDelta = delta;
 			
-			// Compact fin de bloc des methodes
+			// Compact fin de bloc des méthodes
 			for (int i=firstIndex; (i<=lastIndex) && (delta>0); i++)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -2476,7 +2492,7 @@ public class ClassFileLayouter {
 				}
 			}
 				
-			// Expand debut de bloc du corps des classes internes
+			// Expand début de bloc du corps des classes internes
 			for (int i=firstIndex; (i<=lastIndex) && (delta>0); i++)
 			{
 				LayoutBlock lb = layoutBlockList.get(i);
@@ -2829,23 +2845,23 @@ public class ClassFileLayouter {
 			
 			if (lb.tag == markerEndTag)
 			{
-				// Tag de marqueur de fin trouv�.
+				// Tag de marqueur de fin trouvé.
 				MarkerLayoutBlock mlb = (MarkerLayoutBlock)lb;
 				
 				if (mlb.section != mlb.other.section)
 				{
-					// Le marqueur de d�but et le marqueur de fin ne font pas
-					// parti de la m�me section -> l'un des blocs entre eux deux 
+					// Le marqueur de début et le marqueur de fin ne font pas
+					// parti de la même section -> l'un des blocs entre eux deux 
 					// a un numero de ligne connu -> blocs indeplacables.
 					return false;
 				}
 				if (mlb.other.index <= firstBlockIndex)
 				{
-					// Le marqueur de debut est avant la limite.
+					// Le marqueur de début est avant la limite.
 					return false;
 				}
 							
-				// Trouv�. 
+				// Trouvé. 
 				
 				// -- 1 ----------------------------------------------------- //
 				int lastEndTagBlockIndex = blockIndex;
@@ -2867,19 +2883,19 @@ public class ClassFileLayouter {
 					}
 					else if (lb.tag == markerEndTag)
 					{
-						// Tag de marqueur de fin trouv�.
+						// Tag de marqueur de fin trouvé.
 						mlb = (MarkerLayoutBlock)lb;
 						
 						if (mlb.section != mlb.other.section)
 						{
-							// Le marqueur de d�but et le marqueur de fin ne font pas
-							// parti de la m�me section -> l'un des blocs entre eux deux 
+							// Le marqueur de début et le marqueur de fin ne font pas
+							// parti de la même section -> l'un des blocs entre eux deux 
 							// a un numero de ligne connu -> blocs indeplacables.
 							break;
 						}					
 						if (mlb.other.index <= firstBlockIndex)
 						{
-							// Le marqueur de debut est avant la limite.
+							// Le marqueur de début est avant la limite.
 							break;
 						}
 
@@ -2894,10 +2910,10 @@ public class ClassFileLayouter {
 					}
 				}
 				
-				// Un ou plusieurs blocs a deplacer trouv�s.
+				// Un ou plusieurs blocs a deplacer trouvés.
 				
 				// Rechercher de l'index d'insertion =>
-				//  Trouver la section ayant le score le plus bas jusqu'a la 
+				//  Trouver la section ayant le score le plus bas jusqu'à la 
 				//  section contenant un block de type 'tag' ayant un numero 
 				//  de ligne defini
 				int blockLenght = layoutBlockList.size();
@@ -2914,7 +2930,7 @@ public class ClassFileLayouter {
 //						(lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) ||
 						(lb.tag == markerStartTag))
 					{
-						// Fin de corps ou debut d'un bloc
+						// Fin de corps ou début d'un bloc
 						if (lowerScore > lb.section.score)
 						{
 							lowerScore = lb.section.score;							
@@ -2945,11 +2961,11 @@ public class ClassFileLayouter {
 					
 				if (lowerScore != lsSource.score)
 				{
-					// Trouv�. 
+					// Trouvé. 
 					
 					// -- 2 ------------------------------------------------- //
 
-					// Rechercher de l'index de debut du bloc de type 'tag'
+					// Rechercher de l'index de début du bloc de type 'tag'
 					// counter/2 en partant de 'lastEndTagBlockIndex'
 					counter = (counter + 1) / 2;
 					int firstStartTagBlockIndex = 
@@ -2976,7 +2992,7 @@ public class ClassFileLayouter {
 						blockIndex--;
 					}
 					
-					// Trouv�.
+					// Trouvé.
 					
 					// -- 3 ------------------------------------------------- //
 
@@ -3013,7 +3029,8 @@ public class ClassFileLayouter {
 						LayoutBlockConstants.SEPARATOR)
 					{
 						layoutBlockList.remove(blockIndex+1);
-						sourceDeltaIndex++;					}
+						sourceDeltaIndex++;
+					}
 					
 					// Modify separator brefore blocks if exists
 					if (layoutBlockList.get(blockIndex).tag == 
@@ -3022,7 +3039,7 @@ public class ClassFileLayouter {
 						layoutBlockList.get(blockIndex).preferedLineCount = 2;
 					}
 					
-					// Blocs pas encore inser�s.
+					// Blocs pas encore inserés.
 					lowerScoreBlockIndex -= sourceDeltaIndex;
 					
 					int targetDeltaIndex = 0;
@@ -3265,23 +3282,23 @@ public class ClassFileLayouter {
 			
 			if (lb.tag == markerStartTag)
 			{
-				// Tag de marqueur de debut trouv�.
+				// Tag de marqueur de début trouvé.
 				MarkerLayoutBlock mlb = (MarkerLayoutBlock)lb;
 				
 				if (mlb.section != mlb.other.section)
 				{
-					// Le marqueur de d�but et le marqueur de fin ne font pas
-					// parti de la m�me section -> l'un des blocs entre eux deux 
+					// Le marqueur de début et le marqueur de fin ne font pas
+					// parti de la même section -> l'un des blocs entre eux deux 
 					// a un numero de ligne connu -> blocs indeplacables.
 					return false;
 				}
 				if (mlb.other.index >= lastBlockIndex)
 				{
-					// Le marqueur de fin est apres la limite.
+					// Le marqueur de fin est après la limite.
 					return false;
 				}
 							
-				// Trouv�. 
+				// Trouvé. 
 				
 				// -- 1 ----------------------------------------------------- //
 				int firstStartTagBlockIndex = blockIndex;
@@ -3303,19 +3320,19 @@ public class ClassFileLayouter {
 					}
 					else if (lb.tag == markerStartTag)
 					{
-						// Tag de marqueur de fin trouv�.
+						// Tag de marqueur de fin trouvé.
 						mlb = (MarkerLayoutBlock)lb;
 						
 						if (mlb.section != mlb.other.section)
 						{
-							// Le marqueur de d�but et le marqueur de fin ne font pas
-							// parti de la m�me section -> l'un des blocs entre eux deux 
+							// Le marqueur de début et le marqueur de fin ne font pas
+							// parti de la même section -> l'un des blocs entre eux deux 
 							// a un numero de ligne connu -> blocs indeplacables.
 							break;
 						}					
 						if (mlb.other.index >= lastBlockIndex)
 						{
-							// Le marqueur de debut est avant la limite.
+							// Le marqueur de début est avant la limite.
 							break;
 						}
 
@@ -3330,10 +3347,10 @@ public class ClassFileLayouter {
 					}
 				}
 				
-				// Un ou plusieurs blocs a deplacer trouv�s.
+				// Un ou plusieurs blocs a deplacer trouvés.
 				
 				// Rechercher de l'index d'insertion =>
-				//  Trouver la section ayant le score le plus bas jusqu'a la 
+				//  Trouver la section ayant le score le plus bas jusqu'à la 
 				//  section contenant un block de type 'tag' ayant un numero 
 				//  de ligne defini
 				blockIndex = firstStartTagBlockIndex;
@@ -3349,7 +3366,7 @@ public class ClassFileLayouter {
 //						(lb.tag == LayoutBlockConstants.SEPARATOR_BEFORE_OR_AFTER_BLOCK) ||
 						(lb.tag == markerEndTag))
 					{
-						// debut de corps ou fin d'un bloc
+						// début de corps ou fin d'un bloc
 						if (lowerScore > lb.section.score)
 						{
 							lowerScore = lb.section.score;							
@@ -3357,7 +3374,7 @@ public class ClassFileLayouter {
 						}
 						
 						// Impossible de deplacer un bloc au dessus
-						// - d'un debut de corps
+						// - d'un début de corps
 						// - d'un autre du meme type
 						// => On s'arrete.
 						break;
@@ -3380,11 +3397,11 @@ public class ClassFileLayouter {
 					
 				if (lowerScore != lsSource.score)
 				{
-					// Trouv�. 
+					// Trouvé. 
 					
 					// -- 2 ------------------------------------------------- //
 					
-					// Rechercher de l'index de debut du bloc de type 'tag'
+					// Rechercher de l'index de début du bloc de type 'tag'
 					// counter/2 en partant de 'lastEndTagBlockIndex'
 					counter = (counter + 1) / 2;
 					int lastEndTagBlockIndex = 
@@ -3411,7 +3428,7 @@ public class ClassFileLayouter {
 						blockIndex++;
 					}
 					
-					// Trouv�.
+					// Trouvé.
 					
 					// -- 3 ------------------------------------------------- //
 					
@@ -3458,7 +3475,7 @@ public class ClassFileLayouter {
 						layoutBlockList.get(blockIndex).preferedLineCount = 2;
 					}
 					
-					// Blocs pas encore inser�s.
+					// Blocs pas encore inserés.
 					lowerScoreBlockIndex++;
 
 					int targetDeltaIndex = 0;

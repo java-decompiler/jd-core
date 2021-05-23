@@ -1,3 +1,19 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
 package jd.core.process.analyzer.instruction.bytecode;
 
 import java.util.ArrayList;
@@ -19,7 +35,7 @@ import jd.core.model.instruction.bytecode.instruction.TernaryOperator;
 public class ComparisonInstructionAnalyzer 
 {	
 	/*
-	 *                            debut de liste        fin de liste
+	 *                            d√©but de liste        fin de liste
 	 *                            |                                |
 	 * Liste    ... --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ...
 	 */
@@ -73,7 +89,7 @@ public class ComparisonInstructionAnalyzer
 	}
 	
 	/*
-	 *                            debut de liste        fin de liste
+	 *                            d√©but de liste        fin de liste
 	 *                            |               index            |
 	 *                            |                   |            |
 	 * Liste    ... --|----|---|==0===1===2===3===4===5===6==7=...=n---|--| ...
@@ -309,15 +325,15 @@ public class ComparisonInstructionAnalyzer
 
 				if (jumpOffsetValue1 == jumpOffsetValue2)
 				{
-					// Oui ! SÈquence dans le bon sens
+					// Oui ! S√©quence dans le bon sens
 					int nextOffset = nextInstruction.offset;
 					for (int j=g.offset+1; j<nextOffset; j++)
 						offsetToPreviousGotoFlag[j] = true;
 				}
 				else if (jumpOffset == jumpOffsetValue2)
 				{
-					// Oui ! SÈquence inversee : les offsets du Goto et du 1er
-					// sous-test sont inversÈs => il FAUT inverser le 1er test
+					// Oui ! S√©quence inversee : les offsets du Goto et du 1er
+					// sous-test sont invers√©s => il FAUT inverser le 1er test
 					int nextOffset = nextInstruction.offset;
 					for (int j=g.offset+1; j<nextOffset; j++)
 						offsetToPreviousGotoFlag[j] = true;
@@ -814,7 +830,7 @@ public class ComparisonInstructionAnalyzer
 		while (--index > firstIndex)
 		{
 			// Verification que la potentielle derniere instruction de saut a 
-			// comme premiere instruction l'instruction ‡ l'indexe 'firstIndex'
+			// comme premiere instruction l'instruction √† l'indexe 'firstIndex'
 			// Recherche de l'indexe de la premiere instruction 'if' du bloc et 
 			// initialisation de 'offsetToPreviousGotoFlag'	
 			BranchInstruction lastBi = (BranchInstruction)list.get(index);
@@ -827,7 +843,7 @@ public class ComparisonInstructionAnalyzer
 			
 			if (firstIndex == firstIndexTmp)
 			{
-				// TrouvÈ
+				// Trouv√©
 				break;
 			}
 		}
