@@ -4,25 +4,6 @@ apply plugin: 'idea'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 
-sourceSets {
-	main {
-		java
-	}
-	test {
-		java
-	}
-	test {
-		resources {
-			exclude 'java/**'
-		}
-	}
-    testIntegration {
-	    java {
-	        srcDir 'src/test/resources/java'
-	    }
-	}
-}
-
 dependencies {
     testCompile 'commons-codec:commons-codec:1.13'
     testCompile 'org.apache.commons:commons-collections4:4.1'
