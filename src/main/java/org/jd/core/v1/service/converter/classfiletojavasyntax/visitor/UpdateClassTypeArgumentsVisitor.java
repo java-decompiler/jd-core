@@ -11,6 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.*;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS_WILDCARD;
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor {
     protected BaseTypeArgument result;

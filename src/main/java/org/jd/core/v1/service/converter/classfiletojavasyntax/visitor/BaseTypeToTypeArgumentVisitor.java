@@ -9,6 +9,10 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.type.*;
 
+import java.util.Map;
+
+import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
+
 public class BaseTypeToTypeArgumentVisitor implements TypeVisitor {
     protected TypeArgument typeArgument;
 

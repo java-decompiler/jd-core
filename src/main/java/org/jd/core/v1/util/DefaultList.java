@@ -47,19 +47,19 @@ public class DefaultList<E> extends ArrayList<E> {
     }
 
     public E getFirst() {
-        return get(0);
+        return (E)get(0);
     }
 
     public E getLast() {
-        return get(size()-1);
+        return (E)get(size()-1);
     }
 
     public E removeFirst() {
-        return remove(0);
+        return (E)remove(0);
     }
 
     public E removeLast() {
-        return remove(size()-1);
+        return (E)remove(size()-1);
     }
 
     public boolean isList() {

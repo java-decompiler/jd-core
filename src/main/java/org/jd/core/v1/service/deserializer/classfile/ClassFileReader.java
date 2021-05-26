@@ -68,7 +68,7 @@ public class ClassFileReader {
         int charArrayOffset = 0;
 
         while (offset < maxOffset) {
-            c = data[offset++] & 0xff;
+            c = (int) data[offset++] & 0xff;
             switch (c >> 4) {
                 case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
                     /* 0xxxxxxx*/
@@ -78,7 +78,7 @@ public class ClassFileReader {
                     /* 110x xxxx   10xx xxxx*/
                     if (offset+1 > maxOffset)
                         throw new UTFDataFormatException("malformed input: partial character at end");
-                    char2 = data[offset++];
+                    char2 = (int)data[offset++];
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException("malformed input around byte " + offset);
                     charArray[charArrayOffset++] = (char)(((c & 0x1F) << 6) | (char2 & 0x3F));
@@ -87,8 +87,8 @@ public class ClassFileReader {
                     /* 1110 xxxx  10xx xxxx  10xx xxxx */
                     if (offset+2 > maxOffset)
                         throw new UTFDataFormatException("malformed input: partial character at end");
-                    char2 = data[offset++];
-                    char3 = data[offset++];
+                    char2 = (int)data[offset++];
+                    char3 = (int)data[offset++];
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
                         throw new UTFDataFormatException("malformed input around byte " + (offset-1));
                     charArray[charArrayOffset++] = (char)(((c & 0x0F) << 12) | ((char2 & 0x3F) << 6) | ((char3 & 0x3F) << 0));

@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import static org.jd.core.v1.model.classfile.Constants.ACC_ENUM;
+import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
 import static org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration.*;
 
 public class LocalVariableMaker {

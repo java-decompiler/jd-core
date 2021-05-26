@@ -14,7 +14,7 @@ public class RemoveLastContinueStatementVisitor extends AbstractJavaSyntaxVisito
     @Override
     public void visit(Statements list) {
         if (! list.isEmpty()) {
-            Statement last = list.getLast();
+            Statement last = (Statement)list.getLast();
 
             if (last.getClass() == ContinueStatement.class) {
                 list.removeLast();

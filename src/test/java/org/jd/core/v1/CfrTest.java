@@ -48,15 +48,15 @@ public class CfrTest extends TestCase {
             }
 
             void test1() {
-                long b = (long) getLong();
+                long b = (long) (double) getLong();
                 System.out.println(b == getLong()); // Prints "false"
             }
             void test2() {
-                long b = (long) l;
+                long b = (long) (double) l;
                 System.out.println(b == l); // Prints "false"
             }
             void test3() {
-                long b = (long) L;
+                long b = (long) (double) L;
                 System.out.println(b == L); // Prints "false"
             }
         }

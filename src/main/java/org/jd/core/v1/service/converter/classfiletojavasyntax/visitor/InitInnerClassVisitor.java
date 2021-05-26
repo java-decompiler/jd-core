@@ -26,6 +26,7 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
 
+import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
 
 public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
