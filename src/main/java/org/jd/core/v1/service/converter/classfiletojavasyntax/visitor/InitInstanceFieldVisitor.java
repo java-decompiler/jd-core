@@ -218,8 +218,8 @@ public class InitInstanceFieldVisitor extends AbstractJavaSyntaxVisitor {
             while (ite.hasNext()) {
                 int lineNumber = ite.next().getLineNumber();
 
-                if ((firstLineNumber <= lineNumber) && (lastLineNumber <= lastLineNumber)) {
-                    if (lastLineNumber == lastLineNumber) {
+                if ((firstLineNumber <= lineNumber) && (lineNumber <= lastLineNumber)) {
+                    if (lineNumber == lastLineNumber) {
                         lastLineNumber++;
                     }
                     ite.remove();
