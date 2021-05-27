@@ -7,34 +7,24 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.classfile.ClassFile;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
+import org.jd.core.v1.model.message.DecompileContext;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.printer.PlainTextPrinter;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
-import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
-import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
-import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.util.DefaultList;
 import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class JarFileToJavaSourceTest extends TestCase {
-    protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
-    protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
-    protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
-    protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
-    //protected TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-    protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
-    protected WriteTokenProcessor writer = new WriteTokenProcessor();
+public class JarFileToJavaSourceTest extends AbstractJdTest {
 
     @Test
     public void testCommonsCodec() throws Exception {
@@ -146,10 +136,10 @@ public class JarFileToJavaSourceTest extends TestCase {
 
             configuration.put("realignLineNumbers", Boolean.TRUE);
 
-            Message message = new Message();
-            message.setHeader("loader", loader);
-            message.setHeader("printer", printer);
-            message.setHeader("configuration", configuration);
+            DecompileContext decompileContext = new DecompileContext();
+            decompileContext.setLoader(loader);
+            decompileContext.setPrinter(printer);
+            decompileContext.setConfiguration(configuration);
 
             long time0 = System.currentTimeMillis();
 
@@ -160,19 +150,22 @@ public class JarFileToJavaSourceTest extends TestCase {
                     // TODO DEBUG if (!internalTypeName.endsWith("/Debug")) continue;
                     //if (!internalTypeName.endsWith("/MapUtils")) continue;
 
-                    message.setHeader("mainInternalTypeName", internalTypeName);
+                    decompileContext.setMainInternalTypeName(internalTypeName);
                     printer.init();
 
                     fileCounter++;
 
                     try {
                         // Decompile class
-                        deserializer.process(message);
-                        converter.process(message);
-                        fragmenter.process(message);
-                        layouter.process(message);
-                        tokenizer.process(message);
-                        writer.process(message);
+                        ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
+                        decompileContext.setClassFile(classFile);
+
+                        CompilationUnit compilationUnit = converter.process(decompileContext);
+                        fragmenter.process(compilationUnit, decompileContext);
+                        layouter.process(decompileContext);
+                        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+                        decompileContext.setTokens(tokens);
+                        writer.process(decompileContext);
                     } catch (AssertionError e) {
                         String msg = (e.getMessage() == null) ? "<?>" : e.getMessage();
                         Integer counter = statistics.get(msg);

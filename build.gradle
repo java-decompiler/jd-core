@@ -1,34 +1,60 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
+
+
+sourceSets {
+	main {
+		java
+	}
+	test {
+		java
+	}
+	test {
+		resources {
+			exclude 'java/**'
+		}
+	}
+    testIntegration {
+	    java {
+	        srcDir 'src/test/resources/java'
+	    }
+	}
+}
 
 dependencies {
-    testCompile 'commons-codec:commons-codec:1.13'
-    testCompile 'org.apache.commons:commons-collections4:4.1'
-    testCompile 'org.apache.commons:commons-imaging:1.0-alpha1'
-    testCompile 'org.apache.commons:commons-lang3:3.9'
-    testCompile 'com.jakewharton:disklrucache:2.0.2'
-    testCompile 'com.squareup:javapoet:1.11.1'
-    testCompile 'com.squareup:javawriter:2.5.1'
-    testCompile 'joda-time:joda-time:2.10.5'
-    testCompile 'org.joda:joda-convert:2.2.1'
-    testCompile 'org.jsoup:jsoup:1.12.1'
-    testCompile 'junit:junit:4.12'
-    testCompile 'javax.jms:javax.jms-api:2.0.1'
-    testCompile 'javax.mail:javax.mail-api:1.6.2'
-    testCompile 'com.squareup.mimecraft:mimecraft:1.1.1'
-    testCompile 'org.scribe:scribe:1.3.7'
-    testCompile 'com.sparkjava:spark-core:2.9.1'
-    testCompile 'log4j:log4j:1.2.17'
-    testCompile 'com.google.guava:guava:12.0'
+
+    testImplementation 'commons-codec:commons-codec:1.13'
+    testImplementation 'org.apache.commons:commons-collections4:4.1'
+    testImplementation 'org.apache.commons:commons-imaging:1.0-alpha1'
+    testImplementation 'org.apache.commons:commons-lang3:3.9'
+    testImplementation 'com.jakewharton:disklrucache:2.0.2'
+    testImplementation 'com.squareup:javapoet:1.11.1'
+    testImplementation 'com.squareup:javawriter:2.5.1'
+    testImplementation 'joda-time:joda-time:2.10.5'
+    testImplementation 'org.joda:joda-convert:2.2.1'
+    testImplementation 'org.jsoup:jsoup:1.12.1'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'javax.jms:javax.jms-api:2.0.1'
+    testImplementation 'javax.mail:javax.mail-api:1.6.2'
+    testImplementation 'com.squareup.mimecraft:mimecraft:1.1.1'
+    testImplementation 'org.scribe:scribe:1.3.7'
+    testImplementation 'com.sparkjava:spark-core:2.9.1'
+    testImplementation 'log4j:log4j:1.2.17'
+    testImplementation 'com.google.guava:guava:12.0'
+    testImplementation 'javax.xml.bind:jaxb-api:2.3.0'
+    testImplementation 'com.sun.xml.bind:jaxb-core:2.3.0'
+    testImplementation 'com.sun.xml.bind:jaxb-impl:2.3.0'
 }
 
 version='1.1.4'
 
 tasks.withType(JavaCompile) {
-    sourceCompatibility = targetCompatibility = '1.8'
+
+	targetCompatibility = '11'
+	sourceCompatibility = '11'
+
     options.compilerArgs << '-Xlint:deprecation'
     options.compilerArgs << '-Xlint:unchecked'
     options.encoding = 'UTF-8'
@@ -36,15 +62,12 @@ tasks.withType(JavaCompile) {
 
 buildscript {
     repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+    	mavenCentral()
     }
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 jar {
@@ -67,35 +90,6 @@ publishing {
             version project.version
             from components.java
             artifact tasks.sourceJar
-        }
-    }
-}
-
-bintray {
-    // Command: gradlew -Dbintray.user=XXX -Dbintray.key=YYY bintrayUpload
-    user = System.getProperty('bintray.user')
-    key = System.getProperty('bintray.key')
-    publications = ['publicationJdCore']
-
-    dryRun = false //[Default: false] Whether to run this as dry-run, without deploying
-    publish = true //[Default: false] Whether version should be auto published after an upload
-    override = false //[Default: false] Whether to override version artifacts already published
-
-    pkg {
-        userOrg = 'java-decompiler'
-        repo = 'maven'
-        name = 'org.jd:jd-core'
-        description = 'JD-Core is a JAVA decompiler written in JAVA.'
-        licenses = ['GPL-3.0']
-
-        websiteUrl = 'https://github.com/java-decompiler/jd-core'
-        issueTrackerUrl = 'https://github.com/java-decompiler/jd-core/issues'
-        vcsUrl = 'https://github.com/java-decompiler/jd-core.git'
-
-        publicDownloadNumbers = true
-        version {
-            name = project.version
-            released = new Date()
         }
     }
 }

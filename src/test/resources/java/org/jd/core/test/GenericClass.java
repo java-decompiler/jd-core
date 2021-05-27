@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.jd.core.v1.util.DefaultList;
+
 public class GenericClass<T1,                                                             // Implicit 'extends Object'
                      T2 extends Object,                                                   // Explicit 'extends Object'
                      T3 extends AnnotatedClass,                                           // Extends class
@@ -22,15 +24,15 @@ public class GenericClass<T1,                                                   
                      T7 extends Map<?, ?>,
                      T8 extends Map<? extends Number, ? super Serializable>,
                      T9 extends T8>
-        extends ListImpl<T7>
+        extends DefaultList<T7>
         implements Serializable, Comparable<T1> {
 
-    public List<List<? extends GenericClass>> list1 = new ListImpl<>();
+    public List<List<? extends GenericClass>> list1 = new DefaultList<>();
     public List<List<? super GenericClass>> list2;
 
     public GenericClass() {
         super(10);
-        list2 = new ListImpl<>();
+        list2 = new DefaultList<>();
     }
 
     public <T> void fromArrayToCollection(T[] a, Collection<T> c) {
@@ -56,7 +58,7 @@ public class GenericClass<T1,                                                   
     public int scopesAndVariables(int i) {
         int result;
 
-        List<String> as = new ListImpl<>(i + 1);
+        List<String> as = new DefaultList<>(i + 1);
         System.out.println(as);
 
         {
@@ -69,7 +71,7 @@ public class GenericClass<T1,                                                   
         }
         {
             int k = i;
-            List<Double> l = new ListImpl<>(k + 3);
+            List<Double> l = new DefaultList<>(k + 3);
             System.out.println(l);
             int kk = 456;
             System.out.println(kk);
