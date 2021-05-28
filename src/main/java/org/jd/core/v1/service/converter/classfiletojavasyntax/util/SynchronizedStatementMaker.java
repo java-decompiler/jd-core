@@ -69,7 +69,6 @@ public class SynchronizedStatementMaker {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void visit(Statements list) {
             if (! list.isEmpty()) {
                 Iterator<Statement> iterator = list.iterator();

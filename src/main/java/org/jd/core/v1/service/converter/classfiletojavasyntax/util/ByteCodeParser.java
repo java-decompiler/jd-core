@@ -683,6 +683,7 @@ public class ByteCodeParser {
                     break;
                 case 168: // JSR
                     stack.push(JSR_RETURN_ADDRESS_EXPRESSION);
+                    // intended fall through
                 case 167: // GOTO
                     offset += 2; // Skip branch offset
                     break;
@@ -920,6 +921,7 @@ public class ByteCodeParser {
                     break;
                 case 201: // JSR_W
                     stack.push(JSR_RETURN_ADDRESS_EXPRESSION);
+                    // intended fall through
                 case 200: // GOTO_W
                     offset += 4; // Skip branch offset
                     break;
@@ -1548,7 +1550,6 @@ public class ByteCodeParser {
         statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", rightExpression, 16)));
     }
 
-    @SuppressWarnings("unchecked")
     private void parseIINC(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, int count) {
         Expression expression;
 
@@ -1583,11 +1584,8 @@ public class ByteCodeParser {
             expression = newPreArithmeticOperatorExpression(lineNumber, "--", expression);
         } else if (count >= 0) {
             expression = new BinaryOperatorExpression(lineNumber, expression.getType(), expression, "+=", new IntegerConstantExpression(lineNumber, expression.getType(), count), 16);
-        } else if (count < 0) {
-            expression = new BinaryOperatorExpression(lineNumber, expression.getType(), expression, "-=", new IntegerConstantExpression(lineNumber, expression.getType(), -count), 16);
         } else {
-            assert false;
-            expression = null;
+            expression = new BinaryOperatorExpression(lineNumber, expression.getType(), expression, "-=", new IntegerConstantExpression(lineNumber, expression.getType(), -count), 16);
         }
 
         statements.add(new ExpressionStatement(expression));

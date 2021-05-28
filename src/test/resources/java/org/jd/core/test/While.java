@@ -7,6 +7,10 @@
 
 package org.jd.core.test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
+@SuppressWarnings("unused")
 public class While {
 
     public void simpleWhile(int i) {
@@ -214,7 +218,7 @@ public class While {
         System.out.println("k");
     }
 
-    private void whileWhile() {
+	private void whileWhile() {
         int a = 2;
         int b = 2;
 
@@ -226,7 +230,7 @@ public class While {
         }
     }
 
-    private static void whileTestPreInc() {
+	private static void whileTestPreInc() {
         int i = 0;
 
         while (++i < 10)
@@ -235,7 +239,7 @@ public class While {
         }
     }
 
-    private static void whilePreInc() {
+	private static void whilePreInc() {
         int i = 0;
 
         while (i < 10)
@@ -245,7 +249,7 @@ public class While {
         }
     }
 
-    private static void whileTestPostInc() {
+	private static void whileTestPostInc() {
         int i = 0;
 
         while (i++ < 10)

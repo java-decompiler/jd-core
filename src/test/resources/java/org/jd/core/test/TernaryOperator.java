@@ -7,6 +7,9 @@
 
 package org.jd.core.test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
 public class TernaryOperator {
     protected String str = "str";
 
@@ -29,6 +32,8 @@ public class TernaryOperator {
         System.out.println("end");
     }
 
+    @SuppressWarnings("all")
+    
     public boolean ternaryOperatorsInReturn(String s) {
         System.out.println("start");
 
@@ -90,6 +95,7 @@ public class TernaryOperator {
         System.out.println("end");
     }
 
+	@SuppressWarnings("null")
     public void ternaryOperatorInIfElse4(String s1, String s2) {
         System.out.println("start");
 
@@ -123,7 +129,8 @@ public class TernaryOperator {
         System.out.println("end");
     }
 
-    public void ternaryOperatorInIfElseFalse(String s1, String s2) {
+    @SuppressWarnings("unused")
+	public void ternaryOperatorInIfElseFalse(String s1, String s2) {
         System.out.println("start");
 
         if ((s1 == null) ? false : false)

@@ -12,7 +12,10 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class Types extends DefaultList<Type> implements BaseType {
-    public Types() {}
+
+	private static final long serialVersionUID = 1L;
+
+	public Types() {}
 
     public Types(int capacity) {
         super(capacity);
@@ -22,10 +25,9 @@ public class Types extends DefaultList<Type> implements BaseType {
         super(collection);
     }
 
-    @SuppressWarnings("unchecked")
     public Types(Type type, Type... types) {
         super(type, types);
-        assert (types != null) && (types.length > 0) : "Uses 'Type' implementation instead";
+        assert (types.length > 0) : "Uses 'Type' implementation instead";
     }
 
     @Override

@@ -80,6 +80,7 @@ public class ControlFlowGraphLoopReducer {
                         // 'branch' is a dominator -> Back edge found
                         arrayOfMemberIndexes[index] = searchLoopMemberIndexes(length, arrayOfMemberIndexes[index], current, current.getBranch());
                     }
+                    // intended fall through
                 case TYPE_STATEMENTS:
                 case TYPE_GOTO:
                     index = current.getNext().getIndex();
@@ -330,6 +331,7 @@ public class ControlFlowGraphLoopReducer {
                         maxOffset = bb.getFromOffset();
                         break;
                     }
+                    // intended fall through
                 case TYPE_STATEMENTS:
                 case TYPE_GOTO:
                     bb = member.getNext();

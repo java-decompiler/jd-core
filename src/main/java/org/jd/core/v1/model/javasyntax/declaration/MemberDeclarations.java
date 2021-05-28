@@ -12,7 +12,10 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class MemberDeclarations extends DefaultList<MemberDeclaration> implements BaseMemberDeclaration {
-    public MemberDeclarations() {}
+
+	private static final long serialVersionUID = 1L;
+
+	public MemberDeclarations() {}
 
     public MemberDeclarations(int capacity) {
         super(capacity);
@@ -20,13 +23,12 @@ public class MemberDeclarations extends DefaultList<MemberDeclaration> implement
 
     public MemberDeclarations(Collection<MemberDeclaration> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'MemberDeclaration' implementation instead";
+        assert (collection.size() > 1) : "Uses 'MemberDeclaration' implementation instead";
     }
 
-    @SuppressWarnings("unchecked")
     public MemberDeclarations(MemberDeclaration declaration, MemberDeclaration... declarations) {
         super(declaration, declarations);
-        assert (declarations != null) && (declarations.length > 0) : "Uses 'MemberDeclaration' implementation instead";
+        assert (declarations.length > 0) : "Uses 'MemberDeclaration' implementation instead";
     }
 
     @Override

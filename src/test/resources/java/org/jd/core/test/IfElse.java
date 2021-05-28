@@ -7,8 +7,13 @@
 
 package org.jd.core.test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
 public class IfElse {
 
+	@SuppressWarnings("unused")
+	
     public void if_() {
         System.out.println("start");
 
@@ -29,7 +34,8 @@ public class IfElse {
         System.out.println("end");
     }
 
-    public void ifElse() {
+    @SuppressWarnings("unused")
+	public void ifElse() {
         System.out.println("start");
 
         if (this == null) {
@@ -41,7 +47,8 @@ public class IfElse {
         System.out.println("end");
     }
 
-    public void ifElseIfElse() {
+    @SuppressWarnings("unused")
+	public void ifElseIfElse() {
         System.out.println("start");
 
         if (this == null) {

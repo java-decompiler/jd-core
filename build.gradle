@@ -46,6 +46,7 @@ dependencies {
     testImplementation 'javax.xml.bind:jaxb-api:2.3.0'
     testImplementation 'com.sun.xml.bind:jaxb-core:2.3.0'
     testImplementation 'com.sun.xml.bind:jaxb-impl:2.3.0'
+    compileOnly 'com.github.spotbugs:spotbugs:4.2.3'
 }
 
 version='1.1.4'

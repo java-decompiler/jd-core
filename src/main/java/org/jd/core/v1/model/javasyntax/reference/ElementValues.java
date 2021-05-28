@@ -12,7 +12,10 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class ElementValues extends DefaultList<ElementValue> implements BaseElementValue {
-    public ElementValues() {
+
+	private static final long serialVersionUID = 1L;
+
+	public ElementValues() {
     }
 
     public ElementValues(int capacity) {
@@ -21,7 +24,7 @@ public class ElementValues extends DefaultList<ElementValue> implements BaseElem
 
     public ElementValues(Collection<ElementValue> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'ElementValue' or sub class instead";
+        assert (collection.size() > 1) : "Uses 'ElementValue' or sub class instead";
     }
 
     @Override

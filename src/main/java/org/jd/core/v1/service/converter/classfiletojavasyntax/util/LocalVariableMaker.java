@@ -465,11 +465,9 @@ public class LocalVariableMaker {
     }
 
     public void removeLocalVariable(AbstractLocalVariable lv) {
-        int index = lv.getIndex();
-
-        if (index < localVariableCache.length) {
+        if (lv != null && lv.getIndex() < localVariableCache.length) {
             // Remove from cache
-            localVariableCache[index] = null;
+            localVariableCache[lv.getIndex()] = null;
             // Remove from current frame
             currentFrame.removeLocalVariable(lv);
         }

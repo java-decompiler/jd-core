@@ -10,6 +10,8 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.Iterator;
 import java.util.Map;
 
@@ -94,6 +96,7 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
         return (bt2 == null) || bt2.equals(bt1);
     }
 
+	@SuppressFBWarnings
     protected TypeArgument checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(GenericType type) {
         if (current != null) {
             Class currentClass = current.getClass();

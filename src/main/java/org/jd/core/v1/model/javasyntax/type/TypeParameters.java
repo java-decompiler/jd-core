@@ -12,7 +12,10 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class TypeParameters extends DefaultList<TypeParameter> implements BaseTypeParameter {
-    public TypeParameters() {}
+
+	private static final long serialVersionUID = 1L;
+
+	public TypeParameters() {}
 
     public TypeParameters(int capacity) {
         super(capacity);
@@ -20,13 +23,12 @@ public class TypeParameters extends DefaultList<TypeParameter> implements BaseTy
 
     public TypeParameters(Collection<TypeParameter> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'TypeParameter' instead";
+        assert (collection.size() > 1) : "Uses 'TypeParameter' instead";
     }
 
-    @SuppressWarnings("unchecked")
     public TypeParameters(TypeParameter type, TypeParameter... types) {
         super(types.length + 1);
-        assert (types != null) && (types.length > 0) : "Uses 'TypeParameter' instead";
+        assert (types.length > 0) : "Uses 'TypeParameter' instead";
 
         add(type);
 

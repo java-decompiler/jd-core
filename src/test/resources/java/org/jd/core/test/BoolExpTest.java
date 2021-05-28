@@ -7,6 +7,8 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class BoolExpTest {
 	
     static final public String CONST1 = "CONST1";
@@ -21,7 +23,9 @@ public class BoolExpTest {
 	private Object field5;
 	private Object field6;
 	
-    public boolean isValid(Vector v){
+	@SuppressFBWarnings
+    @SuppressWarnings({ "unchecked", "unlikely-arg-type" })
+	public boolean isValid(@SuppressWarnings("rawtypes") Vector v){
         if(field1 == null || "".equals(field1)){
             v.add( new String ("Field #1 is not valid"));
         }
@@ -53,7 +57,8 @@ public class BoolExpTest {
 		toolBar.add(button, Math.random() == 0 && toolBar.getComponentCount() > (Math.random() > 0.5 ? 1 : 0));
 	}
 	
-    public boolean isValidChoice(String s) {
+    @SuppressWarnings("static-access")
+	public boolean isValidChoice(String s) {
         boolean bool = true;
         if ( (Color.BLACK.equals(getColorChoice(s)) &&
               (this.CONST1.equals(s) || this.CONST2.equals(s))) ||

@@ -13,7 +13,9 @@ import java.util.Collection;
 
 public class Expressions extends DefaultList<Expression> implements BaseExpression {
 
-    public Expressions() {}
+	private static final long serialVersionUID = 1L;
+
+	public Expressions() {}
 
     public Expressions(int capacity) {
         super(capacity);
@@ -21,13 +23,12 @@ public class Expressions extends DefaultList<Expression> implements BaseExpressi
 
     public Expressions(Collection<Expression> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'Expression' or sub class instead";
+        assert (collection.size() > 1) : "Uses 'Expression' or sub class instead";
     }
 
-    @SuppressWarnings("unchecked")
     public Expressions(Expression expression, Expression... expressions) {
         super(expression, expressions);
-        assert (expressions != null) && (expressions.length > 0) : "Uses 'Expression' or sub class instead";
+        assert (expressions.length > 0) : "Uses 'Expression' or sub class instead";
     }
 
     @Override

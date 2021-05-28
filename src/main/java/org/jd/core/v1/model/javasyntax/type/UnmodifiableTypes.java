@@ -12,7 +12,10 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public class UnmodifiableTypes extends Types {
-    public UnmodifiableTypes() {}
+
+	private static final long serialVersionUID = 1L;
+
+	public UnmodifiableTypes() {}
 
     public UnmodifiableTypes(int capacity) {
         super(capacity);
@@ -22,10 +25,9 @@ public class UnmodifiableTypes extends Types {
         super(collection);
     }
 
-    @SuppressWarnings("unchecked")
     public UnmodifiableTypes(Type type, Type... types) {
         super(type, types);
-        assert (types != null) && (types.length > 0) : "Uses 'Type' implementation instead";
+        assert (types.length > 0) : "Uses 'Type' implementation instead";
     }
 
     @Override

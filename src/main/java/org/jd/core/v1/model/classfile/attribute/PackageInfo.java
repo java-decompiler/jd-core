@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
+import java.util.Arrays;
+
 public class PackageInfo {
     protected String   internalName;
     protected int flags;
@@ -38,7 +40,7 @@ public class PackageInfo {
         sb.append(", flags=").append(flags);
 
         if (moduleInfoNames != null) {
-            sb.append(", moduleInfoNames=").append(moduleInfoNames);
+            sb.append(", moduleInfoNames=").append(Arrays.toString(moduleInfoNames));
         }
 
         return sb.append("}").toString();

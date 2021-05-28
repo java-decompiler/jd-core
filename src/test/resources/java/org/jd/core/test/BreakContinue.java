@@ -7,6 +7,8 @@
 
 package org.jd.core.test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class BreakContinue {
 
 	public void doWhileContinue(int i) {
@@ -51,6 +53,7 @@ public class BreakContinue {
 		System.out.println("end");
 	}
 
+	@SuppressFBWarnings
 	public void tripleWhile2(int i) {
 		System.out.println("start");
 
@@ -97,6 +100,7 @@ public class BreakContinue {
 		System.out.println("end");
 	}
 
+	@SuppressFBWarnings
 	public void tripleDoWhile2(int i) {
 		System.out.println("start");
 

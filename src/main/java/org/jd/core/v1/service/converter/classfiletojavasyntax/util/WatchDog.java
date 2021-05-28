@@ -19,7 +19,7 @@ public class WatchDog {
     }
 
     public void check(BasicBlock parent, BasicBlock child) {
-        if (!child.matchType(BasicBlock.GROUP_END)) {
+        if (child != null && !child.matchType(BasicBlock.GROUP_END)) {
             Link link = new Link(parent, child);
 
             if (links.contains(link)) {

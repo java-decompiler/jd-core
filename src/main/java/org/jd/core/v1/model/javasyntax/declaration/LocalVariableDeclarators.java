@@ -13,7 +13,9 @@ import java.util.Collection;
 
 public class LocalVariableDeclarators extends DefaultList<LocalVariableDeclarator> implements BaseLocalVariableDeclarator {
 
-    public LocalVariableDeclarators() {}
+	private static final long serialVersionUID = 1L;
+
+	public LocalVariableDeclarators() {}
 
     public LocalVariableDeclarators(int capacity) {
         super(capacity);
@@ -21,7 +23,7 @@ public class LocalVariableDeclarators extends DefaultList<LocalVariableDeclarato
 
     public LocalVariableDeclarators(Collection<LocalVariableDeclarator> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'LocalVariableDeclarator' instead";
+        assert (collection.size() > 1) : "Uses 'LocalVariableDeclarator' instead";
     }
 
     @Override

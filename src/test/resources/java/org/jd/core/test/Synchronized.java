@@ -7,6 +7,9 @@
 
 package org.jd.core.test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
 public class Synchronized
 {
     public int methodSynchronized(StringBuilder paramStringBuilder)

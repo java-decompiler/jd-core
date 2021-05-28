@@ -7,9 +7,12 @@
 
 package org.jd.core.test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class TryCatchFinally
 {
-    public void methodTryCatch() {
+    @SuppressWarnings("unused")
+	public void methodTryCatch() {
         before();
 
         try {
@@ -172,7 +175,8 @@ public class TryCatchFinally
         }
     }
 
-    public void methodTryFinally4() {
+    @SuppressWarnings("unused")
+	public void methodTryFinally4() {
         before();
 
         try {
@@ -225,7 +229,8 @@ public class TryCatchFinally
         after();
     }
 
-    public void methodTryCatchFinally2() {
+    @SuppressWarnings("unused")
+	public void methodTryCatchFinally2() {
         before();
 
         try {
@@ -243,6 +248,7 @@ public class TryCatchFinally
         after();
     }
 
+    @SuppressFBWarnings 
     public int methodTryCatchFinally3() {
         before();
 
@@ -278,7 +284,8 @@ public class TryCatchFinally
         return 2;
     }
 
-    public void methodTryCatchFinally5() throws Exception {
+    @SuppressWarnings("unused")
+	public void methodTryCatchFinally5() throws Exception {
         System.out.println("start");
 
         try {
@@ -307,7 +314,8 @@ public class TryCatchFinally
         System.out.println("end");
     }
 
-    public int methodTryCatchFinallyInTryCatchFinally() throws Exception {
+    @SuppressWarnings("unused")
+	public int methodTryCatchFinallyInTryCatchFinally() throws Exception {
         System.out.println("start");
 
         int a = 1;
@@ -469,7 +477,8 @@ public class TryCatchFinally
         after();
     }
 
-    public void methodTryTryFinallyFinallyTryFinallyReturn() {
+    @SuppressWarnings("unused")
+	public void methodTryTryFinallyFinallyTryFinallyReturn() {
         before();
 
         try {
@@ -497,7 +506,8 @@ public class TryCatchFinally
         after();
     }
 
-    public void methodIfIfTryCatch() {
+    @SuppressWarnings("unused")
+	public void methodIfIfTryCatch() {
         if (this == null) {
             if (this != null) {
                 System.out.println("if if");
@@ -514,7 +524,8 @@ public class TryCatchFinally
         }
     }
 
-    public void methodIfIfTryFinally() {
+    @SuppressWarnings("unused")
+	public void methodIfIfTryFinally() {
         if (this == null) {
             if (this != null) {
                 System.out.println("if if");
@@ -540,6 +551,7 @@ public class TryCatchFinally
         return obj;
     }
 
+    @SuppressFBWarnings
     public void testBugLdapUtil(int i) {
         System.out.println("a");
 
@@ -725,7 +737,8 @@ public class TryCatchFinally
         after();
     }
 
-    public int methodTryCatchCatchFinally3() {
+    @SuppressWarnings("unused")
+	public int methodTryCatchCatchFinally3() {
         before();
 
         int a = 1;
@@ -786,7 +799,8 @@ public class TryCatchFinally
         return 3;
     }
 
-    private Object methodTryCatchTryCatchThrow() throws Exception {
+    @SuppressWarnings("unused")
+	private Object methodTryCatchTryCatchThrow() throws Exception {
         try {
             return null;
         } catch (Exception e) {

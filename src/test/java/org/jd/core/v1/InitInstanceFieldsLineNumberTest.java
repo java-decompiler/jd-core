@@ -12,23 +12,10 @@ import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
-import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
-import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
-import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.stub.InitInstanceFieldsLineNumber;
 import org.junit.Test;
 
 public class InitInstanceFieldsLineNumberTest extends AbstractJdTest {
-    protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
-    protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
-    protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
-    protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
-    //protected TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-    protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
-    protected WriteTokenProcessor writer = new WriteTokenProcessor();
 
     @Test
     public void testLineNumberAlignement() throws Exception {

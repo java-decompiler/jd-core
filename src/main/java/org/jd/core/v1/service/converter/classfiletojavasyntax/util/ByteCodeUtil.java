@@ -406,6 +406,7 @@ public class ByteCodeUtil {
                 case 201: // JSR_W
                     offset += 4;
                     depth++;
+                    // intended fall through
                 case 200: // GOTO_W
                     offset += 4;
                     break;
@@ -660,6 +661,7 @@ public class ByteCodeUtil {
                 case 201: // JSR_W
                     offset += 4;
                     depth++;
+                    // intended fall through
                 case 200: // GOTO_W
                     offset += 4;
                     break;

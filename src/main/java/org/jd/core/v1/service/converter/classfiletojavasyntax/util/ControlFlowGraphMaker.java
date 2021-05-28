@@ -276,7 +276,8 @@ public class ControlFlowGraphMaker {
                                 break;
                             case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
                                 lastStatementOffset = offset+2;
-                            default:
+                                // intended fall through
+                           default:
                                 offset += 2;
                                 break;
                         }

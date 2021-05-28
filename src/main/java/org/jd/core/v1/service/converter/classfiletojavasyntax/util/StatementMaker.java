@@ -126,7 +126,6 @@ public class StatementMaker {
      * @param basicBlock Current basic block
      * @param statements List to populate
      */
-    @SuppressWarnings("unchecked")
     protected void makeStatements(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         Statements subStatements, elseStatements;
         Expression condition, exp1, exp2;
@@ -140,6 +139,7 @@ public class StatementMaker {
                 break;
             case TYPE_STATEMENTS:
                 watchdog.check(basicBlock, basicBlock.getNext());
+                // intended fall through
             case TYPE_THROW:
                 parseByteCode(basicBlock, statements);
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
@@ -705,6 +705,7 @@ public class StatementMaker {
                 case TYPE_IF_ELSE:
                 case TYPE_TERNARY_OPERATOR:
                     count += countStartLoop(bb.getSub2());
+                    // intended fall through
                 case TYPE_IF:
                     count += countStartLoop(bb.getSub1());
                     break;
@@ -767,6 +768,7 @@ public class StatementMaker {
                     } else {
                         changeEndLoopToStartLoop(visited, basicBlock.getBranch());
                     }
+                    // intended fall through
                 case TYPE_START:
                 case TYPE_STATEMENTS:
                 case TYPE_GOTO:
@@ -797,6 +799,7 @@ public class StatementMaker {
                     } else {
                         changeEndLoopToStartLoop(visited, basicBlock.getSub2());
                     }
+                    // intended fall through
                 case TYPE_IF:
                     if (basicBlock.getSub1() == LOOP_END) {
                         basicBlock.setSub1(LOOP_START);

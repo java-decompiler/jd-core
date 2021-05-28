@@ -12,17 +12,19 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class FormalParameters extends DefaultList<FormalParameter> implements BaseFormalParameter {
-    public FormalParameters() {}
+
+	private static final long serialVersionUID = 1L;
+
+	public FormalParameters() {}
 
     public FormalParameters(Collection<FormalParameter> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'FormalParameter' instead";
+        assert (collection.size() > 1) : "Uses 'FormalParameter' instead";
     }
 
-    @SuppressWarnings("unchecked")
     public FormalParameters(FormalParameter parameter, FormalParameter... parameters) {
         super(parameter, parameters);
-        assert (parameters != null) && (parameters.length > 0) : "Uses 'FormalParameter' instead";
+        assert (parameters.length > 0) : "Uses 'FormalParameter' instead";
     }
 
     @Override

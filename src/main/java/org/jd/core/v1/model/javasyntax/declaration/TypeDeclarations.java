@@ -12,9 +12,12 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class TypeDeclarations extends DefaultList<MemberDeclaration> implements BaseTypeDeclaration {
-    public TypeDeclarations(Collection<MemberDeclaration> collection) {
+
+	private static final long serialVersionUID = 1L;
+
+	public TypeDeclarations(Collection<MemberDeclaration> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'TypeDeclaration' or sub class instead";
+        assert (collection.size() > 1) : "Uses 'TypeDeclaration' or sub class instead";
     }
 
     @Override

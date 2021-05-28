@@ -9,16 +9,19 @@ package org.jd.core.test;
 
 import org.jd.core.test.annotation.Name;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+@SuppressFBWarnings
 public class AnonymousClass {
 
     protected long time = System.currentTimeMillis();
     
-    public void test(Enumeration e, String s) {
+    public void test(@SuppressWarnings("rawtypes") Enumeration e, String s) {
         System.out.println("start");
 
         Object obj = new Object() {
@@ -39,7 +42,8 @@ public class AnonymousClass {
         
         final long l1 = System.currentTimeMillis();
         
-        Enumeration e = new Enumeration() {
+        @SuppressWarnings("rawtypes")
+		Enumeration e = new Enumeration() {
             Iterator<String> i = list.iterator(); 
             
             public boolean hasMoreElements() {
@@ -65,7 +69,7 @@ public class AnonymousClass {
         
         System.out.println("2" + (new StringWrapper(123456L) {
             
-            public String toString(String a, String b) {
+			public String toString(String a, String b) {
                 time = System.currentTimeMillis();
                 if ((s1 == s2) && (i == 5))
                     return s1;
@@ -84,7 +88,8 @@ public class AnonymousClass {
         final Object abc = "abc";
         final Object def = "def";
 
-        Serializable serializable = new Serializable() {
+        @SuppressWarnings({ "unused", "serial" })
+		Serializable serializable = new Serializable() {
             public boolean equals(Object obj) {
 
                 final Object ghi = "ghi";

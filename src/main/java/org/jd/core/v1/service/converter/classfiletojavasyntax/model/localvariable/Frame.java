@@ -22,6 +22,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLoca
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
@@ -1043,6 +1045,7 @@ public class Frame {
         }
 
         @Override
+        @SuppressFBWarnings
         public boolean equals(Object obj) {
             return false;
         }
