@@ -26,7 +26,7 @@ public class ClassFileToJavaSyntaxProcessor {
     protected static final ConvertClassFileProcessor CONVERT_CLASS_FILE_PROCESSOR = new ConvertClassFileProcessor();
     protected static final UpdateJavaSyntaxTreeProcessor UPDATE_JAVA_SYNTAX_TREE_PROCESSOR = new UpdateJavaSyntaxTreeProcessor();
 
-    public CompilationUnit process(DecompileContext decompileContext) throws Exception {
+    public CompilationUnit process(DecompileContext decompileContext) {
         Loader loader = decompileContext.getLoader();
 
         TypeMaker typeMaker = decompileContext.getTypeMaker();

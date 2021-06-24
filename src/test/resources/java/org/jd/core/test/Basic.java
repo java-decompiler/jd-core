@@ -9,6 +9,10 @@ package org.jd.core.test;
 
 import java.io.Serializable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
+@SuppressWarnings("all")
 public class Basic implements Serializable {
     protected static final long serialVersionUID = 9506606333927794L;
 
@@ -135,7 +139,7 @@ public class Basic implements Serializable {
     }
 
     public String readLine() {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         for (;;) {
             int intRead = read();
             if (intRead == -1) {
@@ -167,7 +171,7 @@ public class Basic implements Serializable {
         if (str == null) {
             str = "null";
         } else {
-            if (str.length() == 0) {
+            if (str.isEmpty()) {
                 return "empty";
             }
             return str + str;
@@ -185,5 +189,5 @@ public class Basic implements Serializable {
         return ((Basic)objects[index]).int78;
     }
 
-    protected final static Integer INTEGER_255 = new Integer(255);
+    protected static final Integer INTEGER_255 = new Integer(255);
 }

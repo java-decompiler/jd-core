@@ -1,6 +1,6 @@
 package org.jd.core.v1.stub;
 
-public class InitializedArrayInTernaryOperator {
+@SuppressWarnings("all") public class InitializedArrayInTernaryOperator {
     Class[] test0(int i) {
         return (i == 0) ? new Class[] { Object.class } : null;
     }

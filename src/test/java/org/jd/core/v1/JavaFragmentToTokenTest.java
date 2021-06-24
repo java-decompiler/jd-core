@@ -7,19 +7,20 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
+import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.fragment.Fragment;
 import org.jd.core.v1.model.javafragment.*;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.printer.PlainTextMetaPrinter;
 import org.jd.core.v1.printer.PlainTextPrinter;
+import org.jd.core.v1.regex.PatternMaker;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.services.tokenizer.javafragmenttotoken.TestTokenizeJavaFragmentProcessor;
 import org.jd.core.v1.util.DefaultList;
-import org.jd.core.v1.regex.PatternMaker;
+import org.jd.core.v1.util.StringConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,6 +28,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import junit.framework.TestCase;
 
 public class JavaFragmentToTokenTest extends TestCase {
     public static final KeywordToken BOOLEAN = new KeywordToken("boolean");
@@ -167,7 +170,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         Assert.assertTrue(source.matches(PatternMaker.make("/* 1: 1 */", "if (args == null)")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 2 */", "i = 0;")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "i = 1;")));
-        Assert.assertTrue(source.indexOf('{') == -1);
+        Assert.assertEquals(-1, source.indexOf('{'));
     }
 
     @Test
@@ -258,8 +261,8 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 1 */ package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.indexOf("/* 2: 0 */  -->") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 1 */ package org.jd.core.v1.service.writer;"));
+        Assert.assertNotEquals(-1, source.indexOf("/* 2: 0 */  -->"));
     }
 
     @Test
@@ -282,7 +285,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 2 */", "protected int a")));
     }
 
@@ -306,10 +309,10 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "protected int a")));
-        Assert.assertTrue(source.indexOf("/* 4: 0 */ } -->") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 4: 0 */ } -->"));
     }
 
     @Test
@@ -332,10 +335,10 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 4 */", "protected int a")));
-        Assert.assertTrue(source.indexOf("/* 5: 0 */ } -->") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 5: 0 */ } -->"));
     }
 
     @Test
@@ -358,7 +361,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 5: 5 */", "protected int a")));
     }
@@ -383,7 +386,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 5: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 6 */", "protected int a")));
@@ -407,7 +410,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -434,7 +437,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -461,7 +464,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -489,7 +492,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/*  1:  0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/*  1:  0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/*  3:  0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/*  4:  0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/*  6:  0 */", "public class TokenWriterTest")));
@@ -516,7 +519,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "super(i);")));
     }
@@ -541,7 +544,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "public TokenWriterTest", "(int i)")));
     }
@@ -564,7 +567,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -591,7 +594,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -784,7 +787,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 44: 44 */") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 44: 44 */"));
     }
 
     @Test
@@ -807,7 +810,7 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 66: 66 */") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 66: 66 */"));
     }
 
     @Test
@@ -1045,7 +1048,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1054,7 +1057,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1062,14 +1065,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1083,7 +1086,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(lineNumber),
                 new NumericConstantToken("0"),
@@ -1124,7 +1127,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1133,7 +1136,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1141,14 +1144,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1162,7 +1165,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(lineNumber),
                 new NumericConstantToken("0"),
@@ -1226,7 +1229,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1235,7 +1238,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1243,14 +1246,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1261,7 +1264,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 PUBLIC,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.CONSTRUCTOR, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", "(I)V"),
+                new DeclarationToken(Printer.CONSTRUCTOR, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", "(I)V"),
                 TextToken.LEFTROUNDBRACKET,
                 INT,
                 TextToken.SPACE,
@@ -1346,7 +1349,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1360,9 +1363,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_STRING, "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("/*] args)")
         ));
 
@@ -1406,7 +1409,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 INT,
                 new LineNumberToken(10 * factor),
                 new TextToken(" i = "),
-                new ReferenceToken(ReferenceToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 StartBlockToken.START_PARAMETERS_BLOCK,
                 new LineNumberToken(11 * factor),
                 new StringConstantToken("aaaa", "org/jd/core/v1/service/test/TokenWriterTest"),
@@ -1418,7 +1421,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 new LineNumberToken(13 * factor),
                 NEW,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/util/Enumeration", "java.util.Enumeration", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, "java/util/Enumeration", "java.util.Enumeration", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         );
 
@@ -1437,7 +1440,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 BOOLEAN,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "hasMoreElements", "()Z"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "hasMoreElements", "()Z"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         ));
 
@@ -1468,9 +1471,9 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 PUBLIC,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Object", "Object", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_OBJECT, "Object", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "nextElement", "()Ljava/lang/Object;"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "nextElement", "()Ljava/lang/Object;"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         ));
 
@@ -1506,11 +1509,11 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SEMICOLON,
                 NewLineToken.NEWLINE_1,
                 new LineNumberToken(22 * factor),
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_SYSTEM, "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.FIELD, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.FIELD, StringConstants.JAVA_LANG_SYSTEM, "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTROUNDBRACKET,
                 new TextToken("i"),
                 TextToken.RIGHTROUNDBRACKET,
@@ -1557,7 +1560,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1571,12 +1574,12 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "TIMESTAMP", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "TIMESTAMP", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(4),
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_SYSTEM, "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD, "java/lang/System", "currentTimeMillis", "()J", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.METHOD, StringConstants.JAVA_LANG_SYSTEM, "currentTimeMillis", "()J", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTRIGHTROUNDBRACKETS,
                 TextToken.SEMICOLON
         ));
@@ -1591,7 +1594,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1605,7 +1608,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "b", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "b", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1619,7 +1622,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "c", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "c", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1635,9 +1638,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_STRING, "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("/*] args)")
         ));
 
@@ -1647,11 +1650,11 @@ public class JavaFragmentToTokenTest extends TestCase {
         // System.out.println(TIMESTAMP);
         fragments.add(new LineNumberTokensFragment(
                 new LineNumberToken(8),
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_SYSTEM, "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.FIELD, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.FIELD, StringConstants.JAVA_LANG_SYSTEM, "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTROUNDBRACKET,
                 new TextToken("TIMESTAMP"),
                 TextToken.RIGHTROUNDBRACKET,
@@ -1721,7 +1724,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1735,9 +1738,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_STRING, "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("/*] args)")
         ));
 
@@ -1767,7 +1770,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 CATCH,
                 new TextToken(" ("),
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/RuntimeException", "RuntimeException", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_RUNTIME_EXCEPTION, "RuntimeException", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken(" e)")
         ));
 

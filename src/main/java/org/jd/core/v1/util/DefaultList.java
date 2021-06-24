@@ -12,8 +12,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-@SuppressWarnings("unchecked")
 public class DefaultList<E> extends ArrayList<E> {
+
+    private static final long serialVersionUID = 1L;
+
+    @SuppressWarnings("rawtypes")
     protected static final EmptyList EMPTY_LIST = new EmptyList();
 
     public DefaultList() {}
@@ -26,6 +29,7 @@ public class DefaultList<E> extends ArrayList<E> {
         super(collection);
     }
 
+    @SafeVarargs
     public DefaultList(E element, E... elements) {
         ensureCapacity(elements.length + 1);
 
@@ -47,19 +51,19 @@ public class DefaultList<E> extends ArrayList<E> {
     }
 
     public E getFirst() {
-        return (E)get(0);
+        return get(0);
     }
 
     public E getLast() {
-        return (E)get(size()-1);
+        return get(size()-1);
     }
 
     public E removeFirst() {
-        return (E)remove(0);
+        return remove(0);
     }
 
     public E removeLast() {
-        return (E)remove(size()-1);
+        return remove(size()-1);
     }
 
     public boolean isList() {
@@ -70,26 +74,47 @@ public class DefaultList<E> extends ArrayList<E> {
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> DefaultList<T> emptyList() {
         return EMPTY_LIST;
     }
 
-    protected static class EmptyList<E> extends DefaultList<E> implements Iterator<E> {
+    protected static class EmptyList<E> extends DefaultList<E> {
+
+        private static final long serialVersionUID = 1L;
         public EmptyList() { super(0); }
 
+        @Override
         public E set(int index, E e) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public void add(int index, E e) {
             throw new UnsupportedOperationException();
         }
+        @Override
         public E remove(int index) {
             throw new UnsupportedOperationException();
         }
-        public Iterator iterator() { return this; }
+        @Override
+        public Iterator<E> iterator() { return emptyIterator(); }
 
+        @SuppressWarnings("unchecked")
+        public static <T> Iterator<T> emptyIterator() {
+            return (Iterator<T>) EmptyIterator.EMPTY_ITERATOR;
+        }
+    }
+
+    private static class EmptyIterator<E> implements Iterator<E> {
+
+        private static final EmptyIterator<Object> EMPTY_ITERATOR = new EmptyIterator<>();
+
+        @Override
         public boolean hasNext() { return false; }
+        @Override
         public E next() { throw new NoSuchElementException(); }
+        @Override
         public void remove() { throw new UnsupportedOperationException(); }
+
     }
 }

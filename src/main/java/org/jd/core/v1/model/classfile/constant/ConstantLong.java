@@ -11,7 +11,7 @@ public class ConstantLong extends ConstantValue {
     protected long value;
 
     public ConstantLong(long value) {
-        super(CONSTANT_Long);
+        super(CONSTANT_LONG);
         this.value = value;
     }
 

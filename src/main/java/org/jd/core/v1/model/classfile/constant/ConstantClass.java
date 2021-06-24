@@ -8,10 +8,10 @@
 package org.jd.core.v1.model.classfile.constant;
 
 public class ConstantClass extends Constant {
-	protected int nameIndex;
+    protected int nameIndex;
 
     public ConstantClass(int nameIndex) {
-        super(CONSTANT_Class);
+        super(CONSTANT_CLASS);
         this.nameIndex = nameIndex;
     }
 

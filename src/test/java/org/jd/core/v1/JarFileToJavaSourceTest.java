@@ -16,6 +16,7 @@ import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.util.DefaultList;
+import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -118,8 +119,10 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
 //        test(com.google.common.collect.Collections2.class);
 //    }
 
-    protected void test(Class clazz) throws Exception {
-        test(new FileInputStream(Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile()));
+    protected void test(Class<?> clazz) throws Exception {
+        try (FileInputStream inputStream = new FileInputStream(Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile())) {
+            test(inputStream);
+        }
     }
 
     protected void test(InputStream inputStream) throws Exception {
@@ -131,8 +134,8 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
         try (InputStream is = inputStream) {
             ZipLoader loader = new ZipLoader(is);
             CounterPrinter printer = new CounterPrinter();
-            HashMap<String, Integer> statistics = new HashMap<>();
-            HashMap<String, Object> configuration = new HashMap<>();
+            Map<String, Integer> statistics = new HashMap<>();
+            Map<String, Object> configuration = new HashMap<>();
 
             configuration.put("realignLineNumbers", Boolean.TRUE);
 
@@ -144,7 +147,7 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
             long time0 = System.currentTimeMillis();
 
             for (String path : loader.getMap().keySet()) {
-                if (path.endsWith(".class") && (path.indexOf('$') == -1)) {
+                if (path.endsWith(StringConstants.CLASS_FILE_SUFFIX) && (path.indexOf('$') == -1)) {
                     String internalTypeName = path.substring(0, path.length() - 6); // 6 = ".class".length()
 
                     // TODO DEBUG if (!internalTypeName.endsWith("/Debug")) continue;
@@ -216,10 +219,10 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
                 System.out.println(stat);
             }
 
-            assertTrue(exceptionCounter == 0);
-            assertTrue(assertFailedCounter == 0);
-            assertTrue(printer.errorInMethodCounter == 0);
-            assertTrue(recompilationFailedCounter == 0);
+            assertEquals(0, exceptionCounter);
+            assertEquals(0, assertFailedCounter);
+            assertEquals(0, printer.errorInMethodCounter);
+            assertEquals(0, recompilationFailedCounter);
         }
     }
 
@@ -229,6 +232,7 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
         public long errorInMethodCounter = 0;
         public long accessCounter = 0;
 
+        @Override
         public void printText(String text) {
             if (text != null) {
                 if ("// Byte code:".equals(text) || text.startsWith("/* monitor enter ") || text.startsWith("/* monitor exit ")) {
@@ -238,12 +242,14 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
             super.printText(text);
         }
 
+        @Override
         public void printDeclaration(int type, String internalTypeName, String name, String descriptor) {
             if (type == TYPE) classCounter++;
             if ((type == METHOD) || (type == CONSTRUCTOR)) methodCounter++;
             super.printDeclaration(type, internalTypeName, name, descriptor);
         }
 
+        @Override
         public void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) {
             if ((name != null) && name.startsWith("access$")) {
                 accessCounter++;

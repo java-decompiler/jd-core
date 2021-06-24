@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class JavaFragmentToTokenProcessor {
 
-    public DefaultList<Token> process(List<JavaFragment> fragments) throws Exception {
+    public DefaultList<Token> process(List<JavaFragment> fragments) {
         TokenizeJavaFragmentVisitor visitor = new TokenizeJavaFragmentVisitor(fragments.size() * 3);
 
         // Create tokens

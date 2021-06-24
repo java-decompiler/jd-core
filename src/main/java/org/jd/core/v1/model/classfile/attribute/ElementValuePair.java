@@ -8,10 +8,10 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class ElementValuePair {
-	protected String elementName;
-    protected ElementValue elementValue;
+    protected String elementName;
+    protected AttributeElementValue elementValue;
 
-    public ElementValuePair(String elementName, ElementValue elementValue) {
+    public ElementValuePair(String elementName, AttributeElementValue elementValue) {
         this.elementName = elementName;
         this.elementValue = elementValue;
     }
@@ -21,7 +21,7 @@ public class ElementValuePair {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends ElementValue> T getElementValue() {
+    public <T extends AttributeElementValue> T getElementValue() {
         return (T)elementValue;
     }
 }

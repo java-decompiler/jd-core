@@ -10,7 +10,10 @@ package org.jd.core.test;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+@SuppressWarnings("all")
 public class Assert implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public static void test1(int i)
     {
@@ -29,7 +32,6 @@ public class Assert implements Serializable {
                 "boom";
         System.out.println("b");
     }
-
 
     public static void test3(int i)
     {

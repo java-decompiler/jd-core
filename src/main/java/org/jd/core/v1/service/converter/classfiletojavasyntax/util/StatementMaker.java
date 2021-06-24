@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.classfile.ClassFile;
@@ -20,6 +19,8 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.ExceptionHandler;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
@@ -31,6 +32,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.DefaultStack;
+import org.jd.core.v1.util.StringConstants;
 
 import java.util.*;
 
@@ -42,7 +44,7 @@ import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.B
 
 public class StatementMaker {
     protected static final SwitchCaseComparator SWITCH_CASE_COMPARATOR = new SwitchCaseComparator();
-    protected static final NullExpression FINALLY_EXCEPTION_EXPRESSION = new NullExpression(new ObjectType("java/lang/Exception", "java.lang.Exception", "Exception"));
+    protected static final NullExpression FINALLY_EXCEPTION_EXPRESSION = new NullExpression(new ObjectType(StringConstants.JAVA_LANG_EXCEPTION, "java.lang.Exception", "Exception"));
     protected static final MergeTryWithResourcesStatementVisitor MERGE_TRY_WITH_RESOURCES_STATEMENT_VISITOR = new MergeTryWithResourcesStatementVisitor();
 
     protected TypeMaker typeMaker;
@@ -58,8 +60,8 @@ public class StatementMaker {
     protected UpdateIntegerConstantTypeVisitor updateIntegerConstantTypeVisitor;
     protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
     protected MemberVisitor memberVisitor = new MemberVisitor();
-    protected boolean removeFinallyStatementsFlag = false;
-    protected boolean mergeTryWithResourcesStatementFlag = false;
+    protected boolean removeFinallyStatementsFlag;
+    protected boolean mergeTryWithResourcesStatementFlag;
 
     public StatementMaker(TypeMaker typeMaker, LocalVariableMaker localVariableMaker, ClassFileConstructorOrMethodDeclaration comd) {
         ClassFile classFile = comd.getClassFile();
@@ -113,10 +115,6 @@ public class StatementMaker {
         // Change ++i; with i++;
         replacePreOperatorWithPostOperator(statements);
 
-        if (!jumps.isEmpty()) {
-            updateJumpStatements(jumps);
-        }
-
         return statements;
     }
 
@@ -127,8 +125,11 @@ public class StatementMaker {
      * @param statements List to populate
      */
     protected void makeStatements(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
-        Statements subStatements, elseStatements;
-        Expression condition, exp1, exp2;
+        Statements subStatements;
+        Statements elseStatements;
+        Expression condition;
+        Expression exp1;
+        Expression exp2;
 
         switch (basicBlock.getType()) {
             case TYPE_START:
@@ -149,13 +150,15 @@ public class StatementMaker {
                 break;
             case TYPE_RETURN_VALUE:
             case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                parseByteCode(basicBlock, statements);
+            case TYPE_RET:
+            parseByteCode(basicBlock, statements);
                 break;
             case TYPE_SWITCH:
                 parseSwitch(watchdog, basicBlock, statements, jumps);
                 break;
             case TYPE_SWITCH_BREAK:
-                statements.add(BreakStatement.BREAK);
+            case TYPE_LOOP_END:
+            statements.add(BreakStatement.BREAK);
                 break;
             case TYPE_TRY:
                 parseTry(watchdog, basicBlock, statements, jumps, false, false);
@@ -169,9 +172,6 @@ public class StatementMaker {
             case TYPE_JSR:
                 parseJSR(watchdog, basicBlock, statements, jumps);
                 break;
-            case TYPE_RET:
-                parseByteCode(basicBlock, statements);
-                break;
             case TYPE_IF:
                 parseIf(watchdog, basicBlock, statements, jumps);
                 break;
@@ -182,7 +182,7 @@ public class StatementMaker {
                 DefaultStack<Expression> backup = new DefaultStack<>(stack);
                 watchdog.check(basicBlock, basicBlock.getSub1());
                 subStatements = makeSubStatements(watchdog, basicBlock.getSub1(), statements, jumps);
-                if (!basicBlock.getSub2().matchType(TYPE_LOOP_END|TYPE_LOOP_CONTINUE|TYPE_LOOP_START) && (stack.size() != backup.size())) {
+                if (!basicBlock.getSub2().matchType(TYPE_LOOP_END|TYPE_LOOP_CONTINUE|TYPE_LOOP_START) && stack.size() != backup.size()) {
                     stack.copy(backup);
                 }
                 watchdog.check(basicBlock, basicBlock.getSub2());
@@ -205,14 +205,14 @@ public class StatementMaker {
                 exp1 = makeExpression(watchdog, basicBlock.getSub1(), statements, jumps);
                 watchdog.check(basicBlock, basicBlock.getSub2());
                 exp2 = makeExpression(watchdog, basicBlock.getSub2(), statements, jumps);
-                stack.push(new BinaryOperatorExpression(basicBlock.getFirstLineNumber(), PrimitiveType.TYPE_BOOLEAN, exp1, "||", exp2, 14));
+                stack.push(new BinaryOperatorExpression(basicBlock.getFirstLineNumber(), TYPE_BOOLEAN, exp1, "||", exp2, 14));
                 break;
             case TYPE_CONDITION_AND:
                 watchdog.check(basicBlock, basicBlock.getSub1());
                 exp1 = makeExpression(watchdog, basicBlock.getSub1(), statements, jumps);
                 watchdog.check(basicBlock, basicBlock.getSub2());
                 exp2 = makeExpression(watchdog, basicBlock.getSub2(), statements, jumps);
-                stack.push(new BinaryOperatorExpression(basicBlock.getFirstLineNumber(), PrimitiveType.TYPE_BOOLEAN, exp1, "&&", exp2, 13));
+                stack.push(new BinaryOperatorExpression(basicBlock.getFirstLineNumber(), TYPE_BOOLEAN, exp1, "&&", exp2, 13));
                 break;
             case TYPE_CONDITION_TERNARY_OPERATOR:
                 watchdog.check(basicBlock, basicBlock.getCondition());
@@ -252,10 +252,7 @@ public class StatementMaker {
             case TYPE_LOOP_CONTINUE:
                 statements.add(ContinueStatement.CONTINUE);
                 break;
-            case TYPE_LOOP_END:
-                statements.add(BreakStatement.BREAK);
-                break;
-            case TYPE_JUMP:
+        case TYPE_JUMP:
                 Statement jump = new ClassFileBreakContinueStatement(basicBlock.getFromOffset(), basicBlock.getToOffset());
                 statements.add(jump);
                 jumps.add(jump);
@@ -264,8 +261,7 @@ public class StatementMaker {
                 statements.add(new WhileStatement(BooleanExpression.TRUE, null));
                 break;
             default:
-                assert false : "Unexpected basic block: " + basicBlock.getTypeName() + ':' + basicBlock.getIndex();
-                break;
+                throw new IllegalStateException("Unexpected basic block: " + basicBlock.getTypeName() + ':' + basicBlock.getIndex());
         }
     }
 
@@ -308,26 +304,23 @@ public class StatementMaker {
             // https://github.com/JetBrains/intellij-community/blob/master/platform/built-in-server/src/org/jetbrains/builtInWebServer/SingleConnectionNetService.kt
             // final override fun connectToProcess(...)
             return new StringConstantExpression("JD-Core does not support Kotlin");
-        } else {
-            Expression expression = stack.pop();
+        }
+        Expression expression = stack.pop();
+        if (statements.size() > initialStatementCount) {
+            // Is a multi-assignment ?
+            Expression boe = statements.getLast().getExpression();
 
-            if (statements.size() > initialStatementCount) {
-                // Is a multi-assignment ?
-                Expression boe = statements.getLast().getExpression();
-
-                if (boe != NO_EXPRESSION) {
-                    if (boe.getRightExpression() == expression) {
-                        // Pattern matched -> Multi-assignment
-                        statements.removeLast();
-                        expression = boe;
-                    } else if (expression.isNewArray()) {
-                        expression = NewArrayMaker.make(statements, expression);
-                    }
+            if (boe != NO_EXPRESSION) {
+                if (boe.getRightExpression() == expression) {
+                    // Pattern matched -> Multi-assignment
+                    statements.removeLast();
+                    expression = boe;
+                } else if (expression.isNewArray()) {
+                    expression = NewArrayMaker.make(statements, expression);
                 }
             }
-
-            return expression;
         }
+        return expression;
     }
 
     protected void parseSwitch(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
@@ -338,20 +331,24 @@ public class StatementMaker {
         Expression condition = switchStatement.getCondition();
         Type conditionType = condition.getType();
         List<SwitchStatement.Block> blocks = switchStatement.getBlocks();
-        DefaultStack<Expression> localStack = new DefaultStack<Expression>(stack);
+        DefaultStack<Expression> localStack = new DefaultStack<>(stack);
 
         switchCases.sort(SWITCH_CASE_COMPARATOR);
 
+        SwitchCase sc;
+        BasicBlock bb;
+        int j;
+        Statements subStatements;
         for (int i=0, len=switchCases.size(); i<len; i++) {
-            SwitchCase sc = switchCases.get(i);
-            BasicBlock bb = sc.getBasicBlock();
-            int j = i + 1;
+            sc = switchCases.get(i);
+            bb = sc.getBasicBlock();
+            j = i + 1;
 
-            while ((j < len) && (bb == switchCases.get(j).getBasicBlock())) {
+            while (j < len && bb == switchCases.get(j).getBasicBlock()) {
                 j++;
             }
 
-            Statements subStatements = new Statements();
+            subStatements = new Statements();
 
             stack.copy(localStack);
             makeStatements(watchdog, bb, subStatements, jumps);
@@ -376,7 +373,7 @@ public class StatementMaker {
 
         int size = statements.size();
 
-        if ((size > 3) && condition.isLocalVariableReferenceExpression() && statements.get(size-2).isSwitchStatement()) {
+        if (size > 3 && condition.isLocalVariableReferenceExpression() && statements.get(size-2).isSwitchStatement()) {
             // Check pattern & make 'switch-string'
             SwitchStatementMaker.makeSwitchString(localVariableMaker, statements, switchStatement);
         } else if (condition.isArrayExpression()) {
@@ -387,18 +384,14 @@ public class StatementMaker {
         makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
     }
 
-    @SuppressWarnings("unchecked")
     protected void parseTry(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps, boolean jsr, boolean eclipse) {
         Statements tryStatements;
         DefaultList<TryStatement.CatchClause> catchClauses = new DefaultList<>();
         Statements finallyStatements = null;
-        int assertStackSize = stack.size();
 
         tryStatements = makeSubStatements(watchdog, basicBlock.getSub1(), statements, jumps);
 
         for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
-            assert stack.size() == assertStackSize : "parseTry : problem with stack";
-
             if (exceptionHandler.getInternalThrowableName() == null) {
                 // 'finally' handler
                 stack.push(FINALLY_EXCEPTION_EXPRESSION);
@@ -406,7 +399,7 @@ public class StatementMaker {
                 finallyStatements = makeSubStatements(watchdog, exceptionHandler.getBasicBlock(), statements, jumps);
 
                 if (!finallyStatements.getFirst().isMonitorEnterStatement()) {
-                    removeFinallyStatementsFlag |= (jsr == false);
+                    removeFinallyStatementsFlag |= !jsr;
 
                     Expression leftExpression = finallyStatements.getFirst().getExpression().getLeftExpression();
 
@@ -483,11 +476,11 @@ public class StatementMaker {
         // 'try', 'try-with-resources' or 'synchronized' ?
         Statement statement = null;
 
-        if ((finallyStatements != null) && (finallyStatements.size() > 0) && finallyStatements.getFirst().isMonitorExitStatement()) {
+        if (finallyStatements != null && !finallyStatements.isEmpty() && finallyStatements.getFirst().isMonitorExitStatement()) {
             statement = SynchronizedStatementMaker.make(localVariableMaker, statements, tryStatements);
         } else {
             if (majorVersion >= 51) { // (majorVersion >= Java 7)
-                assert jsr == false;
+                assert !jsr;
                 statement = TryWithResourcesStatementMaker.make(localVariableMaker, statements, tryStatements, catchClauses, finallyStatements);
             }
             if (statement == null) {
@@ -502,7 +495,7 @@ public class StatementMaker {
     }
 
     protected void removeExceptionReference(Statements catchStatements) {
-        if ((catchStatements.size() > 0) && catchStatements.getFirst().isExpressionStatement()) {
+        if (!catchStatements.isEmpty() && catchStatements.getFirst().isExpressionStatement()) {
             Expression exp = catchStatements.getFirst().getExpression();
 
             if (exp.isBinaryOperatorExpression()) {
@@ -532,11 +525,10 @@ public class StatementMaker {
         statements.remove(statementCount);
     }
 
-    @SuppressWarnings("unchecked")
     protected void parseIf(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         BasicBlock condition = basicBlock.getCondition();
 
-        if (condition.getType() == BasicBlock.TYPE_CONDITION_AND) {
+        if (condition.getType() == TYPE_CONDITION_AND) {
             condition = condition.getSub1();
         }
 
@@ -559,7 +551,7 @@ public class StatementMaker {
                 Expression e = subStatements.getFirst().getExpression();
                 if (e.isNewExpression()) {
                     BaseExpression parameters = e.getParameters();
-                    if ((parameters != null) && !parameters.isList()) {
+                    if (parameters != null && !parameters.isList()) {
                         message = parameters.getFirst();
                     }
                 }
@@ -570,7 +562,7 @@ public class StatementMaker {
         } else {
             makeStatements(watchdog, basicBlock.getCondition(), statements, jumps);
             Expression cond = stack.pop();
-            DefaultStack<Expression> backup = new DefaultStack<Expression>(stack);
+            DefaultStack<Expression> backup = new DefaultStack<>(stack);
             Statements subStatements = makeSubStatements(watchdog, basicBlock.getSub1(), statements, jumps);
             if (stack.size() != backup.size()) {
                 stack.copy(backup);
@@ -579,10 +571,10 @@ public class StatementMaker {
             int index = statements.size();
             makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
 
-            if ((subStatements.size() == 1) &&
-                    (index+1 == statements.size()) &&
-                    (subStatements.getFirst().isReturnExpressionStatement()) &&
-                    (statements.get(index).isReturnExpressionStatement())) {
+            if (subStatements.size() == 1 &&
+                    index+1 == statements.size() &&
+                    subStatements.getFirst().isReturnExpressionStatement() &&
+                    statements.get(index).isReturnExpressionStatement()) {
                 Statement cfres1 = subStatements.getFirst();
 
                 if (cond.getLineNumber() >= cfres1.getLineNumber()) {
@@ -598,12 +590,11 @@ public class StatementMaker {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void parseLoop(WatchDog watchdog, BasicBlock basicBlock, Statements statements, Statements jumps) {
         BasicBlock sub1 = basicBlock.getSub1();
         BasicBlock updateBasicBlock = null;
 
-        if ((sub1.getType() == TYPE_IF) && (sub1.getCondition() == END)) {
+        if (sub1.getType() == TYPE_IF && sub1.getCondition() == END) {
             updateBasicBlock = sub1.getNext();
             sub1 = sub1.getSub1();
         }
@@ -648,23 +639,25 @@ public class StatementMaker {
         BasicBlock next = sub1.getNext();
         BasicBlock last = sub1;
 
-        while (next.matchType(GROUP_SINGLE_SUCCESSOR) && (next.getPredecessors().size() == 1)) {
+        while (next.matchType(GROUP_SINGLE_SUCCESSOR) && next.getPredecessors().size() == 1) {
             last = next;
             next = next.getNext();
         }
 
-        if ((next == LOOP_START) && (last.getType() == TYPE_IF) && (last.getSub1() == LOOP_END) && (countStartLoop(sub1) == 1)) {
+        if (next == LOOP_START && last.getType() == TYPE_IF && last.getSub1() == LOOP_END && countStartLoop(sub1) == 1) {
             // 'do-while'
             Statements subStatements;
 
             last.getCondition().inverseCondition();
             last.setType(TYPE_END);
 
-            if ((sub1.getType() == TYPE_LOOP) && (sub1.getNext() == last) && (countStartLoop(sub1.getSub1()) == 0)) {
+            if (sub1.getType() == TYPE_LOOP && sub1.getNext() == last && countStartLoop(sub1.getSub1()) == 0) {
                 changeEndLoopToStartLoop(new BitSet(), sub1.getSub1());
                 subStatements = makeSubStatements(watchdog, sub1.getSub1(), statements, jumps, updateBasicBlock);
 
-                assert subStatements.getLast() == ContinueStatement.CONTINUE : "StatementMaker.parseLoop(...) : unexpected basic block for create a do-while loop";
+                if (subStatements.getLast() != ContinueStatement.CONTINUE) {
+                    throw new IllegalStateException("StatementMaker.parseLoop(...) : unexpected basic block for create a do-while loop");
+                }
 
                 subStatements.removeLast();
             } else {
@@ -756,7 +749,7 @@ public class StatementMaker {
     }
 
     protected static void changeEndLoopToStartLoop(BitSet visited, BasicBlock basicBlock) {
-        if (!basicBlock.matchType(GROUP_END| TYPE_LOOP_END) && (visited.get(basicBlock.getIndex()) == false)) {
+        if (!basicBlock.matchType(GROUP_END| TYPE_LOOP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
 
             switch (basicBlock.getType()) {
@@ -784,7 +777,7 @@ public class StatementMaker {
                 case TYPE_TRY:
                 case TYPE_TRY_JSR:
                 case TYPE_TRY_ECLIPSE:
-                    for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
+                    for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
                         if (exceptionHandler.getBasicBlock() == LOOP_END) {
                             exceptionHandler.setBasicBlock(LOOP_START);
                         } else {
@@ -827,33 +820,28 @@ public class StatementMaker {
     }
 
     protected Expression parseTernaryOperator(int lineNumber, Expression condition, Expression exp1, Expression exp2) {
-        if (ObjectType.TYPE_CLASS.equals(exp1.getType()) && ObjectType.TYPE_CLASS.equals(exp2.getType()) && condition.isBinaryOperatorExpression()) {
+        if (ObjectType.TYPE_CLASS.equals(exp1.getType()) && ObjectType.TYPE_CLASS.equals(exp2.getType()) && condition.isBinaryOperatorExpression() && condition.getLeftExpression().isFieldReferenceExpression() && condition.getRightExpression().isNullExpression()) {
+            FieldReferenceExpression freCond = (FieldReferenceExpression) condition.getLeftExpression();
 
-            if (condition.getLeftExpression().isFieldReferenceExpression() && condition.getRightExpression().isNullExpression()) {
-                FieldReferenceExpression freCond = (FieldReferenceExpression) condition.getLeftExpression();
+            if (freCond.getInternalTypeName().equals(internalTypeName)) {
+                String fieldName = freCond.getName();
 
-                if (freCond.getInternalTypeName().equals(internalTypeName)) {
-                    String fieldName = freCond.getName();
+                if (fieldName.startsWith(StringConstants.CLASS_DOLLAR)) {
+                    if ("==".equals(condition.getOperator()) && exp1.isBinaryOperatorExpression() && checkFieldReference(fieldName, exp2)) {
+                        if (exp1.getRightExpression().isMethodInvocationExpression() && checkFieldReference(fieldName, exp1.getLeftExpression())) {
+                            MethodInvocationExpression mie = (MethodInvocationExpression) exp1.getRightExpression();
 
-                    if (fieldName.startsWith("class$")) {
-                        if (condition.getOperator().equals("==") && exp1.isBinaryOperatorExpression() && checkFieldReference(fieldName, exp2)) {
-                            if (exp1.getRightExpression().isMethodInvocationExpression() && checkFieldReference(fieldName, exp1.getLeftExpression())) {
-                                MethodInvocationExpression mie = (MethodInvocationExpression) exp1.getRightExpression();
-
-                                if (mie.getParameters().isStringConstantExpression() && mie.getName().equals("class$") && mie.getInternalTypeName().equals(internalTypeName)) {
-                                    // JDK 1.4.2 '.class' found ==> Convert '(class$java$lang$String == null) ? (class$java$lang$String = TestDotClass.class$("java.lang.String") : class$java$lang$String)' to 'String.class'
-                                    return createObjectTypeReferenceDotClassExpression(lineNumber, fieldName, mie);
-                                }
+                            if (mie.getParameters().isStringConstantExpression() && StringConstants.CLASS_DOLLAR.equals(mie.getName()) && mie.getInternalTypeName().equals(internalTypeName)) {
+                                // JDK 1.4.2 '.class' found ==> Convert '(class$java$lang$String == null) ? (class$java$lang$String = TestDotClass.class$("java.lang.String") : class$java$lang$String)' to 'String.class'
+                                return createObjectTypeReferenceDotClassExpression(lineNumber, fieldName, mie);
                             }
-                        } else if (condition.getOperator().equals("!=") && exp2.isBinaryOperatorExpression() && checkFieldReference(fieldName, exp1)) {
-                            if (exp2.getRightExpression().isMethodInvocationExpression() && checkFieldReference(fieldName, exp2.getLeftExpression())) {
-                                MethodInvocationExpression mie = (MethodInvocationExpression) exp2.getRightExpression();
+                        }
+                    } else if ("!=".equals(condition.getOperator()) && exp2.isBinaryOperatorExpression() && checkFieldReference(fieldName, exp1) && exp2.getRightExpression().isMethodInvocationExpression() && checkFieldReference(fieldName, exp2.getLeftExpression())) {
+                        MethodInvocationExpression mie = (MethodInvocationExpression) exp2.getRightExpression();
 
-                                if (mie.getParameters().isStringConstantExpression() && mie.getName().equals("class$") && mie.getInternalTypeName().equals(internalTypeName)) {
-                                    // JDK 1.1.8 '.class' found ==> Convert '(class$java$lang$String != null) ? class$java$lang$String : (class$java$lang$String = TestDotClass.class$("java.lang.String"))' to 'String.class'
-                                    return createObjectTypeReferenceDotClassExpression(lineNumber, fieldName, mie);
-                                }
-                            }
+                        if (mie.getParameters().isStringConstantExpression() && StringConstants.CLASS_DOLLAR.equals(mie.getName()) && mie.getInternalTypeName().equals(internalTypeName)) {
+                            // JDK 1.1.8 '.class' found ==> Convert '(class$java$lang$String != null) ? class$java$lang$String : (class$java$lang$String = TestDotClass.class$("java.lang.String"))' to 'String.class'
+                            return createObjectTypeReferenceDotClassExpression(lineNumber, fieldName, mie);
                         }
                     }
                 }
@@ -870,9 +858,7 @@ public class StatementMaker {
 
         if (expressionTrue.isNullExpression()) {
             type = expressionFalseType;
-        } else if (expressionFalse.isNullExpression()) {
-            type = expressionTrueType;
-        } else if (expressionTrueType.equals(expressionFalseType)) {
+        } else if (expressionFalse.isNullExpression() || expressionTrueType.equals(expressionFalseType)) {
             type = expressionTrueType;
         } else if (expressionTrueType.isPrimitiveType() && expressionFalseType.isPrimitiveType()) {
             int flags = ((PrimitiveType)expressionTrueType).getFlags() | ((PrimitiveType)expressionFalseType).getFlags();
@@ -899,13 +885,10 @@ public class StatementMaker {
                 }
             }
         } else if (expressionTrueType.isObjectType() && expressionFalseType.isObjectType()) {
-            ObjectType ot1 = (ObjectType)expressionTrueType;
-            ObjectType ot2 = (ObjectType)expressionFalseType;
-
-            if (typeMaker.isAssignable(typeBounds, ot1, ot2)) {
-                type = getTernaryOperatorExpressionType(ot1, ot2);
-            } else if (typeMaker.isAssignable(typeBounds, ot2, ot1)) {
-                type = getTernaryOperatorExpressionType(ot2, ot1);
+            if (typeMaker.isAssignable(typeBounds, (ObjectType)expressionTrueType, (ObjectType)expressionFalseType)) {
+                type = getTernaryOperatorExpressionType((ObjectType)expressionTrueType, (ObjectType)expressionFalseType);
+            } else if (typeMaker.isAssignable(typeBounds, (ObjectType)expressionFalseType, (ObjectType)expressionTrueType)) {
+                type = getTernaryOperatorExpressionType((ObjectType)expressionFalseType, (ObjectType)expressionTrueType);
             } else {
                 type = TYPE_UNDEFINED_OBJECT;
             }
@@ -917,17 +900,18 @@ public class StatementMaker {
     }
 
     protected Type getTernaryOperatorExpressionType(ObjectType ot1, ObjectType ot2) {
-        if (ot1.getTypeArguments() == null) {
-            return ot1;
-        } else if (ot2.getTypeArguments() == null) {
-            return ot1.createType(null);
-        } else if (ot1.isTypeArgumentAssignableFrom(typeBounds, ot2)) {
-            return ot1;
-        } else if (ot2.isTypeArgumentAssignableFrom(typeBounds, ot1)) {
-            return ot1.createType(ot2.getTypeArguments());
-        } else {
-            return ot1.createType(null);
+        if (ot1.getTypeArguments() != null) {
+            if (ot2.getTypeArguments() == null) {
+                return ot1.createType(null);
+            }
+            if (!ot1.isTypeArgumentAssignableFrom(typeBounds, ot2)) {
+                if (ot2.isTypeArgumentAssignableFrom(typeBounds, ot1)) {
+                    return ot1.createType(ot2.getTypeArguments());
+                }
+                return ot1.createType(null);
+            }
         }
+        return ot1;
     }
 
     protected boolean checkFieldReference(String fieldName, Expression expression) {
@@ -939,7 +923,6 @@ public class StatementMaker {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     protected Expression createObjectTypeReferenceDotClassExpression(int lineNumber, String fieldName, MethodInvocationExpression mie) {
         // Add SYNTHETIC flags to field
         memberVisitor.init(fieldName);
@@ -953,7 +936,7 @@ public class StatementMaker {
         }
 
         // Add SYNTHETIC flags to method named 'class$'
-        memberVisitor.init("class$");
+        memberVisitor.init(StringConstants.CLASS_DOLLAR);
 
         for (ClassFileConstructorOrMethodDeclaration member : bodyDeclaration.getMethodDeclarations()) {
             member.accept(memberVisitor);
@@ -973,12 +956,12 @@ public class StatementMaker {
         byteCodeParser.parse(basicBlock, statements, stack);
     }
 
-    @SuppressWarnings("unchecked")
     protected void replacePreOperatorWithPostOperator(Statements statements) {
         Iterator<Statement> iterator = statements.iterator();
 
+        Statement statement;
         while (iterator.hasNext()) {
-            Statement statement = iterator.next();
+            statement = iterator.next();
 
             if (statement.getExpression().isPreOperatorExpression()) {
                 Expression poe = statement.getExpression();
@@ -999,26 +982,14 @@ public class StatementMaker {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected void updateJumpStatements(Statements jumps) {
-        assert false : "StatementMaker.updateJumpStatements(stmt) : 'jumps' list is not empty";
-
-        Iterator<Statement> iterator = jumps.iterator();
-
-        while (iterator.hasNext()) {
-            ClassFileBreakContinueStatement statement = (ClassFileBreakContinueStatement)iterator.next();
-
-            statement.setStatement(new CommentStatement("// Byte code: goto -> " + statement.getTargetOffset()));
-        }
-    }
-
     protected static class SwitchCaseComparator implements Comparator<SwitchCase> {
         @Override
         public int compare(SwitchCase sc1, SwitchCase sc2) {
             int diff = sc1.getOffset() - sc2.getOffset();
 
-            if (diff != 0)
+            if (diff != 0) {
                 return diff;
+            }
 
             return sc1.getValue() - sc2.getValue();
         }

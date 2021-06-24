@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.classfile.ClassFile;
@@ -22,7 +21,9 @@ import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileCmpExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorEnterStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorExitStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
@@ -31,6 +32,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RenameLoca
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.DefaultStack;
+import org.jd.core.v1.util.StringConstants;
 
 import java.util.*;
 
@@ -49,7 +51,7 @@ public class ByteCodeParser {
     private MemberVisitor memberVisitor = new MemberVisitor();
     private SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
     private EraseTypeArgumentVisitor eraseTypeArgumentVisitor = new EraseTypeArgumentVisitor();
-    private LambdaParameterNamesVisitor lambdaParameterNamesVisitor = new LambdaParameterNamesVisitor();;
+    private LambdaParameterNamesVisitor lambdaParameterNamesVisitor = new LambdaParameterNamesVisitor();
     private RenameLocalVariablesVisitor renameLocalVariablesVisitor = new RenameLocalVariablesVisitor();
 
     private TypeMaker typeMaker;
@@ -67,7 +69,7 @@ public class ByteCodeParser {
             ClassFileBodyDeclaration bodyDeclaration, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
         this.localVariableMaker = localVariableMaker;
-        this.genericTypesSupported = (classFile.getMajorVersion() >= 49); // (majorVersion >= Java 5)
+        this.genericTypesSupported = classFile.getMajorVersion() >= 49; // (majorVersion >= Java 5)
         this.internalTypeName = classFile.getInternalTypeName();
         this.attributeBootstrapMethods = classFile.getAttribute("BootstrapMethods");
         this.bodyDeclaration = bodyDeclaration;
@@ -81,7 +83,6 @@ public class ByteCodeParser {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void parse(BasicBlock basicBlock, Statements statements, DefaultStack<Expression> stack) {
         ControlFlowGraph cfg = basicBlock.getControlFlowGraph();
         int fromOffset = basicBlock.getFromOffset();
@@ -92,18 +93,31 @@ public class ByteCodeParser {
         byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
         boolean syntheticFlag = (method.getAccessFlags() & FLAG_SYNTHETIC) != 0;
 
-        Expression indexRef, arrayRef, valueRef, expression1, expression2, expression3;
-        Type type1, type2, type3;
+        Expression indexRef;
+        Expression arrayRef;
+        Expression valueRef;
+        Expression expression1;
+        Expression expression2;
+        Expression expression3;
+        Type type1;
+        Type type2;
+        Type type3;
         ConstantMemberRef constantMemberRef;
         ConstantNameAndType constantNameAndType;
-        String typeName, name, descriptor;
+        String typeName;
+        String name;
+        String descriptor;
         ObjectType ot;
-        int i, count, value;
+        int i;
+        int count;
+        int value;
         AbstractLocalVariable localVariable;
 
+        int opcode;
+        int lineNumber;
         for (int offset=fromOffset; offset<toOffset; offset++) {
-            int opcode = code[offset] & 255;
-            int lineNumber = syntheticFlag ? Expression.UNKNOWN_LINE_NUMBER : cfg.getLineNumber(offset);
+            opcode = code[offset] & 255;
+            lineNumber = syntheticFlag ? Expression.UNKNOWN_LINE_NUMBER : cfg.getLineNumber(offset);
 
             switch (opcode) {
                 case 0: // NOP
@@ -121,13 +135,13 @@ public class ByteCodeParser {
                     stack.push(new IntegerConstantExpression(lineNumber, MAYBE_BYTE_TYPE, opcode - 3));
                     break;
                 case 9: case 10: // LCONST_0, LCONST_1
-                    stack.push(new LongConstantExpression(lineNumber, (long)(opcode - 9)));
+                    stack.push(new LongConstantExpression(lineNumber, opcode - 9L));
                     break;
                 case 11: case 12: case 13: // FCONST_0, FCONST_1, FCONST_2
-                    stack.push(new FloatConstantExpression(lineNumber, (float)(opcode - 11)));
+                    stack.push(new FloatConstantExpression(lineNumber, opcode - 11F));
                     break;
                 case 14: case 15: // DCONST_0, DCONST_1
-                    stack.push(new DoubleConstantExpression(lineNumber, (double)(opcode - 14)));
+                    stack.push(new DoubleConstantExpression(lineNumber, opcode - 14D));
                     break;
                 case 16: // BIPUSH
                     value = (byte)(code[++offset] & 255);
@@ -154,7 +168,7 @@ public class ByteCodeParser {
                 case 25: // ALOAD
                     i = code[++offset] & 255;
                     localVariable = localVariableMaker.getLocalVariable(i, offset);
-                    if ((i == 0) && ((method.getAccessFlags() & FLAG_STATIC) == 0)) {
+                    if (i == 0 && (method.getAccessFlags() & FLAG_STATIC) == 0) {
                         stack.push(new ThisExpression(lineNumber, localVariable.getType()));
                     } else {
                         stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
@@ -194,31 +208,38 @@ public class ByteCodeParser {
                     stack.push(new ArrayExpression(lineNumber, arrayRef, indexRef));
                     break;
                 case 54: case 55: case 56: case 57: // ISTORE, LSTORE, FSTORE, DSTORE
-                    localVariable = getLocalVariableInAssignment(code[++offset] & 255, offset + 2, valueRef = stack.pop());
+                    valueRef = stack.pop();
+                    localVariable = getLocalVariableInAssignment(code[++offset] & 255, offset + 2, valueRef);
                     parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 58: // ASTORE
-                    localVariable = getLocalVariableInAssignment(code[++offset] & 255, offset + 1, valueRef = stack.pop());
+                    valueRef = stack.pop();
+                    localVariable = getLocalVariableInAssignment(code[++offset] & 255, offset + 1, valueRef);
                     parseASTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 59: case 60: case 61: case 62: // ISTORE_0 ... ISTORE_3
-                    localVariable = getLocalVariableInAssignment(opcode - 59, offset + 1, valueRef = stack.pop());
+                    valueRef = stack.pop();
+                    localVariable = getLocalVariableInAssignment(opcode - 59, offset + 1, valueRef);
                     parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 63: case 64: case 65: case 66: // LSTORE_0 ... LSTORE_3
-                    localVariable = getLocalVariableInAssignment(opcode - 63, offset + 1, valueRef = stack.pop());
+                    valueRef = stack.pop();
+                    localVariable = getLocalVariableInAssignment(opcode - 63, offset + 1, valueRef);
                     parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 67: case 68: case 69: case 70: // FSTORE_0 ... FSTORE_3
-                    localVariable = getLocalVariableInAssignment(opcode - 67, offset + 1, valueRef = stack.pop());
+                    valueRef = stack.pop();
+                    localVariable = getLocalVariableInAssignment(opcode - 67, offset + 1, valueRef);
                     parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 71: case 72: case 73: case 74: // DSTORE_0 ... DSTORE_3
-                    localVariable = getLocalVariableInAssignment(opcode - 71, offset + 1, valueRef = stack.pop());
+                    valueRef = stack.pop();
+                    localVariable = getLocalVariableInAssignment(opcode - 71, offset + 1, valueRef);
                     parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 75: case 76: case 77: case 78: // ASTORE_0 ... ASTORE_3
-                    localVariable = getLocalVariableInAssignment(opcode - 75, offset + 1, valueRef = stack.pop());
+                    valueRef = stack.pop();
+                    localVariable = getLocalVariableInAssignment(opcode - 75, offset + 1, valueRef);
                     parseASTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case 79: // IASTORE
@@ -275,7 +296,7 @@ public class ByteCodeParser {
                     break;
                 case 87: case 88: // POP, POP2
                     expression1 = stack.pop();
-                    if (!expression1.isLocalVariableReferenceExpression() && !expression1.isFieldReferenceExpression()) {
+                    if (!expression1.isLocalVariableReferenceExpression() && !expression1.isFieldReferenceExpression() && !expression1.isThisExpression()) {
                         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
                         statements.add(new ExpressionStatement(expression1));
                     }
@@ -301,16 +322,14 @@ public class ByteCodeParser {
                     if (TYPE_LONG.equals(type2) || TYPE_DOUBLE.equals(type2)) {
                         // ..., value2, value1 => ..., value1, value2, value1
                         stack.push(expression1);
-                        stack.push(expression2);
-                        stack.push(expression1);
                     } else {
                         // ..., value3, value2, value1 => ..., value1, value3, value2, value1
                         expression3 = stack.pop();
                         stack.push(expression1);
                         stack.push(expression3);
-                        stack.push(expression2);
-                        stack.push(expression1);
                     }
+                    stack.push(expression2);
+                    stack.push(expression1);
                     break;
                 case 92: // DUP2
                     expression1 = stack.pop();
@@ -320,15 +339,14 @@ public class ByteCodeParser {
                     if (TYPE_LONG.equals(type1) || TYPE_DOUBLE.equals(type1)) {
                         // ..., value => ..., value, value
                         stack.push(expression1);
-                        stack.push(expression1);
                     } else {
                         // ..., value2, value1 => ..., value2, value1, value2, value1
                         expression2 = stack.pop();
                         stack.push(expression2);
                         stack.push(expression1);
                         stack.push(expression2);
-                        stack.push(expression1);
                     }
+                    stack.push(expression1);
                     break;
                 case 93: // DUP2_X1
                     expression1 = stack.pop();
@@ -339,17 +357,15 @@ public class ByteCodeParser {
                     if (TYPE_LONG.equals(type1) || TYPE_DOUBLE.equals(type1)) {
                         // ..., value2, value1 => ..., value1, value2, value1
                         stack.push(expression1);
-                        stack.push(expression2);
-                        stack.push(expression1);
                     } else {
                         // ..., value3, value2, value1 => ..., value2, value1, value3, value2, value1
                         expression3 = stack.pop();
                         stack.push(expression2);
                         stack.push(expression1);
                         stack.push(expression3);
-                        stack.push(expression2);
-                        stack.push(expression1);
                     }
+                    stack.push(expression2);
+                    stack.push(expression1);
                     break;
                 case 94: // DUP2_X2
                     expression1 = stack.pop();
@@ -363,15 +379,11 @@ public class ByteCodeParser {
                         if (TYPE_LONG.equals(type2) || TYPE_DOUBLE.equals(type2)) {
                             // ..., value2, value1 => ..., value1, value2, value1
                             stack.push(expression1);
-                            stack.push(expression2);
-                            stack.push(expression1);
                         } else {
                             // ..., value3, value2, value1 => ..., value1, value3, value2, value1
                             expression3 = stack.pop();
                             stack.push(expression1);
                             stack.push(expression3);
-                            stack.push(expression2);
-                            stack.push(expression1);
                         }
                     } else {
                         expression3 = stack.pop();
@@ -381,20 +393,17 @@ public class ByteCodeParser {
                             // ..., value3, value2, value1 => ..., value2, value1, value3, value2, value1
                             stack.push(expression2);
                             stack.push(expression1);
-                            stack.push(expression3);
-                            stack.push(expression2);
-                            stack.push(expression1);
                         } else {
                             // ..., value4, value3, value2, value1 => ..., value2, value1, value4, value3, value2, value1
                             Expression expression4 = stack.pop();
                             stack.push(expression2);
                             stack.push(expression1);
                             stack.push(expression4);
-                            stack.push(expression3);
-                            stack.push(expression2);
-                            stack.push(expression1);
                         }
+                        stack.push(expression3);
                     }
+                    stack.push(expression2);
+                    stack.push(expression1);
                     break;
                 case 95: // SWAP : ..., value2, value1 => ..., value1, value2
                     expression1 = stack.pop();
@@ -576,35 +585,23 @@ public class ByteCodeParser {
                     stack.push(new CastExpression(lineNumber, TYPE_FLOAT, stack.pop(), false));
                     break;
                 case 135: // I2D
-                    stack.push(new CastExpression(lineNumber, TYPE_DOUBLE, stack.pop(), false));
-                    break;
-                case 136: // L2I
-                    stack.push(new CastExpression(lineNumber, TYPE_INT, forceExplicitCastExpression(stack.pop())));
-                    break;
-                case 137: // L2F
-                    stack.push(new CastExpression(lineNumber, TYPE_FLOAT, forceExplicitCastExpression(stack.pop())));
-                    break;
                 case 138: // L2D
-                    stack.push(new CastExpression(lineNumber, TYPE_DOUBLE, stack.pop(), false));
-                    break;
-                case 139: // F2I
-                    stack.push(new CastExpression(lineNumber, TYPE_INT, forceExplicitCastExpression(stack.pop())));
-                    break;
-                case 140: // F2L
-                    stack.push(new CastExpression(lineNumber, TYPE_LONG, forceExplicitCastExpression(stack.pop())));
-                    break;
                 case 141: // F2D
                     stack.push(new CastExpression(lineNumber, TYPE_DOUBLE, stack.pop(), false));
-                    break;
+                        break;
+                case 136: // L2I
+                case 139: // F2I
                 case 142: // D2I
                     stack.push(new CastExpression(lineNumber, TYPE_INT, forceExplicitCastExpression(stack.pop())));
-                    break;
-                case 143: // D2L
-                    stack.push(new CastExpression(lineNumber, TYPE_LONG, forceExplicitCastExpression(stack.pop())));
-                    break;
+                        break;
+                case 137: // L2F
                 case 144: // D2F
                     stack.push(new CastExpression(lineNumber, TYPE_FLOAT, forceExplicitCastExpression(stack.pop())));
-                    break;
+                        break;
+                case 140: // F2L
+                case 143: // D2L
+                    stack.push(new CastExpression(lineNumber, TYPE_LONG, forceExplicitCastExpression(stack.pop())));
+                        break;
                 case 145: // I2B
                     stack.push(new CastExpression(lineNumber, TYPE_BYTE, forceExplicitCastExpression(stack.pop())));
                     break;
@@ -691,23 +688,23 @@ public class ByteCodeParser {
                     offset++; // Skip index
                     break;
                 case 170: // TABLESWITCH
-                    offset = (offset+4) & 0xFFFC; // Skip padding
+                    offset = offset+4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
                     int low = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8 ) |  (code[offset++] & 255);
                     int high = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8 ) |  (code[offset++] & 255);
 
-                    offset += (4 * (high - low + 1)) - 1;
+                    offset += 4 * (high - low + 1) - 1;
 
                     statements.add(new SwitchStatement(stack.pop(), new DefaultList<>(high - low + 2)));
                     break;
                 case 171: // LOOKUPSWITCH
-                    offset = (offset+4) & 0xFFFC; // Skip padding
+                    offset = offset+4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
                     count = ((code[offset++] & 255) << 24) | ((code[offset++] & 255) << 16) | ((code[offset++] & 255) << 8 ) |  (code[offset++] & 255);
 
-                    offset += (8 * count) - 1;
+                    offset += 8 * count - 1;
 
                     statements.add(new SwitchStatement(stack.pop(), new DefaultList<>(count+1)));
                     break;
@@ -756,9 +753,8 @@ public class ByteCodeParser {
                             offset += 2; // Skip 'count' and one byte
                         }
                         if (TYPE_VOID.equals(methodTypes.returnedType)) {
-                            if ((opcode == 183) && // INVOKESPECIAL
-                                "<init>".equals(name)) {
-
+                            if (opcode == 183 && // INVOKESPECIAL
+                                StringConstants.INSTANCE_CONSTRUCTOR.equals(name)) {
                                 if (expression1.isNewExpression()) {
                                     typeParametersToTypeArgumentsBinder.updateNewExpression((ClassFileNewExpression)expression1, descriptor, methodTypes, parameters);
                                 } else if (ot.getDescriptor().equals(expression1.getType().getDescriptor())) {
@@ -773,13 +769,11 @@ public class ByteCodeParser {
                                 statements.add(new ExpressionStatement(expression1));
                             }
                         } else {
-                            if (opcode == 182) { // INVOKEVIRTUAL
-                                if ("toString".equals(name) && "()Ljava/lang/String;".equals(descriptor)) {
-                                    typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
-                                    if ("java/lang/StringBuilder".equals(typeName) || "java/lang/StringBuffer".equals(typeName)) {
-                                        stack.push(StringConcatenationUtil.create(expression1, lineNumber, typeName));
-                                        break;
-                                    }
+                            if (opcode == 182 /* INVOKEVIRTUAL */ && "toString".equals(name) && "()Ljava/lang/String;".equals(descriptor)) {
+                                typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+                                if (StringConstants.JAVA_LANG_STRING_BUILDER.equals(typeName) || StringConstants.JAVA_LANG_STRING_BUFFER.equals(typeName)) {
+                                    stack.push(StringConcatenationUtil.create(expression1, lineNumber, typeName));
+                                    break;
                                 }
                             }
                             stack.push(typeParametersToTypeArgumentsBinder.newMethodInvocationExpression(
@@ -825,15 +819,15 @@ public class ByteCodeParser {
                     typeName = constants.getConstantTypeName( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
                     type1 = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
                     expression1 = stack.peek();
-                    if (type1.isObjectType() && expression1.getType().isObjectType() && typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) expression1.getType())) {
-                        // Ignore cast
-                    } else if (expression1.isCastExpression()) {
-                        // Skip double cast
-                        ((CastExpression) expression1).setType(type1);
-                    } else {
-                        searchFirstLineNumberVisitor.init();
-                        expression1.accept(searchFirstLineNumberVisitor);
-                        stack.push(new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, forceExplicitCastExpression(stack.pop())));
+                    if (!type1.isObjectType() || !expression1.getType().isObjectType() || !typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) expression1.getType())) {
+                        if (expression1.isCastExpression()) {
+                            // Skip double cast
+                            ((CastExpression) expression1).setType(type1);
+                        } else {
+                            searchFirstLineNumberVisitor.init();
+                            expression1.accept(searchFirstLineNumberVisitor);
+                            stack.push(new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, forceExplicitCastExpression(stack.pop())));
+                        }
                     }
                     break;
                 case 193: // INSTANCEOF
@@ -861,29 +855,34 @@ public class ByteCodeParser {
                         switch (opcode) {
                             case 21: // ILOAD
                                 localVariable = localVariableMaker.getLocalVariable(i, offset + 4);
-                                parseILOAD(statements, stack, offset, lineNumber, localVariable);
+                                parseILOAD(statements, stack, lineNumber, offset, localVariable);
                                 break;
                             case 22: case 23: case 24: case 25: // LLOAD, FLOAD, DLOAD, ALOAD
                                 stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariableMaker.getLocalVariable(i, offset)));
                                 break;
                             case 54: // ISTORE
-                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
+                                valueRef = stack.pop();
+                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef);
                                 statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, localVariable.getType(), new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable), "=", valueRef, 16)));
                                 break;
                             case 55: // LSTORE
-                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
+                                valueRef = stack.pop();
+                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef);
                                 statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_LONG, new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable), "=", valueRef, 16)));
                                 break;
                             case 56: // FSTORE
-                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
+                                valueRef = stack.pop();
+                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef);
                                 statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_FLOAT, new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable), "=", valueRef, 16)));
                                 break;
                             case 57: // DSTORE
-                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
+                                valueRef = stack.pop();
+                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef);
                                 statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_DOUBLE, new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable), "=", valueRef, 16)));
                                 break;
                             case 58: // ASTORE
-                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef = stack.pop());
+                                valueRef = stack.pop();
+                                localVariable = getLocalVariableInAssignment(i, offset + 4, valueRef);
                                 parseASTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                                 break;
                             case 169: // RET
@@ -929,8 +928,7 @@ public class ByteCodeParser {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private BaseExpression extractParametersFromStack(Statements statements, DefaultStack<Expression> stack, BaseType parameterTypes) {
+    private static BaseExpression extractParametersFromStack(Statements statements, DefaultStack<Expression> stack, BaseType parameterTypes) {
         if (parameterTypes == null) {
             return null;
         }
@@ -949,11 +947,13 @@ public class ByteCodeParser {
                 int count = parameterTypes.size() - 1;
 
                 for (int i=count; i>=0; --i) {
-                    parameter = stack.pop();
-                    if (parameter.isNewArray()) {
-                        parameter = NewArrayMaker.make(statements, parameter);
+                    if (!stack.isEmpty()) {
+                        parameter = stack.pop();
+                        if (parameter.isNewArray()) {
+                            parameter = NewArrayMaker.make(statements, parameter);
+                        }
+                        parameters.add(checkIfLastStatementIsAMultiAssignment(statements, parameter));
                     }
-                    parameters.add(checkIfLastStatementIsAMultiAssignment(statements, parameter));
                 }
 
                 Collections.reverse(parameters);
@@ -965,7 +965,7 @@ public class ByteCodeParser {
         if (!statements.isEmpty()) {
             Expression expression = statements.getLast().getExpression();
 
-            if (expression.isBinaryOperatorExpression() && (getLastRightExpression(expression) == parameter)) {
+            if (expression.isBinaryOperatorExpression() && getLastRightExpression(expression) == parameter) {
                 // Return multi assignment expression
                 statements.removeLast();
                 return expression;
@@ -980,48 +980,48 @@ public class ByteCodeParser {
 
         if (value.isNullExpression()) {
             return localVariableMaker.getLocalVariableInNullAssignment(index, offset, valueType);
-        } else if (value.isLocalVariableReferenceExpression()) {
+        }
+        if (value.isLocalVariableReferenceExpression()) {
             AbstractLocalVariable valueLocalVariable = ((ClassFileLocalVariableReferenceExpression)value).getLocalVariable();
             AbstractLocalVariable lv = localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueLocalVariable);
             valueLocalVariable.variableOnLeft(typeBounds, lv);
             return lv;
-        } else if (value.isMethodInvocationExpression()) {
+        }
+        if (value.isMethodInvocationExpression()) {
             if (valueType.isObjectType()) {
                 // Remove type arguments
                 valueType = ((ObjectType)valueType).createType(null);
             } else if (valueType.isGenericType()) {
                 valueType = TYPE_UNDEFINED_OBJECT;
             }
-            return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueType);
-        } else {
-            return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueType);
         }
+        return localVariableMaker.getLocalVariableInAssignment(typeBounds, index, offset, valueType);
     }
 
     private void parseLDC(DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, Constant constant) {
         switch (constant.getTag()) {
-            case Constant.CONSTANT_Integer:
+            case Constant.CONSTANT_INTEGER:
                 int i = ((ConstantInteger)constant).getValue();
                 stack.push(new IntegerConstantExpression(lineNumber, PrimitiveTypeUtil.getPrimitiveTypeFromValue(i), i));
                 break;
-            case Constant.CONSTANT_Float:
+            case Constant.CONSTANT_FLOAT:
                 float f = ((ConstantFloat)constant).getValue();
 
                 if (f == Float.MIN_VALUE) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), "java/lang/Float", "MIN_VALUE", "F"));
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, StringConstants.MIN_VALUE, "F"));
                 } else if (f == Float.MAX_VALUE) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), "java/lang/Float", "MAX_VALUE", "F"));
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, StringConstants.MAX_VALUE, "F"));
                 } else if (f == Float.NEGATIVE_INFINITY) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), "java/lang/Float", "NEGATIVE_INFINITY", "F"));
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, "NEGATIVE_INFINITY", "F"));
                 } else if (f == Float.POSITIVE_INFINITY) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), "java/lang/Float", "POSITIVE_INFINITY", "F"));
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, "POSITIVE_INFINITY", "F"));
                 } else if (Float.isNaN(f)) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), "java/lang/Float", "NaN", "F"));
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_FLOAT, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_FLOAT), StringConstants.JAVA_LANG_FLOAT, "NaN", "F"));
                 } else {
                     stack.push(new FloatConstantExpression(lineNumber, f));
                 }
                 break;
-            case Constant.CONSTANT_Class:
+            case Constant.CONSTANT_CLASS:
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
                 String typeName = ((ConstantUtf8)constants.getConstant(typeNameIndex)).getValue();
                 Type type = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
@@ -1030,39 +1030,39 @@ public class ByteCodeParser {
                 }
                 stack.push(new TypeReferenceDotClassExpression(lineNumber, type));
                 break;
-            case Constant.CONSTANT_Long:
+            case Constant.CONSTANT_LONG:
                 long l = ((ConstantLong)constant).getValue();
 
                 if (l == Long.MIN_VALUE) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_LONG, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_LONG), "java/lang/Long", "MIN_VALUE", "J"));
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_LONG, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_LONG), StringConstants.JAVA_LANG_LONG, StringConstants.MIN_VALUE, "J"));
                 } else if (l == Long.MAX_VALUE) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_LONG, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_LONG), "java/lang/Long", "MAX_VALUE", "J"));
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_LONG, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_LONG), StringConstants.JAVA_LANG_LONG, StringConstants.MAX_VALUE, "J"));
                 } else {
                     stack.push(new LongConstantExpression(lineNumber, l));
                 }
                 break;
-            case Constant.CONSTANT_Double:
+            case Constant.CONSTANT_DOUBLE:
                 double d = ((ConstantDouble)constant).getValue();
 
-                if (d == Double.MIN_VALUE) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), "java/lang/Double", "MIN_VALUE", "D"));
-                } else if (d == Double.MAX_VALUE) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), "java/lang/Double", "MAX_VALUE", "D"));
-                } else if (d == Double.NEGATIVE_INFINITY) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), "java/lang/Double", "NEGATIVE_INFINITY", "D"));
-                } else if (d == Double.POSITIVE_INFINITY) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), "java/lang/Double", "POSITIVE_INFINITY", "D"));
+                if (Double.compare(d, Double.MIN_VALUE) == 0) {
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), StringConstants.JAVA_LANG_DOUBLE, StringConstants.MIN_VALUE, "D"));
+                } else if (Double.compare(d, Double.MAX_VALUE) == 0) {
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), StringConstants.JAVA_LANG_DOUBLE, StringConstants.MAX_VALUE, "D"));
+                } else if (Double.compare(d, Double.NEGATIVE_INFINITY) == 0) {
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), StringConstants.JAVA_LANG_DOUBLE, "NEGATIVE_INFINITY", "D"));
+                } else if (Double.compare(d, Double.POSITIVE_INFINITY) == 0) {
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), StringConstants.JAVA_LANG_DOUBLE, "POSITIVE_INFINITY", "D"));
                 } else if (Double.isNaN(d)) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), "java/lang/Double", "NaN", "D"));
-                } else if (d == Math.E) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_MATH), "java/lang/Math", "E", "D"));
-                } else if (d == Math.PI) {
-                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_MATH), "java/lang/Math", "PI", "D"));
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_DOUBLE), StringConstants.JAVA_LANG_DOUBLE, "NaN", "D"));
+                } else if (Double.compare(d, Math.E) == 0) {
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_MATH), StringConstants.JAVA_LANG_MATH, "E", "D"));
+                } else if (Double.compare(d, Math.PI) == 0) {
+                    stack.push(new FieldReferenceExpression(lineNumber, TYPE_DOUBLE, new ObjectTypeReferenceExpression(lineNumber, ObjectType.TYPE_MATH), StringConstants.JAVA_LANG_MATH, "PI", "D"));
                 } else {
                     stack.push(new DoubleConstantExpression(lineNumber, d));
                 }
                 break;
-            case Constant.CONSTANT_String:
+            case Constant.CONSTANT_STRING:
                 int stringIndex = ((ConstantString)constant).getStringIndex();
                 stack.push(new StringConstantExpression(lineNumber, constants.getConstantUtf8(stringIndex)));
                 break;
@@ -1073,7 +1073,7 @@ public class ByteCodeParser {
         if (! statements.isEmpty()) {
             Expression expression = statements.getLast().getExpression();
 
-            if ((expression.getLineNumber() == lineNumber) && expression.isPreOperatorExpression() && expression.getExpression().isLocalVariableReferenceExpression()) {
+            if (expression.getLineNumber() == lineNumber && expression.isPreOperatorExpression() && expression.getExpression().isLocalVariableReferenceExpression()) {
                 ClassFileLocalVariableReferenceExpression cflvre = (ClassFileLocalVariableReferenceExpression)expression.getExpression();
 
                 if (cflvre.getLocalVariable() == localVariable) {
@@ -1088,13 +1088,12 @@ public class ByteCodeParser {
         stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
     }
 
-    @SuppressWarnings("unchecked")
     private void parseSTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, Expression valueRef) {
         ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
 
         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(vre.getType(), valueRef);
 
-        if ((valueRef.getLineNumber() == lineNumber) && valueRef.isBinaryOperatorExpression() && valueRef.getLeftExpression().isLocalVariableReferenceExpression()) {
+        if (valueRef.getLineNumber() == lineNumber && valueRef.isBinaryOperatorExpression() && valueRef.getLeftExpression().isLocalVariableReferenceExpression()) {
             ClassFileLocalVariableReferenceExpression lvr = (ClassFileLocalVariableReferenceExpression)valueRef.getLeftExpression();
 
             if (lvr.getLocalVariable() == localVariable) {
@@ -1154,10 +1153,10 @@ public class ByteCodeParser {
                             expression = createAssignment(boe, "-=");
                         }
                         break;
-                    default: throw new RuntimeException("Unexpected value expression");
+                    default: throw new IllegalStateException("Unexpected value expression");
                 }
 
-                if (!stack.isEmpty() && (stack.peek() == valueRef)) {
+                if (!stack.isEmpty() && stack.peek() == valueRef) {
                     stack.replace(valueRef, expression);
                 } else {
                     statements.add(new ExpressionStatement(expression));
@@ -1182,7 +1181,6 @@ public class ByteCodeParser {
         return false;
     }
 
-    @SuppressWarnings("unchecked")
     private void parsePUT(Statements statements, DefaultStack<Expression> stack, int lineNumber, FieldReferenceExpression fr, Expression valueRef) {
         if (valueRef.isNewArray()) {
             valueRef = NewArrayMaker.make(statements, valueRef);
@@ -1190,7 +1188,7 @@ public class ByteCodeParser {
 
         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(fr.getType(), valueRef);
 
-        if ((valueRef.getLineNumber() == lineNumber) && valueRef.isBinaryOperatorExpression() && valueRef.getLeftExpression().isFieldReferenceExpression()) {
+        if (valueRef.getLineNumber() == lineNumber && valueRef.isBinaryOperatorExpression() && valueRef.getLeftExpression().isFieldReferenceExpression()) {
             FieldReferenceExpression boefr = (FieldReferenceExpression)valueRef.getLeftExpression();
 
             if (boefr.getName().equals(fr.getName()) && boefr.getExpression().getType().equals(fr.getExpression().getType())) {
@@ -1238,7 +1236,7 @@ public class ByteCodeParser {
                             } else {
                                 expression = newPreArithmeticOperatorExpression(boe.getLineNumber(), "--", boe.getLeftExpression());
                             }
-                        } else if (isPositiveOne(boe.getRightExpression())) {
+                        } else if (isNegativeOne(boe.getRightExpression())) {
                             if (stackContainsFieldReference(stack, fr)) {
                                 stack.pop();
                                 stack.push(valueRef);
@@ -1250,10 +1248,10 @@ public class ByteCodeParser {
                             expression = createAssignment(boe, "-=");
                         }
                         break;
-                    default: throw new RuntimeException("Unexpected value expression");
+                    default: throw new IllegalStateException("Unexpected value expression");
                 }
 
-                if (!stack.isEmpty() && (stack.peek() == valueRef)) {
+                if (!stack.isEmpty() && stack.peek() == valueRef) {
                     stack.replace(valueRef, expression);
                 } else {
                     statements.add(new ExpressionStatement(expression));
@@ -1273,7 +1271,7 @@ public class ByteCodeParser {
             if (expression.isMethodInvocationExpression()) {
                 MethodInvocationExpression mie = (MethodInvocationExpression)expression;
 
-                if (mie.getName().equals("getClass") && mie.getDescriptor().equals("()Ljava/lang/Class;") && mie.getInternalTypeName().equals("java/lang/Object")) {
+                if ("getClass".equals(mie.getName()) && "()Ljava/lang/Class;".equals(mie.getDescriptor()) && StringConstants.JAVA_LANG_OBJECT.equals(mie.getInternalTypeName())) {
                     statements.removeLast();
                 }
             }
@@ -1296,7 +1294,8 @@ public class ByteCodeParser {
             String recipe = constants.getConstantString(bootstrapArguments[0]);
             stack.push(StringConcatenationUtil.create(recipe, indyParameters));
             return;
-        } else if ("makeConcat".equals(indyMethodName)) {
+        }
+        if ("makeConcat".equals(indyMethodName)) {
             // Create Java 9+ string concatenation
             stack.push(StringConcatenationUtil.create(indyParameters));
             return;
@@ -1315,7 +1314,7 @@ public class ByteCodeParser {
 
         if (typeName.equals(internalTypeName)) {
             for (ClassFileConstructorOrMethodDeclaration methodDeclaration : bodyDeclaration.getMethodDeclarations()) {
-                if (((methodDeclaration.getFlags() & (FLAG_SYNTHETIC|FLAG_PRIVATE)) == (FLAG_SYNTHETIC|FLAG_PRIVATE)) && methodDeclaration.getMethod().getName().equals(name1) && methodDeclaration.getMethod().getDescriptor().equals(descriptor1)) {
+                if ((methodDeclaration.getFlags() & (FLAG_SYNTHETIC|FLAG_PRIVATE)) == (FLAG_SYNTHETIC|FLAG_PRIVATE) && methodDeclaration.getMethod().getName().equals(name1) && methodDeclaration.getMethod().getDescriptor().equals(descriptor1)) {
                     // Create lambda expression
                     ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)methodDeclaration;
                     stack.push(new LambdaIdentifiersExpression(
@@ -1331,7 +1330,7 @@ public class ByteCodeParser {
             // Create static method reference
             ObjectType ot = typeMaker.makeFromInternalTypeName(typeName);
 
-            if (name1.equals("<init>")) {
+            if (StringConstants.INSTANCE_CONSTRUCTOR.equals(name1)) {
                 stack.push(new ConstructorReferenceExpression(lineNumber, indyMethodTypes.returnedType, ot, descriptor1));
             } else {
                 stack.push(new MethodReferenceExpression(lineNumber, indyMethodTypes.returnedType, new ObjectTypeReferenceExpression(lineNumber, ot), typeName, name1, descriptor1));
@@ -1344,30 +1343,26 @@ public class ByteCodeParser {
     }
 
     private List<String> prepareLambdaParameterNames(BaseFormalParameter formalParameters, int parameterCount) {
-        if ((formalParameters == null) || (parameterCount == 0)) {
+        if (formalParameters == null || parameterCount == 0) {
             return null;
-        } else {
-            lambdaParameterNamesVisitor.init();
-            formalParameters.accept(lambdaParameterNamesVisitor);
-            List<String> names = lambdaParameterNamesVisitor.getNames();
-
-            assert names.size() >= parameterCount;
-
-            if (names.size() == parameterCount) {
-                return names;
-            } else {
-                return names.subList(names.size() - parameterCount, names.size());
-            }
         }
+        lambdaParameterNamesVisitor.init();
+        formalParameters.accept(lambdaParameterNamesVisitor);
+        List<String> names = lambdaParameterNamesVisitor.getNames();
+        assert names.size() >= parameterCount;
+        if (names.size() == parameterCount) {
+            return names;
+        }
+        return names.subList(names.size() - parameterCount, names.size());
     }
 
     private BaseStatement prepareLambdaStatements(BaseFormalParameter formalParameters, BaseExpression indyParameters, BaseStatement baseStatement) {
         if (baseStatement != null) {
-            if ((formalParameters != null) && (indyParameters != null)) {
+            if (formalParameters != null && indyParameters != null) {
                 int size = indyParameters.size();
 
-                if ((size > 0) && (size <= formalParameters.size())) {
-                    HashMap<String, String> mapping = new HashMap<>();
+                if (size > 0 && size <= formalParameters.size()) {
+                    Map<String, String> mapping = new HashMap<>();
                     Expression expression = indyParameters.getFirst();
 
                     if (expression.isLocalVariableReferenceExpression()) {
@@ -1407,9 +1402,7 @@ public class ByteCodeParser {
             if (baseStatement.size() == 1) {
                 Statement statement = baseStatement.getFirst();
 
-                if (statement.isReturnExpressionStatement()) {
-                    return new LambdaExpressionStatement(statement.getExpression());
-                } else if (statement.isExpressionStatement()) {
+                if (statement.isReturnExpressionStatement() || statement.isExpressionStatement()) {
                     return new LambdaExpressionStatement(statement.getExpression());
                 }
             }
@@ -1437,23 +1430,11 @@ public class ByteCodeParser {
     }
 
     private static boolean isPositiveOne(Expression expression) {
-        if (expression.isIntegerConstantExpression() && expression.getIntegerValue() == 1)
-            return true;
-        if (expression.isLongConstantExpression() && expression.getLongValue() == 1L)
-            return true;
-        if (expression.isFloatConstantExpression() && expression.getFloatValue() == 1.0F)
-            return true;
-        return (expression.isDoubleConstantExpression() && expression.getDoubleValue() == 1.0D);
+        return (expression.isIntegerConstantExpression() && expression.getIntegerValue() == 1) || (expression.isLongConstantExpression() && expression.getLongValue() == 1L) || (expression.isFloatConstantExpression() && expression.getFloatValue() == 1.0F) || (expression.isDoubleConstantExpression() && Double.compare(expression.getDoubleValue(), 1.0D) == 0);
     }
 
     private static boolean isNegativeOne(Expression expression) {
-        if (expression.isIntegerConstantExpression() && expression.getIntegerValue() == -1)
-            return true;
-        if (expression.isLongConstantExpression() && expression.getLongValue() == -1L)
-            return true;
-        if (expression.isFloatConstantExpression() && expression.getFloatValue() == -1.0F)
-            return true;
-        return (expression.isDoubleConstantExpression() && expression.getDoubleValue() == -1.0D);
+        return (expression.isIntegerConstantExpression() && expression.getIntegerValue() == -1) || (expression.isLongConstantExpression() && expression.getLongValue() == -1L) || (expression.isFloatConstantExpression() && expression.getFloatValue() == -1.0F) || (expression.isDoubleConstantExpression() && Double.compare(expression.getDoubleValue(), -1.0D) == 0);
     }
 
     private void parseASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, Expression valueRef) {
@@ -1474,9 +1455,8 @@ public class ByteCodeParser {
         createAssignment(statements, stack, lineNumber, vre, valueRef);
     }
 
-    @SuppressWarnings("unchecked")
     private void createAssignment(Statements statements, DefaultStack<Expression> stack, int lineNumber, Expression leftExpression, Expression rightExpression) {
-        if (!stack.isEmpty() && (stack.peek() == rightExpression)) {
+        if (!stack.isEmpty() && stack.peek() == rightExpression) {
             stack.push(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", stack.pop(), 16));
             return;
         }
@@ -1495,7 +1475,7 @@ public class ByteCodeParser {
                         return;
                     }
 
-                    if ((lineNumber > 0) && (lastExpression.getLineNumber() == lineNumber) && (lastExpression.getLeftExpression().getClass() == rightExpression.getClass())) {
+                    if (lineNumber > 0 && lastExpression.getLineNumber() == lineNumber && lastExpression.getLeftExpression().getClass() == rightExpression.getClass()) {
                         if (rightExpression.isLocalVariableReferenceExpression()) {
                             ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression) lastExpression.getLeftExpression();
                             ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) rightExpression;
@@ -1556,7 +1536,7 @@ public class ByteCodeParser {
         if (!stack.isEmpty()) {
             expression = stack.peek();
 
-            if ((expression.getLineNumber() == lineNumber) && expression.isLocalVariableReferenceExpression()) {
+            if (expression.getLineNumber() == lineNumber && expression.isLocalVariableReferenceExpression()) {
                 ClassFileLocalVariableReferenceExpression exp = (ClassFileLocalVariableReferenceExpression)expression;
 
                 if (exp.getLocalVariable() == localVariable) {
@@ -1568,7 +1548,7 @@ public class ByteCodeParser {
                     } else if (count == -1) {
                         stack.push(newPostArithmeticOperatorExpression(lineNumber, expression, "--"));
                     } else {
-                        assert false;
+                        throw new IllegalStateException();
                     }
 
                     return;
@@ -1608,10 +1588,11 @@ public class ByteCodeParser {
 
             switch (pt.getJavaPrimitiveFlags()) {
                 case FLAG_BOOLEAN:
-                    if (basicBlock.mustInverseCondition() ^ "==".equals(operator1))
+                    if (basicBlock.mustInverseCondition() ^ "==".equals(operator1)) {
                         stack.push(expression);
-                    else
+                    } else {
                         stack.push(new PreOperatorExpression(lineNumber, "!", expression));
+                    }
                     break;
                 case FLAG_FLOAT:
                     stack.push(new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, expression, (basicBlock.mustInverseCondition() ? operator1 : operator2), new FloatConstantExpression(lineNumber, 0), 9));
@@ -1631,7 +1612,6 @@ public class ByteCodeParser {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void parseXRETURN(Statements statements, DefaultStack<Expression> stack, int lineNumber) {
         Expression valueRef = stack.pop();
 
@@ -1651,8 +1631,8 @@ public class ByteCodeParser {
             if (lastStatement.isExpressionStatement()) {
                 Expression expression = statements.getLast().getExpression();
 
-                if ((lineNumber <= expression.getLineNumber()) && expression.isBinaryOperatorExpression() &&
-                    expression.getOperator().equals("=") && expression.getLeftExpression().isLocalVariableReferenceExpression()) {
+                if (lineNumber <= expression.getLineNumber() && expression.isBinaryOperatorExpression() &&
+                    "=".equals(expression.getOperator()) && expression.getLeftExpression().isLocalVariableReferenceExpression()) {
                     ClassFileLocalVariableReferenceExpression vre1 = (ClassFileLocalVariableReferenceExpression) expression.getLeftExpression();
                     ClassFileLocalVariableReferenceExpression vre2 = (ClassFileLocalVariableReferenceExpression) valueRef;
 
@@ -1677,17 +1657,17 @@ public class ByteCodeParser {
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
         String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
 
-        if (name.equals("TYPE") && typeName.startsWith("java/lang/")) {
+        if ("TYPE".equals(name) && typeName.startsWith("java/lang/")) {
             switch (typeName) {
-                case "java/lang/Boolean":   stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_BOOLEAN)); return;
-                case "java/lang/Character": stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_CHAR));    return;
-                case "java/lang/Float":     stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_FLOAT));   return;
-                case "java/lang/Double":    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_DOUBLE));  return;
-                case "java/lang/Byte":      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_BYTE));    return;
-                case "java/lang/Short":     stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_SHORT));   return;
-                case "java/lang/Integer":   stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_INT));     return;
-                case "java/lang/Long":      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_LONG));    return;
-                case "java/lang/Void":      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_VOID));    return;
+                case StringConstants.JAVA_LANG_BOOLEAN:   stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_BOOLEAN)); return;
+                case StringConstants.JAVA_LANG_CHARACTER: stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_CHAR));    return;
+                case StringConstants.JAVA_LANG_FLOAT:     stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_FLOAT));   return;
+                case StringConstants.JAVA_LANG_DOUBLE:    stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_DOUBLE));  return;
+                case StringConstants.JAVA_LANG_BYTE:      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_BYTE));    return;
+                case StringConstants.JAVA_LANG_SHORT:     stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_SHORT));   return;
+                case StringConstants.JAVA_LANG_INTEGER:   stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_INT));     return;
+                case StringConstants.JAVA_LANG_LONG:      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_LONG));    return;
+                case StringConstants.JAVA_LANG_VOID:      stack.push(new TypeReferenceDotClassExpression(lineNumber, TYPE_VOID));    return;
             }
         }
 
@@ -1739,8 +1719,8 @@ public class ByteCodeParser {
     }
 
     private static Expression getLastRightExpression(Expression boe) {
-        while (true) {
-            if (! boe.getOperator().equals("=")) {
+        do {
+            if (! "=".equals(boe.getOperator())) {
                 return boe;
             }
 
@@ -1749,18 +1729,19 @@ public class ByteCodeParser {
             }
 
             boe = boe.getRightExpression();
-        }
+        } while (true);
     }
 
     private Expression newNewExpression(int lineNumber, String internalTypeName) {
         ObjectType objectType = typeMaker.makeFromInternalTypeName(internalTypeName);
 
-        if ((objectType.getQualifiedName() == null) && (objectType.getName() == null)) {
+        if (objectType.getQualifiedName() == null && objectType.getName() == null) {
             ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalTypeName);
 
             if (typeDeclaration == null) {
-                return new ClassFileNewExpression(lineNumber, ObjectType.TYPE_OBJECT);
-            } else if (typeDeclaration.isClassDeclaration()) {
+                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT);
+            }
+            if (typeDeclaration.isClassDeclaration()) {
                 ClassFileClassDeclaration declaration = (ClassFileClassDeclaration) typeDeclaration;
                 BodyDeclaration bodyDeclaration;
 
@@ -1772,18 +1753,18 @@ public class ByteCodeParser {
 
                 if (declaration.getInterfaces() != null) {
                     return new ClassFileNewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), bodyDeclaration, true);
-                } else if (declaration.getSuperType() != null) {
-                    return new ClassFileNewExpression(lineNumber, declaration.getSuperType(), bodyDeclaration, true);
-                } else {
-                    return new ClassFileNewExpression(lineNumber, ObjectType.TYPE_OBJECT, bodyDeclaration, true);
                 }
+                if (declaration.getSuperType() != null) {
+                    return new ClassFileNewExpression(lineNumber, declaration.getSuperType(), bodyDeclaration, true);
+                }
+                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT, bodyDeclaration, true);
             }
         }
 
         return new ClassFileNewExpression(lineNumber, objectType);
     }
 
-    /*
+    /**
      * Operators = { "+", "-", "*", "/", "%", "<<", ">>", ">>>" }
      * See "Additive Operators (+ and -) for Numeric Types": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.18.2
      * See "Shift Operators":                                https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.19
@@ -1802,7 +1783,7 @@ public class ByteCodeParser {
         return new BinaryOperatorExpression(lineNumber, TYPE_INT, leftExpression, operator, rightExpression, priority);
     }
 
-    /*
+    /**
      * Operators = { "&", "|", "^" }
      * See "Binary Numeric Promotion": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.22.1
      */
@@ -1819,39 +1800,35 @@ public class ByteCodeParser {
                     leftVariable.variableOnRight(typeBounds, rightVariable);
                     rightVariable.variableOnLeft(typeBounds, leftVariable);
 
-                    if ((leftVariable.getType() == TYPE_BOOLEAN) || (rightVariable.getType() == TYPE_BOOLEAN)) {
+                    if (leftVariable.getType() == TYPE_BOOLEAN || rightVariable.getType() == TYPE_BOOLEAN) {
                         type = TYPE_BOOLEAN;
                     }
                 }
-            } else {
-                if (rightExpression.getType() == TYPE_BOOLEAN) {
-                    leftVariable.typeOnRight(typeBounds, type = TYPE_BOOLEAN);
-                }
+            } else if (rightExpression.getType() == TYPE_BOOLEAN) {
+                type = TYPE_BOOLEAN;
+                leftVariable.typeOnRight(typeBounds, type);
             }
-        } else if (rightExpression.isLocalVariableReferenceExpression()) {
-            if (leftExpression.getType() == TYPE_BOOLEAN) {
-                AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
-                rightVariable.typeOnRight(typeBounds, type = TYPE_BOOLEAN);
-            }
+        } else if (rightExpression.isLocalVariableReferenceExpression() && leftExpression.getType() == TYPE_BOOLEAN) {
+            AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
+            type = TYPE_BOOLEAN;
+            rightVariable.typeOnRight(typeBounds, type);
         }
 
-        if (type == TYPE_INT) {
-            if (leftExpression.getType().isPrimitiveType() && rightExpression.getType().isPrimitiveType()) {
-                int leftFlags = ((PrimitiveType)leftExpression.getType()).getFlags();
-                int rightFlags = ((PrimitiveType)rightExpression.getType()).getFlags();
-                boolean leftBoolean = (leftFlags & FLAG_BOOLEAN) != 0;
-                boolean rightBoolean = (rightFlags & FLAG_BOOLEAN) != 0;
-                int commonflags = leftFlags | rightFlags;
+        if (type == TYPE_INT && leftExpression.getType().isPrimitiveType() && rightExpression.getType().isPrimitiveType()) {
+            int leftFlags = ((PrimitiveType)leftExpression.getType()).getFlags();
+            int rightFlags = ((PrimitiveType)rightExpression.getType()).getFlags();
+            boolean leftBoolean = (leftFlags & FLAG_BOOLEAN) != 0;
+            boolean rightBoolean = (rightFlags & FLAG_BOOLEAN) != 0;
+            int commonflags = leftFlags | rightFlags;
 
-                if (!leftBoolean || !rightBoolean) {
-                    commonflags &= ~FLAG_BOOLEAN;
-                }
+            if (!leftBoolean || !rightBoolean) {
+                commonflags &= ~FLAG_BOOLEAN;
+            }
 
-                type = PrimitiveTypeUtil.getPrimitiveTypeFromFlags(commonflags);
+            type = PrimitiveTypeUtil.getPrimitiveTypeFromFlags(commonflags);
 
-                if (type == null) {
-                    type = TYPE_INT;
-                }
+            if (type == null) {
+                type = TYPE_INT;
             }
         }
 
@@ -1861,7 +1838,7 @@ public class ByteCodeParser {
         return new BinaryOperatorExpression(lineNumber, type, leftExpression, operator, rightExpression, priority);
     }
 
-    /*
+    /**
      * Operators = { "==", "!=" }
      * See "Numerical Equality Operators == and !=": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.21.1
      */
@@ -1876,16 +1853,12 @@ public class ByteCodeParser {
                     leftVariable.variableOnRight(typeBounds, rightVariable);
                     rightVariable.variableOnLeft(typeBounds, leftVariable);
                 }
-            } else {
-                if (rightExpression.getType() == TYPE_BOOLEAN) {
-                    leftVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
-                }
+            } else if (rightExpression.getType() == TYPE_BOOLEAN) {
+                leftVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
             }
-        } else if (rightExpression.isLocalVariableReferenceExpression()) {
-            if (leftExpression.getType() == TYPE_BOOLEAN) {
-                AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
-                rightVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
-            }
+        } else if (rightExpression.isLocalVariableReferenceExpression() && leftExpression.getType() == TYPE_BOOLEAN) {
+            AbstractLocalVariable rightVariable = ((ClassFileLocalVariableReferenceExpression)rightExpression).getLocalVariable();
+            rightVariable.typeOnRight(typeBounds, TYPE_BOOLEAN);
         }
 
         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(leftExpression.getType(), rightExpression);
@@ -1894,7 +1867,7 @@ public class ByteCodeParser {
         return new BinaryOperatorExpression(lineNumber, TYPE_BOOLEAN, leftExpression, operator, rightExpression, priority);
     }
 
-    /*
+    /**
      * Operators = { "==", "!=" }
      * See "Numerical Equality Operators == and !=": https://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.21.1
      */
@@ -1942,7 +1915,7 @@ public class ByteCodeParser {
      * @return expression, 'this' or 'super'
      */
     private Expression getFieldInstanceReference(Expression expression, ObjectType ot, String name) {
-        if ((bodyDeclaration.getFieldDeclarations() != null) && expression.isThisExpression()) {
+        if (bodyDeclaration.getFieldDeclarations() != null && expression.isThisExpression()) {
             String internalName = expression.getType().getInternalName();
 
             if (!ot.getInternalName().equals(internalName)) {
@@ -1963,7 +1936,7 @@ public class ByteCodeParser {
      * @return expression, 'this' or 'super'
      */
     private Expression getMethodInstanceReference(Expression expression, ObjectType ot, String name, String descriptor) {
-        if ((bodyDeclaration.getMethodDeclarations() != null) && expression.isThisExpression()) {
+        if (bodyDeclaration.getMethodDeclarations() != null && expression.isThisExpression()) {
             String internalName = expression.getType().getInternalName();
 
             if (!ot.getInternalName().equals(internalName)) {
@@ -1982,10 +1955,10 @@ public class ByteCodeParser {
     }
 
     private static void checkStack(DefaultStack<Expression> stack, byte[] code, int offset) {
-        if ((stack.size() > 1) && (offset < code.length)) {
+        if (stack.size() > 1 && offset < code.length) {
             int opcode = code[offset+1] & 255;
 
-            if ((opcode == 87) || (opcode == 176)) { // POP || ARETURN
+            if (opcode == 87 || opcode == 176) { // POP || ARETURN
                 // Duplicate last expression
                 Expression condition = stack.pop();
                 stack.push(stack.peek());
@@ -1999,28 +1972,32 @@ public class ByteCodeParser {
         int offset = basicBlock.getFromOffset();
         int toOffset = basicBlock.getToOffset();
 
-        if (offset + 3 > toOffset)
+        if (offset + 3 > toOffset) {
             return false;
+        }
 
         Method method = cfg.getMethod();
         byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
         int opcode = code[offset] & 255;
 
-        if (opcode != 178) // GETSTATIC
+        if (opcode != 178) {
             return false;
+        }
 
         ConstantPool constants = method.getConstants();
         ConstantMemberRef constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
         String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
 
-        if (! "$assertionsDisabled".equals(name))
+        if (! "$assertionsDisabled".equals(name)) {
             return false;
+        }
 
         String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
 
-        if (! "Z".equals(descriptor))
+        if (! "Z".equals(descriptor)) {
             return false;
+        }
 
         String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
 
@@ -2033,8 +2010,7 @@ public class ByteCodeParser {
         int toOffset = basicBlock.getToOffset();
 
         if (offset + 1 > toOffset) {
-            assert false;
-            return -1;
+            throw new IllegalStateException();
         }
 
         Method method = cfg.getMethod();
@@ -2049,8 +2025,7 @@ public class ByteCodeParser {
             case 87: case 88: // POP, POP2
                 return -1;
             default:
-                assert false;
-                return -1;
+                throw new IllegalStateException();
         }
     }
 
@@ -2091,12 +2066,12 @@ public class ByteCodeParser {
             return names;
         }
 
-        @Override public void visit(FormalParameter declaration) {
+        @Override
+        public void visit(FormalParameter declaration) {
             names.add(declaration.getName());
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void visit(FormalParameters declarations) {
             Iterator<FormalParameter> iterator = declarations.iterator();
 
@@ -2161,8 +2136,9 @@ public class ByteCodeParser {
         // In case of downcasting, set all cast expression children as explicit to prevent missing castings
         Expression exp = expression;
 
+        CastExpression ce;
         while (exp.isCastExpression()) {
-            CastExpression ce = (CastExpression)exp;
+            ce = (CastExpression)exp;
             ce.setExplicit(true);
             exp = ce.getExpression();
         }

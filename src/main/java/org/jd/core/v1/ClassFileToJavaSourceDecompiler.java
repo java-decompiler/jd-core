@@ -9,6 +9,7 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.Decompiler;
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
@@ -22,6 +23,7 @@ import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenP
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.util.DefaultList;
 
+import java.io.UTFDataFormatException;
 import java.util.Map;
 
 public class ClassFileToJavaSourceDecompiler implements Decompiler {
@@ -32,7 +34,8 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
     protected WriteTokenProcessor writer = new WriteTokenProcessor();
 
-    public void decompile(Loader loader, Printer printer, String internalName) throws Exception {
+    @Override
+    public void decompile(Loader loader, Printer printer, String internalName) throws UTFDataFormatException, LoaderException {
         DecompileContext decompileContext = new DecompileContext();
 
         decompileContext.setMainInternalTypeName(internalName);
@@ -42,7 +45,8 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
         decompile(decompileContext);
     }
 
-    public void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws Exception {
+    @Override
+    public void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws UTFDataFormatException, LoaderException {
         DecompileContext decompileContext = new DecompileContext();
 
         decompileContext.setMainInternalTypeName(internalName);
@@ -53,7 +57,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
         decompile(decompileContext);
     }
 
-    protected void decompile(DecompileContext decompileContext) throws Exception {
+    protected void decompile(DecompileContext decompileContext) throws UTFDataFormatException, LoaderException {
         ClassFile classFile = this.deserializer.loadClassFile(decompileContext.getLoader(),
                 decompileContext.getMainInternalTypeName());
         decompileContext.setClassFile(classFile);

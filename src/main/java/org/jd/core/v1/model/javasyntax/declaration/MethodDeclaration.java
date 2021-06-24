@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
-import org.jd.core.v1.model.javasyntax.reference.ElementValue;
+import org.jd.core.v1.model.javasyntax.reference.BaseElementValue;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
@@ -26,7 +26,7 @@ public class MethodDeclaration implements MemberDeclaration {
     protected BaseType exceptionTypes;
     protected String descriptor;
     protected BaseStatement statements;
-    protected ElementValue defaultAnnotationValue;
+    protected BaseElementValue defaultAnnotationValue;
 
     public MethodDeclaration(int flags, String name, Type returnedType, String descriptor) {
         this.flags = flags;
@@ -43,7 +43,7 @@ public class MethodDeclaration implements MemberDeclaration {
         this.statements = statements;
     }
 
-    public MethodDeclaration(int flags, String name, Type returnedType, String descriptor, ElementValue defaultAnnotationValue) {
+    public MethodDeclaration(int flags, String name, Type returnedType, String descriptor, BaseElementValue defaultAnnotationValue) {
         this.flags = flags;
         this.name = name;
         this.returnedType = returnedType;
@@ -60,7 +60,7 @@ public class MethodDeclaration implements MemberDeclaration {
         this.statements = statements;
     }
 
-    public MethodDeclaration(int flags, String name, Type returnedType, BaseFormalParameter formalParameters, String descriptor, ElementValue defaultAnnotationValue) {
+    public MethodDeclaration(int flags, String name, Type returnedType, BaseFormalParameter formalParameters, String descriptor, BaseElementValue defaultAnnotationValue) {
         this.flags = flags;
         this.name = name;
         this.returnedType = returnedType;
@@ -69,7 +69,7 @@ public class MethodDeclaration implements MemberDeclaration {
         this.defaultAnnotationValue = defaultAnnotationValue;
     }
 
-    public MethodDeclaration(BaseAnnotationReference annotationReferences, int flags, String name, BaseTypeParameter typeParameters, Type returnedType, BaseFormalParameter formalParameters, BaseType exceptionTypes, String descriptor, BaseStatement statements, ElementValue defaultAnnotationValue) {
+    public MethodDeclaration(BaseAnnotationReference annotationReferences, int flags, String name, BaseTypeParameter typeParameters, Type returnedType, BaseFormalParameter formalParameters, BaseType exceptionTypes, String descriptor, BaseStatement statements, BaseElementValue defaultAnnotationValue) {
         this.annotationReferences = annotationReferences;
         this.flags = flags;
         this.name = name;
@@ -120,7 +120,7 @@ public class MethodDeclaration implements MemberDeclaration {
         return statements;
     }
 
-    public ElementValue getDefaultAnnotationValue() {
+    public BaseElementValue getDefaultAnnotationValue() {
         return defaultAnnotationValue;
     }
 

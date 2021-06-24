@@ -11,7 +11,7 @@ public class ConstantFloat extends ConstantValue {
     protected float value;
 
     public ConstantFloat(float value) {
-        super(CONSTANT_Float);
+        super(CONSTANT_FLOAT);
         this.value = value;
     }
 

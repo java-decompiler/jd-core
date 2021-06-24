@@ -7,7 +7,6 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
@@ -16,10 +15,13 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_INTEGER;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_STRING;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_INT;
+
+import junit.framework.TestCase;
 
 public class PopulateBindingsForStaticMethodVisitorTest extends TestCase {
     @Test
@@ -41,8 +43,8 @@ public class PopulateBindingsForStaticMethodVisitorTest extends TestCase {
 
         // Create bindings
         PopulateBindingsWithTypeArgumentVisitor visitor = new PopulateBindingsWithTypeArgumentVisitor(new TypeMaker(new ClassPathLoader()));
-        HashMap<String, TypeArgument> bindings = new HashMap<>();
-        HashMap<String, BaseType> typeBounds = new HashMap<>();
+        Map<String, TypeArgument> bindings = new HashMap<>();
+        Map<String, BaseType> typeBounds = new HashMap<>();
 
         bindings.put("I", null);
         bindings.put("O", null);

@@ -7,7 +7,6 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.loader.NopLoader;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.*;
@@ -25,6 +24,7 @@ import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.util.DefaultList;
+import org.jd.core.v1.util.StringConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,7 +32,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-@SuppressWarnings("unchecked")
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import junit.framework.TestCase;
+
 public class JavaSyntaxToJavaSourceTest extends TestCase {
 
     protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
@@ -43,18 +45,18 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
     @Test
     public void testClassDeclaration() throws Exception {
-        ObjectType stringArrayType = new ObjectType("java/lang/String", "java.lang.String", "String", 1);
+        ObjectType stringArrayType = new ObjectType(StringConstants.JAVA_LANG_STRING, "java.lang.String", "String", 1);
         ObjectType printStreamType = new ObjectType("java/io/PrintStream", "java.io.PrintStream", "PrintStream");
 
         CompilationUnit compilationUnit = new CompilationUnit(
             new ClassDeclaration(
-                ClassDeclaration.FLAG_PUBLIC,
+                Declaration.FLAG_PUBLIC,
                 "org/jd/core/v1/service/test/TokenWriterTest",
                 "TokenWriterTest",
                 new BodyDeclaration(
                     "org/jd/core/v1/service/test/TokenWriterTest",
                     new MethodDeclaration(
-                        MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
+                        Declaration.FLAG_PUBLIC | Declaration.FLAG_STATIC,
                         "main",
                         PrimitiveType.TYPE_VOID,
                         new FormalParameter(ObjectType.TYPE_STRING.createType(1), "args"),
@@ -73,7 +75,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                             ),
                             new LocalVariableDeclarationStatement(
                                 PrimitiveType.TYPE_INT,
-                                new LocalVariableDeclarator(
+                                new LocalVariableDeclarator(0,
                                     "i",
                                     new ExpressionVariableInitializer(
                                         new MethodInvocationExpression(
@@ -94,14 +96,14 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                         "java/util/Enumeration",
                                                         new MemberDeclarations(
                                                             new MethodDeclaration(
-                                                                MethodDeclaration.FLAG_PUBLIC,
+                                                                Declaration.FLAG_PUBLIC,
                                                                 "hasMoreElements",
                                                                 PrimitiveType.TYPE_BOOLEAN,
                                                                 "()Z",
                                                                 new ReturnExpressionStatement(new BooleanExpression(15, false))
                                                             ),
                                                             new MethodDeclaration(
-                                                                MethodDeclaration.FLAG_PUBLIC,
+                                                                Declaration.FLAG_PUBLIC,
                                                                 "nextElement",
                                                                 ObjectType.TYPE_OBJECT,
                                                                 "()Ljava/lang/Object;",
@@ -123,8 +125,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                     new FieldReferenceExpression(
                                         22,
                                         printStreamType,
-                                        new ObjectTypeReferenceExpression(22, new ObjectType("java/lang/System", "java.lang.System", "System")),
-                                        "java/lang/System",
+                                        new ObjectTypeReferenceExpression(22, new ObjectType(StringConstants.JAVA_LANG_SYSTEM, "java.lang.System", "System")),
+                                        StringConstants.JAVA_LANG_SYSTEM,
                                         "out",
                                         "Ljava/io/PrintStream;"
                                     ),
@@ -165,19 +167,19 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         System.out.print(source);
         System.out.println("- - - - - - - - ");
 
-        Assert.assertTrue(source.indexOf("/* 22: 22 */") != -1);
-        Assert.assertTrue(source.indexOf("java.lang.System") == -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 22: 22 */"));
+        Assert.assertEquals(-1, source.indexOf("java.lang.System"));
     }
 
     @Test
     public void testInterfaceDeclaration() throws Exception {
-        ObjectType cloneableType = new ObjectType("java/lang/Cloneable", "java.lang.Cloneable", "Cloneable");
-        ObjectType stringType = new ObjectType("java/lang/String", "java.lang.String", "String");
+        ObjectType cloneableType = new ObjectType(StringConstants.JAVA_LANG_CLONEABLE, "java.lang.Cloneable", "Cloneable");
+        ObjectType stringType = new ObjectType(StringConstants.JAVA_LANG_STRING, "java.lang.String", "String");
         ObjectType listType = new ObjectType("java/util/List", "java.util.List", "List", stringType);
 
         CompilationUnit compilationUnit = new CompilationUnit(
             new InterfaceDeclaration(
-                InterfaceDeclaration.FLAG_PUBLIC,
+                Declaration.FLAG_PUBLIC,
                 "org/jd/core/v1/service/test/InterfaceTest",
                 "InterfaceTest",
                 new Types(listType, cloneableType)
@@ -208,11 +210,11 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         System.out.print(source);
         System.out.println("- - - - - - - - ");
 
-        Assert.assertTrue(source.indexOf("/*   1:   0 */ package org.jd.core.v1.service.test;") != -1);
-        Assert.assertTrue(source.indexOf("interface InterfaceTest") != -1);
-        Assert.assertTrue(source.indexOf("extends List") != -1);
-        Assert.assertTrue(source.indexOf("<String") != -1);
-        Assert.assertTrue(source.indexOf(", Cloneable") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/*   1:   0 */ package org.jd.core.v1.service.test;"));
+        Assert.assertNotEquals(-1, source.indexOf("interface InterfaceTest"));
+        Assert.assertNotEquals(-1, source.indexOf("extends List"));
+        Assert.assertNotEquals(-1, source.indexOf("<String"));
+        Assert.assertNotEquals(-1, source.indexOf(", Cloneable"));
     }
 
     @Test
@@ -220,7 +222,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         CompilationUnit compilationUnit = new CompilationUnit(
             new EnumDeclaration(
                 null,
-                EnumDeclaration.FLAG_PUBLIC,
+                Declaration.FLAG_PUBLIC,
                 "org/jd/core/v1/service/test/Day",
                 "Day",
                 null,
@@ -265,8 +267,10 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
     }
 
     @Test
+    @SuppressFBWarnings
+    @SuppressWarnings("all")
     public void testEnumPlanetDeclaration() throws Exception {
-        Type cloneableType = new ObjectType("java/lang/Cloneable", "java.lang.Cloneable", "Cloneable");
+        Type cloneableType = new ObjectType(StringConstants.JAVA_LANG_CLONEABLE, "java.lang.Cloneable", "Cloneable");
         Type stringType = ObjectType.TYPE_STRING;
         Type arrayOfStringType = stringType.createType(1);
         Type listType = new ObjectType("java/util/List", "java.util.List", "List", stringType);
@@ -422,8 +426,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                             PrimitiveType.TYPE_VOID,
                                             new FieldReferenceExpression(
                                                 printStreamType,
-                                                new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
-                                                "java/lang/System",
+                                                new ObjectTypeReferenceExpression(new ObjectType(StringConstants.JAVA_LANG_SYSTEM, "java.lang.System", "System")),
+                                                StringConstants.JAVA_LANG_SYSTEM,
                                                 "out",
                                                 "Ljava/io/PrintStream;"
                                             ),
@@ -434,8 +438,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                         )),
                                         new ExpressionStatement(new MethodInvocationExpression(
                                             PrimitiveType.TYPE_VOID,
-                                            new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
-                                            "java/lang/System",
+                                            new ObjectTypeReferenceExpression(new ObjectType(StringConstants.JAVA_LANG_SYSTEM, "java.lang.System", "System")),
+                                            StringConstants.JAVA_LANG_SYSTEM,
                                             "exit",
                                             "(I)V",
                                             new IntegerConstantExpression(PrimitiveType.TYPE_INT, -1)
@@ -444,11 +448,11 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                 ),
                                 new LocalVariableDeclarationStatement(
                                     PrimitiveType.TYPE_DOUBLE,
-                                    new LocalVariableDeclarator("earthWeight", new ExpressionVariableInitializer(
+                                    new LocalVariableDeclarator(0, "earthWeight", new ExpressionVariableInitializer(
                                         new MethodInvocationExpression(
                                             PrimitiveType.TYPE_DOUBLE,
-                                            new ObjectTypeReferenceExpression(new ObjectType("java/lang/Double", "java.lang.Double", "Double")),
-                                            "java/lang/Double",
+                                            new ObjectTypeReferenceExpression(new ObjectType(StringConstants.JAVA_LANG_DOUBLE, "java.lang.Double", "Double")),
+                                            StringConstants.JAVA_LANG_DOUBLE,
                                             "parseDouble",
                                             "(Ljava/lang/String;)D",
                                             new ArrayExpression(
@@ -460,7 +464,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                 ),
                                 new LocalVariableDeclarationStatement(
                                     PrimitiveType.TYPE_DOUBLE,
-                                    new LocalVariableDeclarator("mass", new ExpressionVariableInitializer(
+                                    new LocalVariableDeclarator(0, "mass", new ExpressionVariableInitializer(
                                         new BinaryOperatorExpression(
                                             0,
                                             PrimitiveType.TYPE_DOUBLE,
@@ -495,8 +499,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                         PrimitiveType.TYPE_VOID,
                                         new FieldReferenceExpression(
                                             printStreamType,
-                                            new ObjectTypeReferenceExpression(new ObjectType("java/lang/System", "java.lang.System", "System")),
-                                            "java/lang/System",
+                                            new ObjectTypeReferenceExpression(new ObjectType(StringConstants.JAVA_LANG_SYSTEM, "java.lang.System", "System")),
+                                            StringConstants.JAVA_LANG_SYSTEM,
                                             "out",
                                             "Ljava/io/PrintStream;"
                                         ),
@@ -554,13 +558,13 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
     public void testSwitch() throws Exception {
         CompilationUnit compilationUnit = new CompilationUnit(
             new ClassDeclaration(
-                ClassDeclaration.FLAG_PUBLIC,
+                Declaration.FLAG_PUBLIC,
                 "org/jd/core/v1/service/test/SwitchTest",
                 "SwitchTest",
                 new BodyDeclaration(
                     "org/jd/core/v1/service/test/SwitchTest",
                     new MethodDeclaration(
-                        MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
+                        Declaration.FLAG_PUBLIC | Declaration.FLAG_STATIC,
                         "translate",
                         PrimitiveType.TYPE_INT,
                         new FormalParameter(PrimitiveType.TYPE_INT, "i"),
@@ -573,7 +577,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                     new Statements(
                                         new LocalVariableDeclarationStatement(
                                             ObjectType.TYPE_STRING,
-                                            new LocalVariableDeclarator("zero", new ExpressionVariableInitializer(new StringConstantExpression("zero")))
+                                            new LocalVariableDeclarator(0, "zero", new ExpressionVariableInitializer(new StringConstantExpression("zero")))
                                         ),
                                         new ReturnExpressionStatement(new LocalVariableReferenceExpression(ObjectType.TYPE_STRING, "zero"))
                                     )
@@ -620,32 +624,32 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         System.out.print(source);
         System.out.println("- - - - - - - - ");
 
-        Assert.assertTrue(source.indexOf("switch (i)") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("switch (i)"));
     }
 
     @Test
     public void testBridgeAndSyntheticAttributes() throws Exception {
         CompilationUnit compilationUnit = new CompilationUnit(
             new ClassDeclaration(
-                ClassDeclaration.FLAG_PUBLIC,
+                Declaration.FLAG_PUBLIC,
                 "org/jd/core/v1/service/test/SyntheticAttributeTest",
                 "SyntheticAttributeTest",
                 new BodyDeclaration(
                     "org/jd/core/v1/service/test/SyntheticAttributeTest",
                     new MemberDeclarations(
                         new FieldDeclaration(
-                            FieldDeclaration.FLAG_PUBLIC|FieldDeclaration.FLAG_BRIDGE,
+                            Declaration.FLAG_PUBLIC|Declaration.FLAG_BRIDGE,
                             PrimitiveType.TYPE_INT,
                             new FieldDeclarator("i")
                         ),
                         new MethodDeclaration(
-                            MethodDeclaration.FLAG_PUBLIC|MethodDeclaration.FLAG_BRIDGE,
+                            Declaration.FLAG_PUBLIC|Declaration.FLAG_BRIDGE,
                             "testBridgeAttribute",
                             PrimitiveType.TYPE_VOID,
                             "()V"
                         ),
                         new MethodDeclaration(
-                            MethodDeclaration.FLAG_PUBLIC|MethodDeclaration.FLAG_SYNTHETIC,
+                            Declaration.FLAG_PUBLIC|Declaration.FLAG_SYNTHETIC,
                             "testSyntheticAttribute",
                             PrimitiveType.TYPE_VOID,
                             "()V"
@@ -679,7 +683,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         System.out.print(source);
         System.out.println("- - - - - - - - ");
 
-        Assert.assertTrue(source.indexOf("/* bridge */") == -1);
-        Assert.assertTrue(source.indexOf("/* synthetic */") == -1);
+        Assert.assertEquals(-1, source.indexOf("/* bridge */"));
+        Assert.assertEquals(-1, source.indexOf("/* synthetic */"));
     }
 }

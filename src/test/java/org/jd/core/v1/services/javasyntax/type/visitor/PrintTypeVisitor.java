@@ -20,6 +20,7 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
         sb.setLength(0);
     }
 
+    @Override
     public String toString() {
         return sb.toString();
     }
@@ -39,7 +40,6 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void visit(Types types) {
         printList(types, ", ");
     }
@@ -80,6 +80,7 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
         printDimension(type.getDimension());
     }
 
+    @Override
     public void visit(InnerObjectType type) {
         BaseType outerType = type.getOuterType();
 
@@ -131,7 +132,6 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void visit(TypeParameters parameters) {
         int size = parameters.size();
 
@@ -145,7 +145,8 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
         }
     }
 
-    @Override public void visit(GenericType type) {
+    @Override
+    public void visit(GenericType type) {
         sb.append(type.getName());
         printDimension(type.getDimension());
     }
@@ -179,7 +180,7 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
                 sb.append("[][]");
                 break;
             default:
-                sb.append(new String(new char[dimension]).replaceAll("\0", "[]"));
+                sb.append(new String(new char[dimension]).replace("\0", "[]"));
         }
     }
 }

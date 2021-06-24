@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.util.DefaultList;
@@ -12,12 +11,13 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class TypeDeclarations extends DefaultList<MemberDeclaration> implements BaseTypeDeclaration {
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
-
-	public TypeDeclarations(Collection<MemberDeclaration> collection) {
+    public TypeDeclarations(Collection<MemberDeclaration> collection) {
         super(collection);
-        assert (collection.size() > 1) : "Uses 'TypeDeclaration' or sub class instead";
+        if (collection.size() <= 1) {
+            throw new IllegalArgumentException("Use 'TypeDeclaration' or sub class instead");
+        }
     }
 
     @Override

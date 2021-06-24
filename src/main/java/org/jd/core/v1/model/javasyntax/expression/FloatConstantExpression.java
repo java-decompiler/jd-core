@@ -22,6 +22,7 @@ public class FloatConstantExpression extends AbstractLineNumberTypeExpression {
         this.value = value;
     }
 
+    @Override
     public float getFloatValue() {
         return value;
     }

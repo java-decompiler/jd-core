@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.model.javasyntax.reference;
 
-public class AnnotationElementValue extends AnnotationReference implements ElementValue {
+public class AnnotationElementValue extends AnnotationReference implements BaseElementValue {
 
     public AnnotationElementValue(AnnotationReference annotationReference) {
         super(annotationReference.getType(),

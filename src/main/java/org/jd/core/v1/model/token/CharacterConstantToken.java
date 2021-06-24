@@ -25,6 +25,7 @@ public class CharacterConstantToken implements Token {
         return ownerInternalName;
     }
 
+    @Override
     public String toString() {
         return "CharacterConstantToken{'" + c + "'}";
     }

@@ -22,7 +22,7 @@ import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor.Search
  */
 public class JavaSyntaxToJavaFragmentProcessor {
 
-    public void process(CompilationUnit compilationUnit, DecompileContext decompileContext) throws Exception {
+    public void process(CompilationUnit compilationUnit, DecompileContext decompileContext) {
         Loader loader = decompileContext.getLoader();
         String mainInternalTypeName = decompileContext.getMainInternalTypeName();
         int majorVersion = decompileContext.getMajorVersion();

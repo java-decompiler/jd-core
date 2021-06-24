@@ -7,27 +7,30 @@
 
 package org.jd.core.v1.model.classfile.constant;
 
+/**
+ * @See https://docs.oracle.com/javase/specs/jvms/se16/html/jvms-4.html
+ */
 public abstract class Constant {
-    public static final byte CONSTANT_Unknown            = 0;
-    public static final byte CONSTANT_Utf8               = 1;
-    public static final byte CONSTANT_Integer            = 3;
-    public static final byte CONSTANT_Float              = 4;
-    public static final byte CONSTANT_Long               = 5;
-    public static final byte CONSTANT_Double             = 6;
-    public static final byte CONSTANT_Class              = 7;
-    public static final byte CONSTANT_String             = 8;
-    public static final byte CONSTANT_FieldRef           = 9;
-    public static final byte CONSTANT_MethodRef          = 10;
-    public static final byte CONSTANT_InterfaceMethodRef = 11;
-    public static final byte CONSTANT_NameAndType        = 12;
-    public static final byte CONSTANT_MethodHandle       = 15;
-    public static final byte CONSTANT_MethodType         = 16;
-    public static final byte CONSTANT_InvokeDynamic      = 18;
-    public static final byte CONSTANT_MemberRef          = 19; // Unofficial constant
+    public static final byte CONSTANT_UNKNOWN            = 0;
+    public static final byte CONSTANT_UTF8               = 1;
+    public static final byte CONSTANT_INTEGER            = 3;
+    public static final byte CONSTANT_FLOAT              = 4;
+    public static final byte CONSTANT_LONG               = 5;
+    public static final byte CONSTANT_DOUBLE             = 6;
+    public static final byte CONSTANT_CLASS              = 7;
+    public static final byte CONSTANT_STRING             = 8;
+    public static final byte CONSTANT_FIELDREF           = 9;
+    public static final byte CONSTANT_METHODREF          = 10;
+    public static final byte CONSTANT_INTERFACEMETHODREF = 11;
+    public static final byte CONSTANT_NAMEANDTYPE        = 12;
+    public static final byte CONSTANT_METHODHANDLE       = 15;
+    public static final byte CONSTANT_METHODTYPE         = 16;
+    public static final byte CONSTANT_INVOKEDYNAMIC      = 18;
+    public static final byte CONSTANT_MEMBERREF          = 19; // Unofficial constant
 
     protected byte tag;
 
-    public Constant(byte tag) {
+    protected Constant(byte tag) {
         this.tag = tag;
     }
 

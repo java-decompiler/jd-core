@@ -10,7 +10,10 @@ package org.jd.core.test;
 import java.io.Serializable;
 import java.util.Enumeration;
 
+@SuppressWarnings("all")
 public abstract class Layout extends Number implements Serializable, Comparable, Runnable {
+
+    private static final long serialVersionUID = 1L;
     protected String str = "str";
     protected int[][] array = {
             {0, 1},

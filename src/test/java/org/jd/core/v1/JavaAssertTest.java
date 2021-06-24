@@ -24,42 +24,44 @@ public class JavaAssertTest extends AbstractJdTest {
     @Test
     public void testJdk170Assert() throws Exception {
         String internalClassName = "org/jd/core/test/Assert";
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
-        Loader loader = new ZipLoader(is);
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-        String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName, configuration);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
+            Loader loader = new ZipLoader(is);
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+            String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName, configuration);
 
-        // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make("/* 16: 16 */", "assert false : \"false\";")));
-        assertTrue(source.matches(PatternMaker.make("/* 17: 17 */", "assert i == 0 || i == 1;")));
-        assertTrue(source.matches(PatternMaker.make("/* 18: 18 */", "assert i == 2 && i < 3;")));
+            // Check decompiled source code
+            assertTrue(source.matches(PatternMaker.make("/* 16: 16 */", "assert false : \"false\";")));
+            assertTrue(source.matches(PatternMaker.make("/* 17: 17 */", "assert i == 0 || i == 1;")));
+            assertTrue(source.matches(PatternMaker.make("/* 18: 18 */", "assert i == 2 && i < 3;")));
 
-        assertTrue(source.matches(PatternMaker.make("/* 34: 34 */", "assert new BigDecimal(i) == BigDecimal.ONE;")));
+            assertTrue(source.matches(PatternMaker.make("/* 34: 34 */", "assert new BigDecimal(i) == BigDecimal.ONE;")));
 
-        assertTrue(source.matches(PatternMaker.make("/* 41: 41 */", "assert check() : \"boom\";")));
+            assertTrue(source.matches(PatternMaker.make("/* 41: 41 */", "assert check() : \"boom\";")));
 
-        // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            // Recompile decompiled source code and check errors
+            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+        }
     }
 
     @Test
     public void testJdk150Assert() throws Exception {
         String internalClassName = "org/jd/core/test/Assert";
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip");
-        Loader loader = new ZipLoader(is);
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-        String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName, configuration);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip")) {
+            Loader loader = new ZipLoader(is);
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+            String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName, configuration);
 
-        // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make("/* 16: 16 */", "assert false : \"false\";")));
-        assertTrue(source.matches(PatternMaker.make("/* 17: 17 */", "assert paramInt == 0 || paramInt == 1;")));
-        assertTrue(source.matches(PatternMaker.make("/* 18: 18 */", "assert paramInt == 2 && paramInt < 3;")));
+            // Check decompiled source code
+            assertTrue(source.matches(PatternMaker.make("/* 16: 16 */", "assert false : \"false\";")));
+            assertTrue(source.matches(PatternMaker.make("/* 17: 17 */", "assert paramInt == 0 || paramInt == 1;")));
+            assertTrue(source.matches(PatternMaker.make("/* 18: 18 */", "assert paramInt == 2 && paramInt < 3;")));
 
-        assertTrue(source.matches(PatternMaker.make("/* 34: 34 */", "assert new BigDecimal(paramInt) == BigDecimal.ONE;")));
+            assertTrue(source.matches(PatternMaker.make("/* 34: 34 */", "assert new BigDecimal(paramInt) == BigDecimal.ONE;")));
 
-        assertTrue(source.matches(PatternMaker.make("/* 41: 41 */", "assert check() : \"boom\";")));
+            assertTrue(source.matches(PatternMaker.make("/* 41: 41 */", "assert check() : \"boom\";")));
 
-        // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+            // Recompile decompiled source code and check errors
+            assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+        }
     }
 }

@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.type;
 
 import org.jd.core.v1.util.DefaultList;
@@ -12,10 +11,9 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class TypeParameters extends DefaultList<TypeParameter> implements BaseTypeParameter {
+    private static final long serialVersionUID = 1L;
 
-	private static final long serialVersionUID = 1L;
-
-	public TypeParameters() {}
+    public TypeParameters() {}
 
     public TypeParameters(int capacity) {
         super(capacity);
@@ -23,12 +21,16 @@ public class TypeParameters extends DefaultList<TypeParameter> implements BaseTy
 
     public TypeParameters(Collection<TypeParameter> collection) {
         super(collection);
-        assert (collection.size() > 1) : "Uses 'TypeParameter' instead";
+        if (collection.size() <= 1) {
+            throw new IllegalArgumentException("Use 'TypeParameter' instead");
+        }
     }
 
     public TypeParameters(TypeParameter type, TypeParameter... types) {
         super(types.length + 1);
-        assert (types.length > 0) : "Uses 'TypeParameter' instead";
+        if (types.length <= 0) {
+            throw new IllegalArgumentException("Use 'TypeParameter' instead");
+        }
 
         add(type);
 
@@ -46,11 +48,11 @@ public class TypeParameters extends DefaultList<TypeParameter> implements BaseTy
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(get(0).toString());
+        sb.append(get(0));
 
         for (int i=1; i<size(); i++) {
             sb.append(" & ");
-            sb.append(get(i).toString());
+            sb.append(get(i));
         }
 
         return sb.toString();

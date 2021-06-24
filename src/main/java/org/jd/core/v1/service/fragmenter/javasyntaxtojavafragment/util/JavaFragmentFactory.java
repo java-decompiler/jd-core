@@ -13,6 +13,11 @@ import org.jd.core.v1.model.javafragment.*;
 import java.util.List;
 
 public class JavaFragmentFactory {
+
+    private JavaFragmentFactory() {
+        super();
+    }
+
     public static void addSpacerAfterPackage(List<Fragment> fragments) {
         fragments.add(new SpacerFragment(0, 1, 1, 0, "Spacer after package"));
         fragments.add(new SpacerFragment(0, 1, 1, 1, "Second spacer after package"));

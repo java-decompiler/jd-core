@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.util.DefaultList;
@@ -12,10 +11,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class FieldDeclarators extends DefaultList<FieldDeclarator> implements BaseFieldDeclarator {
-
-	private static final long serialVersionUID = 1L;
-
-	public FieldDeclarators() {}
+    private static final long serialVersionUID = 1L;
 
     public FieldDeclarators(int capacity) {
         super(capacity);
@@ -23,12 +19,16 @@ public class FieldDeclarators extends DefaultList<FieldDeclarator> implements Ba
 
     public FieldDeclarators(Collection<FieldDeclarator> collection) {
         super(collection);
-        assert (collection.size() > 1) : "Uses 'FieldDeclarator' instead";
+        if (collection.size() <= 1) {
+            throw new IllegalArgumentException("Use 'FieldDeclarator' instead");
+        }
     }
 
     public FieldDeclarators(FieldDeclarator declarator, FieldDeclarator... declarators) {
         super(declarator, declarators);
-        assert (declarators.length > 0) : "Uses 'FieldDeclarator' instead";
+        if (declarators.length <= 0) {
+            throw new IllegalArgumentException("Use 'FieldDeclarator' instead");
+        }
     }
 
     @Override

@@ -9,8 +9,6 @@ package org.jd.core.v1.model.javasyntax.expression;
 
 import org.jd.core.v1.model.javasyntax.type.Type;
 
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
-
 public class ArrayExpression extends AbstractLineNumberTypeExpression {
     protected Expression expression;
     protected Expression index;
@@ -36,6 +34,7 @@ public class ArrayExpression extends AbstractLineNumberTypeExpression {
         this.expression = expression;
     }
 
+    @Override
     public Expression getIndex() {
         return index;
     }

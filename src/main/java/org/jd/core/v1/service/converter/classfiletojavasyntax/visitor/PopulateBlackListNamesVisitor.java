@@ -12,12 +12,12 @@ import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
-import java.util.HashSet;
+import java.util.Set;
 
 public class PopulateBlackListNamesVisitor extends AbstractNopTypeArgumentVisitor {
-    protected HashSet<String> blackListNames;
+    protected Set<String> blackListNames;
 
-    public PopulateBlackListNamesVisitor(HashSet<String> blackListNames) {
+    public PopulateBlackListNamesVisitor(Set<String> blackListNames) {
         this.blackListNames = blackListNames;
     }
 

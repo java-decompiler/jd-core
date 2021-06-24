@@ -43,7 +43,7 @@ public class DecompileContext {
     public DecompileContext(DefaultList<Fragment> fragments) {
         this.body = fragments;
     }
-    
+
     @SuppressWarnings("unchecked")
     public <T> T getBody() {
         return (T)body;
@@ -53,109 +53,107 @@ public class DecompileContext {
         this.body = body;
     }
 
-	public String getMainInternalTypeName() {
-		return mainInternalTypeName;
-	}
+    public String getMainInternalTypeName() {
+        return mainInternalTypeName;
+    }
 
-	public void setMainInternalTypeName(String mainInternalTypeName) {
-		this.mainInternalTypeName = mainInternalTypeName;
-	}
+    public void setMainInternalTypeName(String mainInternalTypeName) {
+        this.mainInternalTypeName = mainInternalTypeName;
+    }
 
-	public Map<String, Object> getConfiguration() {
-		return configuration;
-	}
+    public Map<String, Object> getConfiguration() {
+        return configuration;
+    }
 
-	public void setConfiguration(Map<String, Object> configuration) {
-		this.configuration = configuration;
-	}
+    public void setConfiguration(Map<String, Object> configuration) {
+        this.configuration = configuration;
+    }
 
-	public Loader getLoader() {
-		return loader;
-	}
+    public Loader getLoader() {
+        return loader;
+    }
 
-	public void setLoader(Loader loader) {
-		this.loader = loader;
-	}
+    public void setLoader(Loader loader) {
+        this.loader = loader;
+    }
 
-	public Printer getPrinter() {
-		return printer;
-	}
+    public Printer getPrinter() {
+        return printer;
+    }
 
-	public void setPrinter(Printer printer) {
-		this.printer = printer;
-	}
+    public void setPrinter(Printer printer) {
+        this.printer = printer;
+    }
 
-	public TypeMaker getTypeMaker() {
-		return typeMaker;
-	}
+    public TypeMaker getTypeMaker() {
+        return typeMaker;
+    }
 
-	public void setTypeMaker(TypeMaker typeMaker) {
-		this.typeMaker = typeMaker;
-	}
+    public void setTypeMaker(TypeMaker typeMaker) {
+        this.typeMaker = typeMaker;
+    }
 
-	public int getMajorVersion() {
-		return majorVersion;
-	}
+    public int getMajorVersion() {
+        return majorVersion;
+    }
 
-	public void setMajorVersion(int majorVersion) {
-		this.majorVersion = majorVersion;
-	}
+    public void setMajorVersion(int majorVersion) {
+        this.majorVersion = majorVersion;
+    }
 
-	public int getMinorVersion() {
-		return minorVersion;
-	}
+    public int getMinorVersion() {
+        return minorVersion;
+    }
 
-	public void setMinorVersion(int minorVersion) {
-		this.minorVersion = minorVersion;
-	}
+    public void setMinorVersion(int minorVersion) {
+        this.minorVersion = minorVersion;
+    }
 
-	public int getMaxLineNumber() {
-		return maxLineNumber;
-	}
+    public int getMaxLineNumber() {
+        return maxLineNumber;
+    }
 
-	public void setMaxLineNumber(int maxLineNumber) {
-		this.maxLineNumber = maxLineNumber;
-	}
+    public void setMaxLineNumber(int maxLineNumber) {
+        this.maxLineNumber = maxLineNumber;
+    }
 
-	public boolean isContainsByteCode() {
-		return containsByteCode;
-	}
+    public boolean containsByteCode() {
+        return containsByteCode;
+    }
 
-	public void setContainsByteCode(boolean containsByteCode) {
-		this.containsByteCode = containsByteCode;
-	}
+    public void setContainsByteCode(boolean containsByteCode) {
+        this.containsByteCode = containsByteCode;
+    }
 
-	public boolean isShowBridgeAndSynthetic() {
-		return showBridgeAndSynthetic;
-	}
+    public boolean isShowBridgeAndSynthetic() {
+        return showBridgeAndSynthetic;
+    }
 
-	public void setShowBridgeAndSynthetic(boolean showBridgeAndSynthetic) {
-		this.showBridgeAndSynthetic = showBridgeAndSynthetic;
-	}
+    public void setShowBridgeAndSynthetic(boolean showBridgeAndSynthetic) {
+        this.showBridgeAndSynthetic = showBridgeAndSynthetic;
+    }
 
-	public ClassFile getClassFile() {
-		return classFile;
-	}
+    public ClassFile getClassFile() {
+        return classFile;
+    }
 
-	public void setClassFile(ClassFile classFile) {
-		this.classFile = classFile;
-	}
+    public void setClassFile(ClassFile classFile) {
+        this.classFile = classFile;
+    }
 
-	public CompilationUnit getCompilationUnit() {
-		return compilationUnit;
-	}
+    public CompilationUnit getCompilationUnit() {
+        return compilationUnit;
+    }
 
-	public void setCompilationUnit(CompilationUnit compilationUnit) {
-		this.compilationUnit = compilationUnit;
-	}
+    public void setCompilationUnit(CompilationUnit compilationUnit) {
+        this.compilationUnit = compilationUnit;
+    }
 
-	public DefaultList<Token> getTokens() {
-		return tokens;
-	}
+    public DefaultList<Token> getTokens() {
+        return tokens;
+    }
 
-	public void setTokens(DefaultList<Token> tokens) {
-		this.tokens = tokens;
-	}
-    
-    
+    public void setTokens(DefaultList<Token> tokens) {
+        this.tokens = tokens;
+    }
 }

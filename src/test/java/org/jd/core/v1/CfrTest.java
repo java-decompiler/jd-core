@@ -24,7 +24,7 @@ public class CfrTest extends AbstractJdTest {
     public void testFloatingPointCasting() throws Exception {
         String internalClassName = FloatingPointCasting.class.getName().replace('.', '/');
         String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName, Collections.emptyMap());
-        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertEquals(-1, source.indexOf("// Byte code:"));
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(": 12 */", "long b = (long)(double)")));

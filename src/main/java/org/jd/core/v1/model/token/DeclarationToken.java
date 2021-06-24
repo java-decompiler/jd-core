@@ -7,16 +7,7 @@
 
 package org.jd.core.v1.model.token;
 
-import org.jd.core.v1.api.printer.Printer;
-
 public class DeclarationToken implements Token {
-    // Declaration & reference types
-    public static final int TYPE = Printer.TYPE;
-    public static final int FIELD = Printer.FIELD;
-    public static final int METHOD = Printer.METHOD;
-    public static final int CONSTRUCTOR = Printer.CONSTRUCTOR;
-    public static final int PACKAGE = Printer.PACKAGE;
-    public static final int MODULE = Printer.MODULE;
 
     protected int type;
     protected String internalTypeName;
@@ -46,6 +37,7 @@ public class DeclarationToken implements Token {
         return descriptor;
     }
 
+    @Override
     public String toString() {
         return "DeclarationToken{declaration='" + name + "'}";
     }

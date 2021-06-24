@@ -9,11 +9,11 @@ package org.jd.core.v1.model.classfile.attribute;
 
 import org.jd.core.v1.model.classfile.constant.ConstantValue;
 
-public class ElementValuePrimitiveType implements ElementValue {
-	/*
-	 * type = {'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's'}
-	 */	
-	protected int type;
+public class ElementValuePrimitiveType implements AttributeElementValue {
+    /*
+     * type = {'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's'}
+     */
+    protected int type;
     protected ConstantValue constValue;
 
     public ElementValuePrimitiveType(int type, ConstantValue constValue) {

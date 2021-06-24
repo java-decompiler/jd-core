@@ -7,11 +7,13 @@
 
 package org.jd.core.v1;
 
+import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.printer.PlainTextMetaPrinter;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.util.DefaultList;
+import org.jd.core.v1.util.StringConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,7 +44,7 @@ public class WriteTokenTest {
         // import javasyntax.util.ArrayList;\n
         tokens.add(IMPORT);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/util/ArrayList", "java.util.ArrayList", null, null));
+        tokens.add(new ReferenceToken(Printer.TYPE, "java/util/ArrayList", "java.util.ArrayList", null, null));
         tokens.add(TextToken.SEMICOLON);
         tokens.add(NewLineToken.NEWLINE_1);
 
@@ -51,7 +53,7 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(STATIC);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "org/junit/Assert/*", "org.junit.Assert.*", null, null));
+        tokens.add(new ReferenceToken(Printer.TYPE, "org/junit/Assert/*", "org.junit.Assert.*", null, null));
         tokens.add(TextToken.SEMICOLON);
         tokens.add(NewLineToken.NEWLINE_2);
 
@@ -60,7 +62,7 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(CLASS);
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/WriteTokenTest", "WriteTokenTest", null));
+        tokens.add(new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/WriteTokenTest", "WriteTokenTest", null));
         tokens.add(TextToken.SPACE);
         tokens.add(StartBlockToken.START_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
@@ -72,9 +74,9 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(VOID);
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/WriteTokenTest", "main", "([Ljava/lang/String;)V"));
+        tokens.add(new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/WriteTokenTest", "main", "([Ljava/lang/String;)V"));
         tokens.add(TextToken.LEFTROUNDBRACKET);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_STRING, "String", null, "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(new TextToken("[] args) "));
         tokens.add(StartBlockToken.START_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
@@ -108,7 +110,7 @@ public class WriteTokenTest {
         tokens.add(new LineNumberToken(10));
         tokens.add(INT);
         tokens.add(new TextToken(" i = "));
-        tokens.add(new ReferenceToken(ReferenceToken.METHOD, "org/jd/core/v1/service/test/WriteTokenTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(Printer.METHOD, "org/jd/core/v1/service/test/WriteTokenTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
         tokens.add(new LineNumberToken(11));
@@ -121,7 +123,7 @@ public class WriteTokenTest {
         tokens.add(new LineNumberToken(13));
         tokens.add(NEW);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/util/Enumeration", "Enumeration", null, "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(Printer.TYPE, "java/util/Enumeration", "Enumeration", null, "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(new TextToken("() "));
         tokens.add(StartBlockToken.START_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
@@ -130,7 +132,7 @@ public class WriteTokenTest {
             tokens.add(TextToken.SPACE);
             tokens.add(BOOLEAN);
             tokens.add(TextToken.SPACE);
-            tokens.add(new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/WriteTokenTest$1", "hasMoreElements", "()Z"));
+            tokens.add(new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/WriteTokenTest$1", "hasMoreElements", "()Z"));
             tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
             tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
             tokens.add(TextToken.SPACE);
@@ -148,9 +150,9 @@ public class WriteTokenTest {
             // public Object nextElement()...
             tokens.add(PUBLIC);
             tokens.add(TextToken.SPACE);
-            tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/lang/Object", "Object", null, "org/jd/core/v1/service/test/WriteTokenTest"));
+            tokens.add(new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_OBJECT, "Object", null, "org/jd/core/v1/service/test/WriteTokenTest"));
             tokens.add(TextToken.SPACE);
-            tokens.add(new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/WriteTokenTest$1", "nextElement", "()Ljava/lang/Object;"));
+            tokens.add(new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/WriteTokenTest$1", "nextElement", "()Ljava/lang/Object;"));
             tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
             tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
             tokens.add(TextToken.SPACE);
@@ -177,11 +179,11 @@ public class WriteTokenTest {
 
         // System.out.println(i);
         tokens.add(new LineNumberToken(22));
-        tokens.add(new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_SYSTEM, "System", null, "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(TextToken.DOT);
-        tokens.add(new ReferenceToken(ReferenceToken.FIELD, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(Printer.FIELD, StringConstants.JAVA_LANG_SYSTEM, "out", "java/io/PrintStream", "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(TextToken.DOT);
-        tokens.add(new ReferenceToken(ReferenceToken.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/WriteTokenTest"));
+        tokens.add(new ReferenceToken(Printer.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/WriteTokenTest"));
         tokens.add(TextToken.LEFTROUNDBRACKET);
         tokens.add(new TextToken("i"));
         tokens.add(TextToken.RIGHTROUNDBRACKET);
@@ -242,7 +244,6 @@ public class WriteTokenTest {
         Assert.assertEquals(expected, source);
     }
 
-
     @Test
     public void testComments() throws Exception {
         DefaultList<Token> tokens = new DefaultList<>();
@@ -269,7 +270,7 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(CLASS);
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/WriteTokenTest", "WriteTokenTest", null));
+        tokens.add(new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/WriteTokenTest", "WriteTokenTest", null));
         tokens.add(TextToken.SPACE);
         tokens.add(StartBlockToken.START_BLOCK);
         tokens.add(NewLineToken.NEWLINE_1);
@@ -295,7 +296,7 @@ public class WriteTokenTest {
         System.out.print(source);
         System.out.println("- - - - - - - - ");
 
-        Assert.assertTrue(source.indexOf("<MARKER type='COMMENT'>/* Block comment */</MARKER type='COMMENT'>") != -1);
-        Assert.assertTrue(source.indexOf("<MARKER type='JAVADOC'>/** Javadoc comment */</MARKER type='JAVADOC'>") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("<MARKER type='COMMENT'>/* Block comment */</MARKER type='COMMENT'>"));
+        Assert.assertNotEquals(-1, source.indexOf("<MARKER type='JAVADOC'>/** Javadoc comment */</MARKER type='JAVADOC'>"));
     }
 }

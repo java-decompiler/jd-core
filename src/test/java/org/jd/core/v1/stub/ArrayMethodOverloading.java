@@ -1,11 +1,11 @@
 package org.jd.core.v1.stub;
 
+@SuppressWarnings("all")
 public class ArrayMethodOverloading {
-    void use(Object[] o) {
-    }
 
-    void use(Object o) {
-    }
+    void use(Object[] o) {}
+
+    void use(Object o) {}
 
     void test1() {
         use("string");

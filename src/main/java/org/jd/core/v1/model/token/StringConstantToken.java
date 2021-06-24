@@ -25,6 +25,7 @@ public class StringConstantToken implements Token {
         return ownerInternalName;
     }
 
+    @Override
     public String toString() {
         return "StringConstantToken{'" + text + "'}";
     }

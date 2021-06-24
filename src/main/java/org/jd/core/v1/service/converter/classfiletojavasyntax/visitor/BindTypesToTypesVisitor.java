@@ -21,7 +21,8 @@ public class BindTypesToTypesVisitor extends AbstractNopTypeVisitor {
     protected BaseType result;
 
     public void setBindings(Map<String, TypeArgument> bindings) {
-        bindTypeArgumentsToTypeArgumentsVisitor.setBindings(this.bindings = bindings);
+        this.bindings = bindings;
+        bindTypeArgumentsToTypeArgumentsVisitor.setBindings(this.bindings);
     }
 
     public void init() {

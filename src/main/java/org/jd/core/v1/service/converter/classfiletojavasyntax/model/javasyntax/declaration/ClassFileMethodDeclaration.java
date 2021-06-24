@@ -12,7 +12,7 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
-import org.jd.core.v1.model.javasyntax.reference.ElementValue;
+import org.jd.core.v1.model.javasyntax.reference.BaseElementValue;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
@@ -60,7 +60,7 @@ public class ClassFileMethodDeclaration extends MethodDeclaration implements Cla
     public ClassFileMethodDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, BaseAnnotationReference annotationReferences,
             String name, BaseTypeParameter typeParameters, Type returnedType, BaseType parameterTypes, BaseType exceptionTypes,
-            ElementValue defaultAnnotationValue, Map<String, TypeArgument> bindings,
+            BaseElementValue defaultAnnotationValue, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber) {
         super(annotationReferences, method.getAccessFlags(), name, typeParameters, returnedType, null, exceptionTypes, method.getDescriptor(), null, defaultAnnotationValue);
         this.bodyDeclaration = bodyDeclaration;

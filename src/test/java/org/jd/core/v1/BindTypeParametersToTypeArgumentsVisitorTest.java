@@ -7,19 +7,23 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_INTEGER;
+
+import junit.framework.TestCase;
 
 public class BindTypeParametersToTypeArgumentsVisitorTest extends TestCase {
     @Test
     public void testGenericTypeI0() throws Exception {
-        HashMap<String, TypeArgument> bindings = new HashMap<>();
+        Map<String, TypeArgument> bindings = new HashMap<>();
 
         bindings.put("I", TYPE_INTEGER);
 
@@ -38,7 +42,7 @@ public class BindTypeParametersToTypeArgumentsVisitorTest extends TestCase {
 
     @Test
     public void testGenericTypeI3() throws Exception {
-        HashMap<String, TypeArgument> bindings = new HashMap<>();
+        Map<String, TypeArgument> bindings = new HashMap<>();
 
         bindings.put("I", TYPE_INTEGER);
 

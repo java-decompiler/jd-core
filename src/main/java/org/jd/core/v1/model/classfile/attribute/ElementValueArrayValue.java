@@ -7,14 +7,14 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class ElementValueArrayValue implements ElementValue {
-    protected ElementValue[] values;
+public class ElementValueArrayValue implements AttributeElementValue {
+    protected AttributeElementValue[] values;
 
-    public ElementValueArrayValue(ElementValue[] values) {
+    public ElementValueArrayValue(AttributeElementValue[] values) {
         this.values = values;
     }
 
-    public ElementValue[] getValues() {
+    public AttributeElementValue[] getValues() {
         return values;
     }
 

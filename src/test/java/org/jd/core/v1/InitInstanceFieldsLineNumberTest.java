@@ -30,6 +30,7 @@ public class InitInstanceFieldsLineNumberTest extends AbstractJdTest {
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
 
+    @Override
     protected void printSource(String source) {
         System.out.println("- - - - - - - - ");
         System.out.println(source);

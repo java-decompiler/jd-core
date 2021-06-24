@@ -28,6 +28,7 @@ public class TernaryOperatorExpression extends AbstractLineNumberTypeExpression 
         this.falseExpression = falseExpression;
     }
 
+    @Override
     public Expression getCondition() {
         return condition;
     }

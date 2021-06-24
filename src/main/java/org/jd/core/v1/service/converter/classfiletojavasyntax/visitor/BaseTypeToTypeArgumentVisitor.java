@@ -9,10 +9,6 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.type.*;
 
-import java.util.Map;
-
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
-
 public class BaseTypeToTypeArgumentVisitor implements TypeVisitor {
     protected TypeArgument typeArgument;
 
@@ -24,10 +20,14 @@ public class BaseTypeToTypeArgumentVisitor implements TypeVisitor {
         return typeArgument;
     }
 
-    @Override public void visit(PrimitiveType type) { typeArgument = type; }
-    @Override public void visit(ObjectType type) { typeArgument = type; }
-    @Override public void visit(InnerObjectType type) { typeArgument = type; }
-    @Override public void visit(GenericType type) { typeArgument = type; }
+    @Override
+    public void visit(PrimitiveType type) { typeArgument = type; }
+    @Override
+    public void visit(ObjectType type) { typeArgument = type; }
+    @Override
+    public void visit(InnerObjectType type) { typeArgument = type; }
+    @Override
+    public void visit(GenericType type) { typeArgument = type; }
 
     @Override
     public void visit(Types types) {

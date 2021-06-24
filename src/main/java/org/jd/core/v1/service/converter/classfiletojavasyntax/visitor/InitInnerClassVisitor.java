@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.classfile.ClassFile;
@@ -26,7 +25,6 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.*;
 
-import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
 
 public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
@@ -70,13 +68,12 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             bodyDeclaration.setSyntheticInnerFieldNames(new DefaultList<>(syntheticInnerFieldNames));
         }
 
-        if ((outerTypeFieldName != null) || !syntheticInnerFieldNames.isEmpty()) {
+        if (outerTypeFieldName != null || !syntheticInnerFieldNames.isEmpty()) {
             updateFieldDeclarationsAndReferencesVisitor.visit(bodyDeclaration);
         }
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void visit(ConstructorDeclaration declaration) {
         ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration)declaration;
         ClassFile classFile = cfcd.getClassFile();
@@ -89,8 +86,9 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         if (cfcd.getStatements().isList()) {
             Iterator<Statement> iterator = cfcd.getStatements().iterator();
 
+            Statement statement;
             while (iterator.hasNext()) {
-                Statement statement = iterator.next();
+                statement = iterator.next();
 
                 if (statement.isExpressionStatement()) {
                     Expression expression = statement.getExpression();
@@ -102,7 +100,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
                     if (expression.isConstructorInvocationExpression()) {
                         // 'this(...)'
-                        if ((outerClassFile != null) && !classFile.isStatic()) {
+                        if (outerClassFile != null && !classFile.isStatic()) {
                             // Inner non-static class --> First parameter is the synthetic outer reference
                             removeFirstParameter = true;
                         }
@@ -187,8 +185,10 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override public void visit(MethodDeclaration declaration) {}
-    @Override public void visit(StaticInitializerDeclaration declaration) {}
+    @Override
+    public void visit(MethodDeclaration declaration) {}
+    @Override
+    public void visit(StaticInitializerDeclaration declaration) {}
 
     protected class UpdateFieldDeclarationsAndReferencesVisitor extends AbstractUpdateExpressionVisitor {
         protected ClassFileBodyDeclaration bodyDeclaration;
@@ -220,7 +220,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             }
         }
 
-        @Override public void visit(StaticInitializerDeclaration declaration) {}
+        @Override
+        public void visit(StaticInitializerDeclaration declaration) {}
 
         @Override
         public void visit(MethodDeclaration declaration) {
@@ -249,7 +250,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 } else {
                     ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(expression.getInternalTypeName());
 
-                    if ((typeDeclaration != null) && typeDeclaration.isClassDeclaration()) {
+                    if (typeDeclaration != null && typeDeclaration.isClassDeclaration()) {
                         ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) typeDeclaration.getBodyDeclaration();
                         String outerInternalTypeName = cfbd.getOuterBodyDeclaration().getInternalTypeName();
                         ObjectType objectType = (ObjectType)expression.getType();
@@ -271,12 +272,10 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
         @Override
         protected Expression updateExpression(Expression expression) {
-            if (expression.isLocalVariableReferenceExpression()) {
-                if ((expression.getName() != null) && expression.getName().equals(outerTypeFieldName) && expression.getType().isObjectType()) {
-                    ObjectType objectType = (ObjectType)expression.getType();
-                    if (bodyDeclaration.getOuterBodyDeclaration().getInternalTypeName().equals(objectType.getInternalName())) {
-                        return new FieldReferenceExpression(objectType, new ObjectTypeReferenceExpression(expression.getLineNumber(), objectType.createType(null)), objectType.getInternalName(), "this", objectType.getDescriptor());
-                    }
+            if (expression.isLocalVariableReferenceExpression() && expression.getName() != null && expression.getName().equals(outerTypeFieldName) && expression.getType().isObjectType()) {
+                ObjectType objectType = (ObjectType)expression.getType();
+                if (bodyDeclaration.getOuterBodyDeclaration().getInternalTypeName().equals(objectType.getInternalName())) {
+                    return new FieldReferenceExpression(objectType, new ObjectTypeReferenceExpression(expression.getLineNumber(), objectType.createType(null)), objectType.getInternalName(), "this", objectType.getDescriptor());
                 }
             }
 
@@ -288,9 +287,9 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         protected TypeMaker typeMaker;
         protected ClassFileBodyDeclaration bodyDeclaration;
         protected ClassFile classFile;
-        protected HashMap<String, String> finalLocalVariableNameMap = new HashMap<>();
+        protected Map<String, String> finalLocalVariableNameMap = new HashMap<>();
         protected DefaultList<ClassFileClassDeclaration> localClassDeclarations = new DefaultList<>();
-        protected HashSet<NewExpression> newExpressions = new HashSet<>();
+        protected Set<NewExpression> newExpressions = new HashSet<>();
         protected int lineNumber;
 
         public UpdateNewExpressionVisitor(TypeMaker typeMaker) {
@@ -366,17 +365,17 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void visit(Statements list) {
             if (!list.isEmpty()) {
                 ListIterator<Statement> iterator = list.listIterator();
 
+                Statement s;
                 while (iterator.hasNext()) {
                     //iterator.next().accept(this);
-                    Statement s = iterator.next();
+                    s = iterator.next();
                     s.accept(this);
 
-                    if ((lineNumber == Expression.UNKNOWN_LINE_NUMBER) && !localClassDeclarations.isEmpty()) {
+                    if (lineNumber == Expression.UNKNOWN_LINE_NUMBER && !localClassDeclarations.isEmpty()) {
                         iterator.previous();
 
                         for (TypeDeclaration typeDeclaration : localClassDeclarations) {
@@ -391,11 +390,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void visit(NewExpression expression) {
-            if (!newExpressions.contains(expression)) {
-                newExpressions.add(expression);
-
+            if (newExpressions.add(expression)) {
                 ClassFileNewExpression ne = (ClassFileNewExpression)expression;
                 ClassFileBodyDeclaration cfbd = null;
 
@@ -415,9 +411,9 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                         ClassFileClassDeclaration cfcd = (ClassFileClassDeclaration) typeDeclaration;
                         cfbd = (ClassFileBodyDeclaration) cfcd.getBodyDeclaration();
 
-                        if ((type.getQualifiedName() == null) && (type.getName() != null)) {
+                        if (type.getQualifiedName() == null && type.getName() != null) {
                             // Local class
-                            cfcd.setFlags(cfcd.getFlags() & (~FLAG_SYNTHETIC));
+                            cfcd.setFlags(cfcd.getFlags() & ~FLAG_SYNTHETIC);
                             localClassDeclarations.add(cfcd);
                             bodyDeclaration.removeInnerType(internalName);
                             lineNumber = ne.getLineNumber();
@@ -454,9 +450,11 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                                 Iterator<Expression> parameterIterator = lastParameters.iterator();
                                 Iterator<String> syntheticInnerFieldNameIterator = syntheticInnerFieldNames.iterator();
 
+                                Expression param;
+                                String syntheticInnerFieldName;
                                 while (parameterIterator.hasNext()) {
-                                    Expression param = parameterIterator.next();
-                                    String syntheticInnerFieldName = syntheticInnerFieldNameIterator.next();
+                                    param = parameterIterator.next();
+                                    syntheticInnerFieldName = syntheticInnerFieldNameIterator.next();
 
                                     if (param.isCastExpression()) {
                                         param = param.getExpression();
@@ -496,7 +494,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                         // Is the last parameter synthetic ?
                         parameters = ne.getParameters();
 
-                        if ((parameters != null) && (parameters.size() > 0) && parameters.getLast().isNullExpression()) {
+                        if (parameters != null && parameters.size() > 0 && parameters.getLast().isNullExpression()) {
                             parameterTypes = ne.getParameterTypes();
 
                             if (parameterTypes.getLast().getName() == null) {
@@ -522,18 +520,16 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             ClassFileSuperConstructorInvocationExpression scie = (ClassFileSuperConstructorInvocationExpression)expression;
             BaseExpression parameters = scie.getParameters();
 
-            if ((parameters != null) && (parameters.size() > 0)) {
+            if (parameters != null && parameters.size() > 0) {
                 // Remove outer 'this' reference parameter
                 Type firstParameterType = parameters.getFirst().getType();
 
-                if (firstParameterType.isObjectType() && !classFile.isStatic() && (bodyDeclaration.getOuterTypeFieldName() != null)) {
+                if (firstParameterType.isObjectType() && !classFile.isStatic() && bodyDeclaration.getOuterTypeFieldName() != null) {
                     TypeMaker.TypeTypes superTypeTypes = typeMaker.makeTypeTypes(classFile.getSuperTypeName());
 
-                    if ((superTypeTypes != null) && superTypeTypes.thisType.isInnerObjectType()) {
-                        if (typeMaker.isRawTypeAssignable(superTypeTypes.thisType.getOuterType(), (ObjectType)firstParameterType)) {
-                            scie.setParameters(removeFirstItem(parameters));
-                            scie.setParameterTypes(removeFirstItem(scie.getParameterTypes()));
-                        }
+                    if (superTypeTypes != null && superTypeTypes.thisType.isInnerObjectType() && typeMaker.isRawTypeAssignable(superTypeTypes.thisType.getOuterType(), (ObjectType)firstParameterType)) {
+                        scie.setParameters(removeFirstItem(parameters));
+                        scie.setParameterTypes(removeFirstItem(scie.getParameterTypes()));
                     }
                 }
 
@@ -547,7 +543,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             ClassFileConstructorInvocationExpression cie = (ClassFileConstructorInvocationExpression)expression;
             BaseExpression parameters = cie.getParameters();
 
-            if ((parameters != null) && (parameters.size() > 0)) {
+            if (parameters != null && parameters.size() > 0) {
                 // Remove outer this reference parameter
                 if (bodyDeclaration.getOuterTypeFieldName() != null) {
                     cie.setParameters(removeFirstItem(parameters));
@@ -581,14 +577,12 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
 
         protected BaseExpression removeLastSyntheticParameter(BaseExpression parameters, BaseType parameterTypes) {
             // Is the last parameter synthetic ?
-            if ((parameters != null) && (parameters.size() > 0) && parameters.getLast().isNullExpression()) {
-                if (parameterTypes.getLast().getName() == null) {
-                    // Yes. Remove it.
-                    if (parameters.isList()) {
-                        parameters.getList().removeLast();
-                    } else {
-                        parameters = null;
-                    }
+            if (parameters != null && parameters.size() > 0 && parameters.getLast().isNullExpression() && parameterTypes.getLast().getName() == null) {
+                // Yes. Remove it.
+                if (parameters.isList()) {
+                    parameters.getList().removeLast();
+                } else {
+                    parameters = null;
                 }
             }
 
@@ -651,7 +645,6 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 cfsid.setStatements(addLocalClassDeclarations(cfsid.getStatements()));
             }
 
-            @SuppressWarnings("unchecked")
             protected BaseStatement addLocalClassDeclarations(BaseStatement statements) {
                 if (!localClassDeclarations.isEmpty()) {
                     if (statements.isStatements()) {
@@ -674,7 +667,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                             declarationIterator.next();
                             declarationIterator.remove();
 
-                            while (declarationIterator.hasNext() && ((declaration = declarationIterator.next()).getFirstLineNumber() <= lineNumber)) {
+                            while (declarationIterator.hasNext() && (declaration = declarationIterator.next()).getFirstLineNumber() <= lineNumber) {
                                 list.add(new TypeDeclarationStatement(declaration));
                                 declarationIterator.remove();
                             }
@@ -695,15 +688,15 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public void visit(Statements list) {
                 if (!localClassDeclarations.isEmpty() && !list.isEmpty()) {
                     ListIterator<Statement> statementIterator = list.listIterator();
                     Iterator<ClassFileClassDeclaration> declarationIterator = localClassDeclarations.iterator();
                     ClassFileClassDeclaration declaration = declarationIterator.next();
 
+                    Statement statement;
                     while (statementIterator.hasNext()) {
-                        Statement statement = statementIterator.next();
+                        statement = statementIterator.next();
 
                         searchFirstLineNumberVisitor.init();
                         statement.accept(searchFirstLineNumberVisitor);
@@ -730,6 +723,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         protected class MemberDeclarationComparator implements Comparator<ClassFileMemberDeclaration> {
+            @Override
             public int compare(ClassFileMemberDeclaration md1, ClassFileMemberDeclaration md2) {
                 return md1.getFirstLineNumber() - md2.getFirstLineNumber();
             }

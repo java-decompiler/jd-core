@@ -12,6 +12,7 @@ public abstract class AbstractStoreMovableBlockFragmentIndexVisitorAbstract exte
     protected int size;
     protected boolean enabled;
 
+    @Override
     public void reset() {
         this.size = 0;
         this.depth = 1;

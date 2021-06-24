@@ -50,6 +50,7 @@ public class BinaryOperatorExpression extends AbstractLineNumberTypeExpression {
         this.rightExpression = rightExpression;
     }
 
+    @Override
     public int getPriority() {
         return priority;
     }

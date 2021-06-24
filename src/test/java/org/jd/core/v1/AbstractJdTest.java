@@ -1,6 +1,5 @@
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.classfile.ClassFile;
@@ -17,6 +16,8 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.Collections;
 import java.util.Map;
+
+import junit.framework.TestCase;
 
 public abstract class AbstractJdTest extends TestCase {
     protected ClassFileDeserializer deserializer = new ClassFileDeserializer();
@@ -56,7 +57,7 @@ public abstract class AbstractJdTest extends TestCase {
 
     protected String decompileSuccess(Loader loader, Printer printer, String internalTypeName, Map<String, Object> configuration) throws Exception {
         String source = decompile(loader, printer, internalTypeName, configuration);
-        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertEquals(-1, source.indexOf("// Byte code:"));
         return source;
     }
 

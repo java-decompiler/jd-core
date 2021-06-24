@@ -21,7 +21,6 @@ import java.util.Map;
 
 import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
 
-
 /**
  * Layout (compact, expend, move) a list of fragments.<br><br>
  *
@@ -30,9 +29,9 @@ import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
  */
 public class LayoutFragmentProcessor {
 
-    public void process(DecompileContext decompileContext) throws Exception {
+    public void process(DecompileContext decompileContext) {
         int maxLineNumber = decompileContext.getMaxLineNumber();
-        boolean containsByteCode = decompileContext.isContainsByteCode();
+        boolean containsByteCode = decompileContext.containsByteCode();
         boolean showBridgeAndSynthetic = decompileContext.isShowBridgeAndSynthetic();
         Map<String, Object> configuration = decompileContext.getConfiguration();
         Object realignLineNumbersConfiguration = (configuration == null) ? "false" : configuration.get("realignLineNumbers");

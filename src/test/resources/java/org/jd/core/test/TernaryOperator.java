@@ -10,6 +10,7 @@ package org.jd.core.test;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressFBWarnings
+@SuppressWarnings("all")
 public class TernaryOperator {
     protected String str = "str";
 
@@ -33,7 +34,7 @@ public class TernaryOperator {
     }
 
     @SuppressWarnings("all")
-    
+
     public boolean ternaryOperatorsInReturn(String s) {
         System.out.println("start");
 
@@ -54,7 +55,7 @@ public class TernaryOperator {
     public void ternaryOperatorInIfElse0(String s1, String s2) {
         System.out.println("start");
 
-        if ((s1 != null) && (s1.length() > 0))
+        if ((s1 != null) && (!s1.isEmpty()))
             System.out.println("a");
         else
             System.out.println("b");
@@ -76,7 +77,7 @@ public class TernaryOperator {
     public void ternaryOperatorInIfElse2(String s1, String s2) {
         System.out.println("start");
 
-        if ((s1 == null) ? false : (s1.length() > 0))
+        if ((s1 == null) ? false : (!s1.isEmpty()))
             System.out.println("a");
         else
             System.out.println("b");
@@ -87,7 +88,7 @@ public class TernaryOperator {
     public void ternaryOperatorInIfElse3(String s1, String s2) {
         System.out.println("start");
 
-        if ((s1 != null) ? (s1.length() > 0) : false)
+        if ((s1 != null) ? (!s1.isEmpty()) : false)
             System.out.println("a");
         else
             System.out.println("b");
@@ -95,7 +96,7 @@ public class TernaryOperator {
         System.out.println("end");
     }
 
-	@SuppressWarnings("null")
+    @SuppressWarnings("null")
     public void ternaryOperatorInIfElse4(String s1, String s2) {
         System.out.println("start");
 
@@ -130,7 +131,7 @@ public class TernaryOperator {
     }
 
     @SuppressWarnings("unused")
-	public void ternaryOperatorInIfElseFalse(String s1, String s2) {
+    public void ternaryOperatorInIfElseFalse(String s1, String s2) {
         System.out.println("start");
 
         if ((s1 == null) ? false : false)

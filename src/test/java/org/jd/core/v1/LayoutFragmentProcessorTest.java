@@ -18,75 +18,86 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.junit.Assert.assertNotEquals;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class LayoutFragmentProcessorTest extends AbstractJdTest {
 
     @Test
     public void testJdk118Basic() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.1.8.zip");
-        ZipLoader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.1.8.zip")) {
+            ZipLoader loader = new ZipLoader(is);
+            //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+            PlainTextPrinter printer = new PlainTextPrinter();
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/Basic", configuration);
+            String source = this.decompileSuccess(loader, printer, "org/jd/core/test/Basic", configuration);
 
-        assertTrue(source.indexOf("/* 188: 188 */") != -1);
+            assertNotEquals(-1, source.indexOf("/* 188: 188 */"));
+        }
     }
 
     @Test
     public void testJdk131TryCatchFinally() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.3.1.zip");
-        ZipLoader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.3.1.zip")) {
+            ZipLoader loader = new ZipLoader(is);
+            //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+            PlainTextPrinter printer = new PlainTextPrinter();
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/TryCatchFinally", configuration);
+            String source = this.decompileSuccess(loader, printer, "org/jd/core/test/TryCatchFinally", configuration);
 
-        assertTrue(source.indexOf("/* 902: 902 */") != -1);
+            assertNotEquals(-1, source.indexOf("/* 902: 902 */"));
+        }
     }
 
     @Test
     public void testTryCatchFinally() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
-        ZipLoader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/TryCatchFinally", configuration);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
+            ZipLoader loader = new ZipLoader(is);
+            //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+            PlainTextPrinter printer = new PlainTextPrinter();
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+            String source = this.decompileSuccess(loader, printer, "org/jd/core/test/TryCatchFinally", configuration);
 
-        assertTrue(source.indexOf("/* 902: 902 */") != -1);
+            assertNotEquals(-1, source.indexOf("/* 902: 902 */"));
+        }
     }
 
     @Test
     public void testAnonymousClass() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
-        ZipLoader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
+            ZipLoader loader = new ZipLoader(is);
+            //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+            PlainTextPrinter printer = new PlainTextPrinter();
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/AnonymousClass", configuration);
+            String source = this.decompileSuccess(loader, printer, "org/jd/core/test/AnonymousClass", configuration);
 
-        assertTrue(source.indexOf("/* 111: 111 */") != -1);
+            assertNotEquals(-1, source.indexOf("/* 111: 111 */"));
 
-        assertTrue(source.indexOf("} ;") == -1);
+            assertEquals(-1, source.indexOf("} ;"));
+        }
     }
 
     @Test
     public void testOuterClass() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
-        ZipLoader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
+            ZipLoader loader = new ZipLoader(is);
+            //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+            PlainTextPrinter printer = new PlainTextPrinter();
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/OuterClass", configuration);
+            String source = this.decompileSuccess(loader, printer, "org/jd/core/test/OuterClass", configuration);
 
-        assertTrue(source.indexOf("/* 182: 182 */") != -1);
+            assertNotEquals(-1, source.indexOf("/* 182: 182 */"));
+        }
     }
 
     @Test
+    @SuppressFBWarnings
+    @SuppressWarnings("all")
     public void testEnumClass() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         ZipLoader loader = new ZipLoader(is);
@@ -97,33 +108,35 @@ public class LayoutFragmentProcessorTest extends AbstractJdTest {
 
         String source = this.decompileSuccess(loader, printer, "org/jd/core/test/Enum");
 
-        assertTrue(source.indexOf("NEPTUNE(1.024E26D, 2.4746E7D);") != -1);
-        assertTrue(source.indexOf("public static final double G = 6.673E-11D;") != -1);
+        assertNotEquals(-1, source.indexOf("NEPTUNE(1.024E26D, 2.4746E7D);"));
+        assertNotEquals(-1, source.indexOf("public static final double G = 6.673E-11D;"));
     }
 
     @Test
     public void testAnnotationQuality() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
-        ZipLoader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/annotation/Quality", configuration);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
+            ZipLoader loader = new ZipLoader(is);
+            //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+            PlainTextPrinter printer = new PlainTextPrinter();
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+            String source = this.decompileSuccess(loader, printer, "org/jd/core/test/annotation/Quality", configuration);
 
-        assertTrue(source.indexOf("/* 9: 0 */   }") != -1);
+            assertNotEquals(-1, source.indexOf("/* 9: 0 */   }"));
+        }
     }
 
     @Test
     public void testJdk170Array() throws Exception {
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
-        ZipLoader loader = new ZipLoader(is);
-        //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
-        PlainTextPrinter printer = new PlainTextPrinter();
-        Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
-        String source = this.decompileSuccess(loader, printer, "org/jd/core/test/Array", configuration);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
+            ZipLoader loader = new ZipLoader(is);
+            //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
+            PlainTextPrinter printer = new PlainTextPrinter();
+            Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
+            String source = this.decompileSuccess(loader, printer, "org/jd/core/test/Array", configuration);
 
-        Assert.assertTrue(source.matches(PatternMaker.make("/* 30: 30 */", "int[][] ia", "0, 1, 2")));
+            Assert.assertTrue(source.matches(PatternMaker.make("/* 30: 30 */", "int[][] ia", "0, 1, 2")));
 
-        assertTrue(source.indexOf("/* 75: 75 */") != -1);
+            assertNotEquals(-1, source.indexOf("/* 75: 75 */"));
+        }
     }
 }

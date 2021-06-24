@@ -11,7 +11,7 @@ public abstract class FixedFragment implements Fragment {
     protected final int firstLineNumber;
     protected final int lastLineNumber;
 
-    public FixedFragment(int firstLineNumber, int lastLineNumber) {
+    protected FixedFragment(int firstLineNumber, int lastLineNumber) {
         this.firstLineNumber = firstLineNumber;
         this.lastLineNumber = lastLineNumber;
     }

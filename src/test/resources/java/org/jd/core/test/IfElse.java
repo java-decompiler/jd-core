@@ -10,10 +10,9 @@ package org.jd.core.test;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @SuppressFBWarnings
+@SuppressWarnings("all")
 public class IfElse {
 
-	@SuppressWarnings("unused")
-	
     public void if_() {
         System.out.println("start");
 
@@ -34,8 +33,7 @@ public class IfElse {
         System.out.println("end");
     }
 
-    @SuppressWarnings("unused")
-	public void ifElse() {
+    public void ifElse() {
         System.out.println("start");
 
         if (this == null) {
@@ -47,8 +45,7 @@ public class IfElse {
         System.out.println("end");
     }
 
-    @SuppressWarnings("unused")
-	public void ifElseIfElse() {
+    public void ifElseIfElse() {
         System.out.println("start");
 
         if (this == null) {

@@ -9,6 +9,7 @@ package org.jd.core.test;
 
 import java.util.Comparator;
 
+@SuppressWarnings("all")
 public class OuterClass {
     protected int outerField1 = 0;
     protected String[] outerField2 = { "0" };

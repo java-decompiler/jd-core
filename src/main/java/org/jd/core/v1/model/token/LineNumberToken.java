@@ -26,6 +26,7 @@ public class LineNumberToken implements Token {
         return lineNumber;
     }
 
+    @Override
     public String toString() {
         return "LineNumberToken{" + lineNumber + "}";
     }

@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class ElementValueEnumConstValue implements ElementValue {
+public class ElementValueEnumConstValue implements AttributeElementValue {
     protected String descriptor;
     protected String constName;
 

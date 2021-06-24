@@ -9,6 +9,7 @@ package org.jd.core.v1.printer;
 
 public class PlainTextMetaPrinter extends PlainTextPrinter {
     // --- Printer --- //
+    @Override
     public void printStringConstant(String constant, String ownerInternalName) {
         sb.append(constant);
         sb.append("<META-STRING ownerInternalName='");
@@ -16,6 +17,7 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
         sb.append("'/>");
     }
 
+    @Override
     public void printDeclaration(int type, String internalTypeName, String name, String descriptor) {
         sb.append(name);
         sb.append("<META-DECLARATION type='");
@@ -27,6 +29,7 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
         sb.append("'/>");
     }
 
+    @Override
     public void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) {
         sb.append(name);
         sb.append("<META-REFERENCE type='");
@@ -40,6 +43,7 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
         sb.append("'/>");
     }
 
+    @Override
     public void startLine(int lineNumber) {
         printLineNumber(lineNumber);
 
@@ -47,6 +51,7 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
             sb.append(TAB);
     }
 
+    @Override
     public void extraLine(int count) {
         sb.append("<EXTRALINE>");
         while (count-- > 0) {
@@ -56,12 +61,14 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
         sb.append("</EXTRALINE>");
     }
 
+    @Override
     public void startMarker(int type) {
         sb.append("<MARKER type='");
         printMarker(type);
         sb.append("'>");
     }
 
+    @Override
     public void endMarker(int type) {
         sb.append("</MARKER type='");
         printMarker(type);

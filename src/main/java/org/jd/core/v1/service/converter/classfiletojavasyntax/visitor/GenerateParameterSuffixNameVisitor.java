@@ -29,7 +29,7 @@ public class GenerateParameterSuffixNameVisitor extends AbstractNopTypeArgumentV
             case FLAG_LONG : suffix = "Long"; break;
             case FLAG_SHORT : suffix = "Short"; break;
             case FLAG_BOOLEAN : suffix = "Boolean"; break;
-            default: assert false;
+            default: throw new IllegalStateException();
         }
     }
 

@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.classfile.ClassFile;
@@ -50,7 +49,8 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
 
     public void setFieldDeclarations(List<ClassFileFieldDeclaration> fieldDeclarations) {
         if (fieldDeclarations != null) {
-            updateFirstLineNumber(this.fieldDeclarations = fieldDeclarations);
+            this.fieldDeclarations = fieldDeclarations;
+            updateFirstLineNumber(this.fieldDeclarations);
         }
     }
 
@@ -60,7 +60,8 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
 
     public void setMethodDeclarations(List<ClassFileConstructorOrMethodDeclaration> methodDeclarations) {
         if (methodDeclarations != null) {
-            updateFirstLineNumber(this.methodDeclarations = methodDeclarations);
+            this.methodDeclarations = methodDeclarations;
+            updateFirstLineNumber(this.methodDeclarations);
         }
     }
 
@@ -70,7 +71,8 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
 
     public void setInnerTypeDeclarations(List<ClassFileTypeDeclaration> innerTypeDeclarations) {
         if (innerTypeDeclarations != null) {
-            updateFirstLineNumber(this.innerTypeDeclarations = innerTypeDeclarations);
+            this.innerTypeDeclarations = innerTypeDeclarations;
+            updateFirstLineNumber(this.innerTypeDeclarations);
 
             innerTypeMap = new HashMap<>();
 
@@ -83,7 +85,7 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     public ClassFileTypeDeclaration getInnerTypeDeclaration(String internalName) {
         ClassFileTypeDeclaration declaration = innerTypeMap.get(internalName);
 
-        if ((declaration == null) && (outerBodyDeclaration != null)) {
+        if (declaration == null && outerBodyDeclaration != null) {
             return outerBodyDeclaration.getInnerTypeDeclaration(internalName);
         }
 
@@ -99,13 +101,12 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     }
 
     protected void updateFirstLineNumber(List<? extends ClassFileMemberDeclaration> members) {
+        int lineNumber;
         for (ClassFileMemberDeclaration member : members) {
-            int lineNumber = member.getFirstLineNumber();
+            lineNumber = member.getFirstLineNumber();
 
             if (lineNumber > 0) {
-                if (firstLineNumber == 0) {
-                    firstLineNumber = lineNumber;
-                } else if (firstLineNumber > lineNumber) {
+                if (firstLineNumber == 0 || firstLineNumber > lineNumber) {
                     firstLineNumber = lineNumber;
                 }
 

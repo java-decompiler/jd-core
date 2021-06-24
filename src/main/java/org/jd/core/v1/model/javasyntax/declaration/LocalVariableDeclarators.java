@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.util.DefaultList;
@@ -12,10 +11,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class LocalVariableDeclarators extends DefaultList<LocalVariableDeclarator> implements BaseLocalVariableDeclarator {
-
-	private static final long serialVersionUID = 1L;
-
-	public LocalVariableDeclarators() {}
+    private static final long serialVersionUID = 1L;
 
     public LocalVariableDeclarators(int capacity) {
         super(capacity);
@@ -23,7 +19,9 @@ public class LocalVariableDeclarators extends DefaultList<LocalVariableDeclarato
 
     public LocalVariableDeclarators(Collection<LocalVariableDeclarator> collection) {
         super(collection);
-        assert (collection.size() > 1) : "Uses 'LocalVariableDeclarator' instead";
+        if (collection.size() <= 1) {
+            throw new IllegalArgumentException("Use 'LocalVariableDeclarator' instead");
+        }
     }
 
     @Override

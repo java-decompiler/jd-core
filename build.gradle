@@ -1,4 +1,4 @@
-apply plugin: 'java-library'
+apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
@@ -46,15 +46,15 @@ dependencies {
     testImplementation 'javax.xml.bind:jaxb-api:2.3.0'
     testImplementation 'com.sun.xml.bind:jaxb-core:2.3.0'
     testImplementation 'com.sun.xml.bind:jaxb-impl:2.3.0'
-    compileOnly 'com.github.spotbugs:spotbugs:4.2.3'
+    testImplementation 'com.github.spotbugs:spotbugs-annotations:4.2.3'
 }
 
 version='1.1.4'
 
 tasks.withType(JavaCompile) {
 
-	targetCompatibility = '11'
-	sourceCompatibility = '11'
+	sourceCompatibility = '1.8'
+	targetCompatibility = '1.8'
 
     options.compilerArgs << '-Xlint:deprecation'
     options.compilerArgs << '-Xlint:unchecked'
@@ -81,6 +81,15 @@ jar {
 task sourceJar(type: Jar) {
     classifier 'sources'
     from sourceSets.main.allJava
+}
+
+configurations {
+    testRuntime.extendsFrom testImplementation
+}
+
+task copyDependencies(type: Copy) {
+   from configurations.testRuntime
+   into 'build/test-dependencies'
 }
 
 publishing {

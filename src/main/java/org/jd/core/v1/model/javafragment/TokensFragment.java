@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javafragment;
 
 import org.jd.core.v1.api.printer.Printer;
@@ -54,12 +53,14 @@ public class TokensFragment extends FlexibleFragment implements JavaFragment {
     }
 
     protected static class LineCountVisitor extends AbstractNopTokenVisitor {
-        public int lineCount = 0;
+        public int lineCount;
 
         @Override
         public void visit(LineNumberToken token) {
             lineCount++;
-            assert token.getLineNumber() == Printer.UNKNOWN_LINE_NUMBER : "LineNumberToken cannot have a known line number. Uses 'LineNumberTokensFragment' instead";
+            if (token.getLineNumber() != Printer.UNKNOWN_LINE_NUMBER) {
+                throw new IllegalArgumentException("LineNumberToken cannot have a known line number. Uses 'LineNumberTokensFragment' instead");
+            }
         }
     }
 

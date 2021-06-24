@@ -25,49 +25,51 @@ public class JavaArrayTest extends AbstractJdTest {
     @Test
     public void testJdk150Array() throws Exception {
         String internalClassName = "org/jd/core/test/Array";
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip");
-        Loader loader = new ZipLoader(is);
-        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip")) {
+            Loader loader = new ZipLoader(is);
+            String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
-        // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(": 13 */", "int[][] arrayOfInt1 = new int[1][];")));
-        assertTrue(source.matches(PatternMaker.make(": 30 */", "int[][] arrayOfInt1 = { { 0, 1, 2")));
+            // Check decompiled source code
+            assertTrue(source.matches(PatternMaker.make(": 13 */", "int[][] arrayOfInt1 = new int[1][];")));
+            assertTrue(source.matches(PatternMaker.make(": 30 */", "int[][] arrayOfInt1 = { { 0, 1, 2")));
 
-        assertTrue(source.matches(PatternMaker.make(": 52 */", "testException2(new Exception[][]", "{ { new Exception(\"1\")")));
+            assertTrue(source.matches(PatternMaker.make(": 52 */", "testException2(new Exception[][]", "{ { new Exception(\"1\")")));
 
-        assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][] { { 1,")));
+            assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][] { { 1,")));
 
-        assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][] { { 1,")));
-        assertTrue(source.matches(PatternMaker.make(": 75 */", "testInt3(new int[][][] { { { 0, 1")));
+            assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][] { { 1,")));
+            assertTrue(source.matches(PatternMaker.make(": 75 */", "testInt3(new int[][][] { { { 0, 1")));
 
-        // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+            // Recompile decompiled source code and check errors
+            assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+        }
     }
 
     @Test
     public void testJdk170Array() throws Exception {
         String internalClassName = "org/jd/core/test/Array";
-        InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
-        Loader loader = new ZipLoader(is);
-        String source = decompile(loader, new PlainTextPrinter(), internalClassName);
+        try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
+            Loader loader = new ZipLoader(is);
+            String source = decompile(loader, new PlainTextPrinter(), internalClassName);
 
-        // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(": 12 */", "int[] i1 = new int[1];")));
-        assertTrue(source.matches(PatternMaker.make(": 13 */", "int[][] i2 = new int[1][];")));
-        assertTrue(source.matches(PatternMaker.make(": 14 */", "int[][][] i3 = new int[1][][];")));
-        assertTrue(source.matches(PatternMaker.make(": 15 */", "int[][][] i4 = new int[1][2][];")));
-        assertTrue(source.matches(PatternMaker.make(": 22 */", "String[][][][] s5 = new String[1][2][][];")));
+            // Check decompiled source code
+            assertTrue(source.matches(PatternMaker.make(": 12 */", "int[] i1 = new int[1];")));
+            assertTrue(source.matches(PatternMaker.make(": 13 */", "int[][] i2 = new int[1][];")));
+            assertTrue(source.matches(PatternMaker.make(": 14 */", "int[][][] i3 = new int[1][][];")));
+            assertTrue(source.matches(PatternMaker.make(": 15 */", "int[][][] i4 = new int[1][2][];")));
+            assertTrue(source.matches(PatternMaker.make(": 22 */", "String[][][][] s5 = new String[1][2][][];")));
 
-        assertTrue(source.matches(PatternMaker.make(": 26 */", "byte[] b1 = { 1, 2 } ;")));
-        assertTrue(source.matches(PatternMaker.make(": 27 */", "byte[][] b2 = { { 1, 2 } } ;")));
-        assertTrue(source.matches(PatternMaker.make(": 28 */", "byte[][][][] b3 = { { { 3, 4 } } } ;")));
+            assertTrue(source.matches(PatternMaker.make(": 26 */", "byte[] b1 = { 1, 2 } ;")));
+            assertTrue(source.matches(PatternMaker.make(": 27 */", "byte[][] b2 = { { 1, 2 } } ;")));
+            assertTrue(source.matches(PatternMaker.make(": 28 */", "byte[][][][] b3 = { { { 3, 4 } } } ;")));
 
-        assertTrue(source.matches(PatternMaker.make(": 48 */", "testException1(new Exception[]", "{ new Exception(\"1\") } );")));
+            assertTrue(source.matches(PatternMaker.make(": 48 */", "testException1(new Exception[]", "{ new Exception(\"1\") } );")));
 
-        assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][]", "{ { 1 } ,")));
+            assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][]", "{ { 1 } ,")));
 
-        // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            // Recompile decompiled source code and check errors
+            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+        }
     }
 
     @Test
@@ -88,9 +90,10 @@ public class JavaArrayTest extends AbstractJdTest {
         assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
     }
 
+    @Override
     protected String decompile(Loader loader, Printer printer, String internalTypeName) throws Exception {
         String source = decompile(loader, printer, internalTypeName, Collections.emptyMap());
-        assertTrue(source.indexOf("// Byte code:") == -1);
+        assertEquals(-1, source.indexOf("// Byte code:"));
         return source;
     }
 }

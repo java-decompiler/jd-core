@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.reference;
 public interface ReferenceVisitor {
     void visit(AnnotationElementValue reference);
     void visit(AnnotationReference reference);
-    void visit(AnnotationReferences references);
+    void visit(AnnotationReferences<? extends AnnotationReference> references);
     void visit(ElementValueArrayInitializerElementValue reference);
     void visit(ElementValues references);
     void visit(ElementValuePair reference);

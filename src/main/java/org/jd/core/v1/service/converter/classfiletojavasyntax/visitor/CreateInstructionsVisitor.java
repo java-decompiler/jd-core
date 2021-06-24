@@ -14,7 +14,6 @@ import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.statement.ByteCodeStatement;
 import org.jd.core.v1.model.javasyntax.type.Type;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
@@ -112,21 +111,21 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
             StatementMaker statementMaker = new StatementMaker(typeMaker, localVariableMaker, comd);
             boolean containsLineNumber = (attributeCode.getAttribute("LineNumberTable") != null);
 
-            try {
-                ControlFlowGraph cfg = ControlFlowGraphMaker.make(method);
-
-                if (cfg != null) {
-                    ControlFlowGraphGotoReducer.reduce(cfg);
-                    ControlFlowGraphLoopReducer.reduce(cfg);
-
-                    if (ControlFlowGraphReducer.reduce(cfg)) {
-                        comd.setStatements(statementMaker.make(cfg));
-                    } else {
-                        comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
+            List<ControlFlowGraphReducer> preferredReducers = ControlFlowGraphReducer.getPreferredReducers(method);
+            
+            boolean reduced = false;
+            for (ControlFlowGraphReducer controlFlowGraphReducer : preferredReducers) {
+                try {
+                    if (controlFlowGraphReducer.reduce()) {
+                        comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph()));
+                        reduced = true;
+                        break;
                     }
+                } catch (Exception e) {
+                    assert ExceptionUtil.printStackTrace(e);
                 }
-            } catch (Exception e) {
-                assert ExceptionUtil.printStackTrace(e);
+            }
+            if (!reduced) {
                 comd.setStatements(new ByteCodeStatement(ByteCodeWriter.write("// ", method)));
             }
 

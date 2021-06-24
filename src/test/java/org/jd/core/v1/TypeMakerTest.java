@@ -7,7 +7,6 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.apache.commons.collections4.iterators.AbstractUntypedIteratorDecorator;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
@@ -16,11 +15,15 @@ import org.jd.core.v1.model.javasyntax.type.TypeArguments;
 import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
 
 import java.io.InputStream;
 import java.util.*;
 
+import junit.framework.TestCase;
+
+@SuppressWarnings("all")
 public class TypeMakerTest extends TestCase {
     protected TypeMaker typeMaker = new TypeMaker(new ClassPathLoader());
 
@@ -93,9 +96,9 @@ public class TypeMakerTest extends TestCase {
 
     @Test
     public void testThread() throws Exception {
-        ObjectType ot = typeMaker.makeFromInternalTypeName("java/lang/Thread");
+        ObjectType ot = typeMaker.makeFromInternalTypeName(StringConstants.JAVA_LANG_THREAD);
 
-        assertEquals("java/lang/Thread", ot.getInternalName());
+        assertEquals(StringConstants.JAVA_LANG_THREAD, ot.getInternalName());
         assertEquals("java.lang.Thread", ot.getQualifiedName());
         assertEquals("Thread", ot.getName());
     }
@@ -139,8 +142,8 @@ public class TypeMakerTest extends TestCase {
 
     @Test
     public void testClassIsAssignableFromObject() throws Exception {
-        ObjectType parent = typeMaker.makeFromInternalTypeName("java/lang/Class");
-        ObjectType child = typeMaker.makeFromInternalTypeName("java/lang/Object");
+        ObjectType parent = typeMaker.makeFromInternalTypeName(StringConstants.JAVA_LANG_CLASS);
+        ObjectType child = typeMaker.makeFromInternalTypeName(StringConstants.JAVA_LANG_OBJECT);
 
         assertNotNull(parent);
         assertNotNull(child);
@@ -151,7 +154,7 @@ public class TypeMakerTest extends TestCase {
     public void testObjectIsAssignableFromSafeNumberComparator() throws Exception {
         InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip");
         TypeMaker typeMaker = new TypeMaker(new ZipLoader(is));
-        ObjectType parent = typeMaker.makeFromInternalTypeName("java/lang/Object");
+        ObjectType parent = typeMaker.makeFromInternalTypeName(StringConstants.JAVA_LANG_OBJECT);
         ObjectType child = typeMaker.makeFromInternalTypeName("org/jd/core/test/OuterClass$SafeNumberComparator");
 
         assertNotNull(parent);
@@ -212,7 +215,7 @@ public class TypeMakerTest extends TestCase {
     @Test
     public void testListAndArrayListAssignment() throws Exception {
         List list1 = null;
-        ArrayList list2 = null;
+        List list2 = null;
 
         ObjectType ot1 = otList;
         ObjectType ot2 = otArrayList;
@@ -227,7 +230,7 @@ public class TypeMakerTest extends TestCase {
     @Test
     public void testListNumberAndArrayListNumberAssignment() throws Exception {
         List<Number> list1 = null;
-        ArrayList<Number> list2 = null;
+        List<Number> list2 = null;
 
         ObjectType ot1 = otList.createType(otNumber);
         ObjectType ot2 = otArrayList.createType(otNumber);
@@ -287,7 +290,7 @@ public class TypeMakerTest extends TestCase {
     @Test
     public void testListNumberAndArrayListIntegerAssignment() throws Exception {
         List<Number> list1 = null;
-        ArrayList<Integer> list2 = null;
+        List<Integer> list2 = null;
 
         ObjectType ot1 = otList.createType(otNumber);
         ObjectType ot2 = otArrayList.createType(otInteger);

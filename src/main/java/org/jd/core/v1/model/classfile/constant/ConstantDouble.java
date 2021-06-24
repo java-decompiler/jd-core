@@ -11,7 +11,7 @@ public class ConstantDouble extends ConstantValue {
     protected double value;
 
     public ConstantDouble(double value) {
-        super(CONSTANT_Double);
+        super(CONSTANT_DOUBLE);
         this.value = value;
     }
 

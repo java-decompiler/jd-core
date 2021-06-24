@@ -10,13 +10,17 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 import org.jd.core.v1.model.javasyntax.expression.*;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.util.DefaultList;
+import org.jd.core.v1.util.StringConstants;
 
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
 public class StringConcatenationUtil {
+
+    private StringConcatenationUtil() {
+        super();
+    }
 
     public static Expression create(Expression expression, int lineNumber, String typeName) {
         if (expression.isMethodInvocationExpression()) {
@@ -63,11 +67,11 @@ public class StringConcatenationUtil {
     }
 
     public static Expression create(String recipe, BaseExpression parameters) {
-        StringTokenizer st = new StringTokenizer(recipe, "\u0001", true);
+        StringTokenizer st = new StringTokenizer(recipe, StringConstants.START_OF_HEADING, true);
 
         if (st.hasMoreTokens()) {
             String token = st.nextToken();
-            Expression expression = token.equals("\u0001") ? createFirstStringConcatenationItem(parameters.getFirst()) : new StringConstantExpression(token);
+            Expression expression = token.equals(StringConstants.START_OF_HEADING) ? createFirstStringConcatenationItem(parameters.getFirst()) : new StringConstantExpression(token);
 
             if (parameters.isList()) {
                 DefaultList<Expression> list = parameters.getList();
@@ -75,21 +79,20 @@ public class StringConcatenationUtil {
 
                 while (st.hasMoreTokens()) {
                     token = st.nextToken();
-                    Expression e = token.equals("\u0001") ? list.get(index++) : new StringConstantExpression(token);
+                    Expression e = token.equals(StringConstants.START_OF_HEADING) ? list.get(index++) : new StringConstantExpression(token);
                     expression = new BinaryOperatorExpression(expression.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", e, 6);
                 }
             } else {
                 while (st.hasMoreTokens()) {
                     token = st.nextToken();
-                    Expression e = token.equals("\u0001") ? parameters.getFirst() : new StringConstantExpression(token);
+                    Expression e = token.equals(StringConstants.START_OF_HEADING) ? parameters.getFirst() : new StringConstantExpression(token);
                     expression = new BinaryOperatorExpression(expression.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", e, 6);
                 }
             }
 
             return expression;
-        } else {
-            return StringConstantExpression.EMPTY_STRING;
         }
+        return StringConstantExpression.EMPTY_STRING;
     }
 
     public static Expression create(BaseExpression parameters) {

@@ -4,21 +4,17 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javafragment;
 
 import org.jd.core.v1.model.fragment.FlexibleFragment;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class ImportsFragment extends FlexibleFragment implements JavaFragment {
     protected static final ImportCountComparator COUNT_COMPARATOR = new ImportCountComparator();
 
-    protected final HashMap<String, ImportsFragment.Import> importMap = new HashMap<>();
+    protected final Map<String, Import> importMap = new HashMap<>();
 
     public ImportsFragment(int weight) {
         super(0, -1, -1, weight, "Imports");
@@ -39,10 +35,9 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
 
         if (imp == null) {
             return false;
-        } else {
-            imp.incCounter();
-            return true;
         }
+        imp.incCounter();
+        return true;
     }
 
     public boolean isEmpty() {
@@ -59,7 +54,9 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
 
     @Override
     public int getLineCount() {
-        assert (lineCount != -1) : "Call initLineCounts() before";
+        if (lineCount == -1) {
+            throw new IllegalStateException("Call initLineCounts() before");
+        }
         return lineCount;
     }
 
@@ -67,24 +64,18 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
         int lineCount = getLineCount();
         int size = importMap.size();
 
-        if (lineCount < size) {
-            DefaultList<Import> imports = new DefaultList<>(importMap.values());
-
-            imports.sort(COUNT_COMPARATOR);
-
-            // Remove less used imports
-            List<Import> subList = imports.subList(lineCount, size);
-
-            for (Import imp0rt : subList) {
-                importMap.remove(imp0rt.getInternalName());
-            }
-
-            subList.clear();
-
-            return imports;
-        } else {
+        if (lineCount >= size) {
             return importMap.values();
         }
+        DefaultList<Import> imports = new DefaultList<>(importMap.values());
+        imports.sort(COUNT_COMPARATOR);
+        // Remove less used imports
+        List<Import> subList = imports.subList(lineCount, size);
+        for (Import imp0rt : subList) {
+            importMap.remove(imp0rt.getInternalName());
+        }
+        subList.clear();
+        return imports;
     }
 
     public static class Import {

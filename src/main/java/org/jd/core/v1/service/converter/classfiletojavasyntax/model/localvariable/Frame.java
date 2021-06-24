@@ -4,12 +4,14 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileLocalVariableDeclarator;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
@@ -22,15 +24,13 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLoca
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import java.util.*;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
 
 public class Frame {
     protected static final AbstractLocalVariableComparator ABSTRACT_LOCAL_VARIABLE_COMPARATOR = new AbstractLocalVariableComparator();
-    protected static final HashSet<String> CAPITALIZED_JAVA_LANGUAGE_KEYWORDS = new HashSet<>(Arrays.asList(
+    protected static final Set<String> CAPITALIZED_JAVA_LANGUAGE_KEYWORDS = new HashSet<>(Arrays.asList(
         "Abstract", "Continue", "For", "New", "Switch", "Assert", "Default", "Goto", "Package", "Synchronized",
         "Boolean", "Do", "If", "Private", "This", "Break", "Double", "Implements", "Protected", "Throw", "Byte", "Else",
         "Import", "Public", "Throws", "Case", "Enum", "Instanceof", "Return", "Transient", "Catch", "Extends", "Int",
@@ -38,11 +38,11 @@ public class Frame {
         "Volatile", "Const", "Float", "Native", "Super", "While"));
 
     protected AbstractLocalVariable[] localVariableArray = new AbstractLocalVariable[10];
-    protected HashMap<NewExpression, AbstractLocalVariable> newExpressions = null;
-    protected DefaultList<Frame> children = null;
+    protected Map<NewExpression, AbstractLocalVariable> newExpressions;
+    protected DefaultList<Frame> children;
     protected Frame parent;
     protected Statements statements;
-    protected AbstractLocalVariable exceptionLocalVariable = null;
+    protected AbstractLocalVariable exceptionLocalVariable;
 
     public Frame(Frame parent, Statements statements) {
         this.parent = parent;
@@ -50,7 +50,9 @@ public class Frame {
     }
 
     public void addLocalVariable(AbstractLocalVariable lv) {
-        assert lv.getNext() == null : "Frame.addLocalVariable(lv) : add local variable failed";
+        if (lv.getNext() != null) {
+            throw new IllegalArgumentException("Frame.addLocalVariable(lv) : add local variable failed");
+        }
 
         int index = lv.getIndex();
 
@@ -97,12 +99,11 @@ public class Frame {
             alvToMerge = null;
         }
 
-        if (alvToMerge != null) {
-            if (!lv.isAssignableFrom(typeBounds, alvToMerge) && !alvToMerge.isAssignableFrom(typeBounds, lv)) {
-                alvToMerge = null;
-            } else if ((lv.getName() != null) && (alvToMerge.getName() != null) && !lv.getName().equals(alvToMerge.getName())) {
-                alvToMerge = null;
-            }
+        if (alvToMerge != null
+                && ((!lv.isAssignableFrom(typeBounds, alvToMerge) && !alvToMerge.isAssignableFrom(typeBounds, lv))
+                        || (lv.getName() != null && alvToMerge.getName() != null
+                                && !lv.getName().equals(alvToMerge.getName())))) {
+            alvToMerge = null;
         }
 
         if (alvToMerge == null) {
@@ -129,13 +130,15 @@ public class Frame {
                     Type t = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType)plv.getType(), (PrimitiveType)plvToMergeType.getType());
 
                     if (t == null) {
-                        t = PrimitiveType.TYPE_INT;
+                        t = TYPE_INT;
                     }
 
                     plv.setType((PrimitiveType)t.createType(type.getDimension()));
                 }
             } else {
-                assert (type.isPrimitiveType() == alvToMergeType.isPrimitiveType()) && (type.isObjectType() == alvToMergeType.isObjectType()) && (type.isGenericType() == alvToMergeType.isGenericType()) : "Frame.mergeLocalVariable(lv) : merge local variable failed";
+                if (type.isPrimitiveType() != alvToMergeType.isPrimitiveType() || type.isObjectType() != alvToMergeType.isObjectType() || type.isGenericType() != alvToMergeType.isGenericType()) {
+                    throw new IllegalArgumentException("Frame.mergeLocalVariable(lv) : merge local variable failed");
+                }
 
                 if (type.isPrimitiveType()) {
                     PrimitiveLocalVariable plv = (PrimitiveLocalVariable)lv;
@@ -143,7 +146,7 @@ public class Frame {
                     if (alvToMerge.isAssignableFrom(typeBounds, lv) || localVariableMaker.isCompatible(alvToMerge, lv.getType())) {
                         plv.setType((PrimitiveType)alvToMergeType);
                     } else {
-                        plv.setType(PrimitiveType.TYPE_INT);
+                        plv.setType(TYPE_INT);
                     }
                 } else if (type.isObjectType()) {
                     ObjectLocalVariable olv = (ObjectLocalVariable)lv;
@@ -165,7 +168,7 @@ public class Frame {
         int index = lv.getIndex();
         AbstractLocalVariable alvToRemove;
 
-        if ((index < localVariableArray.length) && (localVariableArray[index] == lv)) {
+        if (index < localVariableArray.length && localVariableArray[index] == lv) {
             alvToRemove = lv;
         } else {
             alvToRemove = null;
@@ -193,20 +196,22 @@ public class Frame {
     public void close() {
         // Update type for 'new' expression
         if (newExpressions != null) {
+            ObjectType ot1;
+            ObjectType ot2;
             for (Map.Entry<NewExpression, AbstractLocalVariable> entry : newExpressions.entrySet()) {
-                ObjectType ot1 = entry.getKey().getObjectType();
-                ObjectType ot2 = (ObjectType) entry.getValue().getType();
+                ot1 = entry.getKey().getObjectType();
+                ot2 = (ObjectType) entry.getValue().getType();
 
-                if ((ot1.getTypeArguments() == null) && (ot2.getTypeArguments() != null)) {
+                if (ot1.getTypeArguments() == null && ot2.getTypeArguments() != null) {
                     entry.getKey().setObjectType(ot1.createType(ot2.getTypeArguments()));
                 }
             }
         }
     }
 
-    public void createNames(HashSet<String> parentNames) {
-        HashSet<String> names = new HashSet<>(parentNames);
-        HashMap<Type, Boolean> types = new HashMap<>();
+    public void createNames(Set<String> parentNames) {
+        Set<String> names = new HashSet<>(parentNames);
+        Map<Type, Boolean> types = new HashMap<>();
         int length = localVariableArray.length;
 
         for (int i=0; i<length; i++) {
@@ -220,12 +225,8 @@ public class Frame {
                     // Unique type
                     types.put(lv.getType(), Boolean.FALSE);
                 }
-                if (lv.name != null) {
-                    if (names.contains(lv.name)) {
-                        lv.name = null;
-                    } else {
-                        names.add(lv.name);
-                    }
+                if (lv.name != null && !names.add(lv.name)) {
+                    lv.name = null;
                 }
                 assert lv != lv.getNext();
                 lv = lv.getNext();
@@ -245,8 +246,9 @@ public class Frame {
         if (! types.isEmpty()) {
             GenerateLocalVariableNameVisitor visitor = new GenerateLocalVariableNameVisitor(names, types);
 
+            AbstractLocalVariable lv;
             for (int i=0; i<length; i++) {
-                AbstractLocalVariable lv = localVariableArray[i];
+                lv = localVariableArray[i];
 
                 while (lv != null) {
                     if (lv.name == null) {
@@ -271,7 +273,6 @@ public class Frame {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void updateLocalVariableInForStatements(TypeMaker typeMaker) {
         // Recursive call first
         if (children != null) {
@@ -282,7 +283,7 @@ public class Frame {
 
         // Split local variable ranges in init 'for' statements
         SearchLocalVariableVisitor searchLocalVariableVisitor = new SearchLocalVariableVisitor();
-        HashSet<AbstractLocalVariable> undeclaredInExpressionStatements = new HashSet<>();
+        Set<AbstractLocalVariable> undeclaredInExpressionStatements = new HashSet<>();
 
         for (Statement statement : statements) {
             if (statement.isForStatement()) {
@@ -311,7 +312,7 @@ public class Frame {
         }
 
         SearchUndeclaredLocalVariableVisitor searchUndeclaredLocalVariableVisitor = new SearchUndeclaredLocalVariableVisitor();
-        HashMap<AbstractLocalVariable, List<ClassFileForStatement>> undeclaredInForStatements = new HashMap<>();
+        Map<AbstractLocalVariable, List<ClassFileForStatement>> undeclaredInForStatements = new HashMap<>();
 
         for (Statement statement : statements) {
             if (statement.isForStatement()) {
@@ -323,11 +324,7 @@ public class Frame {
                     searchUndeclaredLocalVariableVisitor.getVariables().removeAll(undeclaredInExpressionStatements);
 
                     for (AbstractLocalVariable lv : searchUndeclaredLocalVariableVisitor.getVariables()) {
-                        List<ClassFileForStatement> list = undeclaredInForStatements.get(lv);
-                        if (list == null) {
-                            undeclaredInForStatements.put(lv, list = new ArrayList<>());
-                        }
-                        list.add(fs);
+                        undeclaredInForStatements.computeIfAbsent(lv, k -> new ArrayList<>()).add(fs);
                     }
                 }
             }
@@ -336,13 +333,17 @@ public class Frame {
         if (!undeclaredInForStatements.isEmpty()) {
             CreateLocalVariableVisitor createLocalVariableVisitor = new CreateLocalVariableVisitor(typeMaker);
 
+            List<ClassFileForStatement> listFS;
+            AbstractLocalVariable lv;
+            Iterator<ClassFileForStatement> iteratorFS;
+            ClassFileForStatement firstFS;
             for (Map.Entry<AbstractLocalVariable, List<ClassFileForStatement>> entry : undeclaredInForStatements.entrySet()) {
-                List<ClassFileForStatement> listFS = entry.getValue();
+                listFS = entry.getValue();
 
                 // Split local variable range
-                AbstractLocalVariable lv = entry.getKey();
-                Iterator<ClassFileForStatement> iteratorFS = listFS.iterator();
-                ClassFileForStatement firstFS = iteratorFS.next();
+                lv = entry.getKey();
+                iteratorFS = listFS.iterator();
+                firstFS = iteratorFS.next();
 
                 while (iteratorFS.hasNext()) {
                     createNewLocalVariable(createLocalVariableVisitor, iteratorFS.next(), lv);
@@ -350,7 +351,7 @@ public class Frame {
 
                 if (lv.getFrame() == this) {
                     lv.setFromOffset(firstFS.getFromOffset());
-                    lv.setToOffset(firstFS.getToOffset(), true);
+                    lv.setToOffset(firstFS.getToOffset());
                 } else {
                     createNewLocalVariable(createLocalVariableVisitor, firstFS, lv);
 
@@ -363,20 +364,23 @@ public class Frame {
     }
 
     protected void createNewLocalVariable(CreateLocalVariableVisitor createLocalVariableVisitor, ClassFileForStatement fs, AbstractLocalVariable lv) {
-        int fromOffset = fs.getFromOffset(), toOffset = fs.getToOffset();
+        int fromOffset = fs.getFromOffset();
+        int toOffset = fs.getToOffset();
         createLocalVariableVisitor.init(lv.getIndex(), fromOffset);
         lv.accept(createLocalVariableVisitor);
         AbstractLocalVariable newLV = createLocalVariableVisitor.getLocalVariable();
 
-        newLV.setToOffset(toOffset, true);
+        newLV.setToOffset(toOffset);
         addLocalVariable(newLV);
         Iterator<LocalVariableReference> iteratorLVR = lv.getReferences().iterator();
 
+        LocalVariableReference lvr;
+        int offset;
         while (iteratorLVR.hasNext()) {
-            LocalVariableReference lvr = iteratorLVR.next();
-            int offset = ((ClassFileLocalVariableReferenceExpression) lvr).getOffset();
+            lvr = iteratorLVR.next();
+            offset = ((ClassFileLocalVariableReferenceExpression) lvr).getOffset();
 
-            if ((fromOffset <= offset) && (offset <= toOffset)) {
+            if (fromOffset <= offset && offset <= toOffset) {
                 lvr.setLocalVariable(newLV);
                 newLV.addReference(lvr);
                 iteratorLVR.remove();
@@ -404,25 +408,29 @@ public class Frame {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void createInlineDeclarations() {
-        HashMap<Frame, HashSet<AbstractLocalVariable>> map = createMapForInlineDeclarations();
+        Map<Frame, Set<AbstractLocalVariable>> map = createMapForInlineDeclarations();
 
         if (!map.isEmpty()) {
             SearchUndeclaredLocalVariableVisitor searchUndeclaredLocalVariableVisitor = new SearchUndeclaredLocalVariableVisitor();
 
-            for (Map.Entry<Frame, HashSet<AbstractLocalVariable>> entry : map.entrySet()) {
-                Statements statements = entry.getKey().statements;
-                ListIterator<Statement> iterator = statements.listIterator();
-                HashSet<AbstractLocalVariable> undeclaredLocalVariables = entry.getValue();
+            Statements statements;
+            ListIterator<Statement> iterator;
+            Set<AbstractLocalVariable> undeclaredLocalVariables;
+            Statement statement;
+            Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement;
+            for (Map.Entry<Frame, Set<AbstractLocalVariable>> entry : map.entrySet()) {
+                statements = entry.getKey().statements;
+                iterator = statements.listIterator();
+                undeclaredLocalVariables = entry.getValue();
 
                 while (iterator.hasNext()) {
-                    Statement statement = iterator.next();
+                    statement = iterator.next();
 
                     searchUndeclaredLocalVariableVisitor.init();
                     statement.accept(searchUndeclaredLocalVariableVisitor);
 
-                    HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement = searchUndeclaredLocalVariableVisitor.getVariables();
+                    undeclaredLocalVariablesInStatement = searchUndeclaredLocalVariableVisitor.getVariables();
                     undeclaredLocalVariablesInStatement.retainAll(undeclaredLocalVariables);
 
                     if (!undeclaredLocalVariablesInStatement.isEmpty()) {
@@ -467,20 +475,17 @@ public class Frame {
         }
     }
 
-    protected HashMap<Frame, HashSet<AbstractLocalVariable>> createMapForInlineDeclarations() {
-        HashMap<Frame, HashSet<AbstractLocalVariable>> map = new HashMap<>();
+    protected Map<Frame, Set<AbstractLocalVariable>> createMapForInlineDeclarations() {
+        Map<Frame, Set<AbstractLocalVariable>> map = new HashMap<>();
         int i = localVariableArray.length;
 
+        AbstractLocalVariable lv;
         while (i-- > 0) {
-            AbstractLocalVariable lv = localVariableArray[i];
+            lv = localVariableArray[i];
 
             while (lv != null) {
-                if ((this == lv.getFrame()) && !lv.isDeclared()) {
-                    HashSet<AbstractLocalVariable> variablesToDeclare = map.get(this);
-                    if (variablesToDeclare == null) {
-                        map.put(this, variablesToDeclare = new HashSet<>());
-                    }
-                    variablesToDeclare.add(lv);
+                if (this == lv.getFrame() && !lv.isDeclared()) {
+                    map.computeIfAbsent(this, k -> new HashSet<>()).add(lv);
                 }
                 lv = lv.getNext();
             }
@@ -489,15 +494,13 @@ public class Frame {
         return map;
     }
 
-    @SuppressWarnings("unchecked")
     protected void createInlineDeclarations(
-            HashSet<AbstractLocalVariable> undeclaredLocalVariables, HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement,
+            Set<AbstractLocalVariable> undeclaredLocalVariables, Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement,
             ListIterator<Statement> iterator, ExpressionStatement es) {
-
         if (es.getExpression().isBinaryOperatorExpression()) {
             Expression boe = es.getExpression();
 
-            if (boe.getOperator().equals("=")) {
+            if ("=".equals(boe.getOperator())) {
                 Expressions expressions = new Expressions();
 
                 splitMultiAssignment(Integer.MAX_VALUE, undeclaredLocalVariablesInStatement, expressions, boe);
@@ -515,16 +518,15 @@ public class Frame {
     }
 
     protected Expression splitMultiAssignment(
-            int toOffset, HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement, List<Expression> expressions, Expression expression) {
-
-        if (expression.isBinaryOperatorExpression() && expression.getOperator().equals("=")) {
+            int toOffset, Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement, List<Expression> expressions, Expression expression) {
+        if (expression.isBinaryOperatorExpression() && "=".equals(expression.getOperator())) {
             Expression rightExpression = splitMultiAssignment(toOffset, undeclaredLocalVariablesInStatement, expressions, expression.getRightExpression());
 
             if (expression.getLeftExpression().isLocalVariableReferenceExpression()) {
                 ClassFileLocalVariableReferenceExpression lvre = (ClassFileLocalVariableReferenceExpression)expression.getLeftExpression();
                 AbstractLocalVariable localVariable = lvre.getLocalVariable();
 
-                if (undeclaredLocalVariablesInStatement.contains(localVariable) && (localVariable.getToOffset() <= toOffset)) {
+                if (undeclaredLocalVariablesInStatement.contains(localVariable) && localVariable.getToOffset() <= toOffset) {
                     // Split multi assignment
                     if (rightExpression == expression.getRightExpression()) {
                         expressions.add(expression);
@@ -541,8 +543,7 @@ public class Frame {
     }
 
     protected LocalVariableDeclarationStatement newDeclarationStatement(
-            HashSet<AbstractLocalVariable> undeclaredLocalVariables, HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement, Expression boe) {
-
+            Set<AbstractLocalVariable> undeclaredLocalVariables, Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement, Expression boe) {
         ClassFileLocalVariableReferenceExpression reference = (ClassFileLocalVariableReferenceExpression)boe.getLeftExpression();
         AbstractLocalVariable localVariable = reference.getLocalVariable();
 
@@ -553,23 +554,17 @@ public class Frame {
         Type type = localVariable.getType();
         VariableInitializer variableInitializer;
 
-        if (boe.getRightExpression().isNewInitializedArray()) {
-            if (type.isObjectType() && (((ObjectType)type).getTypeArguments() != null)) {
-                variableInitializer = new ExpressionVariableInitializer(boe.getRightExpression());
-            } else {
-                variableInitializer = ((NewInitializedArray) boe.getRightExpression()).getArrayInitializer();
-            }
-        } else {
+        if (!boe.getRightExpression().isNewInitializedArray() || (type.isObjectType() && ((ObjectType)type).getTypeArguments() != null)) {
             variableInitializer = new ExpressionVariableInitializer(boe.getRightExpression());
+        } else {
+            variableInitializer = ((NewInitializedArray) boe.getRightExpression()).getArrayInitializer();
         }
 
         return new LocalVariableDeclarationStatement(type, new ClassFileLocalVariableDeclarator(boe.getLineNumber(), reference.getLocalVariable(), variableInitializer));
     }
 
-    @SuppressWarnings("unchecked")
     protected void createInlineDeclarations(
-            HashSet<AbstractLocalVariable> undeclaredLocalVariables, HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement, ClassFileForStatement fs) {
-
+            Set<AbstractLocalVariable> undeclaredLocalVariables, Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement, ClassFileForStatement fs) {
         BaseExpression init = fs.getInit();
 
         if (init != null) {
@@ -599,21 +594,16 @@ public class Frame {
     }
 
     protected void updateForStatement(
-            HashSet<AbstractLocalVariable> undeclaredLocalVariables, HashSet<AbstractLocalVariable> undeclaredLocalVariablesInStatement,
+            Set<AbstractLocalVariable> undeclaredLocalVariables, Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement,
             ClassFileForStatement forStatement, Expression init) {
-
-        if (!init.isBinaryOperatorExpression()) {
-            return;
-        }
-
-        if (!init.getLeftExpression().isLocalVariableReferenceExpression()) {
+        if (!init.isBinaryOperatorExpression() || !init.getLeftExpression().isLocalVariableReferenceExpression()) {
             return;
         }
 
         ClassFileLocalVariableReferenceExpression reference = (ClassFileLocalVariableReferenceExpression)init.getLeftExpression();
         AbstractLocalVariable localVariable = reference.getLocalVariable();
 
-        if (localVariable.isDeclared() || (localVariable.getToOffset() > forStatement.getToOffset())) {
+        if (localVariable.isDeclared() || localVariable.getToOffset() > forStatement.getToOffset()) {
             return;
         }
 
@@ -629,27 +619,25 @@ public class Frame {
         forStatement.setInit(null);
     }
 
-    @SuppressWarnings("unchecked")
     protected void updateForStatement(
-            HashSet<AbstractLocalVariable> variablesToDeclare, HashSet<AbstractLocalVariable> foundVariables,
+            Set<AbstractLocalVariable> variablesToDeclare, Set<AbstractLocalVariable> foundVariables,
             ClassFileForStatement forStatement, Expressions init) {
-
         DefaultList<Expression> boes = new DefaultList<>();
         DefaultList<AbstractLocalVariable> localVariables = new DefaultList<>();
-        Type type0 = null, type1 = null;
-        int minDimension = 0, maxDimension = 0;
+        Type type0 = null;
+        Type type1 = null;
+        int minDimension = 0;
+        int maxDimension = 0;
 
+        AbstractLocalVariable localVariable;
         for (Expression expression : init) {
-            if (!expression.isBinaryOperatorExpression()) {
-                return;
-            }
-            if (!expression.getLeftExpression().isLocalVariableReferenceExpression()) {
+            if (!expression.isBinaryOperatorExpression() || !expression.getLeftExpression().isLocalVariableReferenceExpression()) {
                 return;
             }
 
-            AbstractLocalVariable localVariable = ((ClassFileLocalVariableReferenceExpression)expression.getLeftExpression()).getLocalVariable();
+            localVariable = ((ClassFileLocalVariableReferenceExpression)expression.getLeftExpression()).getLocalVariable();
 
-            if (localVariable.isDeclared() || (localVariable.getToOffset() > forStatement.getToOffset())) {
+            if (localVariable.isDeclared() || localVariable.getToOffset() > forStatement.getToOffset()) {
                 return;
             }
 
@@ -670,7 +658,7 @@ public class Frame {
                     type0 = type;
                     type1 = type.createType(type1.getDimension());
                     type2 = type.createType(type2.getDimension());
-                } else if (!type1.equals(type2) && !type0.equals(type2.createType(0))) {
+                } else if (!type1.equals(type2) && type0 != null && !type0.equals(type2.createType(0))) {
                     return;
                 }
 
@@ -703,16 +691,18 @@ public class Frame {
         forStatement.setInit(null);
     }
 
-    @SuppressWarnings("unchecked")
     protected LocalVariableDeclarators createDeclarators1(DefaultList<Expression> boes, boolean setDimension) {
         LocalVariableDeclarators declarators = new LocalVariableDeclarators(boes.size());
 
+        ClassFileLocalVariableReferenceExpression reference;
+        VariableInitializer variableInitializer;
+        LocalVariableDeclarator declarator;
         for (Expression boe : boes) {
-            ClassFileLocalVariableReferenceExpression reference = (ClassFileLocalVariableReferenceExpression) boe.getLeftExpression();
-            VariableInitializer variableInitializer = boe.getRightExpression().isNewInitializedArray() ?
+            reference = (ClassFileLocalVariableReferenceExpression) boe.getLeftExpression();
+            variableInitializer = boe.getRightExpression().isNewInitializedArray() ?
                     ((NewInitializedArray) boe.getRightExpression()).getArrayInitializer() :
                     new ExpressionVariableInitializer(boe.getRightExpression());
-            LocalVariableDeclarator declarator = new ClassFileLocalVariableDeclarator(boe.getLineNumber(), reference.getLocalVariable(), variableInitializer);
+            declarator = new ClassFileLocalVariableDeclarator(boe.getLineNumber(), reference.getLocalVariable(), variableInitializer);
 
             if (setDimension) {
                 declarator.setDimension(reference.getLocalVariable().getDimension());
@@ -724,13 +714,13 @@ public class Frame {
         return declarators;
     }
 
-    @SuppressWarnings("unchecked")
     protected void createStartBlockDeclarations() {
         int addIndex = -1;
         int i = localVariableArray.length;
 
+        AbstractLocalVariable lv;
         while (i-- > 0) {
-            AbstractLocalVariable lv = localVariableArray[i];
+            lv = localVariableArray[i];
 
             while (lv != null) {
                 if (!lv.isDeclared()) {
@@ -753,8 +743,10 @@ public class Frame {
             // Insert declarations after 'super' call invocation => Search index of SuperConstructorInvocationExpression.
             int len = statements.size();
 
+            Statement statement;
             while (addIndex < len) {
-                Statement statement = statements.get(addIndex++);
+                statement = statements.get(addIndex);
+                addIndex++;
                 if (statement.isExpressionStatement()) {
                     Expression expression = statement.getExpression();
                     if (expression.isSuperConstructorInvocationExpression() || expression.isConstructorInvocationExpression()) {
@@ -771,7 +763,6 @@ public class Frame {
         return addIndex;
     }
 
-    @SuppressWarnings("unchecked")
     protected void mergeDeclarations() {
         int size = statements.size();
 
@@ -779,9 +770,8 @@ public class Frame {
             DefaultList<LocalVariableDeclarationStatement> declarations = new DefaultList<>();
             ListIterator<Statement> iterator = statements.listIterator();
 
+            Statement previous;
             while (iterator.hasNext()) {
-                Statement previous;
-
                 do {
                     previous = iterator.next();
                 } while (!previous.isLocalVariableDeclarationStatement() && iterator.hasNext());
@@ -797,16 +787,21 @@ public class Frame {
                     declarations.clear();
                     declarations.add(lvds1);
 
+                    Statement statement;
+                    LocalVariableDeclarationStatement lvds2;
+                    int lineNumber2;
+                    Type type2;
+                    int dimension;
                     while (iterator.hasNext()) {
-                        Statement statement = iterator.next();
+                        statement = iterator.next();
 
                         if (!statement.isLocalVariableDeclarationStatement()) {
                             iterator.previous();
                             break;
                         }
 
-                        LocalVariableDeclarationStatement lvds2 = (LocalVariableDeclarationStatement) statement;
-                        int lineNumber2 = lvds2.getLocalVariableDeclarators().getLineNumber();
+                        lvds2 = (LocalVariableDeclarationStatement) statement;
+                        lineNumber2 = lvds2.getLocalVariableDeclarators().getLineNumber();
 
                         if (lineNumber1 != lineNumber2) {
                             iterator.previous();
@@ -815,7 +810,7 @@ public class Frame {
 
                         lineNumber1 = lineNumber2;
 
-                        Type type2 = lvds2.getType();
+                        type2 = lvds2.getType();
 
                         if (type1.isPrimitiveType() && type2.isPrimitiveType()) {
                             Type type = PrimitiveTypeUtil.getCommonPrimitiveType((PrimitiveType)type1, (PrimitiveType)type2);
@@ -833,7 +828,7 @@ public class Frame {
                             break;
                         }
 
-                        int dimension = type2.getDimension();
+                        dimension = type2.getDimension();
 
                         if (minDimension > dimension) {
                             minDimension = dimension;
@@ -868,12 +863,12 @@ public class Frame {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected LocalVariableDeclarators createDeclarators2(DefaultList<LocalVariableDeclarationStatement> declarations, boolean setDimension) {
         LocalVariableDeclarators declarators = new LocalVariableDeclarators(declarations.size());
 
+        LocalVariableDeclarator declarator;
         for (LocalVariableDeclarationStatement declaration : declarations) {
-            LocalVariableDeclarator declarator = (LocalVariableDeclarator)declaration.getLocalVariableDeclarators();
+            declarator = (LocalVariableDeclarator)declaration.getLocalVariableDeclarators();
 
             if (setDimension) {
                 declarator.setDimension(declaration.getType().getDimension());
@@ -889,11 +884,11 @@ public class Frame {
         protected static final String[] INTEGER_NAMES = { "i", "j", "k", "m", "n" };
 
         protected StringBuilder sb = new StringBuilder();
-        protected HashSet<String> blackListNames;
-        protected HashMap<Type, Boolean> types;
+        protected Set<String> blackListNames;
+        protected Map<Type, Boolean> types;
         protected String name;
 
-        public GenerateLocalVariableNameVisitor(HashSet<String> blackListNames, HashMap<Type, Boolean> types) {
+        public GenerateLocalVariableNameVisitor(Set<String> blackListNames, Map<Type, Boolean> types) {
             this.blackListNames = blackListNames;
             this.types = types;
         }
@@ -914,7 +909,8 @@ public class Frame {
                 case FLAG_INT :
                     for (String in : INTEGER_NAMES) {
                         if (!blackListNames.contains(in)) {
-                            blackListNames.add(name = in);
+                            name = in;
+                            blackListNames.add(name);
                             return;
                         }
                     }
@@ -946,29 +942,23 @@ public class Frame {
         protected void visit(Type type, String str) {
             sb.setLength(0);
 
-            switch (type.getDimension()) {
-                case 0:
-                    if ("Class".equals(str)) {
-                        sb.append("clazz");
-                    } else if ("String".equals(str)) {
-                        sb.append("str");
-                    } else if ("Boolean".equals(str)) {
-                        sb.append("bool");
-                    } else {
-                        uncapitalize(str);
-                        if (CAPITALIZED_JAVA_LANGUAGE_KEYWORDS.contains(str)) {
-                            sb.append("_");
-                        }
+            if (type.getDimension() == 0) {
+                if ("Class".equals(str)) {
+                    sb.append("clazz");
+                } else if ("String".equals(str)) {
+                    sb.append("str");
+                } else if ("Boolean".equals(str)) {
+                    sb.append("bool");
+                } else {
+                    uncapitalize(str);
+                    if (CAPITALIZED_JAVA_LANGUAGE_KEYWORDS.contains(str)) {
+                        sb.append("_");
                     }
-                    break;
-                default:
-//                case 1:
-                    sb.append("arrayOf");
-                    capitalize(str);
-                    break;
-//                default:
-//                    sb.append("arrayOfArray");
-//                    break;
+                }
+            } else {
+                //                case 1:
+                                    sb.append("arrayOf");
+                                    capitalize(str);
             }
 
             generate(type);
@@ -1017,25 +1007,32 @@ public class Frame {
             int counter = 1;
 
             if (types.get(type)) {
-                sb.append(counter++);
+                sb.append(counter);
+                counter++;
             }
 
             name = sb.toString();
 
             while (blackListNames.contains(name)) {
                 sb.setLength(length);
-                sb.append(counter++);
+                sb.append(counter);
+                counter++;
                 name = sb.toString();
             }
 
             blackListNames.add(name);
         }
 
-        @Override public void visit(TypeArguments type) {}
-        @Override public void visit(DiamondTypeArgument type) {}
-        @Override public void visit(WildcardExtendsTypeArgument type) {}
-        @Override public void visit(WildcardSuperTypeArgument type) {}
-        @Override public void visit(WildcardTypeArgument type) {}
+        @Override
+        public void visit(TypeArguments type) {}
+        @Override
+        public void visit(DiamondTypeArgument type) {}
+        @Override
+        public void visit(WildcardExtendsTypeArgument type) {}
+        @Override
+        public void visit(WildcardSuperTypeArgument type) {}
+        @Override
+        public void visit(WildcardTypeArgument type) {}
     }
 
     protected static class AbstractLocalVariableComparator implements Comparator<AbstractLocalVariable> {
@@ -1045,7 +1042,6 @@ public class Frame {
         }
 
         @Override
-        @SuppressFBWarnings
         public boolean equals(Object obj) {
             return false;
         }

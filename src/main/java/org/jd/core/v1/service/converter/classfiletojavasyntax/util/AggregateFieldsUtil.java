@@ -15,6 +15,10 @@ import java.util.List;
 
 public class AggregateFieldsUtil {
 
+    private AggregateFieldsUtil() {
+        super();
+    }
+
     public static void aggregate(List<ClassFileFieldDeclaration> fields) {
         if (fields != null) {
             int size = fields.size();
@@ -57,7 +61,6 @@ public class AggregateFieldsUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected static void aggregate(List<ClassFileFieldDeclaration> fields, ClassFileFieldDeclaration firstField, int firstIndex, int lastIndex) {
         if (firstIndex < lastIndex) {
             List<ClassFileFieldDeclaration> sublist = fields.subList(firstIndex + 1, lastIndex + 1);

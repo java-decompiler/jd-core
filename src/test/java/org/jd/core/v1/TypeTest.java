@@ -7,12 +7,13 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.services.javasyntax.type.visitor.PrintTypeVisitor;
 import org.junit.Test;
 
 import java.util.Arrays;
+
+import junit.framework.TestCase;
 
 public class TypeTest extends TestCase {
     @Test

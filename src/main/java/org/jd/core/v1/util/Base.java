@@ -10,16 +10,17 @@ package org.jd.core.v1.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-@SuppressWarnings("unchecked")
 public interface Base<T> extends Iterable<T> {
     default boolean isList() {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     default T getFirst() {
         return (T)this;
     }
 
+    @SuppressWarnings("unchecked")
     default T getLast() {
         return (T)this;
     }
@@ -32,12 +33,16 @@ public interface Base<T> extends Iterable<T> {
         return 1;
     }
 
+    @Override
     default Iterator<T> iterator() {
-        return new Iterator() {
+        return new Iterator<T>() {
             private boolean hasNext = true;
+            @Override
             public boolean hasNext() {
                 return hasNext;
             }
+            @Override
+            @SuppressWarnings("unchecked")
             public T next() {
                 if (hasNext) {
                     hasNext = false;
@@ -45,6 +50,7 @@ public interface Base<T> extends Iterable<T> {
                 }
                 throw new NoSuchElementException();
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }

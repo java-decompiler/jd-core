@@ -22,7 +22,7 @@ import java.util.List;
  */
 public class WriteTokenProcessor {
 
-    public void process(DecompileContext decompileContext) throws Exception {
+    public void process(DecompileContext decompileContext) {
         Printer printer = decompileContext.getPrinter();
         List<Token> tokens = decompileContext.getTokens();
         PrintTokenVisitor visitor = new PrintTokenVisitor();

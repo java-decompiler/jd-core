@@ -7,14 +7,14 @@
 
 package org.jd.core.test;
 
+import org.jd.core.v1.util.DefaultList;
+
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import org.jd.core.v1.util.DefaultList;
-
+@SuppressWarnings("all")
 public class GenericClass<T1,                                                             // Implicit 'extends Object'
                      T2 extends Object,                                                   // Explicit 'extends Object'
                      T3 extends AnnotatedClass,                                           // Extends class
@@ -27,6 +27,7 @@ public class GenericClass<T1,                                                   
         extends DefaultList<T7>
         implements Serializable, Comparable<T1> {
 
+    private static final long serialVersionUID = 1L;
     public List<List<? extends GenericClass>> list1 = new DefaultList<>();
     public List<List<? super GenericClass>> list2;
 
@@ -50,6 +51,7 @@ public class GenericClass<T1,                                                   
         return null;
     }
 
+    @SuppressWarnings("hiding")
     public <T1, T2 extends Exception> List<? extends Number> print(List<? super T1> list) throws T2, InvalidParameterException {
         // ...
         return null;
@@ -85,7 +87,7 @@ public class GenericClass<T1,                                                   
         return firstParameter;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("unused")
     public <R, T, L extends List<String>> R genericAssignment(int i, int j, String[] envs, String[] opts, String[] args, T t, L l) {
         l.add(envs[0]);
 
@@ -105,7 +107,6 @@ public class GenericClass<T1,                                                   
         return call(0);
     }
 
-    @SuppressWarnings("unchecked")
     public T1 call(int i) {
         return (T1)this;
     }

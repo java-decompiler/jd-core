@@ -11,7 +11,6 @@ import org.jd.core.v1.model.javasyntax.type.*;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS_WILDCARD;
-import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor {
     protected BaseTypeArgument result;
@@ -42,11 +41,15 @@ public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor
         result = (result == type) ? argument : new WildcardSuperTypeArgument((Type)result);
     }
 
-    @Override public void visit(DiamondTypeArgument argument) { result = argument; }
-    @Override public void visit(WildcardTypeArgument argument) { result = argument; }
+    @Override
+    public void visit(DiamondTypeArgument argument) { result = argument; }
+    @Override
+    public void visit(WildcardTypeArgument argument) { result = argument; }
 
-    @Override public void visit(PrimitiveType type) { result = type; }
-    @Override public void visit(GenericType type) { result = type; }
+    @Override
+    public void visit(PrimitiveType type) { result = type; }
+    @Override
+    public void visit(GenericType type) { result = type; }
 
     @Override
     public void visit(ObjectType type) {

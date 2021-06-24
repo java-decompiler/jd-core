@@ -12,7 +12,7 @@ public class ConstantNameAndType extends Constant {
     protected int descriptorIndex;
 
     public ConstantNameAndType(int nameIndex, int descriptorIndex) {
-        super(CONSTANT_NameAndType);
+        super(CONSTANT_NAMEANDTYPE);
         this.nameIndex = nameIndex;
         this.descriptorIndex = descriptorIndex;
     }

@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
@@ -17,6 +16,9 @@ import java.util.*;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
 
 public class ControlFlowGraphLoopReducer {
+    private ControlFlowGraphLoopReducer() {
+    }
+
     protected static final LoopComparator LOOP_COMPARATOR = new LoopComparator();
 
     public static BitSet[] buildDominatorIndexes(ControlFlowGraph cfg) {
@@ -40,13 +42,15 @@ public class ControlFlowGraphLoopReducer {
 
         boolean change;
 
+        int index;
+        BitSet dominatorIndexes;
         do {
             change = false;
 
             for (BasicBlock basicBlock : list) {
-                int index = basicBlock.getIndex();
+                index = basicBlock.getIndex();
 
-                BitSet dominatorIndexes = arrayOfDominatorIndexes[index];
+                dominatorIndexes = arrayOfDominatorIndexes[index];
 
                 initial = (BitSet)dominatorIndexes.clone();
 
@@ -55,7 +59,7 @@ public class ControlFlowGraphLoopReducer {
                 }
 
                 dominatorIndexes.set(index);
-                change |= (! initial.equals(dominatorIndexes));
+                change |= ! initial.equals(dominatorIndexes);
             }
         } while (change);
 
@@ -67,16 +71,18 @@ public class ControlFlowGraphLoopReducer {
         int length = list.size();
         BitSet[] arrayOfMemberIndexes = new BitSet[length];
 
+        BasicBlock current;
+        BitSet dominatorIndexes;
         // Identify loop members
         for (int i=0; i<length; i++) {
-            BasicBlock current = list.get(i);
-            BitSet dominatorIndexes = arrayOfDominatorIndexes[i];
+            current = list.get(i);
+            dominatorIndexes = arrayOfDominatorIndexes[i];
 
             switch (current.getType()) {
                 case TYPE_CONDITIONAL_BRANCH:
                     int index = current.getBranch().getIndex();
 
-                    if ((index >= 0) && dominatorIndexes.get(index)) {
+                    if (index >= 0 && dominatorIndexes.get(index)) {
                         // 'branch' is a dominator -> Back edge found
                         arrayOfMemberIndexes[index] = searchLoopMemberIndexes(length, arrayOfMemberIndexes[index], current, current.getBranch());
                     }
@@ -85,7 +91,7 @@ public class ControlFlowGraphLoopReducer {
                 case TYPE_GOTO:
                     index = current.getNext().getIndex();
 
-                    if ((index >= 0) && dominatorIndexes.get(index)) {
+                    if (index >= 0 && dominatorIndexes.get(index)) {
                         // 'next' is a dominator -> Back edge found
                         arrayOfMemberIndexes[index] = searchLoopMemberIndexes(length, arrayOfMemberIndexes[index], current, current.getNext());
                     }
@@ -94,7 +100,7 @@ public class ControlFlowGraphLoopReducer {
                     for (SwitchCase switchCase : current.getSwitchCases()) {
                         index = switchCase.getBasicBlock().getIndex();
 
-                        if ((index >= 0) && dominatorIndexes.get(index)) {
+                        if (index >= 0 && dominatorIndexes.get(index)) {
                             // 'switchCase' is a dominator -> Back edge found
                             arrayOfMemberIndexes[index] = searchLoopMemberIndexes(length, arrayOfMemberIndexes[index], current, switchCase.getBasicBlock());
                         }
@@ -121,16 +127,17 @@ public class ControlFlowGraphLoopReducer {
                 BasicBlock start = list.get(i);
                 BitSet startDominatorIndexes = arrayOfDominatorIndexes[i];
 
-                if ((start.getType() == TYPE_TRY_DECLARATION) && (maxOffset != start.getFromOffset()) && (maxOffset < start.getExceptionHandlers().getFirst().getBasicBlock().getFromOffset())) {
+                if (start.getType() == TYPE_TRY_DECLARATION && maxOffset != start.getFromOffset() && maxOffset < start.getExceptionHandlers().getFirst().getBasicBlock().getFromOffset()) {
                     // 'try' statement outside the loop
                     BasicBlock newStart = start.getNext();
-                    HashSet<BasicBlock> newStartPredecessors = newStart.getPredecessors();
+                    Set<BasicBlock> newStartPredecessors = newStart.getPredecessors();
 
                     // Loop in 'try' statement
                     Iterator<BasicBlock> iterator = start.getPredecessors().iterator();
 
+                    BasicBlock predecessor;
                     while (iterator.hasNext()) {
-                        BasicBlock predecessor = iterator.next();
+                        predecessor = iterator.next();
 
                         if (!startDominatorIndexes.get(predecessor.getIndex())) {
                             iterator.remove();
@@ -163,8 +170,8 @@ public class ControlFlowGraphLoopReducer {
                 searchZoneIndexes.set(start.getIndex());
 
                 if (start.getType() == TYPE_CONDITIONAL_BRANCH) {
-                    if ((start.getNext() != start) &&
-                        (start.getBranch() != start) &&
+                    if (start.getNext() != start &&
+                        start.getBranch() != start &&
                         memberIndexes.get(start.getNext().getIndex()) &&
                         memberIndexes.get(start.getBranch().getIndex()))
                     {
@@ -214,14 +221,13 @@ public class ControlFlowGraphLoopReducer {
 
         if (memberIndexes == null) {
             return visited;
-        } else {
-            memberIndexes.or(visited);
-            return memberIndexes;
         }
+        memberIndexes.or(visited);
+        return memberIndexes;
     }
 
     protected static void recursiveBackwardSearchLoopMemberIndexes(BitSet visited, BasicBlock current, BasicBlock start) {
-        if (visited.get(current.getIndex()) == false) {
+        if (!visited.get(current.getIndex())) {
             visited.set(current.getIndex());
 
             if (current != start) {
@@ -249,7 +255,7 @@ public class ControlFlowGraphLoopReducer {
         memberIndexes.clear();
         recursiveForwardSearchLoopMemberIndexes(memberIndexes, searchZoneIndexes, start, maxOffset);
 
-        HashSet<BasicBlock> members = new HashSet<>(memberIndexes.cardinality());
+        Set<BasicBlock> members = new HashSet<>(memberIndexes.cardinality());
 
         for (int i=0; i<length; i++) {
             if (memberIndexes.get(i)) {
@@ -263,11 +269,11 @@ public class ControlFlowGraphLoopReducer {
         if (start.getType() == TYPE_CONDITIONAL_BRANCH) {
             // First, check natural 'end' blocks
             int index = start.getBranch().getIndex();
-            if (memberIndexes.get(index) == false) {
+            if (!memberIndexes.get(index)) {
                 end = start.getBranch();
             } else {
                 index = start.getNext().getIndex();
-                if (memberIndexes.get(index) == false) {
+                if (!memberIndexes.get(index)) {
                     end = start.getNext();
                 }
             }
@@ -278,10 +284,10 @@ public class ControlFlowGraphLoopReducer {
             end = searchEndBasicBlock(memberIndexes, maxOffset, members);
 
             if (!end.matchType(TYPE_END|TYPE_RETURN|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END) &&
-                (end.getPredecessors().size() == 1) &&
-                (end.getPredecessors().iterator().next().getLastLineNumber() + 1 >= end.getFirstLineNumber()))
+                end.getPredecessors().size() == 1 &&
+                end.getPredecessors().iterator().next().getLastLineNumber() + 1 >= end.getFirstLineNumber())
             {
-                HashSet<BasicBlock> set = new HashSet<>();
+                Set<BasicBlock> set = new HashSet<>();
 
                 if (recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, end, null)) {
                     members.addAll(set);
@@ -299,11 +305,11 @@ public class ControlFlowGraphLoopReducer {
 
         // Extend last member
         if (end != END) {
-            HashSet<BasicBlock> m = new HashSet<>(members);
-            HashSet<BasicBlock> set = new HashSet<>();
+            Set<BasicBlock> m = new HashSet<>(members);
+            Set<BasicBlock> set = new HashSet<>();
 
             for (BasicBlock member : m) {
-                if ((member.getType() == TYPE_CONDITIONAL_BRANCH) && (member != start)) {
+                if (member.getType() == TYPE_CONDITIONAL_BRANCH && member != start) {
                     set.clear();
                     if (recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, member.getNext(), end)) {
                         members.addAll(set);
@@ -326,7 +332,7 @@ public class ControlFlowGraphLoopReducer {
             switch (member.getType()) {
                 case TYPE_CONDITIONAL_BRANCH:
                     BasicBlock bb = member.getBranch();
-                    if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                    if (!memberIndexes.get(bb.getIndex()) && maxOffset < bb.getFromOffset()) {
                         end = bb;
                         maxOffset = bb.getFromOffset();
                         break;
@@ -335,7 +341,7 @@ public class ControlFlowGraphLoopReducer {
                 case TYPE_STATEMENTS:
                 case TYPE_GOTO:
                     bb = member.getNext();
-                    if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                    if (!memberIndexes.get(bb.getIndex()) && maxOffset < bb.getFromOffset()) {
                         end = bb;
                         maxOffset = bb.getFromOffset();
                     }
@@ -343,7 +349,7 @@ public class ControlFlowGraphLoopReducer {
                 case TYPE_SWITCH_DECLARATION:
                     for (SwitchCase switchCase : member.getSwitchCases()) {
                         bb = switchCase.getBasicBlock();
-                        if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                        if (!memberIndexes.get(bb.getIndex()) && maxOffset < bb.getFromOffset()) {
                             end = bb;
                             maxOffset = bb.getFromOffset();
                         }
@@ -351,13 +357,13 @@ public class ControlFlowGraphLoopReducer {
                     break;
                 case TYPE_TRY_DECLARATION:
                     bb = member.getNext();
-                    if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                    if (!memberIndexes.get(bb.getIndex()) && maxOffset < bb.getFromOffset()) {
                         end = bb;
                         maxOffset = bb.getFromOffset();
                     }
                     for (ExceptionHandler exceptionHandler : member.getExceptionHandlers()) {
                         bb = exceptionHandler.getBasicBlock();
-                        if (!memberIndexes.get(bb.getIndex()) && (maxOffset < bb.getFromOffset())) {
+                        if (!memberIndexes.get(bb.getIndex()) && maxOffset < bb.getFromOffset()) {
                             end = bb;
                             maxOffset = bb.getFromOffset();
                         }
@@ -386,16 +392,7 @@ public class ControlFlowGraphLoopReducer {
                 }
             }
         } else if (basicBlock.getType() == TYPE_SWITCH_DECLARATION) {
-            BasicBlock lastBB = null;
-            BasicBlock previousBB = null;
-
-            for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
-                BasicBlock bb = switchCase.getBasicBlock();
-                if ((lastBB == null) || (lastBB.getFromOffset() < bb.getFromOffset())) {
-                    previousBB = lastBB;
-                    lastBB = bb;
-                }
-            }
+            BasicBlock previousBB = findPrevBB(basicBlock);
             if (previousBB != null) {
                 offset = checkSynchronizedBlockOffset(previousBB);
                 if (maxOffset < offset) {
@@ -407,8 +404,23 @@ public class ControlFlowGraphLoopReducer {
         return maxOffset;
     }
 
+    protected static BasicBlock findPrevBB(BasicBlock basicBlock) {
+        BasicBlock lastBB = null;
+        BasicBlock previousBB = null;
+
+        BasicBlock bb;
+        for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
+            bb = switchCase.getBasicBlock();
+            if (lastBB == null || lastBB.getFromOffset() < bb.getFromOffset()) {
+                previousBB = lastBB;
+                lastBB = bb;
+            }
+        }
+        return previousBB;
+    }
+
     private static int checkSynchronizedBlockOffset(BasicBlock basicBlock) {
-        if ((basicBlock.getNext().getType() == TYPE_TRY_DECLARATION) && (ByteCodeUtil.getLastOpcode(basicBlock) == 194)) { // MONITORENTER
+        if (basicBlock.getNext().getType() == TYPE_TRY_DECLARATION && ByteCodeUtil.getLastOpcode(basicBlock) == 194) { // MONITORENTER
             return checkThrowBlockOffset(basicBlock.getNext().getExceptionHandlers().getFirst().getBasicBlock());
         }
 
@@ -432,7 +444,7 @@ public class ControlFlowGraphLoopReducer {
     }
 
     protected static void recursiveForwardSearchLoopMemberIndexes(BitSet visited, BitSet searchZoneIndexes, BasicBlock current, BasicBlock target) {
-        if (!current.matchType(GROUP_END) && (visited.get(current.getIndex()) == false) && (searchZoneIndexes.get(current.getIndex()) == true)) {
+        if (!current.matchType(GROUP_END) && !visited.get(current.getIndex()) && searchZoneIndexes.get(current.getIndex())) {
             visited.set(current.getIndex());
 
             if (current != target) {
@@ -456,9 +468,9 @@ public class ControlFlowGraphLoopReducer {
 
     protected static void recursiveForwardSearchLoopMemberIndexes(BitSet visited, BitSet searchZoneIndexes, BasicBlock current, int maxOffset) {
         if (!current.matchType(TYPE_END|TYPE_LOOP_START|TYPE_LOOP_CONTINUE|TYPE_LOOP_END|TYPE_SWITCH_BREAK) &&
-            (visited.get(current.getIndex()) == false) &&
-            (searchZoneIndexes.get(current.getIndex()) == true) &&
-            (current.getFromOffset() <= maxOffset))
+            !visited.get(current.getIndex()) &&
+            searchZoneIndexes.get(current.getIndex()) &&
+            current.getFromOffset() <= maxOffset)
         {
             visited.set(current.getIndex());
 
@@ -479,27 +491,30 @@ public class ControlFlowGraphLoopReducer {
         }
     }
 
-    protected static boolean recursiveForwardSearchLastLoopMemberIndexes(HashSet<BasicBlock> members, BitSet searchZoneIndexes, HashSet<BasicBlock> set, BasicBlock current, BasicBlock end) {
-        if ((current == end) || members.contains(current) || set.contains(current)) {
+    protected static boolean recursiveForwardSearchLastLoopMemberIndexes(Set<BasicBlock> members, BitSet searchZoneIndexes, Set<BasicBlock> set, BasicBlock current, BasicBlock end) {
+        if (current == end || members.contains(current) || set.contains(current)) {
             return true;
-        } else if (current.matchType(GROUP_SINGLE_SUCCESSOR)) {
+        }
+        if (current.matchType(GROUP_SINGLE_SUCCESSOR)) {
             if (!inSearchZone(current.getNext(), searchZoneIndexes) || !predecessorsInSearchZone(current, searchZoneIndexes)) {
                 searchZoneIndexes.clear(current.getIndex());
                 return true;
-            } else {
-                set.add(current);
-                return recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, current.getNext(), end);
             }
-        } else if (current.getType() == TYPE_CONDITIONAL_BRANCH) {
+            set.add(current);
+            return recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, current.getNext(), end);
+        }
+        if (current.getType() == TYPE_CONDITIONAL_BRANCH) {
             if (!inSearchZone(current.getNext(), searchZoneIndexes) || !inSearchZone(current.getBranch(), searchZoneIndexes) || !predecessorsInSearchZone(current, searchZoneIndexes)) {
                 searchZoneIndexes.clear(current.getIndex());
                 return true;
-            } else {
-                set.add(current);
-                return recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, current.getNext(), end) |
-                       recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, current.getBranch(), end);
             }
-        } else if (current.matchType(GROUP_END)) {
+            set.add(current);
+            boolean searchResult = false;
+            searchResult |= recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, current.getNext(), end);
+            searchResult |= recursiveForwardSearchLastLoopMemberIndexes(members, searchZoneIndexes, set, current.getBranch(), end);
+            return searchResult;
+        }
+        if (current.matchType(GROUP_END)) {
             if (!predecessorsInSearchZone(current, searchZoneIndexes)) {
                 if (current.getIndex() >= 0) {
                     searchZoneIndexes.clear(current.getIndex());
@@ -530,58 +545,49 @@ public class ControlFlowGraphLoopReducer {
     }
 
     protected static BasicBlock recheckEndBlock(Set<BasicBlock> members, BasicBlock end) {
+        boolean flag;
+        BasicBlock newEnd;
         do {
-            boolean flag = false;
-
-            for (BasicBlock predecessor : end.getPredecessors()) {
-                if (!members.contains(predecessor)) {
-                    flag = true;
-                    break;
-                }
-            }
+            flag = !members.containsAll(end.getPredecessors());
 
             if (flag) {
                 break;
             }
 
             // Search new 'end' block
-            BasicBlock newEnd = null;
+            newEnd = null;
 
             for (BasicBlock member : members) {
                 if (member.matchType(GROUP_SINGLE_SUCCESSOR)) {
                     BasicBlock bb = member.getNext();
-                    if ((bb != end) && !members.contains(bb)) {
+                    if (bb != end && !members.contains(bb)) {
                         newEnd = bb;
                         break;
                     }
                 } else if (member.getType() == TYPE_CONDITIONAL_BRANCH) {
                     BasicBlock bb = member.getNext();
-                    if ((bb != end) && !members.contains(bb)) {
+                    if (bb != end && !members.contains(bb)) {
                         newEnd = bb;
                         break;
                     }
                     bb = member.getBranch();
-                    if ((bb != end) && !members.contains(bb)) {
+                    if (bb != end && !members.contains(bb)) {
                         newEnd = bb;
                         break;
                     }
                 }
             }
 
-            if ((newEnd == null) || (end.getFromOffset() >= newEnd.getFromOffset())) {
+            if (newEnd == null || end.getFromOffset() >= newEnd.getFromOffset()) {
                 break;
             }
 
             // Replace 'end' block
-            if (end.matchType(TYPE_RETURN|TYPE_RETURN_VALUE|TYPE_THROW)) {
-                members.add(end);
-                end = newEnd;
-            } else if (end.matchType(GROUP_SINGLE_SUCCESSOR) && (end.getNext() == newEnd)) {
-                members.add(end);
-                end = newEnd;
-            } else {
+            if (!end.matchType(TYPE_RETURN|TYPE_RETURN_VALUE|TYPE_THROW) && (!end.matchType(GROUP_SINGLE_SUCCESSOR) || end.getNext() != newEnd)) {
                 break;
             }
+            members.add(end);
+            end = newEnd;
         } while (false);
 
         return end;
@@ -589,7 +595,7 @@ public class ControlFlowGraphLoopReducer {
 
     protected static BasicBlock reduceLoop(Loop loop) {
         BasicBlock start = loop.getStart();
-        HashSet<BasicBlock> members = loop.getMembers();
+        Set<BasicBlock> members = loop.getMembers();
         BasicBlock end = loop.getEnd();
         int toOffset = start.getToOffset();
 
@@ -602,8 +608,9 @@ public class ControlFlowGraphLoopReducer {
         // Update predecessors
         Iterator<BasicBlock> startPredecessorIterator = start.getPredecessors().iterator();
 
+        BasicBlock predecessor;
         while (startPredecessorIterator.hasNext()) {
-            BasicBlock predecessor = startPredecessorIterator.next();
+            predecessor = startPredecessorIterator.next();
 
             if (!members.contains(predecessor)) {
                 predecessor.replace(start, loopBB);
@@ -623,7 +630,7 @@ public class ControlFlowGraphLoopReducer {
                     member.setNext(LOOP_START);
                 } else if (bb == end) {
                     member.setNext(LOOP_END);
-                } else if (!members.contains(bb) && (bb.getPredecessors().size() > 1)) {
+                } else if (!members.contains(bb) && bb.getPredecessors().size() > 1) {
                     member.setNext(newJumpBasicBlock(member, bb));
                 }
             } else if (member.getType() == TYPE_CONDITIONAL_BRANCH) {
@@ -633,7 +640,7 @@ public class ControlFlowGraphLoopReducer {
                     member.setNext(LOOP_START);
                 } else if (bb == end) {
                     member.setNext(LOOP_END);
-                } else if (!members.contains(bb) && (bb.getPredecessors().size() > 1)) {
+                } else if (!members.contains(bb) && bb.getPredecessors().size() > 1) {
                     member.setNext(newJumpBasicBlock(member, bb));
                 }
 
@@ -643,18 +650,19 @@ public class ControlFlowGraphLoopReducer {
                     member.setBranch(LOOP_START);
                 } else if (bb == end) {
                     member.setBranch(LOOP_END);
-                } else if (!members.contains(bb) && (bb.getPredecessors().size() > 1)) {
+                } else if (!members.contains(bb) && bb.getPredecessors().size() > 1) {
                     member.setBranch(newJumpBasicBlock(member, bb));
                 }
             } else if (member.getType() == TYPE_SWITCH_DECLARATION) {
+                BasicBlock bb;
                 for (SwitchCase switchCase : member.getSwitchCases()) {
-                    BasicBlock bb = switchCase.getBasicBlock();
+                    bb = switchCase.getBasicBlock();
 
                     if (bb == start) {
                         switchCase.setBasicBlock(LOOP_START);
                     } else if (bb == end) {
                         switchCase.setBasicBlock(LOOP_END);
-                    } else if (!members.contains(bb) && (bb.getPredecessors().size() > 1)) {
+                    } else if (!members.contains(bb) && bb.getPredecessors().size() > 1) {
                         switchCase.setBasicBlock(newJumpBasicBlock(member, bb));
                     }
                 }
@@ -677,7 +685,7 @@ public class ControlFlowGraphLoopReducer {
     }
 
     protected static BasicBlock newJumpBasicBlock(BasicBlock bb, BasicBlock target) {
-        HashSet<BasicBlock> predecessors = new HashSet<>();
+        Set<BasicBlock> predecessors = new HashSet<>();
 
         predecessors.add(bb);
         target.getPredecessors().remove(bb);
@@ -689,14 +697,18 @@ public class ControlFlowGraphLoopReducer {
         BitSet[] arrayOfDominatorIndexes = buildDominatorIndexes(cfg);
         List<Loop> loops = identifyNaturalLoops(cfg, arrayOfDominatorIndexes);
 
+        Loop loop;
+        BasicBlock startBB;
+        BasicBlock loopBB;
+        Loop otherLoop;
         for (int i=0, loopsLength=loops.size(); i<loopsLength; i++) {
-            Loop loop = loops.get(i);
-            BasicBlock startBB = loop.getStart();
-            BasicBlock loopBB = reduceLoop(loop);
+            loop = loops.get(i);
+            startBB = loop.getStart();
+            loopBB = reduceLoop(loop);
 
             // Update other loops
             for (int j=loopsLength-1; j>i; j--) {
-                Loop otherLoop = loops.get(j);
+                otherLoop = loops.get(j);
 
                 if (otherLoop.getStart() == startBB) {
                     otherLoop.setStart(loopBB);
@@ -714,9 +726,7 @@ public class ControlFlowGraphLoopReducer {
         }
     }
 
-    /*
-     * Smaller loop first
-     */
+    /** Smaller loop first. */
     public static class LoopComparator implements Comparator<Loop> {
         @Override
         public int compare(Loop loop1, Loop loop2) {

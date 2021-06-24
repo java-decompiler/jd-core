@@ -20,6 +20,7 @@ public class ClassFileForEachStatement extends ForEachStatement {
         this.localVariable = localVariable;
     }
 
+    @Override
     public String getName() {
         return localVariable.getName();
     }

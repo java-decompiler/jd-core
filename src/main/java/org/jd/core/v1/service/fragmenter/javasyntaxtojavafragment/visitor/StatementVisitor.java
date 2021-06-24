@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor;
 
 import org.jd.core.v1.api.loader.Loader;
@@ -72,6 +71,7 @@ public class StatementVisitor extends ExpressionVisitor {
     @Override
     public void visit(BreakStatement statement) {
         tokens = new Tokens();
+        tokens.addLineNumberToken(statement.getLineNumber());
         tokens.add(BREAK);
 
         if (statement.getLabel() != null) {
@@ -83,11 +83,13 @@ public class StatementVisitor extends ExpressionVisitor {
         fragments.addTokensFragment(tokens);
     }
 
-    @Override public void visit(ByteCodeStatement statement) {
+    @Override
+    public void visit(ByteCodeStatement statement) {
         visitComment(statement.getText());
     }
 
-    @Override public void visit(CommentStatement statement) {
+    @Override
+    public void visit(CommentStatement statement) {
         visitComment(statement.getText());
     }
 
@@ -295,10 +297,8 @@ public class StatementVisitor extends ExpressionVisitor {
     protected void visitElseStatements(BaseStatement elseStatements, StartStatementsBlockFragment.Group group) {
         BaseStatement statementList = elseStatements;
 
-        if (elseStatements.isList()) {
-            if (elseStatements.size() == 1) {
-                statementList = elseStatements.getFirst();
-            }
+        if (elseStatements.isList() && elseStatements.size() == 1) {
+            statementList = elseStatements.getFirst();
         }
 
         tokens = new Tokens();
@@ -319,29 +319,28 @@ public class StatementVisitor extends ExpressionVisitor {
             statementList.getStatements().accept(this);
             JavaFragmentFactory.addEndStatementsBlock(fragments, group);
             visitElseStatements(statementList.getElseStatements(), group);
-        } else if (statementList.isIfStatement()) {
-            tokens.add(TextToken.SPACE);
-            tokens.add(IF);
-            tokens.add(TextToken.SPACE);
-            tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
-
-            statementList.getCondition().accept(this);
-
-            tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
-            fragments.addTokensFragment(tokens);
-
-            JavaFragmentFactory.addStartStatementsBlock(fragments, group);
-
-            statementList.getStatements().accept(this);
-
-            JavaFragmentFactory.addEndStatementsBlock(fragments, group);
         } else {
-            fragments.addTokensFragment(tokens);
+            if (statementList.isIfStatement()) {
+                tokens.add(TextToken.SPACE);
+                tokens.add(IF);
+                tokens.add(TextToken.SPACE);
+                tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
-            JavaFragmentFactory.addStartStatementsBlock(fragments, group);
+                statementList.getCondition().accept(this);
 
-            elseStatements.accept(this);
+                tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
+                fragments.addTokensFragment(tokens);
 
+                JavaFragmentFactory.addStartStatementsBlock(fragments, group);
+
+                statementList.getStatements().accept(this);
+            } else {
+                fragments.addTokensFragment(tokens);
+
+                JavaFragmentFactory.addStartStatementsBlock(fragments, group);
+
+                elseStatements.accept(this);
+            }
             JavaFragmentFactory.addEndStatementsBlock(fragments, group);
         }
     }
@@ -410,7 +409,6 @@ public class StatementVisitor extends ExpressionVisitor {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void visit(Statements list) {
         int size = list.size();
 
@@ -589,15 +587,18 @@ public class StatementVisitor extends ExpressionVisitor {
     }
 
     protected void visitTryStatement(TryStatement statement, StartStatementsBlockFragment.Group group) {
-        int fragmentCount1 = fragments.size(), fragmentCount2 = fragmentCount1;
+        int fragmentCount1 = fragments.size();
+        int fragmentCount2 = fragmentCount1;
 
         statement.getTryStatements().accept(this);
 
         if (statement.getCatchClauses() != null) {
+            BaseType type;
+            int lineNumber;
             for (TryStatement.CatchClause cc : statement.getCatchClauses()) {
                 JavaFragmentFactory.addEndStatementsBlock(fragments, group);
 
-                BaseType type = cc.getType();
+                type = cc.getType();
 
                 tokens = new Tokens();
                 tokens.add(CATCH);
@@ -615,14 +616,12 @@ public class StatementVisitor extends ExpressionVisitor {
                 tokens.add(newTextToken(cc.getName()));
                 tokens.add(TextToken.RIGHTROUNDBRACKET);
 
-                int lineNumber = cc.getLineNumber();
+                lineNumber = cc.getLineNumber();
 
-                if (lineNumber == Expression.UNKNOWN_LINE_NUMBER) {
-                    fragments.addTokensFragment(tokens);
-                } else {
+                if (lineNumber != Expression.UNKNOWN_LINE_NUMBER) {
                     tokens.addLineNumberToken(lineNumber);
-                    fragments.addTokensFragment(tokens);
                 }
+                fragments.addTokensFragment(tokens);
 
                 fragmentCount1 = fragments.size();
                 JavaFragmentFactory.addStartStatementsBlock(fragments, group);

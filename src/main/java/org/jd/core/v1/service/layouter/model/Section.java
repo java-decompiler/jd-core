@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.layouter.model;
 
 import org.jd.core.v1.model.fragment.FixedFragment;
@@ -17,6 +16,7 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 public class Section {
     protected final DefaultList<FlexibleFragment> flexibleFragments;
@@ -24,9 +24,9 @@ public class Section {
     protected final Section previousSection;
     protected       Section nextSection;
     protected final int targetLineCount;
-    protected       int rate = 0;
+    protected       int rate;
 
-    // Uses by "layout" method
+    /** Uses by "layout" method. */
     protected int lastLineCount = -1;
     protected int delta;
 
@@ -35,7 +35,9 @@ public class Section {
         this.fixedFragment = fixedFragment;
         this.previousSection = previousSection;
 
-        assert (flexibleFragments != null) && (flexibleFragments.size() > 0) : "Section must contain flexible fragments";
+        if (flexibleFragments == null || flexibleFragments.isEmpty()) {
+            throw new IllegalArgumentException("Section must contain flexible fragments");
+        }
 
         int previousLineNumber;
 
@@ -83,7 +85,7 @@ public class Section {
             }
 
             // Do not re-layout if nothing has changed
-            if (force || (lastLineCount != currentLineCount)) {
+            if (force || lastLineCount != currentLineCount) {
                 lastLineCount = currentLineCount;
 
                 if (targetLineCount != currentLineCount) {
@@ -113,56 +115,63 @@ public class Section {
                             }
 
                             expand(constrainedFlexibleFragments, force);
-                            if (delta == 0) break;
+                            if (delta == 0) {
+                                break;
+                            }
                         }
 
                         // Next, expand all
                         if (delta > 0) {
                             for (DefaultList<FlexibleFragment> flexibleFragments : filteredFlexibleFragments) {
                                 expand(flexibleFragments, force);
-                                if (delta == 0) break;
-                            }
-                        }
-
-                        // Something changed ?
-                        return oldDelta != delta;
-                    } else {
-                        // Compacts fragments
-                        int oldDelta = delta = currentLineCount - targetLineCount;
-
-                        for (FlexibleFragment flexibleFragment : flexibleFragments) {
-                            if (flexibleFragment.getMinimalLineCount() < flexibleFragment.getLineCount()) {
-                                // Keep only compactable fragments
-                                filteredFlexibleFragments.get(flexibleFragment.getWeight()).add(flexibleFragment);
-                            }
-                        }
-
-                        // First, compact expanded fragments
-                        for (DefaultList<FlexibleFragment> flexibleFragments : filteredFlexibleFragments) {
-                            constrainedFlexibleFragments.clear();
-
-                            for (FlexibleFragment flexibleFragment : flexibleFragments) {
-                                if (flexibleFragment.getLineCount() > flexibleFragment.getInitialLineCount()) {
-                                    // Store expanded flexibleFragments
-                                    constrainedFlexibleFragments.add(flexibleFragment);
+                                if (delta == 0) {
+                                    break;
                                 }
-                            }
-
-                            compact(constrainedFlexibleFragments, force);
-                            if (delta == 0) break;
-                        }
-
-                        // Next, compact all
-                        if (delta > 0) {
-                            for (DefaultList<FlexibleFragment> flexibleFragments : filteredFlexibleFragments) {
-                                compact(flexibleFragments, force);
-                                if (delta == 0) break;
                             }
                         }
 
                         // Something changed ?
                         return oldDelta != delta;
                     }
+                    // Compacts fragments
+                    int oldDelta = delta = currentLineCount - targetLineCount;
+
+                    for (FlexibleFragment flexibleFragment : flexibleFragments) {
+                        if (flexibleFragment.getMinimalLineCount() < flexibleFragment.getLineCount()) {
+                            // Keep only compactable fragments
+                            filteredFlexibleFragments.get(flexibleFragment.getWeight()).add(flexibleFragment);
+                        }
+                    }
+
+                    // First, compact expanded fragments
+                    for (DefaultList<FlexibleFragment> flexibleFragments : filteredFlexibleFragments) {
+                        constrainedFlexibleFragments.clear();
+
+                        for (FlexibleFragment flexibleFragment : flexibleFragments) {
+                            if (flexibleFragment.getLineCount() > flexibleFragment.getInitialLineCount()) {
+                                // Store expanded flexibleFragments
+                                constrainedFlexibleFragments.add(flexibleFragment);
+                            }
+                        }
+
+                        compact(constrainedFlexibleFragments, force);
+                        if (delta == 0) {
+                            break;
+                        }
+                    }
+
+                    // Next, compact all
+                    if (delta > 0) {
+                        for (DefaultList<FlexibleFragment> flexibleFragments : filteredFlexibleFragments) {
+                            compact(flexibleFragments, force);
+                            if (delta == 0) {
+                                break;
+                            }
+                        }
+                    }
+
+                    // Something changed ?
+                    return oldDelta != delta;
                 }
             }
         }
@@ -173,14 +182,12 @@ public class Section {
     protected void expand(DefaultList<FlexibleFragment> flexibleFragments, boolean force) {
         int oldDelta = Integer.MAX_VALUE;
 
-        while ((delta > 0) && (delta < oldDelta)) {
+        while (delta > 0 && delta < oldDelta) {
             oldDelta = delta;
 
             for (FlexibleFragment flexibleFragment : flexibleFragments) {
-                if (flexibleFragment.incLineCount(force)) {
-                    if (--delta == 0) {
-                        break;
-                    }
+                if (flexibleFragment.incLineCount(force) && --delta == 0) {
+                    break;
                 }
             }
         }
@@ -189,14 +196,12 @@ public class Section {
     protected void compact(DefaultList<FlexibleFragment> flexibleFragments, boolean force) {
         int oldDelta = Integer.MAX_VALUE;
 
-        while ((delta > 0) && (delta < oldDelta)) {
+        while (delta > 0 && delta < oldDelta) {
             oldDelta = delta;
 
             for (FlexibleFragment flexibleFragment : flexibleFragments) {
-                if (flexibleFragment.decLineCount(force)) {
-                    if (--delta == 0) {
-                        break;
-                    }
+                if (flexibleFragment.decLineCount(force) && --delta == 0) {
+                    break;
                 }
             }
         }
@@ -219,14 +224,15 @@ public class Section {
 
         for (FlexibleFragment flexibleFragment : flexibleFragments) {
             flexibleFragment.accept(forwardSearchEndIndexesVisitor);
-            if (! forwardSearchEndIndexesVisitor.isEnabled())
+            if (! forwardSearchEndIndexesVisitor.isEnabled()) {
                 break;
+            }
         }
 
         int size = backwardSearchStartIndexesVisitor.getSize();
         Section nextSection = searchNextSection(forwardSearchVisitor);
 
-        if ((size > 1) && (nextSection != null)) {
+        if (size > 1 && nextSection != null) {
             int index1 = flexibleCount - 1 - backwardSearchStartIndexesVisitor.getIndex(size/2);
             int index2 = flexibleCount - 1 - backwardSearchStartIndexesVisitor.getIndex(0);
             int nextIndex = forwardSearchVisitor.getIndex();
@@ -249,19 +255,18 @@ public class Section {
             }
 
             return true;
-        } else {
-            size = forwardSearchEndIndexesVisitor.getSize();
+        }
+        size = forwardSearchEndIndexesVisitor.getSize();
 
-            if (size > 1) {
-                int index3 = forwardSearchEndIndexesVisitor.getIndex(0) + 1;
-                int index4 = forwardSearchEndIndexesVisitor.getIndex(size/2) + 1;
-                Section previousSection = searchPreviousSection(backwardSearchVisitor);
+        if (size > 1) {
+            int index3 = forwardSearchEndIndexesVisitor.getIndex(0) + 1;
+            int index4 = forwardSearchEndIndexesVisitor.getIndex(size/2) + 1;
+            Section previousSection = searchPreviousSection(backwardSearchVisitor);
 
-                if ((size > 1) && (previousSection != null)) {
-                    int index = previousSection.getFlexibleFragments().size() - backwardSearchVisitor.getIndex();
-                    previousSection.addFragmentsAtEnd(holder, index, extract(index3, index4));
-                    return true;
-                }
+            if (size > 1 && previousSection != null) {
+                int index = previousSection.getFlexibleFragments().size() - backwardSearchVisitor.getIndex();
+                previousSection.addFragmentsAtEnd(holder, index, extract(index3, index4));
+                return true;
             }
         }
 
@@ -278,8 +283,9 @@ public class Section {
 
             for (FlexibleFragment flexibleFragment : section.getFlexibleFragments()) {
                 flexibleFragment.accept(visitor);
-                if (visitor.getDepth() == 0)
+                if (visitor.getDepth() == 0) {
                     return section;
+                }
             }
 
             section = section.getNextSection();
@@ -293,16 +299,19 @@ public class Section {
 
         visitor.reset();
 
+        DefaultList<FlexibleFragment> flexibleFragments;
+        ListIterator<FlexibleFragment> iterator;
         while (section != null) {
-            DefaultList<FlexibleFragment> flexibleFragments = section.getFlexibleFragments();
-            ListIterator<FlexibleFragment> iterator = flexibleFragments.listIterator(flexibleFragments.size());
+            flexibleFragments = section.getFlexibleFragments();
+            iterator = flexibleFragments.listIterator(flexibleFragments.size());
 
             visitor.resetIndex();
 
             while (iterator.hasPrevious()) {
                 iterator.previous().accept(visitor);
-                if (visitor.getDepth() == 0)
+                if (visitor.getDepth() == 0) {
                     return section;
+                }
             }
 
             section = section.getPreviousSection();
@@ -320,11 +329,12 @@ public class Section {
 
         while (iterator.hasPrevious()) {
             iterator.previous().accept(visitor);
-            if (visitor.getDepth() == 0)
+            if (visitor.getDepth() == 0) {
                 break;
+            }
         }
 
-        assert (visitor.getIndex() < flexibleFragments.size()) && (visitor.getIndex() > 1);
+        assert visitor.getIndex() < flexibleFragments.size() && visitor.getIndex() > 1;
 
         int index1 = flexibleFragments.size() + 1 - visitor.getIndex();
 
@@ -345,11 +355,12 @@ public class Section {
 
         for (FlexibleFragment flexibleFragment : flexibleFragments) {
             flexibleFragment.accept(visitor);
-            if (visitor.getDepth() == 2)
+            if (visitor.getDepth() == 2) {
                 break;
+            }
         }
 
-        assert (visitor.getIndex() < flexibleFragments.size()) && (visitor.getIndex() > 1);
+        assert visitor.getIndex() < flexibleFragments.size() && visitor.getIndex() > 1;
 
         int index1 = visitor.getIndex() - 1;
 
@@ -406,8 +417,9 @@ public class Section {
         }
 
         public void reverse() {
+            DefaultList<FlexibleFragment> tmp;
             for (int index1=0, index2=elements.length-1; index1<index2; index1++, index2--) {
-                DefaultList<FlexibleFragment> tmp = elements[index1];
+                tmp = elements[index1];
                 elements[index1] = elements[index2];
                 elements[index2] = tmp;
             }
@@ -423,15 +435,7 @@ public class Section {
 
         @Override
         public Iterator<DefaultList<FlexibleFragment>> iterator() {
-            int length = elements.length;
-
-            iteratorIndex = 0;
-
-            while ((iteratorIndex < length) && (elements[iteratorIndex] == null)) {
-                iteratorIndex++;
-            }
-
-            return this;
+            return new Itr();
         }
 
         @Override
@@ -441,10 +445,13 @@ public class Section {
 
         @Override
         public DefaultList<FlexibleFragment> next() {
+            if (iteratorIndex >= elements.length) {
+                throw new NoSuchElementException();
+            }
             DefaultList<FlexibleFragment> element = elements[iteratorIndex++];
             int length = elements.length;
 
-            while ((iteratorIndex < length) && (elements[iteratorIndex] == null)) {
+            while (iteratorIndex < length && elements[iteratorIndex] == null) {
                 iteratorIndex++;
             }
 
@@ -452,6 +459,40 @@ public class Section {
         }
 
         @Override
-        public void remove() {}
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+
+        private class Itr implements Iterator<DefaultList<FlexibleFragment>> {
+            private Itr() {
+                int length = elements.length;
+
+                iteratorIndex = 0;
+
+                while (iteratorIndex < length && elements[iteratorIndex] == null) {
+                    iteratorIndex++;
+                }
+            }
+
+            @Override
+            public DefaultList<FlexibleFragment> next() {
+                if (iteratorIndex >= elements.length) {
+                    throw new NoSuchElementException();
+                }
+                DefaultList<FlexibleFragment> element = elements[iteratorIndex++];
+                int length = elements.length;
+
+                while (iteratorIndex < length && elements[iteratorIndex] == null) {
+                    iteratorIndex++;
+                }
+
+                return element;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return iteratorIndex < elements.length;
+            }
+        }
     }
 }

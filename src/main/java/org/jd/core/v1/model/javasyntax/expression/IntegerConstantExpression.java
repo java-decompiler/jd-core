@@ -11,20 +11,23 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
-
 public class IntegerConstantExpression extends AbstractLineNumberTypeExpression {
     protected int value;
 
     public IntegerConstantExpression(Type type, int value) {
         super(type);
         this.value = value;
-        assert type.isPrimitiveType();
+        if (!type.isPrimitiveType()) {
+            throw new IllegalArgumentException("Non-primitive type");
+        }
     }
 
     public IntegerConstantExpression(int lineNumber, Type type, int value) {
         super(lineNumber, type);
         this.value = value;
-        assert type.isPrimitiveType();
+        if (!type.isPrimitiveType()) {
+            throw new IllegalArgumentException("Non-primitive type");
+        }
     }
 
     @Override
@@ -34,7 +37,9 @@ public class IntegerConstantExpression extends AbstractLineNumberTypeExpression 
 
     @Override
     public void setType(Type type) {
-        assert checkType(type) : "IntegerConstantExpression.setType(type) : incompatible types";
+        if (!(checkType(type))) {
+            throw new IllegalArgumentException("IntegerConstantExpression.setType(type) : incompatible types");
+        }
         super.setType(type);
     }
 

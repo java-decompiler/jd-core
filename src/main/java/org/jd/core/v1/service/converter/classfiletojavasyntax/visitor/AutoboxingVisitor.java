@@ -7,45 +7,47 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.util.StringConstants;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
-    protected static final HashMap<String, String> VALUEOF_DESCRIPTOR_MAP = new HashMap<>();
+    protected static final Map<String, String> VALUEOF_DESCRIPTOR_MAP = new HashMap<>();
 
-    protected static final HashMap<String, String> VALUE_DESCRIPTOR_MAP = new HashMap<>();
-    protected static final HashMap<String, String> VALUE_METHODNAME_MAP = new HashMap<>();
+    protected static final Map<String, String> VALUE_DESCRIPTOR_MAP = new HashMap<>();
+    protected static final Map<String, String> VALUE_METHODNAME_MAP = new HashMap<>();
 
     static {
-        VALUEOF_DESCRIPTOR_MAP.put("java/lang/Byte", "(B)Ljava/lang/Byte;");
-        VALUEOF_DESCRIPTOR_MAP.put("java/lang/Character", "(C)Ljava/lang/Character;");
-        VALUEOF_DESCRIPTOR_MAP.put("java/lang/Float", "(F)Ljava/lang/Float;");
-        VALUEOF_DESCRIPTOR_MAP.put("java/lang/Integer", "(I)Ljava/lang/Integer;");
-        VALUEOF_DESCRIPTOR_MAP.put("java/lang/Long", "(J)Ljava/lang/Long;");
-        VALUEOF_DESCRIPTOR_MAP.put("java/lang/Short", "(S)Ljava/lang/Short;");
-        VALUEOF_DESCRIPTOR_MAP.put("java/lang/Double", "(D)Ljava/lang/Double;");
-        VALUEOF_DESCRIPTOR_MAP.put("java/lang/Boolean", "(Z)Ljava/lang/Boolean;");
+        VALUEOF_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_BYTE, "(B)Ljava/lang/Byte;");
+        VALUEOF_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_CHARACTER, "(C)Ljava/lang/Character;");
+        VALUEOF_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_FLOAT, "(F)Ljava/lang/Float;");
+        VALUEOF_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_INTEGER, "(I)Ljava/lang/Integer;");
+        VALUEOF_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_LONG, "(J)Ljava/lang/Long;");
+        VALUEOF_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_SHORT, "(S)Ljava/lang/Short;");
+        VALUEOF_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_DOUBLE, "(D)Ljava/lang/Double;");
+        VALUEOF_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_BOOLEAN, "(Z)Ljava/lang/Boolean;");
 
-        VALUE_DESCRIPTOR_MAP.put("java/lang/Byte", "()B");
-        VALUE_DESCRIPTOR_MAP.put("java/lang/Character", "()C");
-        VALUE_DESCRIPTOR_MAP.put("java/lang/Float", "()F");
-        VALUE_DESCRIPTOR_MAP.put("java/lang/Integer", "()I");
-        VALUE_DESCRIPTOR_MAP.put("java/lang/Long", "()J");
-        VALUE_DESCRIPTOR_MAP.put("java/lang/Short", "()S");
-        VALUE_DESCRIPTOR_MAP.put("java/lang/Double", "()D");
-        VALUE_DESCRIPTOR_MAP.put("java/lang/Boolean", "()Z");
+        VALUE_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_BYTE, "()B");
+        VALUE_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_CHARACTER, "()C");
+        VALUE_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_FLOAT, "()F");
+        VALUE_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_INTEGER, "()I");
+        VALUE_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_LONG, "()J");
+        VALUE_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_SHORT, "()S");
+        VALUE_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_DOUBLE, "()D");
+        VALUE_DESCRIPTOR_MAP.put(StringConstants.JAVA_LANG_BOOLEAN, "()Z");
 
-        VALUE_METHODNAME_MAP.put("java/lang/Byte", "byteValue");
-        VALUE_METHODNAME_MAP.put("java/lang/Character", "charValue");
-        VALUE_METHODNAME_MAP.put("java/lang/Float", "floatValue");
-        VALUE_METHODNAME_MAP.put("java/lang/Integer", "intValue");
-        VALUE_METHODNAME_MAP.put("java/lang/Long", "longValue");
-        VALUE_METHODNAME_MAP.put("java/lang/Short", "shortValue");
-        VALUE_METHODNAME_MAP.put("java/lang/Double", "doubleValue");
-        VALUE_METHODNAME_MAP.put("java/lang/Boolean", "booleanValue");
+        VALUE_METHODNAME_MAP.put(StringConstants.JAVA_LANG_BYTE, "byteValue");
+        VALUE_METHODNAME_MAP.put(StringConstants.JAVA_LANG_CHARACTER, "charValue");
+        VALUE_METHODNAME_MAP.put(StringConstants.JAVA_LANG_FLOAT, "floatValue");
+        VALUE_METHODNAME_MAP.put(StringConstants.JAVA_LANG_INTEGER, "intValue");
+        VALUE_METHODNAME_MAP.put(StringConstants.JAVA_LANG_LONG, "longValue");
+        VALUE_METHODNAME_MAP.put(StringConstants.JAVA_LANG_SHORT, "shortValue");
+        VALUE_METHODNAME_MAP.put(StringConstants.JAVA_LANG_DOUBLE, "doubleValue");
+        VALUE_METHODNAME_MAP.put(StringConstants.JAVA_LANG_BOOLEAN, "booleanValue");
     }
 
     @Override
