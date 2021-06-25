@@ -53,4 +53,9 @@ public class InstanceOfExpression extends AbstractLineNumberExpression {
     public void accept(ExpressionVisitor visitor) {
         visitor.visit(this);
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new InstanceOfExpression(lineNumber, expression, instanceOfType);
+	}
 }

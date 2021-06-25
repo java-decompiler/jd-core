@@ -67,4 +67,9 @@ public class ArrayExpression extends AbstractLineNumberTypeExpression {
     public String toString() {
         return "ArrayExpression{" + expression + "[" + index + "]}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new ArrayExpression(lineNumber, expression, index);
+	}
 }

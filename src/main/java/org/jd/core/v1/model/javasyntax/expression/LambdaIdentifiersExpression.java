@@ -45,4 +45,9 @@ public class LambdaIdentifiersExpression extends AbstractLambdaExpression {
     public String toString() {
         return "LambdaIdentifiersExpression{" + parameterNames + " -> " + statements + "}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new LambdaIdentifiersExpression(lineNumber, type, returnedType, parameterNames, statements);
+	}
 }

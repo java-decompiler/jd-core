@@ -115,8 +115,29 @@ public class StatementMaker {
         // Change ++i; with i++;
         replacePreOperatorWithPostOperator(statements);
 
+        boolean breakToReturn = breakToReturn(cfg, statements, jumps);
+
+        if (!breakToReturn && !jumps.isEmpty()) {
+        	updateJumpStatements(jumps, cfg);
+        }
+
         return statements;
     }
+
+	protected boolean breakToReturn(ControlFlowGraph cfg, Statements statements, Statements jumps) {
+		boolean breakToReturn = false;
+        if (jumps.size() == 1) {
+            ClassFileBreakContinueStatement jumpStatement = (ClassFileBreakContinueStatement)jumps.get(0);
+            for (Statement stmt : statements) {
+            	if (stmt.isReturnExpressionStatement() && stmt.getLineNumber() == cfg.getLineNumber(jumpStatement.getTargetOffset())) {
+					int lineNumber = cfg.getLineNumber(jumpStatement.getOffset()) + 1;
+					jumpStatement.setStatement(new ReturnExpressionStatement(lineNumber, stmt.getExpression().copyTo(lineNumber)));
+					breakToReturn = true;
+            	}
+            }
+        }
+		return breakToReturn;
+	}
 
     /**
      * A recursive, next neighbour first, statements builder from basic blocks.
@@ -979,6 +1000,16 @@ public class StatementMaker {
                     }
                 }
             }
+        }
+    }
+
+    protected void updateJumpStatements(Statements jumps, ControlFlowGraph cfg) {
+        Iterator<Statement> iterator = jumps.iterator();
+
+        while (iterator.hasNext()) {
+            ClassFileBreakContinueStatement statement = (ClassFileBreakContinueStatement)iterator.next();
+
+            statement.setStatement(new CommentStatement("// goto line number " + cfg.getLineNumber(statement.getTargetOffset())));
         }
     }
 

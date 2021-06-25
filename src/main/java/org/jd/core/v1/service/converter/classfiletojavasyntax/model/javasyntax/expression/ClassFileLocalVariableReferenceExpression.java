@@ -7,6 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression;
 
+import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
@@ -50,5 +51,10 @@ public class ClassFileLocalVariableReferenceExpression extends LocalVariableRefe
     @Override
     public String toString() {
         return "ClassFileLocalVariableReferenceExpression{type=" + localVariable.getType() + ", name=" + localVariable.getName() + "}";
+    }
+    
+    @Override
+    public Expression copyTo(int lineNumber) {
+    	return new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
     }
 }

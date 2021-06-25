@@ -37,7 +37,7 @@ public class IntegerConstantExpression extends AbstractLineNumberTypeExpression 
 
     @Override
     public void setType(Type type) {
-        if (!(checkType(type))) {
+        if (!checkType(type)) {
             throw new IllegalArgumentException("IntegerConstantExpression.setType(type) : incompatible types");
         }
         super.setType(type);
@@ -64,4 +64,9 @@ public class IntegerConstantExpression extends AbstractLineNumberTypeExpression 
     public String toString() {
         return "IntegerConstantExpression{type=" + type + ", value=" + value + "}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new IntegerConstantExpression(lineNumber, type, value);
+	}
 }

@@ -71,4 +71,9 @@ public class FieldReferenceExpression extends AbstractLineNumberTypeExpression {
     public String toString() {
         return "FieldReferenceExpression{type=" + type + ", expression=" + expression + ", name=" + name + ", descriptor=" + descriptor + "}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new FieldReferenceExpression(lineNumber, type, expression, internalTypeName, name, descriptor);
+	}
 }

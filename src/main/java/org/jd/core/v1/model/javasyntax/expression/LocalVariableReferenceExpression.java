@@ -39,4 +39,9 @@ public class LocalVariableReferenceExpression extends AbstractLineNumberTypeExpr
     public String toString() {
         return "LocalVariableReferenceExpression{type=" + type + ", name=" + name + "}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new LocalVariableReferenceExpression(lineNumber, type, name);
+	}
 }

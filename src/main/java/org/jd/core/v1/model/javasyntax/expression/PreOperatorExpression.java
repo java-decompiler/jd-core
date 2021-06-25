@@ -60,4 +60,9 @@ public class PreOperatorExpression extends AbstractLineNumberExpression {
     public String toString() {
         return "PreOperatorExpression{" + operator + " " + expression + "}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new PreOperatorExpression(lineNumber, operator, expression);
+	}
 }
