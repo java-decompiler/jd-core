@@ -80,10 +80,16 @@ public class ControlFlowGraphMaker {
                     break;
                 case 42: // ALOAD_0
                     // identify constants prefixed with 'this' qualifier
-                    // by matching the pattern 1)aload_0 -> 2)pop -> 3)ldc
+                    // by matching the pattern 1)aload_0 -> 2)pop -> 3)ldc/getstatic
                     // that we can refactor to a single ldc, ignoring the aload_0 and pop
-                    if (offset+2 < length && (code[offset+1] & 255) == 87 /* POP */ && (code[offset+2] & 255) == 18 /* LDC */) {
+                    if (offset+2 < length && (code[offset+1] & 255) == 87 /* POP */ 
+                        && ((code[offset+2] & 255) == 18 /* LDC */ || (code[offset+2] & 255) == 178 /* GETSTATIC */)) {
                         offset++; // skip pop
+                    }
+                    // another pattern 1)aload_0 -> 2)getfield -> 3)pop -> 4)ldc/getstatic
+                    if (offset+5 < length && (code[offset+1] & 255) == 180 /* GETFIELD */ && (code[offset+4] & 255) == 87 /* POP */ 
+                        && ((code[offset+5] & 255) == 18 /* LDC */ || (code[offset+5] & 255) == 178 /* GETSTATIC */)) {
+                    	offset+=4; // skip getfield and pop
                     }
                     break;
                 case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
