@@ -19,7 +19,11 @@ import java.util.ArrayList;
 
 @Quality(Quality.Level.HIGH)
 @Author(value=@Name(salutation="Mr", value="Donald", last="Duck"), contributors={@Name("Huey"), @Name("Dewey"), @Name("Louie")})
+@SuppressWarnings("all")
 public class AnnotatedClass extends ArrayList implements Serializable, Cloneable {
+
+    private static final long serialVersionUID = 1L;
+
     @Value(z = true)
     protected boolean z1;
 

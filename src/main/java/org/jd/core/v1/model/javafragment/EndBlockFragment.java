@@ -39,13 +39,12 @@ public class EndBlockFragment extends EndFlexibleBlockFragment implements JavaFr
 //            }
 
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
-    public boolean decLineCount(boolean force) {
+    public boolean decLineCount(@SuppressWarnings("all") boolean force) {
         if (lineCount > minimalLineCount) {
             lineCount--;
 
@@ -56,9 +55,8 @@ public class EndBlockFragment extends EndFlexibleBlockFragment implements JavaFr
 //            }
 
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override

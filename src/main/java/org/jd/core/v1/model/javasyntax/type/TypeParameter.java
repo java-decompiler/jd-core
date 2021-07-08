@@ -23,6 +23,7 @@ public class TypeParameter implements BaseTypeParameter {
         visitor.visit(this);
     }
 
+    @Override
     public String toString() {
         return "TypeParameter{identifier=" + identifier + "}";
     }

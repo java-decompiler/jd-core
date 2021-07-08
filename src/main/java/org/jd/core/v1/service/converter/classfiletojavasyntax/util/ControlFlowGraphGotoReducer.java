@@ -12,9 +12,15 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlF
 
 import java.util.Set;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_DELETED;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_INFINITE_GOTO;
 
 public class ControlFlowGraphGotoReducer {
+
+    private ControlFlowGraphGotoReducer() {
+        super();
+    }
 
     public static void reduce(ControlFlowGraph cfg) {
         for (BasicBlock basicBlock : cfg.getBasicBlocks()) {

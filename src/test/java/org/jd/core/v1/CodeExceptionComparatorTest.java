@@ -7,12 +7,13 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.model.classfile.attribute.CodeException;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphMaker;
 import org.junit.Test;
 
 import java.util.Arrays;
+
+import junit.framework.TestCase;
 
 public class CodeExceptionComparatorTest extends TestCase {
     @Test
@@ -30,9 +31,9 @@ public class CodeExceptionComparatorTest extends TestCase {
 
         Arrays.sort(codeExceptions, comparator);
 
-        assertTrue(codeExceptions[0] == ce4);
-        assertTrue(codeExceptions[1] == ce0);
-        assertTrue(codeExceptions[2] == ce2);
-        assertTrue(codeExceptions[3] == ce1);
+        assertSame(codeExceptions[0], ce4);
+        assertSame(codeExceptions[1], ce0);
+        assertSame(codeExceptions[2], ce2);
+        assertSame(codeExceptions[3], ce1);
     }
 }

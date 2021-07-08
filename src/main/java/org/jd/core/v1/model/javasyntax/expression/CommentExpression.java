@@ -45,4 +45,9 @@ public class CommentExpression implements Expression {
     public String toString() {
         return "CommentExpression{" + text + "}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new CommentExpression(text);
+	}
 }

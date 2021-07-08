@@ -14,10 +14,14 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
+@SuppressWarnings("all")
 public class AnonymousClass {
 
     protected long time = System.currentTimeMillis();
-    
+
     public void test(Enumeration e, String s) {
         System.out.println("start");
 
@@ -26,27 +30,27 @@ public class AnonymousClass {
                 return "toString() return " + super.toString() + " at " + time;
             }
         };
-        
+
         System.out.println(obj);
 
         System.out.println("end");
     }
-    
+
     LinkedList<String> list;
-    
+
     public void anonymousImplInterface(final String s1, @Name("s2") final String s2, String s3, final int i1) {
         System.out.println("start");
-        
+
         final long l1 = System.currentTimeMillis();
-        
+
         Enumeration e = new Enumeration() {
-            Iterator<String> i = list.iterator(); 
-            
+            Iterator<String> i = list.iterator();
+
             public boolean hasMoreElements() {
                 time = System.currentTimeMillis();
-                return i.hasNext() && (s1 == s2) && (i1 > l1); 
+                return i.hasNext() && (s1 == s2) && (i1 > l1);
             }
-            
+
             public Object nextElement() {
               return i.next();
             }
@@ -57,14 +61,14 @@ public class AnonymousClass {
 
         System.out.println("end");
     }
-    
+
     public void anonymousImplClass(final String s1, final String s2, String s3) {
         System.out.println("start");
-        
+
         final int i = s1.length();
-        
+
         System.out.println("2" + (new StringWrapper(123456L) {
-            
+
             public String toString(String a, String b) {
                 time = System.currentTimeMillis();
                 if ((s1 == s2) && (i == 5))
@@ -72,7 +76,7 @@ public class AnonymousClass {
                 else
                     return s2;
             }
-            
+
         }) + "3");
 
         System.out.println("end");

@@ -4,14 +4,15 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.reference;
 
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.Collection;
 
-public class ElementValues extends DefaultList<ElementValue> implements BaseElementValue {
+public class ElementValues extends DefaultList<BaseElementValue> implements BaseElementValue {
+    private static final long serialVersionUID = 1L;
+
     public ElementValues() {
     }
 
@@ -19,9 +20,11 @@ public class ElementValues extends DefaultList<ElementValue> implements BaseElem
         super(capacity);
     }
 
-    public ElementValues(Collection<ElementValue> collection) {
+    public ElementValues(Collection<BaseElementValue> collection) {
         super(collection);
-        assert (collection != null) && (collection.size() > 1) : "Uses 'ElementValue' or sub class instead";
+        if (collection.size() <= 1) {
+            throw new IllegalArgumentException("Use 'BaseElementValue' or sub class instead");
+        }
     }
 
     @Override

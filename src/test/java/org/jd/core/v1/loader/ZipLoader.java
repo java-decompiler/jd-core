@@ -9,16 +9,18 @@ package org.jd.core.v1.loader;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
+import org.jd.core.v1.util.StringConstants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ZipLoader implements Loader {
-    protected HashMap<String, byte[]> map = new HashMap<>();
+    protected Map<String, byte[]> map = new HashMap<>();
 
     public  ZipLoader(InputStream is) throws LoaderException {
         byte[] buffer = new byte[1024 * 2];
@@ -48,15 +50,15 @@ public class ZipLoader implements Loader {
         }
     }
 
-    public HashMap<String, byte[]> getMap() { return map; }
+    public Map<String, byte[]> getMap() { return map; }
 
     @Override
     public byte[] load(String internalName) throws LoaderException {
-        return map.get(internalName + ".class");
+        return map.get(internalName + StringConstants.CLASS_FILE_SUFFIX);
     }
 
     @Override
     public boolean canLoad(String internalName) {
-        return map.containsKey(internalName + ".class");
+        return map.containsKey(internalName + StringConstants.CLASS_FILE_SUFFIX);
     }
 }

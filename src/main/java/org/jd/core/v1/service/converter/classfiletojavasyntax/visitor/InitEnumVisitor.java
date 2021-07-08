@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
@@ -17,16 +16,15 @@ import java.util.Comparator;
 
 import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
 
-
 public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
-    protected ClassFileBodyDeclaration bodyDeclaration = null;
-    protected BodyDeclaration constantBodyDeclaration = null;
+    protected ClassFileBodyDeclaration bodyDeclaration;
+    protected BodyDeclaration constantBodyDeclaration;
     protected DefaultList<ClassFileEnumDeclaration.ClassFileConstant> constants = new DefaultList<>();
     protected int lineNumber;
     protected int index;
     protected BaseExpression arguments;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("all")
     public DefaultList<EnumDeclaration.Constant> getConstants() {
         if (!constants.isEmpty()) {
             constants.sort(new EnumConstantComparator());
@@ -48,9 +46,7 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        if ((declaration.getFlags() & FLAG_ANONYMOUS) != 0) {
-            declaration.setFlags(FLAG_SYNTHETIC);
-        } else if (declaration.getStatements().size() <= 1) {
+        if ((declaration.getFlags() & FLAG_ANONYMOUS) != 0 || declaration.getStatements().size() <= 1) {
             declaration.setFlags(FLAG_SYNTHETIC);
         } else {
             FormalParameters parameters = (FormalParameters)declaration.getFormalParameters();
@@ -68,11 +64,9 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(MethodDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_STATIC|FLAG_PUBLIC)) != 0) {
-            if (declaration.getName().equals("values") || declaration.getName().equals("valueOf")) {
-                ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)declaration;
-                cfmd.setFlags(cfmd.getFlags() | FLAG_SYNTHETIC);
-            }
+        if ((declaration.getFlags() & (FLAG_STATIC|FLAG_PUBLIC)) != 0 && ("values".equals(declaration.getName()) || "valueOf".equals(declaration.getName()))) {
+            ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)declaration;
+            cfmd.setFlags(cfmd.getFlags() | FLAG_SYNTHETIC);
         }
     }
 
@@ -93,7 +87,6 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void visit(NewExpression expression) {
         Expressions parameters = (Expressions)expression.getParameters();
         Expression exp = parameters.get(1);
@@ -126,6 +119,7 @@ public class InitEnumVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected static class EnumConstantComparator implements Comparator<ClassFileEnumDeclaration.ClassFileConstant> {
+        @Override
         public int compare(ClassFileEnumDeclaration.ClassFileConstant ec1, ClassFileEnumDeclaration.ClassFileConstant ec2) {
             return ec1.getIndex() - ec2.getIndex();
         }

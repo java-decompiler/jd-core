@@ -9,7 +9,13 @@ package org.jd.core.test;
 
 import java.io.Serializable;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
+@SuppressWarnings("all")
 public class Array implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     public void declarations() {
         int[] i1 = new int[1];

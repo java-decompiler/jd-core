@@ -9,9 +9,9 @@ package org.jd.core.v1.model.javasyntax.reference;
 
 public class ElementValuePair implements BaseElementValuePair {
     protected String name;
-    protected ElementValue elementValue;
+    protected BaseElementValue elementValue;
 
-    public ElementValuePair(String name, ElementValue elementValue) {
+    public ElementValuePair(String name, BaseElementValue elementValue) {
         this.name = name;
         this.elementValue = elementValue;
     }
@@ -20,7 +20,7 @@ public class ElementValuePair implements BaseElementValuePair {
         return name;
     }
 
-    public ElementValue getElementValue() {
+    public BaseElementValue getElementValue() {
         return elementValue;
     }
 

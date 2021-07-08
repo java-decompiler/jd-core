@@ -15,6 +15,7 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.MergeMembersUtil;
 import org.jd.core.v1.util.DefaultList;
+import org.jd.core.v1.util.StringConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -22,7 +23,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-@SuppressWarnings("unchecked")
 public class MergeMembersUtilTest {
 
     @Test
@@ -256,7 +256,7 @@ public class MergeMembersUtilTest {
         DefaultList<ClassFileFieldDeclaration> fields = new DefaultList<>();
         fields.add(new ClassFileFieldDeclaration(0, PrimitiveType.TYPE_INT, new FieldDeclarator("d"), lineNumber));
 
-        ClassFile classFile = new ClassFile(49, 0, 0, "A", "java/lang/Object", null, null, null, null);
+        ClassFile classFile = new ClassFile(49, 0, 0, "A", StringConstants.JAVA_LANG_OBJECT, null, null, null, null);
         ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile, null, null, null);
         bodyDeclaration.setFieldDeclarations(fields);
 

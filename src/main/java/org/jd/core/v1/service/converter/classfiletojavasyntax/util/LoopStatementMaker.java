@@ -31,6 +31,11 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_ITERABLE;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class LoopStatementMaker {
+
+    private LoopStatementMaker() {
+        super();
+    }
+
     protected static final RemoveLastContinueStatementVisitor REMOVE_LAST_CONTINUE_STATEMENT_VISITOR = new RemoveLastContinueStatementVisitor();
 
     public static Statement makeLoop(
@@ -121,7 +126,7 @@ public class LoopStatementMaker {
                     Expressions update = extractUpdate(subStatements, firstLineNumber);
                     BaseExpression init = extractInit(statements, lineNumber);
 
-                    if ((init != null) || (update.size() > 0)) {
+                    if ((init != null) || (!update.isEmpty())) {
                         return newClassFileForStatement(
                             localVariableMaker, loopBasicBlock.getFromOffset(), loopBasicBlock.getToOffset(), init, condition, update, subStatements);
                     }
@@ -188,7 +193,7 @@ public class LoopStatementMaker {
                     // Populates 'update'
                     Expressions update = extractUpdate(subStatements, firstLineNumber);
 
-                    if (update.size() > 0) {
+                    if (!update.isEmpty()) {
                         // Populates 'init'
                         BaseExpression init = extractInit(statements, update.getFirst().getLineNumber());
 
@@ -196,11 +201,7 @@ public class LoopStatementMaker {
                     }
                 } else {
                     // Unknown line numbers => Just try to find 'for (expression;;expression)'
-                    Statement statement = createForStatementWithoutLineNumber(localVariableMaker, loopBasicBlock, statements, BooleanExpression.TRUE, subStatements);
-
-                    if (statement != null) {
-                        return statement;
-                    }
+                    return createForStatementWithoutLineNumber(localVariableMaker, loopBasicBlock, statements, BooleanExpression.TRUE, subStatements);
                 }
         }
 
@@ -221,7 +222,6 @@ public class LoopStatementMaker {
         return makeLabels(loopBasicBlock.getIndex(), continueOffset, breakOffset, loop, jumps);
     }
 
-    @SuppressWarnings("unchecked")
     protected static BaseExpression extractInit(Statements statements, int lineNumber) {
         if (lineNumber > 0) {
             switch (statements.size()) {
@@ -267,7 +267,7 @@ public class LoopStatementMaker {
                         iterator.remove();
                     }
 
-                    if (init.size() > 0) {
+                    if (!init.isEmpty()) {
                         if (init.size() > 1)
                             Collections.reverse(init);
                         return init;
@@ -279,7 +279,6 @@ public class LoopStatementMaker {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     protected static Expressions extractUpdate(Statements statements, int firstLineNumber) {
         Expressions update = new Expressions();
         ListIterator<Statement> iterator = statements.listIterator(statements.size());
@@ -491,7 +490,7 @@ public class LoopStatementMaker {
             return null;
         }
 
-        if ((statements.size() < 1) || (subStatements.size() < 1)) {
+        if ((statements.isEmpty()) || (subStatements.isEmpty())) {
             return null;
         }
 
@@ -607,9 +606,13 @@ public class LoopStatementMaker {
 
                 if (type != null) {
                     if (TYPE_OBJECT.equals(item.getType())) {
-                        ((ObjectLocalVariable) item).setType(typeBounds, type);
+                        if (item instanceof ObjectLocalVariable) {
+                            ((ObjectLocalVariable) item).setType(typeBounds, type);
+                        }
                     } else if (item.getType().isGenericType()) {
-                        ((GenericLocalVariable) item).setType((GenericType) type);
+                        if (item instanceof GenericLocalVariable) {
+                            ((GenericLocalVariable) item).setType((GenericType) type);
+                        }
                     } else {
                         item.typeOnRight(typeBounds, type);
                     }
@@ -620,7 +623,6 @@ public class LoopStatementMaker {
         return new ClassFileForEachStatement(item, list, subStatements);
     }
 
-    @SuppressWarnings("unchecked")
     protected static Statement makeLabels(int loopIndex, int continueOffset, int breakOffset, Statement loop, Statements jumps) {
         if (!jumps.isEmpty()) {
             Iterator<Statement> iterator = jumps.iterator();

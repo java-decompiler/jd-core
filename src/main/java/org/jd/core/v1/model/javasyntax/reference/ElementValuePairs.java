@@ -12,6 +12,9 @@ import org.jd.core.v1.util.DefaultList;
 import java.util.Collection;
 
 public class ElementValuePairs extends DefaultList<ElementValuePair> implements BaseElementValuePair {
+
+    private static final long serialVersionUID = 1L;
+
     public ElementValuePairs() {
     }
 

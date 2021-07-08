@@ -8,11 +8,18 @@
 package org.jd.core.v1.model.javasyntax.reference;
 
 public abstract class AbstractNopReferenceVisitor implements ReferenceVisitor {
-    @Override public void visit(AnnotationReference reference) {}
-    @Override public void visit(AnnotationReferences references) {}
-    @Override public void visit(ElementValues references) {}
-    @Override public void visit(ElementValuePair reference) {}
-    @Override public void visit(ElementValuePairs references) {}
-    @Override public void visit(InnerObjectReference reference) {}
-    @Override public void visit(ObjectReference reference) {}
+    @Override
+    public void visit(AnnotationReference reference) {}
+    @Override
+    public void visit(AnnotationReferences<? extends AnnotationReference> references) {}
+    @Override
+    public void visit(ElementValues references) {}
+    @Override
+    public void visit(ElementValuePair reference) {}
+    @Override
+    public void visit(ElementValuePairs references) {}
+    @Override
+    public void visit(InnerObjectReference reference) {}
+    @Override
+    public void visit(ObjectReference reference) {}
 }

@@ -31,10 +31,10 @@ public class DefaultStack<E> {
     }
 
     public boolean isEmpty() {
-        return head == 0;
+        return head <= 0;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void copy(DefaultStack other) {
         if (elements.length < other.head) {
             elements = (E[])new Object[other.head];

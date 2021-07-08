@@ -7,7 +7,6 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.model.fragment.FlexibleFragment;
 import org.jd.core.v1.model.fragment.Fragment;
 import org.jd.core.v1.model.fragment.SpacerBetweenMovableBlocksFragment;
@@ -16,10 +15,12 @@ import org.jd.core.v1.util.DefaultList;
 import org.junit.Test;
 
 import static org.jd.core.v1.model.javafragment.EndMovableJavaBlockFragment.END_MOVABLE_BLOCK;
-import static org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment.*;
+import static org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment.START_MOVABLE_FIELD_BLOCK;
+import static org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK;
+import static org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK;
 
+import junit.framework.TestCase;
 
-@SuppressWarnings("unchecked")
 public class UpdateSpacerBetweenMovableBlocksVisitorTest extends TestCase {
     @Test
     public void test() {
@@ -71,12 +72,12 @@ public class UpdateSpacerBetweenMovableBlocksVisitorTest extends TestCase {
             fragment.accept(visitor);
         }
 
-        assertTrue(spacer1.getInitialLineCount() == 1);
-        assertTrue(spacer2.getInitialLineCount() == 2);
-        assertTrue(spacer3.getInitialLineCount() == 2);
-        assertTrue(spacer4.getInitialLineCount() == 2);
-        assertTrue(spacer5.getInitialLineCount() == 1);
-        assertTrue(spacer6.getInitialLineCount() == 2);
-        assertTrue(spacer7.getInitialLineCount() == 2);
+        assertEquals(1, spacer1.getInitialLineCount());
+        assertEquals(2, spacer2.getInitialLineCount());
+        assertEquals(2, spacer3.getInitialLineCount());
+        assertEquals(2, spacer4.getInitialLineCount());
+        assertEquals(1, spacer5.getInitialLineCount());
+        assertEquals(2, spacer6.getInitialLineCount());
+        assertEquals(2, spacer7.getInitialLineCount());
     }
 }

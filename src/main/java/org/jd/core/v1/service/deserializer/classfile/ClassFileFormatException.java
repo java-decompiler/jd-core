@@ -8,9 +8,8 @@
 package org.jd.core.v1.service.deserializer.classfile;
 
 public class ClassFileFormatException extends RuntimeException {
-    public ClassFileFormatException() {
-        super();
-    }
+
+    private static final long serialVersionUID = 1L;
 
     public ClassFileFormatException(String s) {
         super(s);

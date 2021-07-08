@@ -25,6 +25,7 @@ public class NewLineToken implements Token {
         return count;
     }
 
+    @Override
     public String toString() {
         return "NewLineToken{" + count + "}";
     }

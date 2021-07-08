@@ -20,9 +20,13 @@ import java.util.Collections;
 import java.util.ListIterator;
 
 public class NewArrayMaker {
+
+    private NewArrayMaker() {
+        super();
+    }
+
     protected static final ArrayVariableInitializer EMPTY_ARRAY = new ArrayVariableInitializer(PrimitiveType.TYPE_VOID);
 
-    @SuppressWarnings("unchecked")
     public static Expression make(Statements statements, Expression newArray) {
         if (! statements.isEmpty()) {
             Expression ae = statements.getLast().getExpression().getLeftExpression();

@@ -4,14 +4,16 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.type;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.ListIterator;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public class UnmodifiableTypes extends Types {
+    private static final long serialVersionUID = 1L;
+
     public UnmodifiableTypes() {}
 
     public UnmodifiableTypes(int capacity) {
@@ -22,10 +24,11 @@ public class UnmodifiableTypes extends Types {
         super(collection);
     }
 
-    @SuppressWarnings("unchecked")
     public UnmodifiableTypes(Type type, Type... types) {
         super(type, types);
-        assert (types != null) && (types.length > 0) : "Uses 'Type' implementation instead";
+        if (types.length <= 0) {
+            throw new IllegalArgumentException("Use 'Type' implementation instead");
+        }
     }
 
     @Override
@@ -93,8 +96,7 @@ public class UnmodifiableTypes extends Types {
         throw new UnsupportedOperationException();
     }
 
-
-    // --- ListIterator --- //
+    /** --- ListIterator --- */
     private class UnmodifiableTypesListIterator implements ListIterator<Type> {
         protected ListIterator<Type> listIterator;
 
@@ -102,15 +104,24 @@ public class UnmodifiableTypes extends Types {
             this.listIterator = listIterator;
         }
 
-        @Override public int nextIndex() { return listIterator.nextIndex(); }
-        @Override public int previousIndex() { return listIterator.previousIndex(); }
-        @Override public boolean hasNext() { return listIterator.hasNext(); }
-        @Override public boolean hasPrevious() { return listIterator.hasPrevious(); }
-        @Override public Type next() { return listIterator.next(); }
-        @Override public Type previous() { return listIterator.previous(); }
+        @Override
+        public int nextIndex() { return listIterator.nextIndex(); }
+        @Override
+        public int previousIndex() { return listIterator.previousIndex(); }
+        @Override
+        public boolean hasNext() { return listIterator.hasNext(); }
+        @Override
+        public boolean hasPrevious() { return listIterator.hasPrevious(); }
+        @Override
+        public Type next() { return listIterator.next(); }
+        @Override
+        public Type previous() { return listIterator.previous(); }
 
-        @Override public void set(Type element) { throw new UnsupportedOperationException(); }
-        @Override public void add(Type element) { throw new UnsupportedOperationException(); }
-        @Override public void remove() { throw new UnsupportedOperationException(); }
+        @Override
+        public void set(Type element) { throw new UnsupportedOperationException(); }
+        @Override
+        public void add(Type element) { throw new UnsupportedOperationException(); }
+        @Override
+        public void remove() { throw new UnsupportedOperationException(); }
     }
 }

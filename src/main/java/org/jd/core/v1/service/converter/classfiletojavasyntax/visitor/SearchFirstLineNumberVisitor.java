@@ -29,7 +29,6 @@ public class SearchFirstLineNumberVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void visit(Statements statements) {
         if (lineNumber == -1) {
             List<Statement> list = statements;
@@ -44,80 +43,123 @@ public class SearchFirstLineNumberVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override public void visit(ArrayExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(BinaryOperatorExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(BooleanExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(CastExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(CommentExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(ConstructorInvocationExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(ConstructorReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(DoubleConstantExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(EnumConstantReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(FieldReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(FloatConstantExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(IntegerConstantExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(InstanceOfExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(LambdaFormalParametersExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(LambdaIdentifiersExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(LengthExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(LocalVariableReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(LongConstantExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(MethodReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(NewArray expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(NewExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(NewInitializedArray expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(NullExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(ObjectTypeReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(ParenthesesExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(PostOperatorExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(PreOperatorExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(StringConstantExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(SuperExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(TernaryOperatorExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(ThisExpression expression) { lineNumber = expression.getLineNumber(); }
-    @Override public void visit(TypeReferenceDotClassExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(ArrayExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(BinaryOperatorExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(BooleanExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(CastExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(CommentExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(ConstructorInvocationExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(ConstructorReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(DoubleConstantExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(EnumConstantReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(FieldReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(FloatConstantExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(IntegerConstantExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(InstanceOfExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(LambdaFormalParametersExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(LambdaIdentifiersExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(LengthExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(LocalVariableReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(LongConstantExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(MethodReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(NewArray expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(NewExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(NewInitializedArray expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(NullExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(ObjectTypeReferenceExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(ParenthesesExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(PostOperatorExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(PreOperatorExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(StringConstantExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(SuperExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(TernaryOperatorExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(ThisExpression expression) { lineNumber = expression.getLineNumber(); }
+    @Override
+    public void visit(TypeReferenceDotClassExpression expression) { lineNumber = expression.getLineNumber(); }
 
-    @Override public void visit(AssertStatement statement) {
+    @Override
+    public void visit(AssertStatement statement) {
         statement.getCondition().accept(this);
     }
 
-    @Override public void visit(ExpressionStatement statement) {
+    @Override
+    public void visit(ExpressionStatement statement) {
         statement.getExpression().accept(this);
     }
 
-    @Override public void visit(ForEachStatement statement) {
+    @Override
+    public void visit(ForEachStatement statement) {
         statement.getExpression().accept(this);
     }
 
-    @Override public void visit(IfStatement statement) {
+    @Override
+    public void visit(IfStatement statement) {
         statement.getCondition().accept(this);
     }
 
-    @Override public void visit(IfElseStatement statement) {
+    @Override
+    public void visit(IfElseStatement statement) {
         statement.getCondition().accept(this);
     }
 
-    @Override public void visit(LambdaExpressionStatement statement) {
+    @Override
+    public void visit(LambdaExpressionStatement statement) {
         statement.getExpression().accept(this);
     }
 
-    @Override public void visit(MethodInvocationExpression expression) {
+    @Override
+    public void visit(MethodInvocationExpression expression) {
         expression.getExpression().accept(this);
     }
 
-    @Override public void visit(SwitchStatement statement) {
+    @Override
+    public void visit(SwitchStatement statement) {
         statement.getCondition().accept(this);
     }
 
-    @Override public void visit(SynchronizedStatement statement) {
+    @Override
+    public void visit(SynchronizedStatement statement) {
         statement.getMonitor().accept(this);
     }
 
-    @Override public void visit(ThrowStatement statement) {
+    @Override
+    public void visit(ThrowStatement statement) {
         statement.getExpression().accept(this);
     }
 
-    @Override public void visit(WhileStatement statement) {
+    @Override
+    public void visit(WhileStatement statement) {
         if (statement.getCondition() != null) {
             statement.getCondition().accept(this);
         } else if (statement.getStatements() != null) {
@@ -125,7 +167,8 @@ public class SearchFirstLineNumberVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override public void visit(DoWhileStatement statement) {
+    @Override
+    public void visit(DoWhileStatement statement) {
         if (statement.getStatements() != null) {
             statement.getStatements().accept(this);
         } else if (statement.getCondition() != null) {
@@ -133,7 +176,8 @@ public class SearchFirstLineNumberVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override public void visit(ForStatement statement) {
+    @Override
+    public void visit(ForStatement statement) {
         if (statement.getInit() != null) {
             statement.getInit().accept(this);
         } else if (statement.getCondition() != null) {
@@ -145,11 +189,13 @@ public class SearchFirstLineNumberVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override public void visit(ReturnExpressionStatement statement) {
+    @Override
+    public void visit(ReturnExpressionStatement statement) {
         statement.getExpression().accept(this);
     }
 
-    @Override public void visit(TryStatement statement) {
+    @Override
+    public void visit(TryStatement statement) {
         if (statement.getResources() != null) {
             acceptListStatement(statement.getResources());
         } else {

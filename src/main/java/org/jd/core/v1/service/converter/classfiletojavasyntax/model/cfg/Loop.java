@@ -7,15 +7,15 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 public class Loop {
     protected BasicBlock start;
-    protected HashSet<BasicBlock> members;
+    protected Set<BasicBlock> members;
     protected BasicBlock end;
 
-    public Loop(BasicBlock start, HashSet<BasicBlock> members, BasicBlock end) {
+    public Loop(BasicBlock start, Set<BasicBlock> members, BasicBlock end) {
         this.start = start;
         this.members = members;
         this.end = end;
@@ -29,7 +29,7 @@ public class Loop {
         this.start = start;
     }
 
-    public HashSet<BasicBlock> getMembers() {
+    public Set<BasicBlock> getMembers() {
         return members;
     }
 

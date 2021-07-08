@@ -7,6 +7,10 @@
 
 package org.jd.core.test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
+@SuppressWarnings("all")
 public class IfElse {
 
     public void if_() {

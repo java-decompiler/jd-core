@@ -32,11 +32,13 @@ public interface InterfaceWithDefaultMethods {
         return getZonedDateTime(getLocalDateTime(), getZoneId(zoneString));
     }
 
-    private static ZoneId unsafeGetZoneId(String zoneString) throws DateTimeException {
+    // test with private modifier located in /zip/data-java-jdk-9.0.1.zip
+    /*private*/ static ZoneId unsafeGetZoneId(String zoneString) throws DateTimeException {
         return ZoneId.of(zoneString);
     }
 
-    private ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId) {
+    // test with private modifier located in /zip/data-java-jdk-9.0.1.zip
+    /*private*/ default ZonedDateTime getZonedDateTime(LocalDateTime localDateTime, ZoneId zoneId) {
         return ZonedDateTime.of(localDateTime, zoneId);
     }
 }

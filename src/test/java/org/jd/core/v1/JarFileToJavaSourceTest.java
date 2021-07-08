@@ -7,34 +7,25 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.JavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.classfile.ClassFile;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
+import org.jd.core.v1.model.message.DecompileContext;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.printer.PlainTextPrinter;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.ClassFileToJavaSyntaxProcessor;
-import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
-import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
-import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
-import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;
-import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.util.DefaultList;
+import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-public class JarFileToJavaSourceTest extends TestCase {
-    protected DeserializeClassFileProcessor deserializer = new DeserializeClassFileProcessor();
-    protected ClassFileToJavaSyntaxProcessor converter = new ClassFileToJavaSyntaxProcessor();
-    protected JavaSyntaxToJavaFragmentProcessor fragmenter = new JavaSyntaxToJavaFragmentProcessor();
-    protected LayoutFragmentProcessor layouter = new LayoutFragmentProcessor();
-    //protected TestTokenizeJavaFragmentProcessor tokenizer = new TestTokenizeJavaFragmentProcessor();
-    protected JavaFragmentToTokenProcessor tokenizer = new JavaFragmentToTokenProcessor();
-    protected WriteTokenProcessor writer = new WriteTokenProcessor();
+public class JarFileToJavaSourceTest extends AbstractJdTest {
 
     @Test
     public void testCommonsCodec() throws Exception {
@@ -128,8 +119,10 @@ public class JarFileToJavaSourceTest extends TestCase {
 //        test(com.google.common.collect.Collections2.class);
 //    }
 
-    protected void test(Class clazz) throws Exception {
-        test(new FileInputStream(Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile()));
+    protected void test(Class<?> clazz) throws Exception {
+        try (FileInputStream inputStream = new FileInputStream(Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile())) {
+            test(inputStream);
+        }
     }
 
     protected void test(InputStream inputStream) throws Exception {
@@ -141,38 +134,41 @@ public class JarFileToJavaSourceTest extends TestCase {
         try (InputStream is = inputStream) {
             ZipLoader loader = new ZipLoader(is);
             CounterPrinter printer = new CounterPrinter();
-            HashMap<String, Integer> statistics = new HashMap<>();
-            HashMap<String, Object> configuration = new HashMap<>();
+            Map<String, Integer> statistics = new HashMap<>();
+            Map<String, Object> configuration = new HashMap<>();
 
             configuration.put("realignLineNumbers", Boolean.TRUE);
 
-            Message message = new Message();
-            message.setHeader("loader", loader);
-            message.setHeader("printer", printer);
-            message.setHeader("configuration", configuration);
+            DecompileContext decompileContext = new DecompileContext();
+            decompileContext.setLoader(loader);
+            decompileContext.setPrinter(printer);
+            decompileContext.setConfiguration(configuration);
 
             long time0 = System.currentTimeMillis();
 
             for (String path : loader.getMap().keySet()) {
-                if (path.endsWith(".class") && (path.indexOf('$') == -1)) {
+                if (path.endsWith(StringConstants.CLASS_FILE_SUFFIX) && (path.indexOf('$') == -1)) {
                     String internalTypeName = path.substring(0, path.length() - 6); // 6 = ".class".length()
 
                     // TODO DEBUG if (!internalTypeName.endsWith("/Debug")) continue;
                     //if (!internalTypeName.endsWith("/MapUtils")) continue;
 
-                    message.setHeader("mainInternalTypeName", internalTypeName);
+                    decompileContext.setMainInternalTypeName(internalTypeName);
                     printer.init();
 
                     fileCounter++;
 
                     try {
                         // Decompile class
-                        deserializer.process(message);
-                        converter.process(message);
-                        fragmenter.process(message);
-                        layouter.process(message);
-                        tokenizer.process(message);
-                        writer.process(message);
+                        ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
+                        decompileContext.setClassFile(classFile);
+
+                        CompilationUnit compilationUnit = converter.process(decompileContext);
+                        fragmenter.process(compilationUnit, decompileContext);
+                        layouter.process(decompileContext);
+                        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
+                        decompileContext.setTokens(tokens);
+                        writer.process(decompileContext);
                     } catch (AssertionError e) {
                         String msg = (e.getMessage() == null) ? "<?>" : e.getMessage();
                         Integer counter = statistics.get(msg);
@@ -223,10 +219,10 @@ public class JarFileToJavaSourceTest extends TestCase {
                 System.out.println(stat);
             }
 
-            assertTrue(exceptionCounter == 0);
-            assertTrue(assertFailedCounter == 0);
-            assertTrue(printer.errorInMethodCounter == 0);
-            assertTrue(recompilationFailedCounter == 0);
+            assertEquals(0, exceptionCounter);
+            assertEquals(0, assertFailedCounter);
+            assertEquals(0, printer.errorInMethodCounter);
+            assertEquals(0, recompilationFailedCounter);
         }
     }
 
@@ -236,6 +232,7 @@ public class JarFileToJavaSourceTest extends TestCase {
         public long errorInMethodCounter = 0;
         public long accessCounter = 0;
 
+        @Override
         public void printText(String text) {
             if (text != null) {
                 if ("// Byte code:".equals(text) || text.startsWith("/* monitor enter ") || text.startsWith("/* monitor exit ")) {
@@ -245,12 +242,14 @@ public class JarFileToJavaSourceTest extends TestCase {
             super.printText(text);
         }
 
+        @Override
         public void printDeclaration(int type, String internalTypeName, String name, String descriptor) {
             if (type == TYPE) classCounter++;
             if ((type == METHOD) || (type == CONSTRUCTOR)) methodCounter++;
             super.printDeclaration(type, internalTypeName, name, descriptor);
         }
 
+        @Override
         public void printReference(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) {
             if ((name != null) && name.startsWith("access$")) {
                 accessCounter++;

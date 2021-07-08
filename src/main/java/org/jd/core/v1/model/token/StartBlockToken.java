@@ -26,6 +26,7 @@ public class StartBlockToken implements Token {
         return text;
     }
 
+    @Override
     public String toString() {
         return "StartBlockToken{'" + text + "'}";
     }

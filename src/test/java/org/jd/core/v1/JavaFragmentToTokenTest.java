@@ -7,19 +7,20 @@
 
 package org.jd.core.v1;
 
-import junit.framework.TestCase;
+import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.fragment.Fragment;
 import org.jd.core.v1.model.javafragment.*;
-import org.jd.core.v1.model.message.Message;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.token.*;
 import org.jd.core.v1.printer.PlainTextMetaPrinter;
 import org.jd.core.v1.printer.PlainTextPrinter;
+import org.jd.core.v1.regex.PatternMaker;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.services.tokenizer.javafragmenttotoken.TestTokenizeJavaFragmentProcessor;
 import org.jd.core.v1.util.DefaultList;
-import org.jd.core.v1.regex.PatternMaker;
+import org.jd.core.v1.util.StringConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,6 +28,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import junit.framework.TestCase;
 
 public class JavaFragmentToTokenTest extends TestCase {
     public static final KeywordToken BOOLEAN = new KeywordToken("boolean");
@@ -54,17 +57,17 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testIfReturn_0() throws Exception {
-        Message message = createMessageToTestIfReturn(0, 0);
+        DecompileContext decompileContext = createMessageToTestIfReturn(0, 0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setMaxLineNumber(0);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -75,19 +78,19 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testIfReturn_1_3() throws Exception {
-        Message message = createMessageToTestIfReturn(1, 3);
+        DecompileContext decompileContext = createMessageToTestIfReturn(1, 3);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 3);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(3);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -100,19 +103,19 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testIfReturn_1_4() throws Exception {
-        Message message = createMessageToTestIfReturn(1, 4);
+        DecompileContext decompileContext = createMessageToTestIfReturn(1, 4);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 4);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(4);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -125,17 +128,17 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testIfAssignation_0() throws Exception {
-        Message message = createMessageToTestIfAssignation(0, 0, 0);
+        DecompileContext decompileContext = createMessageToTestIfAssignation(0, 0, 0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setMaxLineNumber(0);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -146,19 +149,19 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testIfAssignation_1_2_3() throws Exception {
-        Message message = createMessageToTestIfAssignation(1, 2, 3);
+        DecompileContext decompileContext = createMessageToTestIfAssignation(1, 2, 3);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 3);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(3);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -167,24 +170,24 @@ public class JavaFragmentToTokenTest extends TestCase {
         Assert.assertTrue(source.matches(PatternMaker.make("/* 1: 1 */", "if (args == null)")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 2 */", "i = 0;")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "i = 1;")));
-        Assert.assertTrue(source.indexOf('{') == -1);
+        Assert.assertEquals(-1, source.indexOf('{'));
     }
 
     @Test
     public void testIfAssignation_1_3_5() throws Exception {
-        Message message = createMessageToTestIfAssignation(1, 3, 5);
+        DecompileContext decompileContext = createMessageToTestIfAssignation(1, 3, 5);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 5);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(5);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -198,17 +201,17 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndFieldDeclarationWithoutImports_0() throws Exception {
-        Message message = createMessageToTestClassDeclarationWithoutImports(0);
+        DecompileContext decompileContext = createMessageToTestClassDeclarationWithoutImports(0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setMaxLineNumber(0);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -219,17 +222,17 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndFieldDeclaration_0() throws Exception {
-        Message message = createMessageToTestClassDeclaration(0);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setMaxLineNumber(0);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -240,150 +243,150 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndFieldDeclaration_1() throws Exception {
-        Message message = createMessageToTestClassDeclaration(1);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(1);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 1);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(1);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 1 */ package org.jd.core.v1.service.writer;") != -1);
-        Assert.assertTrue(source.indexOf("/* 2: 0 */  -->") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 1 */ package org.jd.core.v1.service.writer;"));
+        Assert.assertNotEquals(-1, source.indexOf("/* 2: 0 */  -->"));
     }
 
     @Test
     public void testClassAndFieldDeclaration_2() throws Exception {
-        Message message = createMessageToTestClassDeclaration(2);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(2);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 2);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(2);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 2 */", "protected int a")));
     }
 
     @Test
     public void testClassAndFieldDeclaration_3() throws Exception {
-        Message message = createMessageToTestClassDeclaration(3);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(3);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 3);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(3);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "protected int a")));
-        Assert.assertTrue(source.indexOf("/* 4: 0 */ } -->") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 4: 0 */ } -->"));
     }
 
     @Test
     public void testClassAndFieldDeclaration_4() throws Exception {
-        Message message = createMessageToTestClassDeclaration(4);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(4);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 4);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(4);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 4 */", "protected int a")));
-        Assert.assertTrue(source.indexOf("/* 5: 0 */ } -->") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 5: 0 */ } -->"));
     }
 
     @Test
     public void testClassAndFieldDeclaration_5() throws Exception {
-        Message message = createMessageToTestClassDeclaration(5);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(5);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 5);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(5);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 5: 5 */", "protected int a")));
     }
 
     @Test
     public void testClassAndFieldDeclaration_6() throws Exception {
-        Message message = createMessageToTestClassDeclaration(6);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(6);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 6);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(6);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 5: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 6 */", "protected int a")));
@@ -391,23 +394,23 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndFieldDeclaration_7() throws Exception {
-        Message message = createMessageToTestClassDeclaration(7);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(7);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 7);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setMaxLineNumber(7);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -416,25 +419,25 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndFieldDeclaration_8() throws Exception {
-        Message message = createMessageToTestClassDeclaration(8);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(8);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 8);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(8);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -443,25 +446,25 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndFieldDeclaration_9() throws Exception {
-        Message message = createMessageToTestClassDeclaration(9);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(9);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 9);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(9);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -470,26 +473,26 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndFieldDeclaration_10() throws Exception {
-        Message message = createMessageToTestClassDeclaration(10);
+        DecompileContext decompileContext = createMessageToTestClassDeclaration(10);
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 10);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(10);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/*  1:  0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/*  1:  0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/*  3:  0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/*  4:  0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/*  6:  0 */", "public class TokenWriterTest")));
@@ -498,73 +501,73 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndMethodDeclaration_3() throws Exception {
-        Message message = createMessageToTestClassAndMethodDeclaration(3);
+        DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(3);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 3);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(3);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 3 */", "super(i);")));
     }
 
     @Test
     public void testClassAndMethodDeclaration_4() throws Exception {
-        Message message = createMessageToTestClassAndMethodDeclaration(4);
+        DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(4);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 4);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(4);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 2: 0 */", "public class TokenWriterTest")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "public TokenWriterTest", "(int i)")));
     }
 
     @Test
     public void testClassAndMethodDeclaration_8() throws Exception {
-        Message message = createMessageToTestClassAndMethodDeclaration(8);
+        DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(8);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 8);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setMaxLineNumber(8);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -573,25 +576,25 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndMethodDeclaration_9() throws Exception {
-        Message message = createMessageToTestClassAndMethodDeclaration(9);
+        DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(9);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 9);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(9);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 1: 0 */ package org.jd.core.v1.service.writer;"));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 3: 0 */", "import java.util.ArrayList")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 4: 0 */", "import org.junit.Assert")));
         Assert.assertTrue(source.matches(PatternMaker.make("/* 6: 0 */", "public class TokenWriterTest")));
@@ -600,20 +603,20 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndMethodDeclaration_10() throws Exception {
-        Message message = createMessageToTestClassAndMethodDeclaration(10);
+        DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(10);
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 10);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(10);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -631,20 +634,20 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndMethodDeclaration_11() throws Exception {
-        Message message = createMessageToTestClassAndMethodDeclaration(11);
+        DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(11);
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 11);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(11);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -662,20 +665,20 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndMethodDeclaration_12() throws Exception {
-        Message message = createMessageToTestClassAndMethodDeclaration(12);
+        DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(12);
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 12);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(12);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -693,20 +696,20 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testClassAndMethodDeclaration_14() throws Exception {
-        Message message = createMessageToTestClassAndMethodDeclaration(14);
+        DecompileContext decompileContext = createMessageToTestClassAndMethodDeclaration(14);
         //PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         PlainTextPrinter printer = new PlainTextPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 14);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(14);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -724,17 +727,17 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testLayout() throws Exception {
-        Message message = createSimpleMessage(1);
+        DecompileContext decompileContext = createSimpleMessage(1);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 22);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setMaxLineNumber(22);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -745,17 +748,17 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testLayoutWithoutLineNumber() throws Exception {
-        Message message = createSimpleMessage(0);
+        DecompileContext decompileContext = createSimpleMessage(0);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
 
-        message.setHeader("printer", printer);
-        message.setHeader("maxLineNumber", 0);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setMaxLineNumber(0);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -766,65 +769,65 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testLayoutWithStretchedfFragments_2() throws Exception {
-        Message message = createSimpleMessage(2);
+        DecompileContext decompileContext = createSimpleMessage(2);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 44);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(44);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 44: 44 */") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 44: 44 */"));
     }
 
     @Test
     public void testLayoutWithStretchedfFragments_3() throws Exception {
-        Message message = createSimpleMessage(3);
+        DecompileContext decompileContext = createSimpleMessage(3);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 66);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(66);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
         printSource(source);
 
-        Assert.assertTrue(source.indexOf("/* 66: 66 */") != -1);
+        Assert.assertNotEquals(-1, source.indexOf("/* 66: 66 */"));
     }
 
     @Test
     public void testMoveDown() throws Exception {
-        Message message = createMessageToTestMoveDown();
+        DecompileContext decompileContext = createMessageToTestMoveDown();
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 8);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(8);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -835,19 +838,19 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testLinkedBlocks_16() throws Exception {
-        Message message = createMessageToTestLinkedBlocks(6, 9, 11, 13, 16);
+        DecompileContext decompileContext = createMessageToTestLinkedBlocks(6, 9, 11, 13, 16);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 16);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(16);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -858,19 +861,19 @@ public class JavaFragmentToTokenTest extends TestCase {
 
     @Test
     public void testLinkedBlocks_22() throws Exception {
-        Message message = createMessageToTestLinkedBlocks(7, 11, 15, 19, 22);
+        DecompileContext decompileContext = createMessageToTestLinkedBlocks(7, 11, 15, 19, 22);
         PlainTextMetaPrinter printer = new PlainTextMetaPrinter();
         Map<String, Object> configuration = Collections.singletonMap("realignLineNumbers", Boolean.TRUE);
 
-        message.setHeader("printer", printer);
-        message.setHeader("configuration", configuration);
-        message.setHeader("maxLineNumber", 22);
-        message.setHeader("majorVersion", 0);
-        message.setHeader("minorVersion", 0);
+        decompileContext.setPrinter(printer);
+        decompileContext.setConfiguration(configuration);
+        decompileContext.setMaxLineNumber(22);
+        decompileContext.setMajorVersion(0);
+        decompileContext.setMinorVersion(0);
 
-        layouter.process(message);
-        tokenizer.process(message);
-        writer.process(message);
+        layouter.process(decompileContext);
+        tokenizer.process(decompileContext);
+        writer.process(decompileContext);
 
         String source = printer.toString();
 
@@ -892,7 +895,7 @@ public class JavaFragmentToTokenTest extends TestCase {
      * @return A message
      * @throws Exception
      */
-    public Message createMessageToTestIfReturn(int lineNumber1, int lineNumber2) throws Exception {
+    public DecompileContext createMessageToTestIfReturn(int lineNumber1, int lineNumber2) throws Exception {
         DefaultList<Fragment> fragments = new DefaultList<>();
 
         JavaFragmentFactory.addSpacerBetweenStatements(fragments);
@@ -938,10 +941,11 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         JavaFragmentFactory.addSpacerBetweenStatements(fragments);
 
-        Message message = new Message(fragments);
-        message.setHeader("maxLineNumber", Integer.valueOf(lineNumber2));
+        DecompileContext decompileContext = new DecompileContext(fragments);
+        decompileContext.setBody(fragments);
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber2));
 
-        return message;
+        return decompileContext;
     }
 
     /**
@@ -958,7 +962,7 @@ public class JavaFragmentToTokenTest extends TestCase {
      * @return A message
      * @throws Exception
      */
-    public Message createMessageToTestIfAssignation(int lineNumber1, int lineNumber2, int lineNumber3) throws Exception {
+    public DecompileContext createMessageToTestIfAssignation(int lineNumber1, int lineNumber2, int lineNumber3) throws Exception {
         DefaultList<Fragment> fragments = new DefaultList<>();
 
         JavaFragmentFactory.addSpacerBetweenStatements(fragments);
@@ -1009,13 +1013,13 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         JavaFragmentFactory.addSpacerBetweenStatements(fragments);
 
-        Message message = new Message(fragments);
-        message.setHeader("maxLineNumber", Integer.valueOf(lineNumber3));
+        DecompileContext decompileContext = new DecompileContext(fragments);
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber3));
 
-        return message;
+        return decompileContext;
     }
 
-    public Message createMessageToTestClassDeclaration(int lineNumber) throws Exception {
+    public DecompileContext createMessageToTestClassDeclaration(int lineNumber) throws Exception {
         DefaultList<Fragment> fragments = new DefaultList<>();
 
         // package org.jd.core.v1.service.writer;\n\n
@@ -1044,7 +1048,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1053,7 +1057,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1061,14 +1065,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1082,7 +1086,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(lineNumber),
                 new NumericConstantToken("0"),
@@ -1099,13 +1103,13 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         JavaFragmentFactory.addEndTypeBody(fragments, classStart);
 
-        Message message = new Message(fragments);
-        message.setHeader("maxLineNumber", Integer.valueOf(lineNumber));
+        DecompileContext decompileContext = new DecompileContext(fragments);
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber));
 
-        return message;
+        return decompileContext;
     }
 
-    public Message createMessageToTestClassDeclarationWithoutImports(int lineNumber) throws Exception {
+    public DecompileContext createMessageToTestClassDeclarationWithoutImports(int lineNumber) throws Exception {
         DefaultList<Fragment> fragments = new DefaultList<>();
 
         // package org.jd.core.v1.service.writer;\n\n
@@ -1123,7 +1127,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1132,7 +1136,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1140,14 +1144,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1161,7 +1165,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(lineNumber),
                 new NumericConstantToken("0"),
@@ -1178,10 +1182,10 @@ public class JavaFragmentToTokenTest extends TestCase {
 
         JavaFragmentFactory.addEndTypeBody(fragments, classStart);
 
-        Message message = new Message(fragments);
-        message.setHeader("maxLineNumber", Integer.valueOf(lineNumber));
+        DecompileContext decompileContext = new DecompileContext(fragments);
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber));
 
-        return message;
+        return decompileContext;
     }
 
     /*
@@ -1196,7 +1200,7 @@ public class JavaFragmentToTokenTest extends TestCase {
      *                    }
      *                  }
      */
-    public Message createMessageToTestClassAndMethodDeclaration(int lineNumber) throws Exception {
+    public DecompileContext createMessageToTestClassAndMethodDeclaration(int lineNumber) throws Exception {
         DefaultList<Fragment> fragments = new DefaultList<>();
 
         // package org.jd.core.v1.service.writer;\n\n
@@ -1225,7 +1229,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null),
                 StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1234,7 +1238,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1242,14 +1246,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Comparable", "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Cloneable", "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1260,7 +1264,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 PUBLIC,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.CONSTRUCTOR, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", "(I)V"),
+                new DeclarationToken(Printer.CONSTRUCTOR, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", "(I)V"),
                 TextToken.LEFTROUNDBRACKET,
                 INT,
                 TextToken.SPACE,
@@ -1282,10 +1286,10 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addEndMethodBody(fragments, startConstructor);
         JavaFragmentFactory.addEndTypeBody(fragments, startMainClass);
 
-        Message message = new Message(fragments);
-        message.setHeader("maxLineNumber", Integer.valueOf(lineNumber));
+        DecompileContext decompileContext = new DecompileContext(fragments);
+        decompileContext.setMaxLineNumber(Integer.valueOf(lineNumber));
 
-        return message;
+        return decompileContext;
     }
 
     /*
@@ -1316,7 +1320,7 @@ public class JavaFragmentToTokenTest extends TestCase {
      *                    } 0,2,7 --><--
      *                  } 0,2,2 -->
      */
-    public Message createSimpleMessage(int factor) {
+    public DecompileContext createSimpleMessage(int factor) {
         DefaultList<Fragment> fragments = new DefaultList<>();
 
         // package org.jd.core.v1.service.writer;\n\n
@@ -1345,7 +1349,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1359,9 +1363,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_STRING, "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("/*] args)")
         ));
 
@@ -1405,7 +1409,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 INT,
                 new LineNumberToken(10 * factor),
                 new TextToken(" i = "),
-                new ReferenceToken(ReferenceToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "call", "(IILjava/util/Enumeration;I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 StartBlockToken.START_PARAMETERS_BLOCK,
                 new LineNumberToken(11 * factor),
                 new StringConstantToken("aaaa", "org/jd/core/v1/service/test/TokenWriterTest"),
@@ -1417,7 +1421,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 new LineNumberToken(13 * factor),
                 NEW,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/util/Enumeration", "java.util.Enumeration", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, "java/util/Enumeration", "java.util.Enumeration", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         );
 
@@ -1436,7 +1440,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 BOOLEAN,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "hasMoreElements", "()Z"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "hasMoreElements", "()Z"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         ));
 
@@ -1467,9 +1471,9 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 PUBLIC,
                 TextToken.SPACE,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/Object", "Object", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_OBJECT, "Object", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "nextElement", "()Ljava/lang/Object;"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest$1", "nextElement", "()Ljava/lang/Object;"),
                 TextToken.LEFTRIGHTROUNDBRACKETS
         ));
 
@@ -1505,11 +1509,11 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SEMICOLON,
                 NewLineToken.NEWLINE_1,
                 new LineNumberToken(22 * factor),
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_SYSTEM, "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.FIELD, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.FIELD, StringConstants.JAVA_LANG_SYSTEM, "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTROUNDBRACKET,
                 new TextToken("i"),
                 TextToken.RIGHTROUNDBRACKET,
@@ -1530,14 +1534,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addEndTypeBody(fragments, startMainClass);
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
 
-        Message message = new Message(fragments);
+        DecompileContext decompileContext = new DecompileContext(fragments);
         if (factor != 0)
-            message.setHeader("maxLineNumber", Integer.valueOf(22 * factor));
+            decompileContext.setMaxLineNumber(Integer.valueOf(22 * factor));
 
-        return message;
+        return decompileContext;
     }
 
-    public Message createMessageToTestMoveDown() {
+    public DecompileContext createMessageToTestMoveDown() {
         DefaultList<Fragment> fragments = new DefaultList<>();
 
         // package org.jd.core.v1.service.writer;\n\n
@@ -1556,7 +1560,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1570,12 +1574,12 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "TIMESTAMP", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "TIMESTAMP", "I"),
                 new TextToken(" = "),
                 new LineNumberToken(4),
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_SYSTEM, "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD, "java/lang/System", "currentTimeMillis", "()J", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.METHOD, StringConstants.JAVA_LANG_SYSTEM, "currentTimeMillis", "()J", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTRIGHTROUNDBRACKETS,
                 TextToken.SEMICOLON
         ));
@@ -1590,7 +1594,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "a", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1604,7 +1608,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "b", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "b", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1618,7 +1622,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 INT,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "c", "I"),
+                new DeclarationToken(Printer.FIELD, "org/jd/core/v1/service/test/TokenWriterTest", "c", "I"),
                 TextToken.SEMICOLON
         ));
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
@@ -1634,9 +1638,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_STRING, "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("/*] args)")
         ));
 
@@ -1646,11 +1650,11 @@ public class JavaFragmentToTokenTest extends TestCase {
         // System.out.println(TIMESTAMP);
         fragments.add(new LineNumberTokensFragment(
                 new LineNumberToken(8),
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/System", "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_SYSTEM, "System", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.FIELD, "java/lang/System", "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.FIELD, StringConstants.JAVA_LANG_SYSTEM, "out", "java/io/PrintStream", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.DOT,
-                new ReferenceToken(ReferenceToken.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.METHOD, "java/io/PrintStream", "println", "(I)V", "org/jd/core/v1/service/test/TokenWriterTest"),
                 TextToken.LEFTROUNDBRACKET,
                 new TextToken("TIMESTAMP"),
                 TextToken.RIGHTROUNDBRACKET,
@@ -1666,11 +1670,11 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addEndTypeBody(fragments, startMainClass);
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
 
-        Message message = new Message(fragments);
-        message.setHeader("maxLineNumber", Integer.valueOf(8));
+        DecompileContext decompileContext = new DecompileContext(fragments);
+        decompileContext.setMaxLineNumber(Integer.valueOf(8));
         //message.setStart("containsByteCode", Boolean.TRUE);
 
-        return message;
+        return decompileContext;
     }
 
     /**
@@ -1701,7 +1705,7 @@ public class JavaFragmentToTokenTest extends TestCase {
      * @param lineNumber5
      * @return
      */
-    public Message createMessageToTestLinkedBlocks(int lineNumber1, int lineNumber2, int lineNumber3, int lineNumber4, int lineNumber5) {
+    public DecompileContext createMessageToTestLinkedBlocks(int lineNumber1, int lineNumber2, int lineNumber3, int lineNumber4, int lineNumber5) {
         DefaultList<Fragment> fragments = new DefaultList<>();
 
         // package org.jd.core.v1.service.writer;\n\n
@@ -1720,7 +1724,7 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 CLASS,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
+                new DeclarationToken(Printer.TYPE, "org/jd/core/v1/service/test/TokenWriterTest", "TokenWriterTest", null)
         ));
 
         StartBodyFragment startMainClass = JavaFragmentFactory.addStartTypeBody(fragments);
@@ -1734,9 +1738,9 @@ public class JavaFragmentToTokenTest extends TestCase {
                 TextToken.SPACE,
                 VOID,
                 TextToken.SPACE,
-                new DeclarationToken(DeclarationToken.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
+                new DeclarationToken(Printer.METHOD, "org/jd/core/v1/service/test/TokenWriterTest", "main", "([Ljava/lang/String;)V"),
                 TextToken.LEFTROUNDBRACKET,
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/String", "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_STRING, "String", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken("/*] args)")
         ));
 
@@ -1766,7 +1770,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 CATCH,
                 new TextToken(" ("),
-                new ReferenceToken(ReferenceToken.TYPE, "java/lang/RuntimeException", "RuntimeException", null, "org/jd/core/v1/service/test/TokenWriterTest"),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_RUNTIME_EXCEPTION, "RuntimeException", null, "org/jd/core/v1/service/test/TokenWriterTest"),
                 new TextToken(" e)")
         ));
 
@@ -1811,11 +1815,11 @@ public class JavaFragmentToTokenTest extends TestCase {
         JavaFragmentFactory.addEndTypeBody(fragments, startMainClass);
         fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
 
-        Message message = new Message(fragments);
-        message.setHeader("maxLineNumber", Integer.valueOf(8));
+        DecompileContext decompileContext = new DecompileContext(fragments);
+        decompileContext.setMaxLineNumber(Integer.valueOf(8));
         //message.setStart("containsByteCode", Boolean.TRUE);
 
-        return message;
+        return decompileContext;
     }
 
     protected void printSource(String source) {

@@ -9,6 +9,8 @@ package org.jd.core.v1.cfg;
 
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.ExceptionHandler;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
 import org.jd.core.v1.util.DefaultList;
@@ -38,65 +40,64 @@ public class ControlFlowGraphPlantUMLWriter {
     public static String write(ControlFlowGraph cfg) {
         if (cfg.getBasicBlocks() == null) {
             return null;
-        } else {
-            boolean dark = true;
-            HashSet<BasicBlock> set = new HashSet<>();
-
-            search(set, cfg.getStart());
-
-            DefaultList<BasicBlock> list = new DefaultList<>(set);
-            list.sort(BASIC_BLOCK_COMPARATOR);
-
-            StringBuilder sb = new StringBuilder();
-
-            //sb.append("scale 0.6\n");
-            //sb.append("scale max 2000 width\n");
-            //sb.append("skinparam shadowing false\n");
-            sb.append("skinparam state {\n");
-            sb.append("  BackgroundColor<<Reduced>> #BBD7B7\n");
-            sb.append("  BorderColor<<Reduced>> Green\n");
-            sb.append("  BackgroundColor<<Synthetic>> PowderBlue\n");
-            sb.append("  BorderColor<<Synthetic>> DodgerBlue\n");
-            sb.append("  BackgroundColor<<ToReduce>> Orange\n");
-            sb.append("  BorderColor<<ToReduce>> #FF740E\n");
-            sb.append("}\n");
-
-            if (dark) {
-                sb.append("skinparam BackgroundColor #2B2B2B\n");
-                sb.append("skinparam state {\n");
-                sb.append("  StartColor #999999\n");
-                sb.append("  BackgroundColor #D6BF55\n");
-                sb.append("  BorderColor #F6DF57\n");
-                sb.append("}\n");
-                sb.append("skinparam sequence {\n");
-                sb.append("  ArrowColor #999999\n");
-                sb.append("  ArrowFontColor #AAAAAA\n");
-                sb.append("}\n");
-            } else {
-                //sb.append("skinparam BackgroundColor #DDDDDD\n");
-                sb.append("skinparam state {\n");
-                sb.append("  BorderColor Gold\n");
-                sb.append("}\n");
-                sb.append("skinparam sequence {\n");
-                sb.append("  ArrowColor Black\n");
-                sb.append("}\n");
-            }
-
-            Method method = cfg.getMethod();
-
-            for (BasicBlock basicBlock : list) {
-                writeState(sb, method, basicBlock);
-            }
-
-            for (BasicBlock basicBlock : list) {
-                writeLink(sb, basicBlock);
-            }
-
-            return sb.toString();
         }
+        boolean dark = true;
+        Set<BasicBlock> set = new HashSet<>();
+
+        search(set, cfg.getStart());
+
+        DefaultList<BasicBlock> list = new DefaultList<>(set);
+        list.sort(BASIC_BLOCK_COMPARATOR);
+
+        StringBuilder sb = new StringBuilder();
+
+        //sb.append("scale 0.6\n");
+        //sb.append("scale max 2000 width\n");
+        //sb.append("skinparam shadowing false\n");
+        sb.append("skinparam state {\n");
+        sb.append("  BackgroundColor<<Reduced>> #BBD7B7\n");
+        sb.append("  BorderColor<<Reduced>> Green\n");
+        sb.append("  BackgroundColor<<Synthetic>> PowderBlue\n");
+        sb.append("  BorderColor<<Synthetic>> DodgerBlue\n");
+        sb.append("  BackgroundColor<<ToReduce>> Orange\n");
+        sb.append("  BorderColor<<ToReduce>> #FF740E\n");
+        sb.append("}\n");
+
+        if (dark) {
+            sb.append("skinparam BackgroundColor #2B2B2B\n");
+            sb.append("skinparam state {\n");
+            sb.append("  StartColor #999999\n");
+            sb.append("  BackgroundColor #D6BF55\n");
+            sb.append("  BorderColor #F6DF57\n");
+            sb.append("}\n");
+            sb.append("skinparam sequence {\n");
+            sb.append("  ArrowColor #999999\n");
+            sb.append("  ArrowFontColor #AAAAAA\n");
+            sb.append("}\n");
+        } else {
+            //sb.append("skinparam BackgroundColor #DDDDDD\n");
+            sb.append("skinparam state {\n");
+            sb.append("  BorderColor Gold\n");
+            sb.append("}\n");
+            sb.append("skinparam sequence {\n");
+            sb.append("  ArrowColor Black\n");
+            sb.append("}\n");
+        }
+
+        Method method = cfg.getMethod();
+
+        for (BasicBlock basicBlock : list) {
+            writeState(sb, method, basicBlock);
+        }
+
+        for (BasicBlock basicBlock : list) {
+            writeLink(sb, basicBlock);
+        }
+
+        return sb.toString();
     }
 
-    protected static void search(HashSet<BasicBlock> set, BasicBlock basicBlock) {
+    protected static void search(Set<BasicBlock> set, BasicBlock basicBlock) {
         if (set.contains(basicBlock) == false) {
             set.add(basicBlock);
 
@@ -233,7 +234,7 @@ public class ControlFlowGraphPlantUMLWriter {
                 sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append(" {\n");
                 sb.append("[*] --> ").append(getStateId(basicBlock.getSub1())).append('\n');
 
-                HashSet<BasicBlock> set = new HashSet<>();
+                Set<BasicBlock> set = new HashSet<>();
 
                 search(set, basicBlock.getSub1());
 
@@ -470,9 +471,8 @@ public class ControlFlowGraphPlantUMLWriter {
             }
 
             return PLANTUML_URL_PREFIX + sb.toString();
-        } else {
-            return null;
         }
+        return null;
     }
 
     protected static void append3bytes(StringBuilder sb, int b1, int b2, int b3) {

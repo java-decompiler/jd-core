@@ -15,15 +15,16 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class SearchLocalVariableVisitor extends AbstractJavaSyntaxVisitor {
-    protected HashSet<AbstractLocalVariable> variables = new HashSet<>();
+    protected Set<AbstractLocalVariable> variables = new HashSet<>();
 
     public void init() {
         variables.clear();
     }
 
-    public HashSet<AbstractLocalVariable> getVariables() {
+    public Set<AbstractLocalVariable> getVariables() {
         return variables;
     }
 
@@ -36,15 +37,25 @@ public class SearchLocalVariableVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override public void visit(IntegerConstantExpression expression) {}
+    @Override
+    public void visit(IntegerConstantExpression expression) {}
 
-    @Override public void visit(TypeArguments arguments) {}
-    @Override public void visit(DiamondTypeArgument argument) {}
-    @Override public void visit(WildcardExtendsTypeArgument argument) {}
-    @Override public void visit(WildcardSuperTypeArgument argument) {}
-    @Override public void visit(WildcardTypeArgument argument) {}
-    @Override public void visit(PrimitiveType type) {}
-    @Override public void visit(ObjectType type) {}
-    @Override public void visit(InnerObjectType type) {}
-    @Override public void visit(GenericType type) {}
+    @Override
+    public void visit(TypeArguments arguments) {}
+    @Override
+    public void visit(DiamondTypeArgument argument) {}
+    @Override
+    public void visit(WildcardExtendsTypeArgument argument) {}
+    @Override
+    public void visit(WildcardSuperTypeArgument argument) {}
+    @Override
+    public void visit(WildcardTypeArgument argument) {}
+    @Override
+    public void visit(PrimitiveType type) {}
+    @Override
+    public void visit(ObjectType type) {}
+    @Override
+    public void visit(InnerObjectType type) {}
+    @Override
+    public void visit(GenericType type) {}
 }

@@ -8,5 +8,4 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class AttributeSynthetic implements Attribute {
-    public AttributeSynthetic() {}
 }

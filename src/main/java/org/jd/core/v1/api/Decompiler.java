@@ -8,12 +8,14 @@
 package org.jd.core.v1.api;
 
 import org.jd.core.v1.api.loader.Loader;
+import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.api.printer.Printer;
 
+import java.io.UTFDataFormatException;
 import java.util.Map;
 
 public interface Decompiler {
-    void decompile(Loader loader, Printer printer, String internalName) throws Exception;
+    void decompile(Loader loader, Printer printer, String internalName) throws UTFDataFormatException, LoaderException;
 
-    void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws Exception;
+    void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws UTFDataFormatException, LoaderException;
 }

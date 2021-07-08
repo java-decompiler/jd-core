@@ -60,4 +60,9 @@ public class PostOperatorExpression extends AbstractLineNumberExpression {
     public String toString() {
         return "PostOperatorExpression{" + expression + " " + operator + "}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new PostOperatorExpression(lineNumber, expression, operator);
+	}
 }

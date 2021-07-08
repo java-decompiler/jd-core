@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.type;
 
 import java.util.Map;
@@ -20,7 +19,7 @@ public class PrimitiveType implements Type {
     public static final int FLAG_LONG    = 128;
     public static final int FLAG_VOID    = 256;
 
-    //                                                                                                          type,                                                 type = ...,                                           ... = type
+    /** Type, type = ..., ... = type */
     public static final PrimitiveType TYPE_BOOLEAN                = new PrimitiveType("boolean",                FLAG_BOOLEAN,                                         FLAG_BOOLEAN,                                         FLAG_BOOLEAN);
     public static final PrimitiveType TYPE_BYTE                   = new PrimitiveType("byte",                   FLAG_BYTE,                                            FLAG_BYTE,                                            FLAG_BYTE|FLAG_INT|FLAG_SHORT);
     public static final PrimitiveType TYPE_CHAR                   = new PrimitiveType("char",                   FLAG_CHAR,                                            FLAG_CHAR,                                            FLAG_CHAR|FLAG_INT);
@@ -31,19 +30,27 @@ public class PrimitiveType implements Type {
     public static final PrimitiveType TYPE_SHORT                  = new PrimitiveType("short",                  FLAG_SHORT,                                           FLAG_SHORT|FLAG_BYTE,                                 FLAG_SHORT|FLAG_INT);
     public static final PrimitiveType TYPE_VOID                   = new PrimitiveType("void",                   FLAG_VOID,                                            FLAG_VOID,                                            FLAG_VOID);
 
-    public static final PrimitiveType MAYBE_CHAR_TYPE             = new PrimitiveType("maybe_char",             FLAG_CHAR|FLAG_INT,                                   FLAG_CHAR|FLAG_INT,                                   FLAG_CHAR|FLAG_INT);                                   //  32768 .. 65535
-    public static final PrimitiveType MAYBE_SHORT_TYPE            = new PrimitiveType("maybe_short",            FLAG_CHAR|FLAG_SHORT|FLAG_INT,                        FLAG_CHAR|FLAG_SHORT|FLAG_INT,                        FLAG_CHAR|FLAG_SHORT|FLAG_INT);                        //    128 .. 32767
-    public static final PrimitiveType MAYBE_BYTE_TYPE             = new PrimitiveType("maybe_byte",             FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT,              FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT,              FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT);              //      2 .. 127
-    public static final PrimitiveType MAYBE_BOOLEAN_TYPE          = new PrimitiveType("maybe_boolean",          FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT, FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT, FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT); //      0 .. 1
-    public static final PrimitiveType MAYBE_NEGATIVE_BYTE_TYPE    = new PrimitiveType("maybe_negative_byte",    FLAG_BYTE|FLAG_SHORT|FLAG_INT,                        FLAG_BYTE|FLAG_SHORT|FLAG_INT,                        FLAG_BYTE|FLAG_SHORT|FLAG_INT);                        //   -128 .. -1
-    public static final PrimitiveType MAYBE_NEGATIVE_SHORT_TYPE   = new PrimitiveType("maybe_negative_short",   FLAG_SHORT|FLAG_INT,                                  FLAG_SHORT|FLAG_INT,                                  FLAG_SHORT|FLAG_INT);                                  // -32768 .. -129
-    public static final PrimitiveType MAYBE_INT_TYPE              = new PrimitiveType("maybe_int",              FLAG_INT,                                             FLAG_INT,                                             FLAG_INT);                                             // Otherwise
-    public static final PrimitiveType MAYBE_NEGATIVE_BOOLEAN_TYPE = new PrimitiveType("maybe_negative_boolean", FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT,           FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT,           FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT);           // Boolean or negative
+    /** 32768 .. 65535 */
+    public static final PrimitiveType MAYBE_CHAR_TYPE             = new PrimitiveType("maybe_char",             FLAG_CHAR|FLAG_INT,                                   FLAG_CHAR|FLAG_INT,                                   FLAG_CHAR|FLAG_INT);
+    /** 128 .. 32767 */
+    public static final PrimitiveType MAYBE_SHORT_TYPE            = new PrimitiveType("maybe_short",            FLAG_CHAR|FLAG_SHORT|FLAG_INT,                        FLAG_CHAR|FLAG_SHORT|FLAG_INT,                        FLAG_CHAR|FLAG_SHORT|FLAG_INT);
+    /** 2 .. 127 */
+    public static final PrimitiveType MAYBE_BYTE_TYPE             = new PrimitiveType("maybe_byte",             FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT,              FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT,              FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT);
+    /** 0 .. 1 */
+    public static final PrimitiveType MAYBE_BOOLEAN_TYPE          = new PrimitiveType("maybe_boolean",          FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT, FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT, FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT);
+    /** -128 .. -1 */
+    public static final PrimitiveType MAYBE_NEGATIVE_BYTE_TYPE    = new PrimitiveType("maybe_negative_byte",    FLAG_BYTE|FLAG_SHORT|FLAG_INT,                        FLAG_BYTE|FLAG_SHORT|FLAG_INT,                        FLAG_BYTE|FLAG_SHORT|FLAG_INT);
+    /** -32768 .. -129 */
+    public static final PrimitiveType MAYBE_NEGATIVE_SHORT_TYPE   = new PrimitiveType("maybe_negative_short",   FLAG_SHORT|FLAG_INT,                                  FLAG_SHORT|FLAG_INT,                                  FLAG_SHORT|FLAG_INT);
+    /** Otherwise. */
+    public static final PrimitiveType MAYBE_INT_TYPE              = new PrimitiveType("maybe_int",              FLAG_INT,                                             FLAG_INT,                                             FLAG_INT);
+    /** Boolean or negative. */
+    public static final PrimitiveType MAYBE_NEGATIVE_BOOLEAN_TYPE = new PrimitiveType("maybe_negative_boolean", FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT,           FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT,           FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT);
 
     protected static final PrimitiveType[] descriptorToType = new PrimitiveType['Z' - 'B' + 1];
 
     static {
-        descriptorToType['B' - 'B'] = TYPE_BYTE;
+        descriptorToType[0]         = TYPE_BYTE;
         descriptorToType['C' - 'B'] = TYPE_CHAR;
         descriptorToType['D' - 'B'] = TYPE_DOUBLE;
         descriptorToType['F' - 'B'] = TYPE_FLOAT;
@@ -72,22 +79,23 @@ public class PrimitiveType implements Type {
 
         StringBuilder sb = new StringBuilder();
 
-        if ((flags & FLAG_DOUBLE) != 0)
+        if ((flags & FLAG_DOUBLE) != 0) {
             sb.append('D');
-        else if ((flags & FLAG_FLOAT) != 0)
+        } else if ((flags & FLAG_FLOAT) != 0) {
             sb.append('F');
-        else if ((flags & FLAG_LONG) != 0)
+        } else if ((flags & FLAG_LONG) != 0) {
             sb.append('J');
-        else if ((flags & FLAG_BOOLEAN) != 0)
+        } else if ((flags & FLAG_BOOLEAN) != 0) {
             sb.append('Z');
-        else if ((flags & FLAG_BYTE) != 0)
+        } else if ((flags & FLAG_BYTE) != 0) {
             sb.append('B');
-        else if ((flags & FLAG_CHAR) != 0)
+        } else if ((flags & FLAG_CHAR) != 0) {
             sb.append('C');
-        else if ((flags & FLAG_SHORT) != 0)
+        } else if ((flags & FLAG_SHORT) != 0) {
             sb.append('S');
-        else
+        } else {
             sb.append('I');
+        }
 
         this.descriptor = sb.toString();
     }
@@ -125,24 +133,27 @@ public class PrimitiveType implements Type {
 
     @Override
     public Type createType(int dimension) {
-        assert dimension >= 0 : "PrimitiveType.createType(dim) : create type with negative dimension";
+        if (dimension < 0) {
+            throw new IllegalArgumentException("PrimitiveType.createType(dim) : create type with negative dimension");
+        }
         if (dimension == 0) {
             return this;
-        } else {
-            return new ObjectType(descriptor, dimension);
         }
+        return new ObjectType(descriptor, dimension);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         PrimitiveType that = (PrimitiveType) o;
 
-        if (flags != that.flags) return false;
-
-        return true;
+        return flags == that.flags;
     }
 
     @Override
@@ -181,16 +192,21 @@ public class PrimitiveType implements Type {
     }
 
     public int getJavaPrimitiveFlags() {
-        if ((flags & FLAG_BOOLEAN) != 0)
+        if ((flags & FLAG_BOOLEAN) != 0) {
             return FLAG_BOOLEAN;
-        else if ((flags & FLAG_INT) != 0)
+        }
+        if ((flags & FLAG_INT) != 0) {
             return FLAG_INT;
-        else if ((flags & FLAG_CHAR) != 0)
+        }
+        if ((flags & FLAG_CHAR) != 0) {
             return FLAG_CHAR;
-        else if ((flags & FLAG_SHORT) != 0)
+        }
+        if ((flags & FLAG_SHORT) != 0) {
             return FLAG_SHORT;
-        else if ((flags & FLAG_BYTE) != 0)
+        }
+        if ((flags & FLAG_BYTE) != 0) {
             return FLAG_BYTE;
+        }
 
         return flags;
     }

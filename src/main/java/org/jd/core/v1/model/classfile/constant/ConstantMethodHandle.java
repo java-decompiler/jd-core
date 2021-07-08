@@ -12,7 +12,7 @@ public class ConstantMethodHandle extends Constant {
     protected int referenceIndex;
 
     public ConstantMethodHandle(int referenceKind, int referenceIndex) {
-        super(CONSTANT_MethodHandle);
+        super(CONSTANT_METHODHANDLE);
         this.referenceKind = referenceKind;
         this.referenceIndex = referenceIndex;
     }

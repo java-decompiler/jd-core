@@ -11,7 +11,7 @@ public class ConstantString extends Constant {
     protected int stringIndex;
 
     public ConstantString(int stringIndex) {
-        super(CONSTANT_String);
+        super(CONSTANT_STRING);
         this.stringIndex = stringIndex;
     }
 

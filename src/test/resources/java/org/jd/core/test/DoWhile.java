@@ -7,6 +7,10 @@
 
 package org.jd.core.test;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings
+@SuppressWarnings("all")
 public class DoWhile {
 
     public void doWhileTry(int i, Object o) {
@@ -24,6 +28,7 @@ public class DoWhile {
         while (i<10);
     }
 
+	
 	public void doWhile() {
 		System.out.println("start");
 
@@ -108,7 +113,7 @@ public class DoWhile {
 		while (i-- > 0);
 	}
 
-	public void doWhileORAndANDConditions(int i)
+    public void doWhileORAndANDConditions(int i)
 	{
 		System.out.println("start");
 

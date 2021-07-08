@@ -11,6 +11,5 @@ import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 
 public interface ClassFileTypeDeclaration extends ClassFileMemberDeclaration {
     String getInternalTypeName();
-    int getFirstLineNumber();
     BodyDeclaration getBodyDeclaration();
 }

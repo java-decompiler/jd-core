@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.model.javafragment;
 
-public class EndBlockInParameterFragment extends EndBlockFragment implements JavaFragment {
+public class EndBlockInParameterFragment extends EndBlockFragment {
     public EndBlockInParameterFragment(int minimalLineCount, int lineCount, int maximalLineCount, int weight, String label, StartBlockFragment start) {
         super(minimalLineCount, lineCount, maximalLineCount, weight, label, start);
     }

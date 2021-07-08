@@ -9,6 +9,7 @@ package org.jd.core.v1.loader;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
+import org.jd.core.v1.util.StringConstants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -39,9 +40,8 @@ public class DirectoryLoader implements Loader {
             } catch (Exception e) {
                 throw new LoaderException(e);
             }
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Override
@@ -50,6 +50,6 @@ public class DirectoryLoader implements Loader {
     }
 
     protected File newFile(String internalName) {
-        return new File(base, internalName.replace('/', File.separatorChar) + ".class");
+        return new File(base, internalName.replace('/', File.separatorChar) + StringConstants.CLASS_FILE_SUFFIX);
     }
 }

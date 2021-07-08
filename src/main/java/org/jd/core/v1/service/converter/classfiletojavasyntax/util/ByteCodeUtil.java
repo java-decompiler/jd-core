@@ -10,10 +10,15 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
+import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 
 public class ByteCodeUtil {
+
+    private ByteCodeUtil() {
+        super();
+    }
 
     public static int searchNextOpcode(BasicBlock basicBlock, int maxOffset) {
         byte[] code = basicBlock.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
@@ -111,9 +116,8 @@ public class ByteCodeUtil {
 
         if (offset <= maxOffset) {
             return code[offset] & 255;
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     public static int getLastOpcode(BasicBlock basicBlock) {
@@ -406,6 +410,7 @@ public class ByteCodeUtil {
                 case 201: // JSR_W
                     offset += 4;
                     depth++;
+                    // intended fall through
                 case 200: // GOTO_W
                     offset += 4;
                     break;
@@ -660,6 +665,7 @@ public class ByteCodeUtil {
                 case 201: // JSR_W
                     offset += 4;
                     depth++;
+                    // intended fall through
                 case 200: // GOTO_W
                     offset += 4;
                     break;

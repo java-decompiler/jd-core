@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.model.javasyntax.statement;
 
+import java.util.Objects;
+
 public class ContinueStatement implements Statement {
     public static final ContinueStatement CONTINUE = new ContinueStatement();
 
@@ -17,7 +19,7 @@ public class ContinueStatement implements Statement {
     }
 
     public ContinueStatement(String label) {
-        assert label != null;
+        Objects.requireNonNull(label);
 
         this.label = label;
     }

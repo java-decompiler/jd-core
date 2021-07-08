@@ -4,11 +4,9 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.classfile.attribute.*;
-import org.jd.core.v1.model.classfile.attribute.ElementValue;
 import org.jd.core.v1.model.classfile.attribute.ElementValuePair;
 import org.jd.core.v1.model.classfile.constant.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
@@ -18,97 +16,89 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
 public class AnnotationConverter implements ElementValueVisitor {
     protected TypeMaker typeMaker;
-    protected org.jd.core.v1.model.javasyntax.reference.ElementValue elementValue = null;
+    protected BaseElementValue elementValue;
 
     public AnnotationConverter(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
     }
 
-    @SuppressWarnings("unchecked")
     public BaseAnnotationReference convert(Annotations visibles, Annotations invisibles) {
         if (visibles == null) {
             if (invisibles == null) {
                 return null;
-            } else {
-                return convert(invisibles);
             }
-        } else {
-            if (invisibles == null) {
-                return convert(visibles);
-            } else {
-                AnnotationReferences aral = new AnnotationReferences();
-
-                for (Annotation a : visibles.getAnnotations()) {
-                    aral.add(convert(a));
-                }
-                for (Annotation a : invisibles.getAnnotations()) {
-                    aral.add(convert(a));
-                }
-
-                return aral;
-            }
+            return convert(invisibles);
         }
+        if (invisibles == null) {
+            return convert(visibles);
+        }
+        AnnotationReferences<AnnotationReference> aral = new AnnotationReferences<>();
+
+        for (Annotation a : visibles.getAnnotations()) {
+            aral.add(convert(a));
+        }
+        for (Annotation a : invisibles.getAnnotations()) {
+            aral.add(convert(a));
+        }
+
+        return aral;
     }
 
-    @SuppressWarnings("unchecked")
     protected BaseAnnotationReference convert(Annotations annotations) {
         Annotation[] as = annotations.getAnnotations();
 
         if (as.length == 1) {
             return convert(as[0]);
-        } else {
-            AnnotationReferences aral = new AnnotationReferences(as.length);
-
-            for (Annotation a : as) {
-                aral.add(convert(a));
-            }
-
-            return aral;
         }
+        AnnotationReferences<AnnotationReference> aral = new AnnotationReferences<>(as.length);
+
+        for (Annotation a : as) {
+            aral.add(convert(a));
+        }
+
+        return aral;
     }
 
-    @SuppressWarnings("unchecked")
     protected AnnotationReference convert(Annotation annotation) {
         String descriptor = annotation.getDescriptor();
 
-        assert (descriptor != null) && (descriptor.length() > 2) && (descriptor.charAt(0) == 'L') && (descriptor.charAt(descriptor.length()-1) == ';');
+        assert descriptor != null && descriptor.length() > 2 && descriptor.charAt(0) == 'L' && descriptor.charAt(descriptor.length()-1) == ';';
 
         ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
         ElementValuePair[] elementValuePairs = annotation.getElementValuePairs();
 
         if (elementValuePairs == null) {
             return new AnnotationReference(ot);
-        } else if (elementValuePairs.length == 1) {
+        }
+		if (elementValuePairs.length == 1) {
             ElementValuePair elementValuePair = elementValuePairs[0];
             String elementName = elementValuePair.getElementName();
-            ElementValue elementValue = elementValuePair.getElementValue();
+            AttributeElementValue elementValue = elementValuePair.getElementValue();
 
             if ("value".equals(elementName)) {
                 return new AnnotationReference(ot, convert(elementValue));
-            } else {
-                return new AnnotationReference(
-                        ot,
-                        new org.jd.core.v1.model.javasyntax.reference.ElementValuePair(elementName, convert(elementValue)));
             }
-        } else {
-            ElementValuePairs list = new ElementValuePairs(elementValuePairs.length);
-
-            for (ElementValuePair elementValuePair : elementValuePairs) {
-                String elementName = elementValuePair.getElementName();
-                ElementValue elementValue = elementValuePair.getElementValue();
-                list.add(new org.jd.core.v1.model.javasyntax.reference.ElementValuePair(elementName, convert(elementValue)));
-            }
-
-            return new AnnotationReference(ot, list);
+            return new AnnotationReference(
+                    ot,
+                    new org.jd.core.v1.model.javasyntax.reference.ElementValuePair(elementName, convert(elementValue)));
         }
+		ElementValuePairs list = new ElementValuePairs(elementValuePairs.length);
+		String elementName;
+		AttributeElementValue elementValue;
+		for (ElementValuePair elementValuePair : elementValuePairs) {
+		    elementName = elementValuePair.getElementName();
+		    elementValue = elementValuePair.getElementValue();
+		    list.add(new org.jd.core.v1.model.javasyntax.reference.ElementValuePair(elementName, convert(elementValue)));
+		}
+		return new AnnotationReference(ot, list);
     }
 
-    public org.jd.core.v1.model.javasyntax.reference.ElementValue convert(ElementValue ev) {
+    public BaseElementValue convert(AttributeElementValue ev) {
         ev.accept(this);
         return elementValue;
     }
 
-    // --- ElementValueVisitor --- //
+    /** --- ElementValueVisitor --- */
     @Override
     public void visit(ElementValuePrimitiveType elementValuePrimitiveType) {
         switch (elementValuePrimitiveType.getType()) {
@@ -160,7 +150,9 @@ public class AnnotationConverter implements ElementValueVisitor {
     public void visit(ElementValueEnumConstValue elementValueEnumConstValue) {
         String descriptor = elementValueEnumConstValue.getDescriptor();
 
-        assert (descriptor != null) && (descriptor.length() > 2) && (descriptor.charAt(0) == 'L') && (descriptor.charAt(descriptor.length()-1) == ';') : "AnnotationConverter.visit(elementValueEnumConstValue)";
+        if (descriptor == null || descriptor.length() <= 2 || descriptor.charAt(0) != 'L' || descriptor.charAt(descriptor.length()-1) != ';') {
+            throw new IllegalArgumentException("AnnotationConverter.visit(elementValueEnumConstValue)");
+        }
 
         ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
         String constName = elementValueEnumConstValue.getConstName();
@@ -169,9 +161,8 @@ public class AnnotationConverter implements ElementValueVisitor {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void visit(ElementValueArrayValue elementValueArrayValue) {
-        ElementValue[] values = elementValueArrayValue.getValues();
+        AttributeElementValue[] values = elementValueArrayValue.getValues();
 
         if (values == null) {
             elementValue = new ElementValueArrayInitializerElementValue();
@@ -181,7 +172,7 @@ public class AnnotationConverter implements ElementValueVisitor {
         } else {
             ElementValues list = new ElementValues(values.length);
 
-            for (ElementValue value : values) {
+            for (AttributeElementValue value : values) {
                 value.accept(this);
                 list.add(elementValue);
             }

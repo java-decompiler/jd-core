@@ -7,6 +7,6 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public interface ElementValue {
+public interface AttributeElementValue {
     void accept(ElementValueVisitor attribute);
 }

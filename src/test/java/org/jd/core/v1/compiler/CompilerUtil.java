@@ -7,11 +7,12 @@
 
 package org.jd.core.v1.compiler;
 
-import javax.tools.*;
 import java.io.File;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.tools.*;
 
 public class CompilerUtil {
     protected static final File DESTINATION_DIRECTORY = new File("build/test-recompiled");
@@ -35,7 +36,7 @@ public class CompilerUtil {
             if (!diagnostics.getDiagnostics().isEmpty()) {
                 StringBuilder sb = new StringBuilder();
 
-                for (Diagnostic d : diagnostics.getDiagnostics()) {
+                for (Diagnostic<? extends JavaFileObject> d : diagnostics.getDiagnostics()) {
                     switch (d.getKind()) {
                         case NOTE:
                         case WARNING:
@@ -65,15 +66,13 @@ public class CompilerUtil {
 
         if (numericSystemJavaVersion <= 8) {
             return preferredJavaVersion;
-        } else {
-            int numericPreferredJavaVersion = parseJavaVersion(preferredJavaVersion);
-
-            if (numericPreferredJavaVersion < 6) {
-                return "1.6";
-            } else {
-                return preferredJavaVersion;
-            }
         }
+        int numericPreferredJavaVersion = parseJavaVersion(preferredJavaVersion);
+
+        if (numericPreferredJavaVersion < 6) {
+            return "1.6";
+        }
+        return preferredJavaVersion;
     }
 
     private static int parseJavaVersion(String javaVersion) {

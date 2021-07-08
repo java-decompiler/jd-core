@@ -9,6 +9,8 @@ package org.jd.core.test;
 
 import java.io.*;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class TryWithResources {
 
     public void try1Resource(String path) throws IOException {
@@ -119,6 +121,7 @@ public class TryWithResources {
         }
     }
 
+    @SuppressFBWarnings
     public int tryCatchFinally4Resources(String pathIn, String pathOut) throws Exception {
         try {
             try (FileInputStream input = new FileInputStream(pathIn);

@@ -8,9 +8,9 @@
 package org.jd.core.v1.service.tokenizer.javafragmenttotoken;
 
 import org.jd.core.v1.model.javafragment.JavaFragment;
-import org.jd.core.v1.model.message.Message;
-import org.jd.core.v1.model.processor.Processor;
+import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.visitor.TokenizeJavaFragmentVisitor;
+import org.jd.core.v1.util.DefaultList;
 
 import java.util.List;
 
@@ -20,11 +20,9 @@ import java.util.List;
  * Input:  List<{@link org.jd.core.v1.model.fragment.Fragment}><br>
  * Output: List<{@link org.jd.core.v1.model.token.Token}><br>
  */
-public class JavaFragmentToTokenProcessor implements Processor {
+public class JavaFragmentToTokenProcessor {
 
-    @Override
-    public void process(Message message) throws Exception {
-        List<JavaFragment> fragments = message.getBody();
+    public DefaultList<Token> process(List<JavaFragment> fragments) {
         TokenizeJavaFragmentVisitor visitor = new TokenizeJavaFragmentVisitor(fragments.size() * 3);
 
         // Create tokens
@@ -32,6 +30,6 @@ public class JavaFragmentToTokenProcessor implements Processor {
             fragment.accept(visitor);
         }
 
-        message.setBody(visitor.getTokens());
+        return visitor.getTokens();
     }
 }

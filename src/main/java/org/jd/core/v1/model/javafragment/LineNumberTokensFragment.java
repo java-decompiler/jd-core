@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javafragment;
 
 import org.jd.core.v1.api.printer.Printer;
@@ -26,7 +25,9 @@ public class LineNumberTokensFragment extends FixedFragment implements JavaFragm
 
     public LineNumberTokensFragment(List<Token> tokens) {
         super(searchFirstLineNumber(tokens), searchLastLineNumber(tokens));
-        assert firstLineNumber != Printer.UNKNOWN_LINE_NUMBER : "Uses 'TokensFragment' instead";
+        if (firstLineNumber == Printer.UNKNOWN_LINE_NUMBER) {
+            throw new IllegalArgumentException("Use 'TokensFragment' instead");
+        }
         this.tokens = tokens;
     }
 

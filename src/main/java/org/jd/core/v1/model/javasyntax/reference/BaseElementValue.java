@@ -9,4 +9,4 @@ package org.jd.core.v1.model.javasyntax.reference;
 
 import org.jd.core.v1.util.Base;
 
-public interface BaseElementValue extends Reference, Base<ElementValue> {}
+public interface BaseElementValue extends Reference, Base<BaseElementValue> {}

@@ -19,6 +19,7 @@ public class BooleanConstantToken implements Token {
         return value;
     }
 
+    @Override
     public String toString() {
         return "BooleanConstantToken{'" + value + "'}";
     }

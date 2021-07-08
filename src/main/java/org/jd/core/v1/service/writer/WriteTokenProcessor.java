@@ -8,8 +8,7 @@
 package org.jd.core.v1.service.writer;
 
 import org.jd.core.v1.api.printer.Printer;
-import org.jd.core.v1.model.message.Message;
-import org.jd.core.v1.model.processor.Processor;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.service.writer.visitor.PrintTokenVisitor;
 
@@ -21,16 +20,15 @@ import java.util.List;
  * Input:  List<{@link org.jd.core.v1.model.token.Token}><br>
  * Output: -<br>
  */
-public class WriteTokenProcessor implements Processor {
+public class WriteTokenProcessor {
 
-    @Override
-    public void process(Message message) throws Exception {
-        Printer printer = message.getHeader("printer");
-        List<Token> tokens = message.getBody();
+    public void process(DecompileContext decompileContext) {
+        Printer printer = decompileContext.getPrinter();
+        List<Token> tokens = decompileContext.getTokens();
         PrintTokenVisitor visitor = new PrintTokenVisitor();
-        int maxLineNumber = message.getHeader("maxLineNumber");
-        int majorVersion = message.getHeader("majorVersion");
-        int minorVersion = message.getHeader("minorVersion");
+        int maxLineNumber = decompileContext.getMaxLineNumber();
+        int majorVersion = decompileContext.getMajorVersion();
+        int minorVersion = decompileContext.getMinorVersion();
 
         printer.start(maxLineNumber, majorVersion, minorVersion);
         visitor.start(printer, tokens);

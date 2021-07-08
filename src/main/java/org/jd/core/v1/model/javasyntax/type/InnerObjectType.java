@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.type;
 
 public class InnerObjectType extends ObjectType {
@@ -13,30 +12,36 @@ public class InnerObjectType extends ObjectType {
     public InnerObjectType(String internalName, String qualifiedName, String name, ObjectType outerType) {
         super(internalName, qualifiedName, name);
         this.outerType = outerType;
-        assert (name == null) || !Character.isDigit(name.charAt(0)) || (qualifiedName == null);
+        checkArguments(qualifiedName, name);
     }
 
     public InnerObjectType(String internalName, String qualifiedName, String name, int dimension, ObjectType outerType) {
         super(internalName, qualifiedName, name, dimension);
         this.outerType = outerType;
-        assert (name == null) || !Character.isDigit(name.charAt(0)) || (qualifiedName == null);
+        checkArguments(qualifiedName, name);
     }
 
     public InnerObjectType(String internalName, String qualifiedName, String name, BaseTypeArgument typeArguments, ObjectType outerType) {
         super(internalName, qualifiedName, name, typeArguments);
         this.outerType = outerType;
-        assert (name == null) || !Character.isDigit(name.charAt(0)) || (qualifiedName == null);
+        checkArguments(qualifiedName, name);
     }
 
     public InnerObjectType(String internalName, String qualifiedName, String name, BaseTypeArgument typeArguments, int dimension, ObjectType outerType) {
         super(internalName, qualifiedName, name, typeArguments, dimension);
         this.outerType = outerType;
-        assert (name == null) || !Character.isDigit(name.charAt(0)) || (qualifiedName == null);
+        checkArguments(qualifiedName, name);
     }
 
     public InnerObjectType(InnerObjectType iot) {
         super(iot);
         this.outerType = iot.outerType;
+    }
+
+    protected void checkArguments(String qualifiedName, String name) {
+        if (name != null && Character.isDigit(name.charAt(0)) && qualifiedName != null) {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override
@@ -46,32 +51,35 @@ public class InnerObjectType extends ObjectType {
 
     @Override
     public Type createType(int dimension) {
-        assert dimension >= 0;
+        if (dimension < 0) {
+            throw new IllegalArgumentException("InnerObjectType.createType(dim) : create type with negative dimension");
+        }
         return new InnerObjectType(internalName, qualifiedName, name, typeArguments, dimension, outerType);
     }
 
+    @Override
     public ObjectType createType(BaseTypeArgument typeArguments) {
         return new InnerObjectType(internalName, qualifiedName, name, typeArguments, dimension, outerType);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof InnerObjectType)) return false;
-        if (!super.equals(o)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof InnerObjectType) || !super.equals(o)) {
+            return false;
+        }
 
         InnerObjectType that = (InnerObjectType) o;
 
-        if (!outerType.equals(that.outerType)) return false;
-
-        return true;
+        return outerType.equals(that.outerType);
     }
 
     @Override
     public int hashCode() {
         int result = 111476860 + super.hashCode();
-        result = 31 * result + outerType.hashCode();
-        return result;
+        return 31 * result + outerType.hashCode();
     }
 
     @Override
@@ -97,9 +105,8 @@ public class InnerObjectType extends ObjectType {
     @Override
     public String toString() {
         if (typeArguments == null) {
-            return "InnerObjectType{" + outerType.toString() + "." + descriptor + "}";
-        } else {
-            return "InnerObjectType{" + outerType.toString() + "." + descriptor + "<" + typeArguments + ">}";
+            return "InnerObjectType{" + outerType + "." + descriptor + "}";
         }
+        return "InnerObjectType{" + outerType + "." + descriptor + "<" + typeArguments + ">}";
     }
 }

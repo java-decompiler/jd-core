@@ -48,4 +48,9 @@ public class LengthExpression extends AbstractLineNumberExpression {
     public String toString() {
         return "LengthExpression{" + expression + "}";
     }
+
+	@Override
+	public Expression copyTo(int lineNumber) {
+		return new LengthExpression(lineNumber, expression);
+	}
 }

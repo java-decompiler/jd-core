@@ -19,6 +19,7 @@ public class KeywordToken implements Token {
         return keyword;
     }
 
+    @Override
     public String toString() {
         return "KeywordToken{'" + keyword + "'}";
     }
