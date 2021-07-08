@@ -1188,10 +1188,14 @@ public class ByteCodeParser {
 
         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(fr.getType(), valueRef);
 
-        if (valueRef.getLineNumber() == lineNumber && valueRef.isBinaryOperatorExpression() && valueRef.getLeftExpression().isFieldReferenceExpression()) {
+        if (valueRef.getLineNumber() == lineNumber 
+         && valueRef.isBinaryOperatorExpression() 
+         && valueRef.getLeftExpression().isFieldReferenceExpression()) {
             FieldReferenceExpression boefr = (FieldReferenceExpression)valueRef.getLeftExpression();
-
-            if (boefr.getName().equals(fr.getName()) && boefr.getExpression().getType().equals(fr.getExpression().getType())) {
+            
+            if (boefr.getName().equals(fr.getName()) 
+             && boefr.getExpression().getType().equals(fr.getExpression().getType())
+             && boefr.getExpression().getIndex().getIntegerValue() == fr.getExpression().getIndex().getIntegerValue()) {
                 BinaryOperatorExpression boe = (BinaryOperatorExpression)valueRef;
                 Expression expression;
 
