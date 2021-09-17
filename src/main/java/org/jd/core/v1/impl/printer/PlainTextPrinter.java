@@ -10,6 +10,10 @@ package org.jd.core.v1.impl.printer;
 
 import org.jd.core.v1.api.printer.Printer;
 
+/**
+ * A Printer that stores Java source inside a StringBuilder. Retrieve final
+ * source code using toString() method.
+ */
 public class PlainTextPrinter implements Printer {
     protected static final String TAB = "  ";
     protected static final String NEWLINE = "\n";

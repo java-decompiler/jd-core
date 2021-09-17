@@ -14,6 +14,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 
+/**
+ * A loader that loads classes from a given filesystem folder.
+ */
 public class DirectoryLoader implements Loader {
     protected File base;
 

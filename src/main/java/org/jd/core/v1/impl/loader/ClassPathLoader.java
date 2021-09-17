@@ -14,6 +14,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A Loader that loads classes from classpath.
+ */
 public class ClassPathLoader implements Loader {
     @Override
     public byte[] load(String internalName) throws LoaderException {

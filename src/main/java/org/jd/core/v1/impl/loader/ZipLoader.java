@@ -17,6 +17,10 @@ import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * A loader that loads classes from within ZIP archive (e.g. JAR).
+ * All classes inside zip file are loaded in memory as byte arrays.
+ */
 public class ZipLoader implements Loader {
     protected HashMap<String, byte[]> map = new HashMap<>();
 

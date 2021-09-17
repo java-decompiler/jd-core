@@ -7,6 +7,9 @@
 
 package org.jd.core.v1.impl.printer;
 
+/**
+ * A PlainTextPrinter that add some extra meta information to source code.
+ */
 public class PlainTextMetaPrinter extends PlainTextPrinter {
     // --- Printer --- //
     public void printStringConstant(String constant, String ownerInternalName) {
