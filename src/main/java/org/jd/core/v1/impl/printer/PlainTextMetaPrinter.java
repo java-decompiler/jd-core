@@ -5,7 +5,7 @@
  * copy and modify the code freely for non-commercial purposes.
  */
 
-package org.jd.core.v1.printer;
+package org.jd.core.v1.impl.printer;
 
 public class PlainTextMetaPrinter extends PlainTextPrinter {
     // --- Printer --- //

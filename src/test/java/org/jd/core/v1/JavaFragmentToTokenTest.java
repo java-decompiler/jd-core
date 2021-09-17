@@ -8,12 +8,13 @@
 package org.jd.core.v1;
 
 import junit.framework.TestCase;
+
+import org.jd.core.v1.impl.printer.PlainTextMetaPrinter;
+import org.jd.core.v1.impl.printer.PlainTextPrinter;
 import org.jd.core.v1.model.fragment.Fragment;
 import org.jd.core.v1.model.javafragment.*;
 import org.jd.core.v1.model.message.Message;
 import org.jd.core.v1.model.token.*;
-import org.jd.core.v1.printer.PlainTextMetaPrinter;
-import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.writer.WriteTokenProcessor;

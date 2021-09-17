@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
-import org.jd.core.v1.loader.ZipLoader;
+import org.jd.core.v1.impl.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.attribute.Annotations;

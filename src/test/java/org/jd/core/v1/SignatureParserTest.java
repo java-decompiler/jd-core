@@ -8,8 +8,9 @@
 package org.jd.core.v1;
 
 import junit.framework.TestCase;
-import org.jd.core.v1.loader.ClassPathLoader;
-import org.jd.core.v1.loader.ZipLoader;
+
+import org.jd.core.v1.impl.loader.ClassPathLoader;
+import org.jd.core.v1.impl.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.type.*;
 import org.jd.core.v1.model.message.Message;
