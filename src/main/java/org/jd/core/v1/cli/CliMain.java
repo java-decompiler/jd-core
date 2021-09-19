@@ -96,6 +96,11 @@ public class CliMain {
 			destFolder = srcFolder;
 		}
 
+		main(srcFolder, destFolder, override, escapeUnicode, printLineNumbers);
+	}
+
+	public static void main(File srcFolder, File destFolder, boolean override, boolean escapeUnicode,
+			boolean printLineNumbers) {
 		prepareFolders(srcFolder, destFolder);
 
 		// adding whole folder to classpath should give better decompilation, doesn't
@@ -209,6 +214,7 @@ public class CliMain {
 			System.err.println("Skipping existing file " + f.getPath());
 			return;
 		}
+		f.getParentFile().mkdirs();
 		try (FileWriter fw = new FileWriter(f)) {
 			fw.write(source);
 		}
