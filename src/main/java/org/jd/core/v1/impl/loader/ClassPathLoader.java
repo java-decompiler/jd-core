@@ -5,7 +5,7 @@
  * copy and modify the code freely for non-commercial purposes.
  */
 
-package org.jd.core.v1.loader;
+package org.jd.core.v1.impl.loader;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
@@ -14,6 +14,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * A Loader that loads classes from classpath.
+ */
 public class ClassPathLoader implements Loader {
     @Override
     public byte[] load(String internalName) throws LoaderException {

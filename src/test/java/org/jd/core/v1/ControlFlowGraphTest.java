@@ -9,8 +9,6 @@ package org.jd.core.v1;
 
 import junit.framework.TestCase;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.loader.ClassPathLoader;
-import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.*;
@@ -23,6 +21,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.ConvertC
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
 import org.jd.core.v1.service.deserializer.classfile.DeserializeClassFileProcessor;
 import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
+import org.jd.core.v1.impl.loader.ClassPathLoader;
+import org.jd.core.v1.impl.loader.ZipLoader;
 import org.junit.Test;
 
 import java.io.FileInputStream;

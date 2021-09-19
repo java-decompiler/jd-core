@@ -8,7 +8,9 @@
 package org.jd.core.v1;
 
 import junit.framework.TestCase;
-import org.jd.core.v1.loader.NopLoader;
+
+import org.jd.core.v1.impl.loader.NopLoader;
+import org.jd.core.v1.impl.printer.PlainTextMetaPrinter;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.*;
 import org.jd.core.v1.model.javasyntax.expression.*;
@@ -18,7 +20,6 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.model.javasyntax.type.Types;
 import org.jd.core.v1.model.message.Message;
-import org.jd.core.v1.printer.PlainTextMetaPrinter;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.JavaSyntaxToJavaFragmentProcessor;
 import org.jd.core.v1.service.layouter.LayoutFragmentProcessor;
 import org.jd.core.v1.service.tokenizer.javafragmenttotoken.JavaFragmentToTokenProcessor;

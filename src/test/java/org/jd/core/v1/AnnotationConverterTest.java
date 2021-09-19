@@ -8,7 +8,8 @@
 package org.jd.core.v1;
 
 import junit.framework.TestCase;
-import org.jd.core.v1.loader.ZipLoader;
+
+import org.jd.core.v1.impl.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.attribute.Annotations;
 import org.jd.core.v1.model.javasyntax.reference.*;

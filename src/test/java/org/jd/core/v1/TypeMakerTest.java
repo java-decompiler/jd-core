@@ -9,8 +9,8 @@ package org.jd.core.v1;
 
 import junit.framework.TestCase;
 import org.apache.commons.collections4.iterators.AbstractUntypedIteratorDecorator;
-import org.jd.core.v1.loader.ClassPathLoader;
-import org.jd.core.v1.loader.ZipLoader;
+import org.jd.core.v1.impl.loader.ClassPathLoader;
+import org.jd.core.v1.impl.loader.ZipLoader;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.TypeArguments;
 import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;

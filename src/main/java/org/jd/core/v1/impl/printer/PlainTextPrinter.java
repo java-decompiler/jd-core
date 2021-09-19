@@ -5,11 +5,15 @@
  * copy and modify the code freely for non-commercial purposes.
  */
 
-package org.jd.core.v1.printer;
+package org.jd.core.v1.impl.printer;
 
 
 import org.jd.core.v1.api.printer.Printer;
 
+/**
+ * A Printer that stores Java source inside a StringBuilder. Retrieve final
+ * source code using toString() method.
+ */
 public class PlainTextPrinter implements Printer {
     protected static final String TAB = "  ";
     protected static final String NEWLINE = "\n";
@@ -19,14 +23,19 @@ public class PlainTextPrinter implements Printer {
     protected int realLineNumber = 0;
     protected String format;
 
-    protected boolean escapeUnicodeCharacters;
+    protected boolean escapeUnicodeCharacters = false;
+    protected boolean showLineNumbers = true;
 
     public PlainTextPrinter() {
-        this.escapeUnicodeCharacters = false;
     }
 
     public PlainTextPrinter(boolean escapeUnicodeCharacters) {
         this.escapeUnicodeCharacters = escapeUnicodeCharacters;
+    }
+
+    public PlainTextPrinter(boolean escapeUnicodeCharacters, boolean showLineNumbers) {
+        this.escapeUnicodeCharacters = escapeUnicodeCharacters;
+        this.showLineNumbers = showLineNumbers;
     }
 
     public void init() {
@@ -123,10 +132,13 @@ public class PlainTextPrinter implements Printer {
     public void endMarker(int type) {}
 
     protected void printLineNumber(int lineNumber) {
-        sb.append("/*");
-        sb.append(String.format(format, ++realLineNumber));
-        sb.append(':');
-        sb.append(String.format(format, lineNumber));
-        sb.append(" */ ");
+    	++realLineNumber;
+    	if (showLineNumbers) {
+	        sb.append("/*");
+	        sb.append(String.format(format, realLineNumber));
+	        sb.append(':');
+	        sb.append(String.format(format, lineNumber));
+	        sb.append(" */ ");
+    	}
     }
 }
