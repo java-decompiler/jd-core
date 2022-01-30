@@ -8,13 +8,17 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariableSet;
 
 public class UpdateTypeVisitor extends AbstractNopTypeArgumentVisitor {
-    protected UpdateClassTypeArgumentsVisitor updateClassTypeArgumentsVisitor = new UpdateClassTypeArgumentsVisitor();
-    protected LocalVariableSet localVariableSet;
-    protected LocalVariableType localVariableType;
+    private final UpdateClassTypeArgumentsVisitor updateClassTypeArgumentsVisitor = new UpdateClassTypeArgumentsVisitor();
+    private final LocalVariableSet localVariableSet;
+    private LocalVariableType localVariableType;
 
     public UpdateTypeVisitor(LocalVariableSet localVariableSet) {
         this.localVariableSet = localVariableSet;
@@ -26,17 +30,17 @@ public class UpdateTypeVisitor extends AbstractNopTypeArgumentVisitor {
 
     @Override
     public void visit(ObjectType type) {
-        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), updateType(type));
+        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), updateType(type));
     }
 
     @Override
     public void visit(InnerObjectType type) {
-        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), updateType(type));
+        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), updateType(type));
     }
 
     @Override
     public void visit(GenericType type) {
-        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPc(), type);
+        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), type);
     }
 
     protected ObjectType updateType(ObjectType type) {

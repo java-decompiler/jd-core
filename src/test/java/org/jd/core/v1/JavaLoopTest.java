@@ -9,7 +9,7 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
@@ -48,7 +48,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 431: 431 */", "System.out.println(\"a\");")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -77,7 +77,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 431: 431 */", "System.out.println(\"a\");")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -106,7 +106,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 431: 431 */", "System.out.println(\"a\");")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -131,7 +131,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertNotEquals(-1, source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));"));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -156,7 +156,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertNotEquals(-1, source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));"));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -181,7 +181,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertNotEquals(-1, source.indexOf("while ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4));"));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -224,7 +224,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 162:   0 */", "break label16;")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -287,7 +287,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertNotEquals(-1, source.indexOf("/* 524: 524 */"));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -333,7 +333,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 427 */", "for (int i = 0; i < 3; i++)")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.5", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -358,7 +358,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 427 */", "for (int i = 0; i < 3; i++)")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.6", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.6", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -382,7 +382,7 @@ public class JavaLoopTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 427 */", "for (int i = 0; i < 3; i++)")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.5", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 }

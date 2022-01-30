@@ -9,7 +9,7 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
@@ -59,7 +59,7 @@ public class JavaIfElseTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 184: 184 */", "if ((i == 1 && (i == 5 || i == 6 || i == 7) && i == 8 && (i == 9 || i == 10 || i == 11)) || (i == 4 && i % 200 > 50) || (i > 3 && i > 4))")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 }

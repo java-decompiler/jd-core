@@ -4,23 +4,21 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
+import java.util.Objects;
+
 public class FieldDeclaration implements MemberDeclaration {
-    protected BaseAnnotationReference annotationReferences;
-    protected int flags;
-    protected Type type;
+    private final BaseAnnotationReference annotationReferences;
+    private int flags;
+    protected final Type type;
     protected BaseFieldDeclarator fieldDeclarators;
 
     public FieldDeclaration(int flags, Type type, BaseFieldDeclarator fieldDeclarators) {
-        this.flags = flags;
-        this.type = type;
-        this.fieldDeclarators = fieldDeclarators;
-        fieldDeclarators.setFieldDeclaration(this);
+        this(null, flags, type, fieldDeclarators);
     }
 
     public FieldDeclaration(BaseAnnotationReference annotationReferences, int flags, Type type, BaseFieldDeclarator fieldDeclarators) {
@@ -47,10 +45,6 @@ public class FieldDeclaration implements MemberDeclaration {
         return type;
     }
 
-    public void setType(Type type) {
-        this.type = type;
-    }
-
     public BaseFieldDeclarator getFieldDeclarators() {
         return fieldDeclarators;
     }
@@ -61,27 +55,22 @@ public class FieldDeclaration implements MemberDeclaration {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FieldDeclaration)) return false;
-
-        FieldDeclaration that = (FieldDeclaration) o;
-
-        if (flags != that.flags) return false;
-        if (annotationReferences != null ? !annotationReferences.equals(that.annotationReferences) : that.annotationReferences != null)
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-        if (!fieldDeclarators.equals(that.fieldDeclarators)) return false;
-        if (!type.equals(that.type)) return false;
-
-        return true;
+        }
+        FieldDeclaration that = (FieldDeclaration) o;
+        return flags == that.flags && Objects.equals(annotationReferences, that.annotationReferences) && fieldDeclarators.equals(that.fieldDeclarators) && type.equals(that.type);
     }
 
     @Override
     public int hashCode() {
-        int result = 327494460 + flags;
-        result = 31 * result + (annotationReferences != null ? annotationReferences.hashCode() : 0);
+        int result = 327_494_460 + flags;
+        result = 31 * result + Objects.hash(annotationReferences);
         result = 31 * result + type.hashCode();
-        result = 31 * result + fieldDeclarators.hashCode();
-        return result;
+        return 31 * result + fieldDeclarators.hashCode();
     }
 
     @Override

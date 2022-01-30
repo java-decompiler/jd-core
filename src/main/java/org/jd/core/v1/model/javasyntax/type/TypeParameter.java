@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 public class TypeParameter implements BaseTypeParameter {
-    protected String identifier;
+    protected final String identifier;
 
     public TypeParameter(String identifier) {
         this.identifier = identifier;

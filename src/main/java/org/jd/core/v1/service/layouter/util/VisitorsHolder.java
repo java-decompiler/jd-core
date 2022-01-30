@@ -13,10 +13,10 @@ import org.jd.core.v1.service.layouter.visitor.AbstractSearchMovableBlockFragmen
 import org.jd.core.v1.service.layouter.visitor.AbstractStoreMovableBlockFragmentIndexVisitorAbstract;
 
 public class VisitorsHolder {
-    protected AbstractSearchMovableBlockFragmentVisitor visitor7;
-    protected AbstractSearchMovableBlockFragmentVisitor visitor8;
-    protected AbstractStoreMovableBlockFragmentIndexVisitorAbstract visitor9;
-    protected AbstractStoreMovableBlockFragmentIndexVisitorAbstract visitor10;
+    private AbstractSearchMovableBlockFragmentVisitor visitor7;
+    private AbstractSearchMovableBlockFragmentVisitor visitor8;
+    private AbstractStoreMovableBlockFragmentIndexVisitorAbstract visitor9;
+    private AbstractStoreMovableBlockFragmentIndexVisitorAbstract visitor10;
 
     public AbstractSearchMovableBlockFragmentVisitor getForwardSearchVisitor() {
         if (visitor7 == null) {

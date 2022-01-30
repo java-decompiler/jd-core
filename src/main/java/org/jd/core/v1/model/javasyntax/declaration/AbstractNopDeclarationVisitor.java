@@ -21,7 +21,6 @@ public abstract class AbstractNopDeclarationVisitor implements DeclarationVisito
     @Override public void visit(FieldDeclarators declarations) {}
     @Override public void visit(FormalParameter declaration) {}
     @Override public void visit(FormalParameters declarations) {}
-    @Override public void visit(InstanceInitializerDeclaration declaration) {}
     @Override public void visit(InterfaceDeclaration declaration) {}
     @Override public void visit(LocalVariableDeclaration declaration) {}
     @Override public void visit(LocalVariableDeclarator declarator) {}

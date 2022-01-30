@@ -10,8 +10,8 @@ package org.jd.core.v1.model.javasyntax.statement;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class DoWhileStatement implements Statement {
-    protected Expression condition;
-    protected BaseStatement statements;
+    private Expression condition;
+    private final BaseStatement statements;
 
     public DoWhileStatement(Expression condition, BaseStatement statements) {
         this.condition = condition;

@@ -15,6 +15,8 @@ import org.jd.core.v1.util.StringConstants;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.bcel.Const.MAJOR_1_5;
+
 public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
     protected static final Map<String, String> VALUEOF_DESCRIPTOR_MAP = new HashMap<>();
 
@@ -53,7 +55,7 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
     @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration)declaration;
-        boolean autoBoxingSupported = (cfbd.getClassFile().getMajorVersion() >= 49); // (majorVersion >= Java 5)
+        boolean autoBoxingSupported = cfbd.getClassFile().getMajorVersion() >= MAJOR_1_5;
 
         if (autoBoxingSupported) {
             safeAccept(declaration.getMemberDeclarations());
@@ -63,24 +65,22 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
     @Override
     protected Expression updateExpression(Expression expression) {
         if (expression.isMethodInvocationExpression() && expression.getInternalTypeName().startsWith("java/lang/")) {
-            int parameterSize = (expression.getParameters() == null) ? 0 : expression.getParameters().size();
+            int parameterSize = expression.getParameters() == null ? 0 : expression.getParameters().size();
 
             if (expression.getExpression().isObjectTypeReferenceExpression()) {
                 // static method invocation
-                if ((parameterSize == 1) &&
-                        expression.getName().equals("valueOf") &&
+                if (parameterSize == 1 &&
+                        "valueOf".equals(expression.getName()) &&
                         expression.getDescriptor().equals(VALUEOF_DESCRIPTOR_MAP.get(expression.getInternalTypeName())))
                 {
                     return expression.getParameters().getFirst();
                 }
-            } else {
-                // non-static method invocation
-                if ((parameterSize == 0) &&
-                        expression.getName().equals(VALUE_METHODNAME_MAP.get(expression.getInternalTypeName())) &&
-                        expression.getDescriptor().equals(VALUE_DESCRIPTOR_MAP.get(expression.getInternalTypeName())))
-                {
-                    return expression.getExpression();
-                }
+            } else // non-static method invocation
+            if (parameterSize == 0 &&
+                    expression.getName().equals(VALUE_METHODNAME_MAP.get(expression.getInternalTypeName())) &&
+                    expression.getDescriptor().equals(VALUE_DESCRIPTOR_MAP.get(expression.getInternalTypeName())))
+            {
+                return expression.getExpression();
             }
         }
 

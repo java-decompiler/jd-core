@@ -12,23 +12,22 @@ import org.jd.core.v1.model.classfile.attribute.Attribute;
 import java.util.Map;
 
 public class Method {
-    protected int accessFlags;
-    protected String name;
-    protected String descriptor;
-    protected Map<String, Attribute> attributes;
-    protected ConstantPool constants;
+    private final int accessFlags;
+    private final String name;
+    private final String descriptor;
+    private final Map<String, Attribute> attributes;
+    private final ConstantPool constants;
+    private final String className;
 
-    public Method(int accessFlags, String name, String descriptor, Map<String, Attribute> attributes, ConstantPool constants) {
+    public Method(int accessFlags, String name, String descriptor, Map<String, Attribute> attributes, ConstantPool constants, String className) {
         this.accessFlags = accessFlags;
         this.name = name;
         this.descriptor = descriptor;
         this.attributes = attributes;
         this.constants = constants;
+        this.className = className;
     }
 
-    /**
-     * @see Constants
-     */
     public int getAccessFlags() {
         return accessFlags;
     }
@@ -41,9 +40,13 @@ public class Method {
         return descriptor;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends Attribute> T getAttribute(String name) {
-        return (attributes == null) ? null : (T)attributes.get(name);
+        return attributes == null ? null : (T)attributes.get(name);
     }
 
     public ConstantPool getConstants() {
@@ -52,6 +55,6 @@ public class Method {
 
     @Override
     public String toString() {
-        return "Method{" + name + " " + descriptor + "}";
+        return String.join(".", className, name + descriptor);
     }
 }

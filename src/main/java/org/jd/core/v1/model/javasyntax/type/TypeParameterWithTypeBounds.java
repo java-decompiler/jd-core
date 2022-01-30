@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 public class TypeParameterWithTypeBounds extends TypeParameter {
-    protected BaseType typeBounds;
+    private final BaseType typeBounds;
 
     public TypeParameterWithTypeBounds(String identifier, BaseType typeBounds) {
         super(identifier);

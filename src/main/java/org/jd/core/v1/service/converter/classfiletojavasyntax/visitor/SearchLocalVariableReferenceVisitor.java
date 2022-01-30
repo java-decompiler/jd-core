@@ -12,8 +12,8 @@ import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpressi
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 
 public class SearchLocalVariableReferenceVisitor extends AbstractJavaSyntaxVisitor {
-    protected int index;
-    protected boolean found;
+    private int index;
+    private boolean found;
 
     public void init(int index) {
         this.index = index;

@@ -9,12 +9,15 @@ package org.jd.core.v1.model.javafragment;
 import org.jd.core.v1.model.fragment.FlexibleFragment;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ImportsFragment extends FlexibleFragment implements JavaFragment {
-    protected static final ImportCountComparator COUNT_COMPARATOR = new ImportCountComparator();
 
-    protected final Map<String, Import> importMap = new HashMap<>();
+    private final Map<String, Import> importMap = new HashMap<>();
 
     public ImportsFragment(int weight) {
         super(0, -1, -1, weight, "Imports");
@@ -68,7 +71,7 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
             return importMap.values();
         }
         DefaultList<Import> imports = new DefaultList<>(importMap.values());
-        imports.sort(COUNT_COMPARATOR);
+        imports.sort(Comparator.comparing(Import::getCounter).reversed());
         // Remove less used imports
         List<Import> subList = imports.subList(lineCount, size);
         for (Import imp0rt : subList) {
@@ -79,9 +82,9 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
     }
 
     public static class Import {
-        protected String internalName;
-        protected String qualifiedName;
-        protected int counter;
+        private final String internalName;
+        private final String qualifiedName;
+        private int counter;
 
         public Import(String internalName, String qualifiedName) {
             this.internalName = internalName;
@@ -108,10 +111,4 @@ public class ImportsFragment extends FlexibleFragment implements JavaFragment {
         visitor.visit(this);
     }
 
-    protected static class ImportCountComparator implements Comparator<Import> {
-        @Override
-        public int compare(Import tr1, Import tr2) {
-            return tr2.getCounter() - tr1.getCounter();
-        }
-    }
 }

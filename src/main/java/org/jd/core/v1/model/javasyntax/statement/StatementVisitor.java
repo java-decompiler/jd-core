@@ -10,7 +10,6 @@ package org.jd.core.v1.model.javasyntax.statement;
 public interface StatementVisitor {
     void visit(AssertStatement statement);
     void visit(BreakStatement statement);
-    void visit(ByteCodeStatement statement);
     void visit(CommentStatement statement);
     void visit(ContinueStatement statement);
     void visit(DoWhileStatement statement);

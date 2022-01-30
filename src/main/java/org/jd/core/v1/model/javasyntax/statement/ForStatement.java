@@ -16,14 +16,7 @@ public class ForStatement implements Statement {
     protected BaseExpression init;
     protected Expression condition;
     protected BaseExpression update;
-    protected BaseStatement statements;
-
-    public ForStatement(LocalVariableDeclaration declaration, Expression condition, BaseExpression update, BaseStatement statements) {
-        this.declaration = declaration;
-        this.condition = condition;
-        this.update = update;
-        this.statements = statements;
-    }
+    private final BaseStatement statements;
 
     public ForStatement(BaseExpression init, Expression condition, BaseExpression update, BaseStatement statements) {
         this.init = init;

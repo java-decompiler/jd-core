@@ -9,8 +9,6 @@ package org.jd.core.v1.model.javasyntax.reference;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-
 public class ElementValuePairs extends DefaultList<ElementValuePair> implements BaseElementValuePair {
 
     private static final long serialVersionUID = 1L;
@@ -20,10 +18,6 @@ public class ElementValuePairs extends DefaultList<ElementValuePair> implements 
 
     public ElementValuePairs(int capacity) {
         super(capacity);
-    }
-
-    public ElementValuePairs(Collection<ElementValuePair> collection) {
-        super(collection);
     }
 
     @Override

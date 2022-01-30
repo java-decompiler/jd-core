@@ -36,7 +36,7 @@ public class AutoUnboxingInLoop {
             }
         }
     }
-    
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings
     public static Integer getInteger() {
         Integer index = (int) Math.random();
         if (index > 0) {

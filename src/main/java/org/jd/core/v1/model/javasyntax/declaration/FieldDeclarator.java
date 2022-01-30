@@ -4,14 +4,14 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
+import java.util.Objects;
+
 public class FieldDeclarator implements BaseFieldDeclarator {
-    protected FieldDeclaration fieldDeclaration;
-    protected String name;
-    protected int dimension;
-    protected VariableInitializer variableInitializer;
+    private FieldDeclaration fieldDeclaration;
+    private final String name;
+    private VariableInitializer variableInitializer;
 
     public FieldDeclarator(String name) {
         this.name = name;
@@ -19,12 +19,6 @@ public class FieldDeclarator implements BaseFieldDeclarator {
 
     public FieldDeclarator(String name, VariableInitializer variableInitializer) {
         this.name = name;
-        this.variableInitializer = variableInitializer;
-    }
-
-    public FieldDeclarator(String name, int dimension, VariableInitializer variableInitializer) {
-        this.name = name;
-        this.dimension = dimension;
         this.variableInitializer = variableInitializer;
     }
 
@@ -41,10 +35,6 @@ public class FieldDeclarator implements BaseFieldDeclarator {
         return name;
     }
 
-    public int getDimension() {
-        return dimension;
-    }
-
     public VariableInitializer getVariableInitializer() {
         return variableInitializer;
     }
@@ -55,25 +45,20 @@ public class FieldDeclarator implements BaseFieldDeclarator {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FieldDeclarator)) return false;
-
-        FieldDeclarator that = (FieldDeclarator) o;
-
-        if (dimension != that.dimension) return false;
-        if (!name.equals(that.name)) return false;
-        if (variableInitializer != null ? !variableInitializer.equals(that.variableInitializer) : that.variableInitializer != null)
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
-
-        return true;
+        }
+        FieldDeclarator that = (FieldDeclarator) o;
+        return name.equals(that.name) && Objects.equals(variableInitializer, that.variableInitializer);
     }
 
     @Override
     public int hashCode() {
-        int result = 544278669 + name.hashCode();
-        result = 31 * result + dimension;
-        result = 31 * result + (variableInitializer != null ? variableInitializer.hashCode() : 0);
-        return result;
+        int result = 544_278_669 + name.hashCode();
+        return 31 * result + Objects.hash(variableInitializer);
     }
 
     @Override

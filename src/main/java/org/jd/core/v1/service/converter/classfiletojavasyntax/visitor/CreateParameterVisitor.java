@@ -7,7 +7,11 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.GenericLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.ObjectLocalVariable;
@@ -15,11 +19,11 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class CreateParameterVisitor extends AbstractNopTypeArgumentVisitor {
-    protected TypeMaker typeMaker;
-    protected int index;
-    protected String name;
+    private final TypeMaker typeMaker;
+    private int index;
+    private String name;
 
-    protected AbstractLocalVariable localVariable;
+    private AbstractLocalVariable localVariable;
 
     public CreateParameterVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;

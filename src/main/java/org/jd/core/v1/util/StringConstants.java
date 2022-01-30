@@ -16,7 +16,7 @@
  ******************************************************************************/
 package org.jd.core.v1.util;
 
-public class StringConstants
+public final class StringConstants
 {
     private StringConstants() {
         super();
@@ -32,7 +32,6 @@ public class StringConstants
     public static final char   INTERNAL_PACKAGE_SEPARATOR = '/';
     public static final char   INTERNAL_INNER_SEPARATOR = '$';
     public static final char   INTERNAL_BEGIN_TEMPLATE = '<';
-    public static final char   INTERNAL_END_TEMPLATE = '>';
 
     public static final char   PACKAGE_SEPARATOR = '.';
     public static final char   INNER_SEPARATOR = '.';
@@ -49,18 +48,17 @@ public class StringConstants
     public static final String OUTER_THIS_LOCAL_VARIABLE_NAME = "this$1";
     public static final String TMP_LOCAL_VARIABLE_NAME        = "tmp";
 
-    public static final String INDENT = "  ";
     public static final String START_OF_HEADING = "\u0001";
 
-    public static final String ENUM_VALUES_ARRAY_NAME	= "$VALUES";
+    public static final String ENUM_VALUES_ARRAY_NAME    = "$VALUES";
     public static final String ENUM_VALUES_ARRAY_NAME_ECLIPSE = "ENUM$VALUES";
-    public static final String ENUM_VALUES_METHOD_NAME	= "values";
-    public static final String ENUM_VALUEOF_METHOD_NAME	= "valueOf";
-    public static final String TOSTRING_METHOD_NAME		= "toString";
-    public static final String VALUEOF_METHOD_NAME		= "valueOf";
-    public static final String APPEND_METHOD_NAME		= "append";
-    public static final String FORNAME_METHOD_NAME		= "forName";
-    public static final String ORDINAL_METHOD_NAME		= "ordinal";
+    public static final String ENUM_VALUES_METHOD_NAME    = "values";
+    public static final String ENUM_VALUEOF_METHOD_NAME    = "valueOf";
+    public static final String TOSTRING_METHOD_NAME        = "toString";
+    public static final String VALUEOF_METHOD_NAME        = "valueOf";
+    public static final String APPEND_METHOD_NAME        = "append";
+    public static final String FORNAME_METHOD_NAME        = "forName";
+    public static final String ORDINAL_METHOD_NAME        = "ordinal";
 
     public static final String ANNOTATIONDEFAULT_ATTRIBUTE_NAME = "AnnotationDefault";
     public static final String CODE_ATTRIBUTE_NAME = "Code";
@@ -79,6 +77,8 @@ public class StringConstants
     public static final String SIGNATURE_ATTRIBUTE_NAME = "Signature";
     public static final String SOURCEFILE_ATTRIBUTE_NAME = "SourceFile";
     public static final String SYNTHETIC_ATTRIBUTE_NAME = "Synthetic";
+    public static final String BOOTSTRAP_METHODS_ATTRIBUTE_NAME = "BootstrapMethods";
+    public static final String METHOD_PARAMETERS_ATTRIBUTE_NAME = "MethodParameters";
 
     public static final String CLASS_DOLLAR = "class$";
     public static final String ARRAY_DOLLAR = "array$";

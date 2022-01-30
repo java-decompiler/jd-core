@@ -8,7 +8,29 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfElseStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfStatement;
+import org.jd.core.v1.model.javasyntax.statement.LabelStatement;
+import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.SynchronizedStatement;
+import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement;
+import org.jd.core.v1.model.javasyntax.statement.TypeDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
 
 public class RemoveLastContinueStatementVisitor extends AbstractJavaSyntaxVisitor {
     @Override
@@ -16,7 +38,7 @@ public class RemoveLastContinueStatementVisitor extends AbstractJavaSyntaxVisito
         if (! list.isEmpty()) {
             Statement last = list.getLast();
 
-            if (last.getClass() == ContinueStatement.class) {
+            if (last instanceof ContinueStatement) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
                 list.removeLast();
                 visit(list);
             } else {
@@ -63,8 +85,6 @@ public class RemoveLastContinueStatementVisitor extends AbstractJavaSyntaxVisito
     public void visit(AssertStatement statement) {}
     @Override
     public void visit(BreakStatement statement) {}
-    @Override
-    public void visit(ByteCodeStatement statement) {}
     @Override
     public void visit(CommentStatement statement) {}
     @Override

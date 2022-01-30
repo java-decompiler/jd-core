@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.statement;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class IfElseStatement extends IfStatement {
-    protected BaseStatement elseStatements;
+    private final BaseStatement elseStatements;
 
     public IfElseStatement(Expression condition, BaseStatement statement, BaseStatement elseStatements) {
         super(condition, statement);

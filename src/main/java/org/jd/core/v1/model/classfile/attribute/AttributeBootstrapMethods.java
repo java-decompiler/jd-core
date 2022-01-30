@@ -7,14 +7,11 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class AttributeBootstrapMethods implements Attribute {
-    protected BootstrapMethod[] bootstrapMethods;
+import org.apache.bcel.classfile.BootstrapMethod;
 
-    public AttributeBootstrapMethods(BootstrapMethod[] bootstrapMethods) {
-        this.bootstrapMethods = bootstrapMethods;
-    }
+public record AttributeBootstrapMethods(BootstrapMethod[] bootstrapMethods) implements Attribute {
 
-    public BootstrapMethod[] getBootstrapMethods() {
-        return bootstrapMethods;
+    public BootstrapMethod getBootstrapMethod(int i) {
+        return bootstrapMethods[i];
     }
 }

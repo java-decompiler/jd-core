@@ -8,11 +8,27 @@
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util;
 
 import org.jd.core.v1.model.fragment.Fragment;
-import org.jd.core.v1.model.javafragment.*;
+import org.jd.core.v1.model.javafragment.EndBlockFragment;
+import org.jd.core.v1.model.javafragment.EndBlockInParameterFragment;
+import org.jd.core.v1.model.javafragment.EndBodyFragment;
+import org.jd.core.v1.model.javafragment.EndBodyInParameterFragment;
+import org.jd.core.v1.model.javafragment.EndSingleStatementBlockFragment;
+import org.jd.core.v1.model.javafragment.EndStatementsBlockFragment;
+import org.jd.core.v1.model.javafragment.ImportsFragment;
+import org.jd.core.v1.model.javafragment.SpaceSpacerFragment;
+import org.jd.core.v1.model.javafragment.SpacerBetweenMembersFragment;
+import org.jd.core.v1.model.javafragment.SpacerFragment;
+import org.jd.core.v1.model.javafragment.StartBlockFragment;
+import org.jd.core.v1.model.javafragment.StartBodyFragment;
+import org.jd.core.v1.model.javafragment.StartSingleStatementBlockFragment;
+import org.jd.core.v1.model.javafragment.StartStatementsBlockFragment;
+import org.jd.core.v1.model.javafragment.StartStatementsDoWhileBlockFragment;
+import org.jd.core.v1.model.javafragment.StartStatementsTryBlockFragment;
+import org.jd.core.v1.model.javafragment.TokensFragment;
 
 import java.util.List;
 
-public class JavaFragmentFactory {
+public final class JavaFragmentFactory {
 
     private JavaFragmentFactory() {
         super();

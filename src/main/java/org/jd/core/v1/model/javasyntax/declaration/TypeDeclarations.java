@@ -8,17 +8,8 @@ package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-
 public class TypeDeclarations extends DefaultList<MemberDeclaration> implements BaseTypeDeclaration {
     private static final long serialVersionUID = 1L;
-
-    public TypeDeclarations(Collection<MemberDeclaration> collection) {
-        super(collection);
-        if (collection.size() <= 1) {
-            throw new IllegalArgumentException("Use 'TypeDeclaration' or sub class instead");
-        }
-    }
 
     @Override
     public void accept(DeclarationVisitor visitor) {

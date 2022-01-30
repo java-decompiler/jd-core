@@ -8,18 +8,23 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
+import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 
 public class SearchFromOffsetVisitor extends AbstractJavaSyntaxVisitor {
-    protected int offset;
+    private int offset;
 
     public SearchFromOffsetVisitor() {
-        offset = Integer.MAX_VALUE;
-    }
-
-    public void init() {
         offset = Integer.MAX_VALUE;
     }
 
@@ -29,10 +34,10 @@ public class SearchFromOffsetVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(LocalVariableReferenceExpression expression) {
-        int offset = ((ClassFileLocalVariableReferenceExpression) expression).getOffset();
+        int localOffset = ((ClassFileLocalVariableReferenceExpression) expression).getOffset();
 
-        if (this.offset > offset) {
-            this.offset = offset;
+        if (this.offset > localOffset) {
+            this.offset = localOffset;
         }
     }
 

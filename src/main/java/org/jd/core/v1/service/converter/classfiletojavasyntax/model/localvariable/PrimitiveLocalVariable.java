@@ -13,11 +13,35 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveType
 
 import java.util.Map;
 
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_VOID;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BOOLEAN_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BYTE_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_CHAR_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_BOOLEAN_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_BYTE_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_SHORT_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_SHORT_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_VOID;
 
 public class PrimitiveLocalVariable extends AbstractLocalVariable {
     private static final String NON_ZERO_DIMENSION = "Non-zero dimension";
-    protected int flags;
+    private int flags;
 
     public PrimitiveLocalVariable(int index, int offset, PrimitiveType type, String name) {
         super(index, offset, name);
@@ -62,26 +86,23 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
                 return TYPE_VOID;
         }
 
-        if (flags == (FLAG_CHAR|FLAG_INT)) {
+        switch (flags) {
+        case FLAG_CHAR|FLAG_INT:
             return MAYBE_CHAR_TYPE;
-        }
-        if (flags == (FLAG_CHAR|FLAG_SHORT|FLAG_INT)) {
+        case FLAG_CHAR|FLAG_SHORT|FLAG_INT:
             return MAYBE_SHORT_TYPE;
-        }
-        if (flags == (FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT)) {
+        case FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT:
             return MAYBE_BYTE_TYPE;
-        }
-        if (flags == (FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT)) {
+        case FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT:
             return MAYBE_BOOLEAN_TYPE;
-        }
-        if (flags == (FLAG_BYTE|FLAG_SHORT|FLAG_INT)) {
+        case FLAG_BYTE|FLAG_SHORT|FLAG_INT:
             return MAYBE_NEGATIVE_BYTE_TYPE;
-        }
-        if (flags == (FLAG_SHORT|FLAG_INT)) {
+        case FLAG_SHORT|FLAG_INT:
             return MAYBE_NEGATIVE_SHORT_TYPE;
-        }
-        if (flags == (FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT)) {
+        case FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT:
             return MAYBE_NEGATIVE_BOOLEAN_TYPE;
+        default:
+            break;
         }
 
         return TYPE_INT;
@@ -92,7 +113,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
         return 0;
     }
 
-    public void setType(PrimitiveType type) {
+    void setType(PrimitiveType type) {
         this.flags = type.getFlags();
     }
 

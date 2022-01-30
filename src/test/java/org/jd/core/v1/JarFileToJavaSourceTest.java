@@ -8,7 +8,7 @@
 package org.jd.core.v1;
 
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
@@ -184,7 +184,7 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
                     // Recompile source
                     String source = printer.toString();
 
-                    if (!CompilerUtil.compile("1.8", new JavaSourceFileObject(internalTypeName, source))) {
+                    if (!CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalTypeName, source))) {
                         recompilationFailedCounter++;
                     }
                 }

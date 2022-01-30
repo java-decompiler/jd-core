@@ -10,7 +10,7 @@ package org.jd.core.v1;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
@@ -41,7 +41,7 @@ public class JavaArrayTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 75 */", "testInt3(new int[][][] { { { 0, 1")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.5", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -68,7 +68,7 @@ public class JavaArrayTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 73 */", "testInt2(new int[][]", "{ { 1 } ,")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -87,7 +87,7 @@ public class JavaArrayTest extends AbstractJdTest {
         assertTrue(source.matches(PatternMaker.make(": 23 */", "return (i == 0) ? new Class<?>[] { Object.class } : new Class<?>[] { String.class, Number.class };")));
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
 
     @Override

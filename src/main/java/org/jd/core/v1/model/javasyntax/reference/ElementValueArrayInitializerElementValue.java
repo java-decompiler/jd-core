@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.javasyntax.reference;
 
 public class ElementValueArrayInitializerElementValue implements BaseElementValue {
-    protected BaseElementValue elementValueArrayInitializer;
+    private final BaseElementValue elementValueArrayInitializer;
 
     public ElementValueArrayInitializerElementValue() {
         this.elementValueArrayInitializer = null;

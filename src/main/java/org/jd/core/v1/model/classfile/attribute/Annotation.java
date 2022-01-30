@@ -7,20 +7,8 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class Annotation {
-    protected String descriptor;
-    protected ElementValuePair[] elementValuePairs;
+import java.util.List;
+import java.util.Map.Entry;
 
-    public Annotation(String descriptor, ElementValuePair[] elementValuePairs) {
-        this.descriptor = descriptor;
-        this.elementValuePairs = elementValuePairs;
-    }
-
-    public String getDescriptor() {
-        return descriptor;
-    }
-
-    public ElementValuePair[] getElementValuePairs() {
-        return elementValuePairs;
-    }
+public record Annotation(String descriptor, List<Entry<String,AttributeElementValue>> elementValuePairs) {
 }

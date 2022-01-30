@@ -6,20 +6,58 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.processor;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantDouble;
+import org.apache.bcel.classfile.ConstantFloat;
+import org.apache.bcel.classfile.ConstantInteger;
+import org.apache.bcel.classfile.ConstantLong;
+import org.apache.bcel.classfile.ConstantUtf8;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Constants;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.*;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.attribute.Annotations;
+import org.jd.core.v1.model.classfile.attribute.AttributeAnnotationDefault;
+import org.jd.core.v1.model.classfile.attribute.AttributeCode;
+import org.jd.core.v1.model.classfile.attribute.AttributeConstantValue;
+import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
+import org.jd.core.v1.model.classfile.attribute.AttributeModule;
+import org.jd.core.v1.model.classfile.attribute.ModuleInfo;
+import org.jd.core.v1.model.classfile.attribute.PackageInfo;
+import org.jd.core.v1.model.classfile.attribute.ServiceInfo;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.declaration.Declaration;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.ModuleDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.reference.BaseElementValue;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
 import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileAnnotationDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileEnumDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileInterfaceDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileStaticInitializerDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.PopulateBindingsWithTypeParameterVisitor;
@@ -31,8 +69,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
-
 /**
  * Convert ClassFile model to Java syntax model.<br><br>
  *
@@ -40,7 +76,7 @@ import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
  * Output: {@link org.jd.core.v1.model.javasyntax.CompilationUnit}<br>
  */
 public class ConvertClassFileProcessor {
-    protected PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor() {
+    private final PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor() {
         @Override
         public void visit(TypeParameter parameter) {
             bindings.put(parameter.getIdentifier(), new GenericType(parameter.getIdentifier()));
@@ -77,46 +113,46 @@ public class ConvertClassFileProcessor {
     protected ClassFileInterfaceDeclaration convertInterfaceDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
         TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
-        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.getTypeParameters(), outerClassFileBodyDeclaration);
 
         return new ClassFileInterfaceDeclaration(
                 annotationReferences, classFile.getAccessFlags(),
-                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
-                typeTypes.typeParameters, typeTypes.interfaces, bodyDeclaration);
+                typeTypes.getThisType().getInternalName(), typeTypes.getThisType().getName(),
+                typeTypes.getTypeParameters(), typeTypes.getInterfaces(), bodyDeclaration);
     }
 
     protected ClassFileEnumDeclaration convertEnumDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
         TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
-        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.getTypeParameters(), outerClassFileBodyDeclaration);
 
         return new ClassFileEnumDeclaration(
                 annotationReferences, classFile.getAccessFlags(),
-                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
-                typeTypes.interfaces, bodyDeclaration);
+                typeTypes.getThisType().getInternalName(), typeTypes.getThisType().getName(),
+                typeTypes.getInterfaces(), bodyDeclaration);
     }
 
     protected ClassFileAnnotationDeclaration convertAnnotationDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
         TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
-        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.getTypeParameters(), outerClassFileBodyDeclaration);
 
         return new ClassFileAnnotationDeclaration(
                 annotationReferences, classFile.getAccessFlags(),
-                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
+                typeTypes.getThisType().getInternalName(), typeTypes.getThisType().getName(),
                 bodyDeclaration);
     }
 
     protected ClassFileClassDeclaration convertClassDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
         BaseAnnotationReference annotationReferences = convertAnnotationReferences(converter, classFile);
         TypeMaker.TypeTypes typeTypes = parser.parseClassFileSignature(classFile);
-        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.typeParameters, outerClassFileBodyDeclaration);
+        ClassFileBodyDeclaration bodyDeclaration = convertBodyDeclaration(parser, converter, classFile, typeTypes.getTypeParameters(), outerClassFileBodyDeclaration);
 
         return new ClassFileClassDeclaration(
                 annotationReferences, classFile.getAccessFlags(),
-                typeTypes.thisType.getInternalName(), typeTypes.thisType.getName(),
-                typeTypes.typeParameters, typeTypes.superType,
-                typeTypes.interfaces, bodyDeclaration);
+                typeTypes.getThisType().getInternalName(), typeTypes.getThisType().getName(),
+                typeTypes.getTypeParameters(), typeTypes.getSuperType(),
+                typeTypes.getInterfaces(), bodyDeclaration);
     }
 
     protected ClassFileBodyDeclaration convertBodyDeclaration(TypeMaker parser, AnnotationConverter converter, ClassFile classFile, BaseTypeParameter typeParameters, ClassFileBodyDeclaration outerClassFileBodyDeclaration) {
@@ -192,11 +228,11 @@ public class ConvertClassFileProcessor {
             defaultAnnotationValue = null;
 
             if (annotationDefault != null) {
-                defaultAnnotationValue = converter.convert(annotationDefault.getDefaultValue());
+                defaultAnnotationValue = converter.convert(annotationDefault.defaultValue());
             }
 
             methodTypes = parser.parseMethodSignature(classFile, method);
-            if ((method.getAccessFlags() & ACC_STATIC) == 0) {
+            if ((method.getAccessFlags() & Const.ACC_STATIC) == 0) {
                 bindings = bodyDeclaration.getBindings();
                 typeBounds = bodyDeclaration.getTypeBounds();
             } else {
@@ -204,11 +240,11 @@ public class ConvertClassFileProcessor {
                 typeBounds = Collections.emptyMap();
             }
 
-            if (methodTypes.typeParameters != null) {
+            if (methodTypes.getTypeParameters() != null) {
                 bindings=new HashMap<>(bindings);
                 typeBounds=new HashMap<>(typeBounds);
                 populateBindingsWithTypeParameterVisitor.init(bindings, typeBounds);
-                methodTypes.typeParameters.accept(populateBindingsWithTypeParameterVisitor);
+                methodTypes.getTypeParameters().accept(populateBindingsWithTypeParameterVisitor);
            }
 
             code = method.getAttribute("Code");
@@ -217,24 +253,24 @@ public class ConvertClassFileProcessor {
             if (code != null) {
                 AttributeLineNumberTable lineNumberTable = code.getAttribute("LineNumberTable");
                 if (lineNumberTable != null) {
-                    firstLineNumber = lineNumberTable.getLineNumberTable()[0].getLineNumber();
+                    firstLineNumber = lineNumberTable.getLineNumberTable(0).getLineNumber();
                 }
             }
 
             if (StringConstants.INSTANCE_CONSTRUCTOR.equals(name)) {
                 list.add(new ClassFileConstructorDeclaration(
-                        bodyDeclaration, classFile, method, annotationReferences, methodTypes.typeParameters,
-                        methodTypes.parameterTypes, methodTypes.exceptionTypes, bindings, typeBounds, firstLineNumber));
+                        bodyDeclaration, classFile, method, annotationReferences, methodTypes.getTypeParameters(),
+                        methodTypes.getParameterTypes(), methodTypes.getExceptionTypes(), bindings, typeBounds, firstLineNumber));
             } else if ("<clinit>".equals(name)) {
                 list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, bindings, typeBounds, firstLineNumber));
             } else {
                 ClassFileMethodDeclaration methodDeclaration = new ClassFileMethodDeclaration(
-                        bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.typeParameters,
-                        methodTypes.returnedType, methodTypes.parameterTypes, methodTypes.exceptionTypes, defaultAnnotationValue,
+                        bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.getTypeParameters(),
+                        methodTypes.getReturnedType(), methodTypes.getParameterTypes(), methodTypes.getExceptionTypes(), defaultAnnotationValue,
                         bindings, typeBounds, firstLineNumber);
-                if (classFile.isInterface() && methodDeclaration.getFlags() == Constants.ACC_PUBLIC) {
+                if (classFile.isInterface() && methodDeclaration.getFlags() == Const.ACC_PUBLIC) {
                     // For interfaces, add 'default' access flag on public methods
-                    methodDeclaration.setFlags(Declaration.FLAG_PUBLIC|Declaration.FLAG_DEFAULT);
+                    methodDeclaration.setFlags(Const.ACC_PUBLIC|Declaration.FLAG_DEFAULT);
                 }
                 list.add(methodDeclaration);
             }
@@ -289,45 +325,32 @@ public class ConvertClassFileProcessor {
 
     protected ExpressionVariableInitializer convertFieldInitializer(Field field, Type typeField) {
         AttributeConstantValue acv = field.getAttribute("ConstantValue");
-
         if (acv == null) {
             return null;
         }
-        ConstantValue constantValue = acv.getConstantValue();
-        Expression expression;
-        switch (constantValue.getTag()) {
-            case Constant.CONSTANT_INTEGER:
-                expression = new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getValue());
-                break;
-            case Constant.CONSTANT_FLOAT:
-                expression = new FloatConstantExpression(((ConstantFloat)constantValue).getValue());
-                break;
-            case Constant.CONSTANT_LONG:
-                expression = new LongConstantExpression(((ConstantLong)constantValue).getValue());
-                break;
-            case Constant.CONSTANT_DOUBLE:
-                expression = new DoubleConstantExpression(((ConstantDouble)constantValue).getValue());
-                break;
-            case Constant.CONSTANT_UTF8:
-                expression = new StringConstantExpression(((ConstantUtf8)constantValue).getValue());
-                break;
-            default:
-                throw new ConvertClassFileException("Invalid attributes");
-        }
+        Constant constantValue = acv.constantValue();
+        Expression expression = switch (constantValue.getTag()) {
+            case Const.CONSTANT_Integer -> new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
+            case Const.CONSTANT_Float -> new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
+            case Const.CONSTANT_Long -> new LongConstantExpression(((ConstantLong)constantValue).getBytes());
+            case Const.CONSTANT_Double -> new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
+            case Const.CONSTANT_Utf8 -> new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
+            default -> throw new ConvertClassFileException("Invalid attributes");
+        };
         return new ExpressionVariableInitializer(expression);
     }
 
     protected ModuleDeclaration convertModuleDeclaration(ClassFile classFile) {
         AttributeModule attributeModule = classFile.getAttribute("Module");
-        List<ModuleDeclaration.ModuleInfo> requires = convertModuleDeclarationModuleInfo(attributeModule.getRequires());
-        List<ModuleDeclaration.PackageInfo> exports = convertModuleDeclarationPackageInfo(attributeModule.getExports());
-        List<ModuleDeclaration.PackageInfo> opens = convertModuleDeclarationPackageInfo(attributeModule.getOpens());
-        DefaultList<String> uses = new DefaultList<>(attributeModule.getUses());
-        List<ModuleDeclaration.ServiceInfo> provides = convertModuleDeclarationServiceInfo(attributeModule.getProvides());
+        List<ModuleDeclaration.ModuleInfo> requires = convertModuleDeclarationModuleInfo(attributeModule.requires());
+        List<ModuleDeclaration.PackageInfo> exports = convertModuleDeclarationPackageInfo(attributeModule.exports());
+        List<ModuleDeclaration.PackageInfo> opens = convertModuleDeclarationPackageInfo(attributeModule.opens());
+        DefaultList<String> uses = new DefaultList<>(attributeModule.uses());
+        List<ModuleDeclaration.ServiceInfo> provides = convertModuleDeclarationServiceInfo(attributeModule.provides());
 
         return new ModuleDeclaration(
-                attributeModule.getFlags(), classFile.getInternalTypeName(), attributeModule.getName(),
-                attributeModule.getVersion(), requires, exports, opens, uses, provides);
+                attributeModule.flags(), classFile.getInternalTypeName(), attributeModule.name(),
+                attributeModule.version(), requires, exports, opens, uses, provides);
     }
 
     protected List<ModuleDeclaration.ModuleInfo> convertModuleDeclarationModuleInfo(ModuleInfo[] moduleInfos) {
@@ -336,7 +359,7 @@ public class ConvertClassFileProcessor {
         }
         DefaultList<ModuleDeclaration.ModuleInfo> list = new DefaultList<>(moduleInfos.length);
         for (ModuleInfo moduleInfo : moduleInfos) {
-            list.add(new ModuleDeclaration.ModuleInfo(moduleInfo.getName(), moduleInfo.getFlags(), moduleInfo.getVersion()));
+            list.add(new ModuleDeclaration.ModuleInfo(moduleInfo.name(), moduleInfo.flags(), moduleInfo.version()));
         }
         return list;
     }
@@ -348,9 +371,9 @@ public class ConvertClassFileProcessor {
         DefaultList<ModuleDeclaration.PackageInfo> list = new DefaultList<>(packageInfos.length);
         DefaultList<String> moduleInfoNames;
         for (PackageInfo packageInfo : packageInfos) {
-            moduleInfoNames = (packageInfo.getModuleInfoNames() == null) ?
-                    null : new DefaultList<>(packageInfo.getModuleInfoNames());
-            list.add(new ModuleDeclaration.PackageInfo(packageInfo.getInternalName(), packageInfo.getFlags(), moduleInfoNames));
+            moduleInfoNames = packageInfo.moduleInfoNames() == null ?
+                    null : new DefaultList<>(packageInfo.moduleInfoNames());
+            list.add(new ModuleDeclaration.PackageInfo(packageInfo.internalName(), packageInfo.flags(), moduleInfoNames));
         }
         return list;
     }
@@ -362,9 +385,9 @@ public class ConvertClassFileProcessor {
         DefaultList<ModuleDeclaration.ServiceInfo> list = new DefaultList<>(serviceInfos.length);
         DefaultList<String> implementationTypeNames;
         for (ServiceInfo serviceInfo : serviceInfos) {
-            implementationTypeNames = (serviceInfo.getImplementationTypeNames() == null) ?
-                    null : new DefaultList<>(serviceInfo.getImplementationTypeNames());
-            list.add(new ModuleDeclaration.ServiceInfo(serviceInfo.getInterfaceTypeName(), implementationTypeNames));
+            implementationTypeNames = serviceInfo.implementationTypeNames() == null ?
+                    null : new DefaultList<>(serviceInfo.implementationTypeNames());
+            list.add(new ModuleDeclaration.ServiceInfo(serviceInfo.interfaceTypeName(), implementationTypeNames));
         }
         return list;
     }

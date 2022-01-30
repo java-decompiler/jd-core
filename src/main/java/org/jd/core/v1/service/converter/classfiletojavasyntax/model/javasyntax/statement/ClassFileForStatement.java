@@ -13,8 +13,8 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.ForStatement;
 
 public class ClassFileForStatement extends ForStatement {
-    protected int fromOffset;
-    protected int toOffset;
+    private final int fromOffset;
+    private final int toOffset;
 
     public ClassFileForStatement(int fromOffset, int toOffset, BaseExpression init, Expression condition, BaseExpression update, BaseStatement statements) {
         super(init, condition, update, statements);

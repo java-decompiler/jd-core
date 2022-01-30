@@ -12,22 +12,19 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 
-import static org.jd.core.v1.model.classfile.Constants.ACC_STATIC;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 public class ConstructorDeclaration implements MemberDeclaration {
-    protected BaseAnnotationReference annotationReferences;
-    protected int flags;
-    protected BaseTypeParameter typeParameters;
+    private final BaseAnnotationReference annotationReferences;
+    private int flags;
+    private final BaseTypeParameter typeParameters;
     protected BaseFormalParameter formalParameters;
-    protected BaseType exceptionTypes;
-    protected String descriptor;
+    private final BaseType exceptionTypes;
+    protected final String descriptor;
     protected BaseStatement statements;
 
     public ConstructorDeclaration(int flags, BaseFormalParameter formalParameters, String descriptor, BaseStatement statements) {
-        this.flags = flags;
-        this.formalParameters = formalParameters;
-        this.descriptor = descriptor;
-        this.statements = statements;
+        this(null, flags, null, formalParameters, null, descriptor, statements);
     }
 
     public ConstructorDeclaration(BaseAnnotationReference annotationReferences, int flags, BaseTypeParameter typeParameters, BaseFormalParameter formalParameters, BaseType exceptionTypes, String descriptor, BaseStatement statements) {
@@ -43,6 +40,7 @@ public class ConstructorDeclaration implements MemberDeclaration {
     public int getFlags() {
         return flags;
     }
+
     public void setFlags(int flags) {
         this.flags = flags;
     }

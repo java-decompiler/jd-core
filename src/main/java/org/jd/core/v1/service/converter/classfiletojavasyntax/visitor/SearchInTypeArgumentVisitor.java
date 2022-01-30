@@ -7,29 +7,19 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.AbstractTypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 
 public class SearchInTypeArgumentVisitor extends AbstractTypeArgumentVisitor {
-    protected boolean wildcardFound;
-    protected boolean wildcardSuperOrExtendsTypeFound;
-    protected boolean genericFound;
+    private boolean genericFound;
 
     public SearchInTypeArgumentVisitor() {
         init();
     }
 
     public void init() {
-        wildcardFound = false;
-        wildcardSuperOrExtendsTypeFound = false;
         genericFound = false;
-    }
-
-    public boolean containsWildcard() {
-        return wildcardFound;
-    }
-
-    public boolean containsWildcardSuperOrExtendsType() {
-        return wildcardSuperOrExtendsTypeFound;
     }
 
     public boolean containsGeneric() {
@@ -38,19 +28,6 @@ public class SearchInTypeArgumentVisitor extends AbstractTypeArgumentVisitor {
 
     @Override
     public void visit(WildcardTypeArgument type) {
-        wildcardFound = true;
-    }
-
-    @Override
-    public void visit(WildcardExtendsTypeArgument type) {
-        wildcardSuperOrExtendsTypeFound = true;
-        type.getType().accept(this);
-    }
-
-    @Override
-    public void visit(WildcardSuperTypeArgument type) {
-        wildcardSuperOrExtendsTypeFound = true;
-        type.getType().accept(this);
     }
 
     @Override

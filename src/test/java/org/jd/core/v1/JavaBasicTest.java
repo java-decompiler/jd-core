@@ -9,7 +9,7 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
@@ -89,7 +89,7 @@ public class JavaBasicTest extends AbstractJdTest {
             assertEquals(-1, source.indexOf("NaND"));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -122,7 +122,7 @@ public class JavaBasicTest extends AbstractJdTest {
             assertEquals(-1, source.indexOf("NaND"));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -144,7 +144,7 @@ public class JavaBasicTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 39 */", "this.short123 = 3;")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -159,7 +159,7 @@ public class JavaBasicTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("public interface Interface", "extends Serializable")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -180,7 +180,7 @@ public class JavaBasicTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 176: 176 */", "return str;")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.3", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.3", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -204,7 +204,7 @@ public class JavaBasicTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 188: 188 */", "protected static final Integer INTEGER_255 = new Integer(255);")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.4", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.4", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -228,7 +228,7 @@ public class JavaBasicTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 188: 188 */", "protected static final Integer INTEGER_255 = new Integer(255);")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -252,7 +252,7 @@ public class JavaBasicTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 188: 188 */", "protected static final Integer INTEGER_255 = new Integer(255);")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -267,6 +267,6 @@ public class JavaBasicTest extends AbstractJdTest {
         assertNotEquals(-1, source.indexOf("setDefaultFullDetail(true);"));
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
 }

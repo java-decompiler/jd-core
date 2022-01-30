@@ -8,13 +8,19 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
+import static org.apache.bcel.Const.MAJOR_1_5;
+
 public class UpdateJavaSyntaxTreeStep0Visitor extends AbstractJavaSyntaxVisitor {
-    protected UpdateOuterFieldTypeVisitor updateOuterFieldTypeVisitor;
-    protected UpdateBridgeMethodTypeVisitor updateBridgeMethodTypeVisitor;
+    private final UpdateOuterFieldTypeVisitor updateOuterFieldTypeVisitor;
+    private final UpdateBridgeMethodTypeVisitor updateBridgeMethodTypeVisitor;
 
     public UpdateJavaSyntaxTreeStep0Visitor(TypeMaker typeMaker) {
         this.updateOuterFieldTypeVisitor = new UpdateOuterFieldTypeVisitor(typeMaker);
@@ -24,7 +30,7 @@ public class UpdateJavaSyntaxTreeStep0Visitor extends AbstractJavaSyntaxVisitor 
     @Override
     public void visit(BodyDeclaration declaration) {
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
-        boolean genericTypesSupported = (bodyDeclaration.getClassFile().getMajorVersion() >= 49); // (majorVersion >= Java 5)
+        boolean genericTypesSupported = bodyDeclaration.getClassFile().getMajorVersion() >= MAJOR_1_5;
 
         if (genericTypesSupported) {
             updateOuterFieldTypeVisitor.safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());

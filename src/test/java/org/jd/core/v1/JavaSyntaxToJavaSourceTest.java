@@ -7,11 +7,46 @@
 
 package org.jd.core.v1;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.loader.NopLoader;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.MemberDeclarations;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.ArrayExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LengthExpression;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.ParenthesesExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
@@ -32,6 +67,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.apache.bcel.Const.ACC_FINAL;
+import static org.apache.bcel.Const.ACC_PRIVATE;
+import static org.apache.bcel.Const.ACC_PUBLIC;
+import static org.apache.bcel.Const.ACC_STATIC;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import junit.framework.TestCase;
 
@@ -50,13 +90,13 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         CompilationUnit compilationUnit = new CompilationUnit(
             new ClassDeclaration(
-                Declaration.FLAG_PUBLIC,
+                Const.ACC_PUBLIC,
                 "org/jd/core/v1/service/test/TokenWriterTest",
                 "TokenWriterTest",
                 new BodyDeclaration(
                     "org/jd/core/v1/service/test/TokenWriterTest",
                     new MethodDeclaration(
-                        Declaration.FLAG_PUBLIC | Declaration.FLAG_STATIC,
+                        Const.ACC_PUBLIC | Const.ACC_STATIC,
                         "main",
                         PrimitiveType.TYPE_VOID,
                         new FormalParameter(ObjectType.TYPE_STRING.createType(1), "args"),
@@ -96,14 +136,14 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                         "java/util/Enumeration",
                                                         new MemberDeclarations(
                                                             new MethodDeclaration(
-                                                                Declaration.FLAG_PUBLIC,
+                                                                Const.ACC_PUBLIC,
                                                                 "hasMoreElements",
                                                                 PrimitiveType.TYPE_BOOLEAN,
                                                                 "()Z",
                                                                 new ReturnExpressionStatement(new BooleanExpression(15, false))
                                                             ),
                                                             new MethodDeclaration(
-                                                                Declaration.FLAG_PUBLIC,
+                                                                Const.ACC_PUBLIC,
                                                                 "nextElement",
                                                                 ObjectType.TYPE_OBJECT,
                                                                 "()Ljava/lang/Object;",
@@ -179,7 +219,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         CompilationUnit compilationUnit = new CompilationUnit(
             new InterfaceDeclaration(
-                Declaration.FLAG_PUBLIC,
+                Const.ACC_PUBLIC,
                 "org/jd/core/v1/service/test/InterfaceTest",
                 "InterfaceTest",
                 new Types(listType, cloneableType)
@@ -222,7 +262,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
         CompilationUnit compilationUnit = new CompilationUnit(
             new EnumDeclaration(
                 null,
-                Declaration.FLAG_PUBLIC,
+                Const.ACC_PUBLIC,
                 "org/jd/core/v1/service/test/Day",
                 "Day",
                 null,
@@ -280,7 +320,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
 
         CompilationUnit compilationUnit = new CompilationUnit(
             new EnumDeclaration(
-                EnumDeclaration.FLAG_PUBLIC,
+                ACC_PUBLIC,
                 "org/jd/core/v1/service/test/Planet",
                 "Planet",
                 Arrays.asList(
@@ -309,8 +349,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                 new BodyDeclaration(
                     "org/jd/core/v1/service/test/Planet",
                     new MemberDeclarations(
-                        new FieldDeclaration(FieldDeclaration.FLAG_PRIVATE | FieldDeclaration.FLAG_FINAL, PrimitiveType.TYPE_DOUBLE, new FieldDeclarator("mass")),
-                        new FieldDeclaration(FieldDeclaration.FLAG_PRIVATE | FieldDeclaration.FLAG_FINAL, PrimitiveType.TYPE_DOUBLE, new FieldDeclarator("radius")),
+                        new FieldDeclaration(ACC_PRIVATE | ACC_FINAL, PrimitiveType.TYPE_DOUBLE, new FieldDeclarator("mass")),
+                        new FieldDeclaration(ACC_PRIVATE | ACC_FINAL, PrimitiveType.TYPE_DOUBLE, new FieldDeclarator("radius")),
                         new ConstructorDeclaration(
                             0,
                             new FormalParameters(
@@ -338,21 +378,21 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                             )
                         ),
                         new MethodDeclaration(
-                            MethodDeclaration.FLAG_PRIVATE,
+                            ACC_PRIVATE,
                             "mass",
                             PrimitiveType.TYPE_DOUBLE,
                             "()D",
                             new ReturnExpressionStatement(new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "mass", "D"))
                         ),
                         new MethodDeclaration(
-                            MethodDeclaration.FLAG_PRIVATE,
+                            ACC_PRIVATE,
                             "radius",
                             PrimitiveType.TYPE_DOUBLE,
                             "()D",
                             new ReturnExpressionStatement(new FieldReferenceExpression(PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "radius", "D"))
                         ),
                         new FieldDeclaration(
-                            FieldDeclaration.FLAG_PUBLIC | FieldDeclaration.FLAG_STATIC | FieldDeclaration.FLAG_FINAL,
+                            ACC_PUBLIC | ACC_STATIC | ACC_FINAL,
                             PrimitiveType.TYPE_DOUBLE,
                             new FieldDeclarator("G", new ExpressionVariableInitializer(new DoubleConstantExpression(6.67300E-11)))
                         ),
@@ -406,7 +446,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                             )
                         ),
                         new MethodDeclaration(
-                            MethodDeclaration.FLAG_PUBLIC | MethodDeclaration.FLAG_STATIC,
+                            ACC_PUBLIC | ACC_STATIC,
                             "surfaceWeight",
                             PrimitiveType.TYPE_VOID,
                             new FormalParameter(arrayOfStringType, "args"),
@@ -558,13 +598,13 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
     public void testSwitch() throws Exception {
         CompilationUnit compilationUnit = new CompilationUnit(
             new ClassDeclaration(
-                Declaration.FLAG_PUBLIC,
+                Const.ACC_PUBLIC,
                 "org/jd/core/v1/service/test/SwitchTest",
                 "SwitchTest",
                 new BodyDeclaration(
                     "org/jd/core/v1/service/test/SwitchTest",
                     new MethodDeclaration(
-                        Declaration.FLAG_PUBLIC | Declaration.FLAG_STATIC,
+                        Const.ACC_PUBLIC | Const.ACC_STATIC,
                         "translate",
                         PrimitiveType.TYPE_INT,
                         new FormalParameter(PrimitiveType.TYPE_INT, "i"),
@@ -631,25 +671,25 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
     public void testBridgeAndSyntheticAttributes() throws Exception {
         CompilationUnit compilationUnit = new CompilationUnit(
             new ClassDeclaration(
-                Declaration.FLAG_PUBLIC,
+                Const.ACC_PUBLIC,
                 "org/jd/core/v1/service/test/SyntheticAttributeTest",
                 "SyntheticAttributeTest",
                 new BodyDeclaration(
                     "org/jd/core/v1/service/test/SyntheticAttributeTest",
                     new MemberDeclarations(
                         new FieldDeclaration(
-                            Declaration.FLAG_PUBLIC|Declaration.FLAG_BRIDGE,
+                            Const.ACC_PUBLIC|Const.ACC_BRIDGE,
                             PrimitiveType.TYPE_INT,
                             new FieldDeclarator("i")
                         ),
                         new MethodDeclaration(
-                            Declaration.FLAG_PUBLIC|Declaration.FLAG_BRIDGE,
+                            Const.ACC_PUBLIC|Const.ACC_BRIDGE,
                             "testBridgeAttribute",
                             PrimitiveType.TYPE_VOID,
                             "()V"
                         ),
                         new MethodDeclaration(
-                            Declaration.FLAG_PUBLIC|Declaration.FLAG_SYNTHETIC,
+                            Const.ACC_PUBLIC|Const.ACC_SYNTHETIC,
                             "testSyntheticAttribute",
                             PrimitiveType.TYPE_VOID,
                             "()V"

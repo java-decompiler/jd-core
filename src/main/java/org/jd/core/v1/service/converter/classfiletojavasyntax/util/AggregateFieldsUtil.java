@@ -13,7 +13,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 
 import java.util.List;
 
-public class AggregateFieldsUtil {
+public final class AggregateFieldsUtil {
 
     private AggregateFieldsUtil() {
         super();
@@ -24,13 +24,14 @@ public class AggregateFieldsUtil {
             int size = fields.size();
 
             if (size > 1) {
-                int firstIndex=0, lastIndex=0;
+                int firstIndex=0;
+                int lastIndex=0;
                 ClassFileFieldDeclaration firstField = fields.get(0);
 
                 for (int index=1; index<size; index++) {
                     ClassFileFieldDeclaration field = fields.get(index);
 
-                    if ((firstField.getFirstLineNumber() == 0) || (firstField.getFlags() != field.getFlags()) || !firstField.getType().equals(field.getType())) {
+                    if (firstField.getFirstLineNumber() == 0 || firstField.getFlags() != field.getFlags() || !firstField.getType().equals(field.getType())) {
                         firstField = field;
                         firstIndex = lastIndex = index;
                     } else {
@@ -61,7 +62,7 @@ public class AggregateFieldsUtil {
         }
     }
 
-    protected static void aggregate(List<ClassFileFieldDeclaration> fields, ClassFileFieldDeclaration firstField, int firstIndex, int lastIndex) {
+    private static void aggregate(List<ClassFileFieldDeclaration> fields, ClassFileFieldDeclaration firstField, int firstIndex, int lastIndex) {
         if (firstIndex < lastIndex) {
             List<ClassFileFieldDeclaration> sublist = fields.subList(firstIndex + 1, lastIndex + 1);
 

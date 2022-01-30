@@ -31,8 +31,8 @@ public class NullExpression extends AbstractLineNumberTypeExpression {
         return "NullExpression{type=" + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new NullExpression(lineNumber, type);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new NullExpression(lineNumber, type);
+    }
 }

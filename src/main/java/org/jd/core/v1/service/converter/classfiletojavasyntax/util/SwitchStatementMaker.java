@@ -7,7 +7,12 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.expression.EnumConstantReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
@@ -24,19 +29,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class SwitchStatementMaker {
+public final class SwitchStatementMaker {
 
     private SwitchStatementMaker() {
         super();
     }
 
-    protected static final Integer MINUS_ONE = Integer.valueOf(-1);
+    private static final Integer MINUS_ONE = Integer.valueOf(-1);
 
     public static void makeSwitchString(LocalVariableMaker localVariableMaker, Statements statements, SwitchStatement switchStatement) {
         int size = statements.size();
         SwitchStatement previousSwitchStatement = (SwitchStatement)statements.get(size - 2);
 
-        if ((previousSwitchStatement.getCondition().getLineNumber() == switchStatement.getCondition().getLineNumber()) && previousSwitchStatement.getCondition().isMethodInvocationExpression()) {
+        if (previousSwitchStatement.getCondition().getLineNumber() == switchStatement.getCondition().getLineNumber() && previousSwitchStatement.getCondition().isMethodInvocationExpression()) {
             Expression expression = previousSwitchStatement.getCondition();
 
             if (expression.isMethodInvocationExpression()) {
@@ -66,7 +71,7 @@ public class SwitchStatementMaker {
                                         if (syntheticLV2.equals(((ClassFileLocalVariableReferenceExpression)boe2.getLeftExpression()).getLocalVariable())) {
                                             MethodInvocationExpression mie = (MethodInvocationExpression) previousSwitchStatement.getCondition();
 
-                                            if (mie.getName().equals("hashCode") && mie.getDescriptor().equals("()I")) {
+                                            if ("hashCode".equals(mie.getName()) && "()I".equals(mie.getDescriptor())) {
                                                 // Pattern found ==> Parse cases of the synthetic switch statement 'previousSwitchStatement'
                                                 Map<Integer, String> map = new HashMap<>();
 
@@ -74,7 +79,7 @@ public class SwitchStatementMaker {
                                                 for (SwitchStatement.Block block : previousSwitchStatement.getBlocks()) {
                                                     BaseStatement stmts = block.getStatements();
 
-                                                    assert (stmts != null) && stmts.isStatements() && (stmts.size() > 0);
+                                                    assert stmts != null && stmts.isStatements() && stmts.size() > 0;
 
                                                     for (Statement stmt : stmts) {
                                                         if (!stmt.isIfStatement()) {
@@ -160,7 +165,7 @@ public class SwitchStatementMaker {
         if (expression.isFieldReferenceExpression()) {
             FieldReferenceExpression fre = (FieldReferenceExpression)expression;
 
-            if (fre.getDescriptor().equals("[I") && fre.getName().startsWith("$SwitchMap$")) {
+            if ("[I".equals(fre.getDescriptor()) && fre.getName().startsWith("$SwitchMap$")) {
                 ClassFileTypeDeclaration syntheticClassDeclaration = bodyDeclaration.getInnerTypeDeclaration(fre.getInternalTypeName());
 
                 if (syntheticClassDeclaration != null) {
@@ -174,7 +179,7 @@ public class SwitchStatementMaker {
             MethodInvocationExpression mie = (MethodInvocationExpression)expression;
             String methodName = mie.getName();
 
-            if (mie.getDescriptor().equals("()[I") && methodName.startsWith("$SWITCH_TABLE$")) {
+            if ("()[I".equals(mie.getDescriptor()) && methodName.startsWith("$SWITCH_TABLE$")) {
                 // Eclipse compiler switch-enum pattern
                 for (ClassFileConstructorOrMethodDeclaration declaration : bodyDeclaration.getMethodDeclarations()) {
                      if (declaration.getMethod().getName().equals(methodName)) {
@@ -187,7 +192,7 @@ public class SwitchStatementMaker {
         }
     }
 
-    protected static Iterator<Statement> searchSwitchMap(FieldReferenceExpression fre, Iterator<Statement> iterator) {
+    private static Iterator<Statement> searchSwitchMap(FieldReferenceExpression fre, Iterator<Statement> iterator) {
         String name = fre.getName();
 
         while (iterator.hasNext()) {
@@ -201,7 +206,7 @@ public class SwitchStatementMaker {
         return iterator;
     }
 
-    protected static void updateSwitchStatement(SwitchStatement switchStatement, Iterator<Statement> iterator) {
+    private static void updateSwitchStatement(SwitchStatement switchStatement, Iterator<Statement> iterator) {
         // Create map<synthetic index -> enum name>
         Map<Integer, String> map = new HashMap<>();
 

@@ -13,9 +13,9 @@ import org.jd.core.v1.util.DefaultList;
 
 public class TryStatement implements Statement {
     protected DefaultList<Resource> resources;
-    protected BaseStatement tryStatements;
-    protected DefaultList<CatchClause> catchClauses;
-    protected BaseStatement finallyStatements;
+    private BaseStatement tryStatements;
+    private final DefaultList<CatchClause> catchClauses;
+    private BaseStatement finallyStatements;
 
     public TryStatement(BaseStatement tryStatements, DefaultList<CatchClause> catchClauses, BaseStatement finallyStatements) {
         this.resources = null;
@@ -59,9 +59,9 @@ public class TryStatement implements Statement {
     }
 
     public static class Resource implements Statement {
-        protected ObjectType type;
-        protected String name;
-        protected Expression expression;
+        private final ObjectType type;
+        private final String name;
+        private Expression expression;
 
         public Resource(ObjectType type, String name, Expression expression) {
             this.type = type;
@@ -93,11 +93,11 @@ public class TryStatement implements Statement {
     }
 
     public static class CatchClause implements Statement {
-        protected int lineNumber;
-        protected ObjectType type;
-        protected DefaultList<ObjectType> otherTypes = null;
-        protected String name;
-        protected BaseStatement statements;
+        private final int lineNumber;
+        private final ObjectType type;
+        private DefaultList<ObjectType> otherTypes;
+        private final String name;
+        private final BaseStatement statements;
 
         public CatchClause(int lineNumber, ObjectType type, String name, BaseStatement statements) {
             this.lineNumber = lineNumber;

@@ -8,36 +8,10 @@ package org.jd.core.v1.model.javasyntax.type;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-
 public class TypeParameters extends DefaultList<TypeParameter> implements BaseTypeParameter {
     private static final long serialVersionUID = 1L;
 
     public TypeParameters() {}
-
-    public TypeParameters(int capacity) {
-        super(capacity);
-    }
-
-    public TypeParameters(Collection<TypeParameter> collection) {
-        super(collection);
-        if (collection.size() <= 1) {
-            throw new IllegalArgumentException("Use 'TypeParameter' instead");
-        }
-    }
-
-    public TypeParameters(TypeParameter type, TypeParameter... types) {
-        super(types.length + 1);
-        if (types.length <= 0) {
-            throw new IllegalArgumentException("Use 'TypeParameter' instead");
-        }
-
-        add(type);
-
-        for (TypeParameter t : types) {
-            add(t);
-        }
-    }
 
     @Override
     public void accept(TypeParameterVisitor visitor) {

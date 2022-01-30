@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.javasyntax.expression;
 
 public abstract class AbstractLineNumberExpression implements Expression {
-    protected int lineNumber;
+    private final int lineNumber;
 
     protected AbstractLineNumberExpression() {
         this.lineNumber = UNKNOWN_LINE_NUMBER;

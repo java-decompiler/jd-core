@@ -16,7 +16,7 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import java.util.List;
 
 public class ClassFileEnumDeclaration extends EnumDeclaration implements ClassFileTypeDeclaration {
-    protected int firstLineNumber;
+    private final int firstLineNumber;
 
     public ClassFileEnumDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseType interfaces, ClassFileBodyDeclaration bodyDeclaration) {
         super(annotationReferences, flags, internalName, name, interfaces, null, bodyDeclaration);
@@ -42,7 +42,7 @@ public class ClassFileEnumDeclaration extends EnumDeclaration implements ClassFi
     }
 
     public static class ClassFileConstant extends Constant {
-        protected int index;
+        private final int index;
 
         public ClassFileConstant(int lineNumber, String name, int index, BaseExpression arguments, BodyDeclaration bodyDeclaration) {
             super(lineNumber, name, arguments, bodyDeclaration);

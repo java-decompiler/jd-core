@@ -26,8 +26,6 @@ public interface JavaFragmentVisitor {
     void visit(StartSingleStatementBlockFragment fragment);
     void visit(StartStatementsBlockFragment fragment);
     void visit(StartStatementsDoWhileBlockFragment fragment);
-    void visit(StartStatementsInfiniteForBlockFragment fragment);
-    void visit(StartStatementsInfiniteWhileBlockFragment fragment);
     void visit(StartStatementsTryBlockFragment fragment);
     void visit(TokensFragment fragment);
 }

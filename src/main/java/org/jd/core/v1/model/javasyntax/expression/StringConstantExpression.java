@@ -13,7 +13,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 public class StringConstantExpression extends AbstractLineNumberExpression {
     public static final StringConstantExpression EMPTY_STRING = new StringConstantExpression("");
 
-    protected String string;
+    private final String string;
 
     public StringConstantExpression(String string) {
         this.string = string;
@@ -47,8 +47,8 @@ public class StringConstantExpression extends AbstractLineNumberExpression {
         return "StringConstantExpression{\"" + string + "\"}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new StringConstantExpression(lineNumber, string);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new StringConstantExpression(lineNumber, string);
+    }
 }

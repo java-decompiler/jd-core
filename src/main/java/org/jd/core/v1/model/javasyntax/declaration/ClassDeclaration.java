@@ -13,10 +13,10 @@ import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
 public class ClassDeclaration extends InterfaceDeclaration {
-    protected ObjectType superType;
+    private final ObjectType superType;
 
     public ClassDeclaration(int flags, String internalName, String name, BodyDeclaration bodyDeclaration) {
-        super(null, flags, internalName, name, null, null, bodyDeclaration);
+        this(null, flags, internalName, name, null, null, null, bodyDeclaration);
     }
 
     public ClassDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseTypeParameter typeParameters, ObjectType superType, BaseType interfaces, BodyDeclaration bodyDeclaration) {

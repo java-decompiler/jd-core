@@ -13,7 +13,7 @@ public class MergeIfCondition {
         return p1.distance(p2);
     }
     
-	double compute() throws Exception {
+    double compute() throws Exception {
         Objects o = null;
         if (o == null || o.isNull(o.toString())) {
           throw new Exception("Error !!!");

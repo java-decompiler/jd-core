@@ -8,20 +8,11 @@ package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-
 public class LocalVariableDeclarators extends DefaultList<LocalVariableDeclarator> implements BaseLocalVariableDeclarator {
     private static final long serialVersionUID = 1L;
 
     public LocalVariableDeclarators(int capacity) {
         super(capacity);
-    }
-
-    public LocalVariableDeclarators(Collection<LocalVariableDeclarator> collection) {
-        super(collection);
-        if (collection.size() <= 1) {
-            throw new IllegalArgumentException("Use 'LocalVariableDeclarator' instead");
-        }
     }
 
     @Override

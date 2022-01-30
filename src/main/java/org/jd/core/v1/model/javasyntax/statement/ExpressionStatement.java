@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.statement;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class ExpressionStatement implements Statement {
-    protected Expression expression;
+    private Expression expression;
 
     public ExpressionStatement(Expression expression) {
         this.expression = expression;

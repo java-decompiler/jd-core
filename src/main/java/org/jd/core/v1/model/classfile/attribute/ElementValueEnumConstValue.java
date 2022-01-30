@@ -7,22 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class ElementValueEnumConstValue implements AttributeElementValue {
-    protected String descriptor;
-    protected String constName;
-
-    public ElementValueEnumConstValue(String descriptor, String constName) {
-        this.descriptor = descriptor;
-        this.constName = constName;
-    }
-
-    public String getDescriptor() {
-        return descriptor;
-    }
-
-    public String getConstName() {
-        return constName;
-    }
+public record ElementValueEnumConstValue(String descriptor, String constName) implements AttributeElementValue {
 
     @Override
     public void accept(ElementValueVisitor visitor) {

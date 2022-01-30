@@ -1,18 +1,30 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util.cfg;
 
-import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
+import java.util.BitSet;
+
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.GROUP_END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITIONAL_BRANCH;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO_IN_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_STATEMENTS;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_DECLARATION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_ECLIPSE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_JSR;
 
 public class MinDepthCFGReducer extends ControlFlowGraphReducer {
-    
-    public MinDepthCFGReducer(Method method) {
-        super(method);
-    }
 
+    private boolean preReduce;
+
+    public MinDepthCFGReducer(boolean preReduce) {
+        this.preReduce = preReduce;
+    }
+    
     @Override
     protected boolean needToUpdateConditionTernaryOperator(BasicBlock basicBlock, BasicBlock nextNext) {
         return ByteCodeUtil.getMinDepth(nextNext) == -1;
@@ -33,12 +45,6 @@ public class MinDepthCFGReducer extends ControlFlowGraphReducer {
     }
 
     @Override
-    protected void maybeEndCondition(BasicBlock condition) {
-        condition.setNext(END);
-        condition.setBranch(END);
-    }
-
-    @Override
     protected boolean needToCreateIf(BasicBlock branch, BasicBlock nextNext, int maxOffset) {
         return nextNext.getFromOffset() < branch.getFromOffset() && nextNext.getPredecessors().size() == 1;
     }
@@ -46,5 +52,27 @@ public class MinDepthCFGReducer extends ControlFlowGraphReducer {
     @Override
     protected boolean needToCreateIfElse(BasicBlock branch, BasicBlock nextNext, BasicBlock branchNext) {
         return nextNext.getFromOffset() > branch.getFromOffset() && branchNext.matchType(GROUP_END);
+    }
+    
+    @Override
+    protected boolean reduceTryDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
+        BasicBlock next = basicBlock.getNext();
+        if (next != null && next.matchType(TYPE_LOOP)) {
+            BasicBlock sub1 = next.getSub1();
+            if (sub1 != null && sub1.matchType(TYPE_TRY|TYPE_TRY_JSR|TYPE_TRY_ECLIPSE|TYPE_TRY_DECLARATION)) {
+                return false;
+            }
+        }
+        return super.reduceTryDeclaration(visited, basicBlock, jsrTargets);
+    }
+
+    @Override
+    public boolean doPreReduce() {
+        return preReduce;
+    }
+    
+    @Override
+    public String getLabel() {
+        return "Show Minimum-Depth Control Flow Graph";
     }
 }

@@ -7,8 +7,23 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
@@ -26,12 +41,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_STATIC;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
-    protected BodyDeclarationsVisitor bodyDeclarationsVisitor = new BodyDeclarationsVisitor();
-    protected Map<String, Map<String, ClassFileMethodDeclaration>> bridgeMethodDeclarations = new HashMap<>();
-    protected TypeMaker typeMaker;
+    private final BodyDeclarationsVisitor bodyDeclarationsVisitor = new BodyDeclarationsVisitor();
+    private final Map<String, Map<String, ClassFileMethodDeclaration>> bridgeMethodDeclarations = new HashMap<>();
+    private final TypeMaker typeMaker;
 
     public UpdateBridgeMethodVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -83,12 +98,12 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         exp = statement.getExpression();
 
         BaseType parameterTypes = bridgeMethodDeclaration.getParameterTypes();
-        int parameterTypesCount = (parameterTypes == null) ? 0 : parameterTypes.size();
+        int parameterTypesCount = parameterTypes == null ? 0 : parameterTypes.size();
 
         if (exp.isFieldReferenceExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp);
 
-            expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
+            expression = parameterTypesCount == 0 ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new FieldReferenceExpression(mie1.getLineNumber(), fre.getType(), expression, fre.getInternalTypeName(), fre.getName(), fre.getDescriptor());
         }
@@ -99,13 +114,12 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             if (methodTypes != null) {
                 if (mie2.getExpression().isObjectTypeReferenceExpression()) {
                     // Static method invocation
-                    return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.returnedType, mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.parameterTypes, mie1.getParameters());
+                    return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.getReturnedType(), mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.getParameterTypes(), mie1.getParameters());
                 }
                 BaseExpression mie1Parameters = mie1.getParameters();
                 BaseExpression newParameters = null;
                 switch (mie1Parameters.size()) {
-                    case 0:
-                    case 1:
+                    case 0, 1:
                         break;
                     case 2:
                         newParameters = mie1Parameters.getList().get(1);
@@ -115,7 +129,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                         newParameters = new Expressions(p.subList(1, p.size()));
                         break;
                 }
-                return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.returnedType, mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.parameterTypes, newParameters);
+                return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.getReturnedType(), mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.getParameterTypes(), newParameters);
             }
         } else if (exp.isBinaryOperatorExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp.getLeftExpression());
@@ -141,7 +155,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         } else if (exp.isPostOperatorExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp.getExpression());
 
-            expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
+            expression = parameterTypesCount == 0 ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new PostOperatorExpression(
                     mie1.getLineNumber(),
@@ -150,7 +164,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
         } else if (exp.isPreOperatorExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp.getExpression());
 
-            expression = (parameterTypesCount == 0) ? fre.getExpression() : mie1.getParameters().getFirst();
+            expression = parameterTypesCount == 0 ? fre.getExpression() : mie1.getParameters().getFirst();
 
             return new PreOperatorExpression(
                     mie1.getLineNumber(),
@@ -175,7 +189,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
     }
 
     protected class BodyDeclarationsVisitor extends AbstractJavaSyntaxVisitor {
-        protected Map<String, ClassFileMethodDeclaration> map;
+        private Map<String, ClassFileMethodDeclaration> map;
 
         @Override
         public void visit(ClassDeclaration declaration) { safeAccept(declaration.getBodyDeclaration()); }
@@ -215,7 +229,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
 
         @Override
         public void visit(MethodDeclaration declaration) {
-            if ((declaration.getFlags() & FLAG_STATIC) == 0) {
+            if ((declaration.getFlags() & ACC_STATIC) == 0) {
                 return;
             }
 
@@ -250,7 +264,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             exp = statement.getExpression();
 
             BaseType parameterTypes = bridgeMethodDeclaration.getParameterTypes();
-            int parameterTypesCount = (parameterTypes == null) ? 0 : parameterTypes.size();
+            int parameterTypesCount = parameterTypes == null ? 0 : parameterTypes.size();
 
             if (exp.isFieldReferenceExpression()) {
                 FieldReferenceExpression fre = (FieldReferenceExpression) exp;
@@ -322,7 +336,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                     FieldReferenceExpression fre = (FieldReferenceExpression) exp.getLeftExpression();
                     return checkLocalVariableReference(fre.getExpression(), 0);
                 }
-            } else if (exp.isPostOperatorExpression() || (parameterTypesCount == 1 && exp.isPreOperatorExpression())) {
+            } else if (exp.isPostOperatorExpression() || parameterTypesCount == 1 && exp.isPreOperatorExpression()) {
                 exp = exp.getExpression();
 
                 if (exp.isFieldReferenceExpression()) {

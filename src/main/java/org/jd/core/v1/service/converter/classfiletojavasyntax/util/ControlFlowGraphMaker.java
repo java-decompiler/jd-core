@@ -6,32 +6,147 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.LineNumber;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
 import org.jd.core.v1.model.classfile.attribute.CodeException;
-import org.jd.core.v1.model.classfile.attribute.LineNumber;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
+import static org.apache.bcel.Const.AASTORE;
+import static org.apache.bcel.Const.ALOAD;
+import static org.apache.bcel.Const.ALOAD_0;
+import static org.apache.bcel.Const.ALOAD_1;
+import static org.apache.bcel.Const.ALOAD_2;
+import static org.apache.bcel.Const.ALOAD_3;
+import static org.apache.bcel.Const.ANEWARRAY;
+import static org.apache.bcel.Const.ARETURN;
+import static org.apache.bcel.Const.ASTORE;
+import static org.apache.bcel.Const.ASTORE_0;
+import static org.apache.bcel.Const.ASTORE_1;
+import static org.apache.bcel.Const.ASTORE_2;
+import static org.apache.bcel.Const.ASTORE_3;
+import static org.apache.bcel.Const.ATHROW;
+import static org.apache.bcel.Const.BASTORE;
+import static org.apache.bcel.Const.BIPUSH;
+import static org.apache.bcel.Const.CASTORE;
+import static org.apache.bcel.Const.CHECKCAST;
+import static org.apache.bcel.Const.DASTORE;
+import static org.apache.bcel.Const.DLOAD;
+import static org.apache.bcel.Const.DRETURN;
+import static org.apache.bcel.Const.DSTORE;
+import static org.apache.bcel.Const.DSTORE_0;
+import static org.apache.bcel.Const.DSTORE_1;
+import static org.apache.bcel.Const.DSTORE_2;
+import static org.apache.bcel.Const.DSTORE_3;
+import static org.apache.bcel.Const.FASTORE;
+import static org.apache.bcel.Const.FLOAD;
+import static org.apache.bcel.Const.FRETURN;
+import static org.apache.bcel.Const.FSTORE;
+import static org.apache.bcel.Const.FSTORE_0;
+import static org.apache.bcel.Const.FSTORE_1;
+import static org.apache.bcel.Const.FSTORE_2;
+import static org.apache.bcel.Const.FSTORE_3;
+import static org.apache.bcel.Const.GETFIELD;
+import static org.apache.bcel.Const.GETSTATIC;
+import static org.apache.bcel.Const.GOTO;
+import static org.apache.bcel.Const.GOTO_W;
+import static org.apache.bcel.Const.IASTORE;
+import static org.apache.bcel.Const.IFEQ;
+import static org.apache.bcel.Const.IFGE;
+import static org.apache.bcel.Const.IFGT;
+import static org.apache.bcel.Const.IFLE;
+import static org.apache.bcel.Const.IFLT;
+import static org.apache.bcel.Const.IFNE;
+import static org.apache.bcel.Const.IFNONNULL;
+import static org.apache.bcel.Const.IFNULL;
+import static org.apache.bcel.Const.IF_ACMPEQ;
+import static org.apache.bcel.Const.IF_ACMPNE;
+import static org.apache.bcel.Const.IF_ICMPEQ;
+import static org.apache.bcel.Const.IF_ICMPGE;
+import static org.apache.bcel.Const.IF_ICMPGT;
+import static org.apache.bcel.Const.IF_ICMPLE;
+import static org.apache.bcel.Const.IF_ICMPLT;
+import static org.apache.bcel.Const.IF_ICMPNE;
+import static org.apache.bcel.Const.IINC;
+import static org.apache.bcel.Const.ILOAD;
+import static org.apache.bcel.Const.INSTANCEOF;
+import static org.apache.bcel.Const.INVOKEDYNAMIC;
+import static org.apache.bcel.Const.INVOKEINTERFACE;
+import static org.apache.bcel.Const.INVOKESPECIAL;
+import static org.apache.bcel.Const.INVOKESTATIC;
+import static org.apache.bcel.Const.INVOKEVIRTUAL;
+import static org.apache.bcel.Const.IRETURN;
+import static org.apache.bcel.Const.ISTORE;
+import static org.apache.bcel.Const.ISTORE_0;
+import static org.apache.bcel.Const.ISTORE_1;
+import static org.apache.bcel.Const.ISTORE_2;
+import static org.apache.bcel.Const.ISTORE_3;
+import static org.apache.bcel.Const.JSR;
+import static org.apache.bcel.Const.JSR_W;
+import static org.apache.bcel.Const.LASTORE;
+import static org.apache.bcel.Const.LDC;
+import static org.apache.bcel.Const.LDC2_W;
+import static org.apache.bcel.Const.LDC_W;
+import static org.apache.bcel.Const.LLOAD;
+import static org.apache.bcel.Const.LOOKUPSWITCH;
+import static org.apache.bcel.Const.LRETURN;
+import static org.apache.bcel.Const.LSTORE;
+import static org.apache.bcel.Const.LSTORE_0;
+import static org.apache.bcel.Const.LSTORE_1;
+import static org.apache.bcel.Const.LSTORE_2;
+import static org.apache.bcel.Const.LSTORE_3;
+import static org.apache.bcel.Const.MONITORENTER;
+import static org.apache.bcel.Const.MONITOREXIT;
+import static org.apache.bcel.Const.MULTIANEWARRAY;
+import static org.apache.bcel.Const.NEW;
+import static org.apache.bcel.Const.NEWARRAY;
+import static org.apache.bcel.Const.POP;
+import static org.apache.bcel.Const.POP2;
+import static org.apache.bcel.Const.PUTFIELD;
+import static org.apache.bcel.Const.PUTSTATIC;
+import static org.apache.bcel.Const.RET;
+import static org.apache.bcel.Const.SASTORE;
+import static org.apache.bcel.Const.SIPUSH;
+import static org.apache.bcel.Const.TABLESWITCH;
+import static org.apache.bcel.Const.WIDE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITIONAL_BRANCH;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_DELETED;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO_IN_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_JSR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RET;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RETURN;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RETURN_VALUE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_START;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_STATEMENTS;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH_DECLARATION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_THROW;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_DECLARATION;
+
 
 public class ControlFlowGraphMaker {
     protected static final BasicBlock MARK = END;
 
     protected static final CodeExceptionComparator CODE_EXCEPTION_COMPARATOR = new CodeExceptionComparator();
 
-    private ControlFlowGraphMaker() {
-    }
-
-    public static ControlFlowGraph make(Method method) {
+    public ControlFlowGraph make(Method method) {
         AttributeCode attributeCode = method.getAttribute("Code");
 
         if (attributeCode == null) {
@@ -61,52 +176,57 @@ public class ControlFlowGraphMaker {
             opcode = code[offset] & 255;
 
             switch (opcode) {
-                case 16: // BIPUSH
-                case 18: // LDC
-                case 21: case 22: case 23: case 24: // ILOAD, LLOAD, FLOAD, DLOAD
-                case 188: // NEWARRAY
+                case BIPUSH,
+                     LDC,
+                     ILOAD, LLOAD, FLOAD, DLOAD,
+                     NEWARRAY:
                     offset++;
                     break;
-                case 25: case 43: case 44: case 45: // ALOAD, ALOAD_1..3
-                    if (opcode == 25 /* ALOAD */) {
+                case ALOAD, ALOAD_1, ALOAD_2, ALOAD_3:
+                    if (opcode == ALOAD) {
                         // ALOAD param to skip
                         offset++;
                     }
                     // identify access to static member from instance by checking if the ALOAD is discarded by a POP
-                    // but if the POP is followed by a GOTO then it's a false positive
-                    if (offset+2 < length && (code[offset+1] & 255) == 87 /* POP */ && (code[offset+2] & 255) != 167 /* GOTO */) {
+                    // followed by another load instruction
+                    if (offset+2 < length
+                        && (code[offset+1] & 255) == POP
+                        && ByteCodeUtil.isLoad(code, offset+2)) {
                         offset++; // skip pop
                     }
                     break;
-                case 42: // ALOAD_0
+                case ALOAD_0:
                     // identify constants prefixed with 'this' qualifier
                     // by matching the pattern 1)aload_0 -> 2)pop -> 3)ldc/getstatic
                     // that we can refactor to a single ldc, ignoring the aload_0 and pop
-                    if (offset+2 < length && (code[offset+1] & 255) == 87 /* POP */ 
-                        && ((code[offset+2] & 255) == 18 /* LDC */ || (code[offset+2] & 255) == 178 /* GETSTATIC */)) {
+                    if (offset+2 < length
+                        && (code[offset+1] & 255) == POP
+                        && ByteCodeUtil.isStaticAccess(code, offset+2)) {
                         offset++; // skip pop
                     }
                     // another pattern 1)aload_0 -> 2)getfield -> 3)pop -> 4)ldc/getstatic
-                    if (offset+5 < length && (code[offset+1] & 255) == 180 /* GETFIELD */ && (code[offset+4] & 255) == 87 /* POP */ 
-                        && ((code[offset+5] & 255) == 18 /* LDC */ || (code[offset+5] & 255) == 178 /* GETSTATIC */)) {
-                    	offset+=4; // skip getfield and pop
+                    if (offset+5 < length
+                        && (code[offset+1] & 255) == GETFIELD
+                        && (code[offset+4] & 255) == POP
+                        && ByteCodeUtil.isStaticAccess(code, offset+5)) {
+                        offset+=4; // skip getfield and pop
                     }
                     break;
-                case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
+                case ISTORE, LSTORE, FSTORE, DSTORE, ASTORE:
                     offset++;
                     lastStatementOffset = offset;
                     break;
-                case 59: case 60: case 61: case 62: // ISTORE_0 .. ISTORE_3
-                case 63: case 64: case 65: case 66: // LSTORE_0 .. LSTORE_3
-                case 67: case 68: case 69: case 70: // FSTORE_0 .. FSTORE_3
-                case 71: case 72: case 73: case 74: // DSTORE_0 .. DSTORE_3
-                case 75: case 76: case 77: case 78: // ASTORE_0 .. ASTORE_3
-                case 79: case 80: case 81: case 82: case 83: case 84: case 85: case 86: // IASTORE, LASTORE, FASTORE, DASTORE, AASTORE, BASTORE, CASTORE, SASTORE
-                case 87: case 88: // POP, POP2
-                case 194: case 195: // MONITORENTER, MONITOREXIT
+                case ISTORE_0, ISTORE_1, ISTORE_2, ISTORE_3,
+                     LSTORE_0, LSTORE_1, LSTORE_2, LSTORE_3,
+                     FSTORE_0, FSTORE_1, FSTORE_2, FSTORE_3,
+                     DSTORE_0, DSTORE_1, DSTORE_2, DSTORE_3,
+                     ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3,
+                     IASTORE, LASTORE, FASTORE, DASTORE, AASTORE, BASTORE, CASTORE, SASTORE,
+                     POP, POP2,
+                     MONITORENTER, MONITOREXIT:
                     lastStatementOffset = offset;
                     break;
-                case 169: // RET
+                case RET:
                     offset++;
                     // The instruction that immediately follows a conditional or an unconditional goto/jump instruction is a leader
                     types[offset] = 'R';
@@ -115,50 +235,50 @@ public class ControlFlowGraphMaker {
                     }
                     lastStatementOffset = offset;
                     break;
-                case 179: case 181: // PUTSTATIC, PUTFIELD
+                case PUTSTATIC, PUTFIELD:
                     offset += 2;
                     lastStatementOffset = offset;
                     break;
-                case 182: case 183: case 184: // INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC
-                    ConstantMemberRef constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
+                case INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC:
+                    ConstantMemberRef constantMemberRef = constants.getConstant( (code[++offset] & 255) << 8 | code[++offset] & 255 );
                     ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     if (descriptor.charAt(descriptor.length()-1) == 'V') {
                         lastStatementOffset = offset;
                     }
                     break;
-                case 185: case 186: // INVOKEINTERFACE, INVOKEDYNAMIC
-                    constantMemberRef = constants.getConstant( ((code[++offset] & 255) << 8) | (code[++offset] & 255) );
+                case INVOKEINTERFACE, INVOKEDYNAMIC:
+                    constantMemberRef = constants.getConstant( (code[++offset] & 255) << 8 | code[++offset] & 255 );
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                     offset += 2; // Skip 2 bytes
                     if (descriptor.charAt(descriptor.length()-1) == 'V') {
                         lastStatementOffset = offset;
                     }
                     break;
-                case 132: // IINC
+                case IINC:
                     offset += 2;
                     if (lastStatementOffset+3 == offset && !checkILOADForIINC(code, offset, code[offset-1] & 255)) {
                         // Last instruction is a 'statement' & the next instruction is not a matching ILOAD -> IINC as a statement
                         lastStatementOffset = offset;
                     }
                     break;
-                case 17: // SIPUSH
-                case 19: case 20: // LDC_W, LDC2_W
-                case 178: case 180: // GETSTATIC, GETFIELD
-                case 187: case 189: // NEW, ANEWARRAY
-                case 192: // CHECKCAST
-                case 193: // INSTANCEOF
+                case SIPUSH,
+                     LDC_W, LDC2_W,
+                     GETSTATIC, GETFIELD,
+                     NEW, ANEWARRAY,
+                     CHECKCAST,
+                     INSTANCEOF:
                     offset += 2;
                     break;
-                case 167: // GOTO
-                    char type = (lastStatementOffset+1 == offset) ? 'g' : 'G';
+                case GOTO:
+                    char type = lastStatementOffset+1 == offset ? 'g' : 'G';
 
                     if (lastStatementOffset != -1) {
                         map[lastStatementOffset + 1] = MARK;
                     }
                     // The target of a conditional or an unconditional goto/jump instruction is a leader
-                    int branchOffset = offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    int branchOffset = offset + (short)((code[++offset] & 255) << 8 | code[++offset] & 255);
                     map[branchOffset] = MARK;
                     types[offset] = type;
                     branchOffsets[offset] = branchOffset;
@@ -168,12 +288,12 @@ public class ControlFlowGraphMaker {
                     }
                     lastStatementOffset = offset;
                     break;
-                case 168: // JSR
+                case JSR:
                     if (lastStatementOffset != -1) {
                         map[lastStatementOffset + 1] = MARK;
                     }
                     // The target of a conditional or an unconditional goto/jump instruction is a leader
-                    branchOffset = offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    branchOffset = offset + (short)((code[++offset] & 255) << 8 | code[++offset] & 255);
                     map[branchOffset] = MARK;
                     types[offset] = 'j';
                     branchOffsets[offset] = branchOffset;
@@ -183,14 +303,14 @@ public class ControlFlowGraphMaker {
                     }
                     lastStatementOffset = offset;
                     break;
-                case 153: case 154: case 155: case 156: case 157: case 158: // IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE
-                case 159: case 160: case 161: case 162: case 163: case 164: case 165: case 166: // IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE
-                case 198: case 199: // IFNULL, IFNONNULL
+                case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE,
+                     IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE,
+                     IFNULL, IFNONNULL:
                     if (lastStatementOffset != -1) {
                         map[lastStatementOffset + 1] = MARK;
                     }
                     // The target of a conditional or an unconditional goto/jump instruction is a leader
-                    branchOffset = offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    branchOffset = offset + (short)((code[++offset] & 255) << 8 | code[++offset] & 255);
                     map[branchOffset] = MARK;
                     types[offset] = 'c';
                     branchOffsets[offset] = branchOffset;
@@ -200,15 +320,15 @@ public class ControlFlowGraphMaker {
                     }
                     lastStatementOffset = offset;
                     break;
-                case 170: // TABLESWITCH
+                case TABLESWITCH:
                     // Skip padding
                     int i = offset + 4 & 0xFFFC;
-                    int defaultOffset = offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255));
+                    int defaultOffset = offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255);
 
                     map[defaultOffset] = MARK;
 
-                    int low = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
-                    int high = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
+                    int low = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
+                    int high = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
                     int[] values = new int[high - low + 2];
                     int[] offsets = new int[high - low + 2];
 
@@ -216,7 +336,7 @@ public class ControlFlowGraphMaker {
 
                     for (int j=1, len=high-low+2; j<len; j++) {
                         values[j] = low + j - 1;
-                        branchOffset = offsets[j] = offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255));
+                        branchOffset = offsets[j] = offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255);
                         map[branchOffset] = MARK;
                     }
 
@@ -226,14 +346,14 @@ public class ControlFlowGraphMaker {
                     switchOffsets[offset] = offsets;
                     lastStatementOffset = offset;
                     break;
-                case 171: // LOOKUPSWITCH
+                case LOOKUPSWITCH:
                     // Skip padding
                     i = offset + 4 & 0xFFFC;
-                    defaultOffset = offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255));
+                    defaultOffset = offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255);
 
                     map[defaultOffset] = MARK;
 
-                    int npairs = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
+                    int npairs = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
 
                     values = new int[npairs + 1];
                     offsets = new int[npairs + 1];
@@ -241,8 +361,8 @@ public class ControlFlowGraphMaker {
                     offsets[0] = defaultOffset;
 
                     for (int j=1; j<=npairs; j++) {
-                        values[j] = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
-                        branchOffset = offsets[j] = offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255));
+                        values[j] = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
+                        branchOffset = offsets[j] = offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255);
                         map[branchOffset] = MARK;
                     }
 
@@ -252,14 +372,14 @@ public class ControlFlowGraphMaker {
                     switchOffsets[offset] = offsets;
                     lastStatementOffset = offset;
                     break;
-                case 172: case 173: case 174: case 175: case 176: // IRETURN, LRETURN, FRETURN, DRETURN, ARETURN
+                case IRETURN, LRETURN, FRETURN, DRETURN, ARETURN:
                     types[offset] = 'v';
                     if (offset + 1 < length) {
                         map[offset + 1] = MARK;
                     }
                     lastStatementOffset = offset;
                     break;
-                case 177: // RETURN
+                case Const.RETURN:
                     if (lastStatementOffset != -1) {
                         map[lastStatementOffset + 1] = MARK;
                     }
@@ -269,26 +389,26 @@ public class ControlFlowGraphMaker {
                     }
                     lastStatementOffset = offset;
                     break;
-                case 191: // ATHROW
+                case ATHROW:
                     types[offset] = 't';
                     if (offset + 1 < length) {
                         map[offset + 1] = MARK;
                     }
                     lastStatementOffset = offset;
                     break;
-                case 196: // WIDE
+                case WIDE:
                     offset++;
                     opcode = code[offset] & 255;
 
                     switch (opcode) {
-                        case 132: // IINC
+                        case IINC:
                             offset += 4;
-                            if (lastStatementOffset+6 == offset && !checkILOADForIINC(code, offset, ((code[offset-3] & 255) << 8) | (code[offset-2] & 255))) {
+                            if (lastStatementOffset+6 == offset && !checkILOADForIINC(code, offset, (code[offset-3] & 255) << 8 | code[offset-2] & 255)) {
                                 // Last instruction is a 'statement' & the next instruction is not a matching ILOAD -> IINC as a statement
                                 lastStatementOffset = offset;
                             }
                             break;
-                        case 169: // RET
+                        case RET:
                             offset += 2;
                             // The instruction that immediately follows a conditional or an unconditional goto/jump instruction is a leader
                             types[offset] = 'R';
@@ -297,7 +417,7 @@ public class ControlFlowGraphMaker {
                             }
                             lastStatementOffset = offset;
                             break;
-                        case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
+                        case ISTORE, LSTORE, FSTORE, DSTORE, ASTORE:
                             lastStatementOffset = offset+2;
                             // intended fall through
                         default:
@@ -305,13 +425,13 @@ public class ControlFlowGraphMaker {
                             break;
                     }
                     break;
-                case 197: // MULTIANEWARRAY
+                case MULTIANEWARRAY:
                     offset += 3;
                     break;
-                case 200: // GOTO_W
-                    type = (lastStatementOffset+1 == offset) ? 'g' : 'G';
+                case GOTO_W:
+                    type = lastStatementOffset+1 == offset ? 'g' : 'G';
 
-                    branchOffset = offset + (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    branchOffset = offset + ((code[++offset] & 255) << 24 | (code[++offset] & 255) << 16 | (code[++offset] & 255) << 8 | code[++offset] & 255);
                     map[branchOffset] = MARK;
                     types[offset] = type;
                     branchOffsets[offset] = branchOffset;
@@ -321,12 +441,12 @@ public class ControlFlowGraphMaker {
                     }
                     lastStatementOffset = offset;
                     break;
-                case 201: // JSR_W
+                case JSR_W:
                     if (lastStatementOffset != -1) {
                         map[lastStatementOffset + 1] = MARK;
                     }
                     // The target of a conditional or an unconditional goto/jump instruction is a leader
-                    branchOffset = offset + (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                    branchOffset = offset + ((code[++offset] & 255) << 24 | (code[++offset] & 255) << 16 | (code[++offset] & 255) << 8 | code[++offset] & 255);
                     map[branchOffset] = MARK;
                     types[offset] = 'j';
                     branchOffsets[offset] = branchOffset;
@@ -342,8 +462,8 @@ public class ControlFlowGraphMaker {
         CodeException[] codeExceptions = attributeCode.getExceptionTable();
         if (codeExceptions != null) {
             for (CodeException codeException : codeExceptions) {
-                map[codeException.getStartPc()] = MARK;
-                map[codeException.getHandlerPc()] = MARK;
+                map[codeException.startPc()] = MARK;
+                map[codeException.handlerPc()] = MARK;
             }
         }
         // --- Create line numbers --- //
@@ -351,7 +471,7 @@ public class ControlFlowGraphMaker {
         AttributeLineNumberTable attributeLineNumberTable = attributeCode.getAttribute("LineNumberTable");
         if (attributeLineNumberTable != null) {
             // Parse line numbers
-            LineNumber[] lineNumberTable = attributeLineNumberTable.getLineNumberTable();
+            LineNumber[] lineNumberTable = attributeLineNumberTable.lineNumberTable();
 
             int[] offsetToLineNumbers = new int[length];
             int offset = 0;
@@ -361,7 +481,7 @@ public class ControlFlowGraphMaker {
             int toIndex;
             for (int i=1, len=lineNumberTable.length; i<len; i++) {
                 lineNumberEntry = lineNumberTable[i];
-                toIndex = lineNumberEntry.getStartPc();
+                toIndex = lineNumberEntry.getStartPC();
 
                 while (offset < toIndex) {
                     offsetToLineNumbers[offset] = lineNumber;
@@ -485,7 +605,7 @@ public class ControlFlowGraphMaker {
         }
         // --- Create try-catch-finally basic blocks --- //
         if (codeExceptions != null) {
-            Map<CodeException, BasicBlock> cache = new HashMap<>();
+            Map<String, BasicBlock> cache = new HashMap<>();
             ConstantPool constantPool = method.getConstants();
             // Reuse arrays
             int[] handlePcToStartPc = branchOffsets;
@@ -496,15 +616,16 @@ public class ControlFlowGraphMaker {
             int startPc;
             int handlerPc;
             for (CodeException codeException : codeExceptions) {
-                startPc = codeException.getStartPc();
-                handlerPc = codeException.getHandlerPc();
+                startPc = codeException.startPc();
+                handlerPc = codeException.handlerPc();
 
                 if (startPc != handlerPc && (handlePcMarks[handlerPc] != 'T' || startPc <= map[handlePcToStartPc[handlerPc]].getFromOffset())) {
-                    int catchType = codeException.getCatchType();
-                    BasicBlock tcf = cache.get(codeException);
+                    int catchType = codeException.catchType();
+                    String key = makeShortKey(codeException);
+                    BasicBlock tcf = cache.get(key);
 
                     if (tcf == null) {
-                        int endPc = codeException.getEndPc();
+                        int endPc = codeException.endPc();
                         // Check 'endPc'
                         BasicBlock start = map[startPc];
 
@@ -534,7 +655,7 @@ public class ControlFlowGraphMaker {
                         map[startPc] = tcf;
 
                         // Store to objectTypeCache
-                        cache.put(codeException, tcf);
+                        cache.put(key, tcf);
                     }
 
                     String internalThrowableName = catchType == 0 ? null : constantPool.getConstantTypeName(catchType);
@@ -584,7 +705,7 @@ public class ControlFlowGraphMaker {
         if (++offset < code.length) {
             int nextOpcode = code[offset] & 255;
 
-            if (nextOpcode == 21) { // ILOAD
+            if (nextOpcode == ILOAD) {
                 if (index == (code[offset+1] & 255)) {
                     return true;
                 }
@@ -595,14 +716,23 @@ public class ControlFlowGraphMaker {
 
         return false;
     }
-
+    
+    public static final String makeShortKey(CodeException ce) {
+        return ce.startPc() + "-" + ce.endPc();
+    }
+    
     /** 1) Smaller 'startPc' first 2) Smaller 'endPc' first. */
-    public static class CodeExceptionComparator implements Comparator<CodeException> {
+    public static class CodeExceptionComparator implements java.io.Serializable, Comparator<CodeException> {
+        /**
+         * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+         */
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int compare(CodeException ce1, CodeException ce2) {
-            int comp = ce1.getStartPc() - ce2.getStartPc();
+            int comp = ce1.startPc() - ce2.startPc();
             if (comp == 0) {
-                comp = ce1.getEndPc() - ce2.getEndPc();
+                comp = ce1.endPc() - ce2.endPc();
             }
             return comp;
         }

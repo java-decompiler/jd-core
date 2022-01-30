@@ -23,24 +23,24 @@ public class StaticAccessFromInstance {
             objects = values.get(name);
             System.out.println("before try");
             try {
-	            if (objects == null || objects.isNull(objects.toString()) || this.p.ICON_PROPERTY.isEmpty() || this.f.separator.isEmpty()) {
-	            	System.err.println("Error !!");
-	            }
+                if (objects == null || objects.isNull(objects.toString()) || this.p.ICON_PROPERTY.isEmpty() || this.f.separator.isEmpty()) {
+                    System.err.println("Error !!");
+                }
             } catch (Exception e) {
-				e.printStackTrace();
-			}
+                e.printStackTrace();
+            }
             System.out.println("after try");
        } else {
             objects = values.get(value);
             System.out.println("before try");
             try {
-	            if (objects == null || objects.isNull(objects.toString()) || this.SEP.isEmpty()) {
-	                System.err.println("Error !!!");
-	            }
-	        } catch (Exception e) {
-				e.printStackTrace();
-			}
-	        System.out.println("after try");
+                if (objects == null || objects.isNull(objects.toString()) || this.SEP.isEmpty()) {
+                    System.err.println("Error !!!");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("after try");
        }
         return objects;
     }

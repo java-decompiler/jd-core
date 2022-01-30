@@ -8,8 +8,6 @@ package org.jd.core.v1.model.javasyntax.reference;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-
 public class ElementValues extends DefaultList<BaseElementValue> implements BaseElementValue {
     private static final long serialVersionUID = 1L;
 
@@ -18,13 +16,6 @@ public class ElementValues extends DefaultList<BaseElementValue> implements Base
 
     public ElementValues(int capacity) {
         super(capacity);
-    }
-
-    public ElementValues(Collection<BaseElementValue> collection) {
-        super(collection);
-        if (collection.size() <= 1) {
-            throw new IllegalArgumentException("Use 'BaseElementValue' or sub class instead");
-        }
     }
 
     @Override

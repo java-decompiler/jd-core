@@ -14,8 +14,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariableReference;
 
 public class ClassFileLocalVariableReferenceExpression extends LocalVariableReferenceExpression implements LocalVariableReference {
-    protected int offset;
-    protected AbstractLocalVariable localVariable;
+    private final int offset;
+    private AbstractLocalVariable localVariable;
 
     public ClassFileLocalVariableReferenceExpression(int lineNumber, int offset, AbstractLocalVariable localVariable) {
         super(lineNumber, null, null);
@@ -52,9 +52,9 @@ public class ClassFileLocalVariableReferenceExpression extends LocalVariableRefe
     public String toString() {
         return "ClassFileLocalVariableReferenceExpression{type=" + localVariable.getType() + ", name=" + localVariable.getName() + "}";
     }
-    
+
     @Override
     public Expression copyTo(int lineNumber) {
-    	return new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
+        return new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
     }
 }

@@ -11,7 +11,7 @@ import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 
 public class ClassFileAnnotationDeclaration extends AnnotationDeclaration implements ClassFileTypeDeclaration {
-    protected int firstLineNumber;
+    private final int firstLineNumber;
 
     public ClassFileAnnotationDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, ClassFileBodyDeclaration bodyDeclaration) {
         super(annotationReferences, flags, internalName, name, null, bodyDeclaration);

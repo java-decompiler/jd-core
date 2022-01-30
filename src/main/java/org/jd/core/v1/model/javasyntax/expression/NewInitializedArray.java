@@ -11,12 +11,7 @@ import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class NewInitializedArray extends AbstractLineNumberTypeExpression {
-    protected ArrayVariableInitializer arrayInitializer;
-
-    public NewInitializedArray(Type type, ArrayVariableInitializer arrayInitializer) {
-        super(type);
-        this.arrayInitializer = arrayInitializer;
-    }
+    private final ArrayVariableInitializer arrayInitializer;
 
     public NewInitializedArray(int lineNumber, Type type, ArrayVariableInitializer arrayInitializer) {
         super(lineNumber, type);
@@ -45,8 +40,8 @@ public class NewInitializedArray extends AbstractLineNumberTypeExpression {
         return "NewInitializedArray{new " + type + " [" + arrayInitializer + "]}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new NewInitializedArray(lineNumber, type, arrayInitializer);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new NewInitializedArray(lineNumber, type, arrayInitializer);
+    }
 }

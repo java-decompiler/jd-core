@@ -13,7 +13,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariableReference;
 
 public class ClassFileLocalVariableDeclarator extends LocalVariableDeclarator implements LocalVariableReference {
-    protected AbstractLocalVariable localVariable;
+    private AbstractLocalVariable localVariable;
 
     public ClassFileLocalVariableDeclarator(AbstractLocalVariable localVariable) {
         super(null);

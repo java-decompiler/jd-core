@@ -4,16 +4,16 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 public class Loop {
-    protected BasicBlock start;
-    protected Set<BasicBlock> members;
-    protected BasicBlock end;
+    private BasicBlock start;
+    private final Set<BasicBlock> members;
+    private BasicBlock end;
 
     public Loop(BasicBlock start, Set<BasicBlock> members, BasicBlock end) {
         this.start = start;
@@ -33,6 +33,10 @@ public class Loop {
         return members;
     }
 
+    public int getMemberCount() {
+        return members.size();
+    }
+
     public BasicBlock getEnd() {
         return end;
     }
@@ -41,37 +45,48 @@ public class Loop {
         this.end = end;
     }
 
+    public void updateEnclosingLoop() {
+        members.forEach(this::updateEnclosingLoop);
+    }
+
+    private void updateEnclosingLoop(BasicBlock member) {
+        member.setEnclosingLoop(this);
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Loop loop = (Loop) o;
 
-        if (!start.equals(loop.start)) return false;
-        if (!members.equals(loop.members)) return false;
-        return !(end != null ? !end.equals(loop.end) : loop.end != null);
-
+        return Objects.equals(start, loop.start) 
+            && Objects.equals(members, loop.members)
+            && Objects.equals(end, loop.end);
     }
 
     @Override
     public int hashCode() {
-        int result = 258190310 + start.hashCode();
+        int result = 258_190_310 + start.hashCode();
         result = 31 * result + members.hashCode();
-        result = 31 * result + (end != null ? end.hashCode() : 0);
-        return result;
+        return 31 * result + Objects.hash(end);
     }
 
     @Override
     public String toString() {
-        String str = "Loop{start=" + start.getIndex() + ", members=[";
+        StringBuilder str = new StringBuilder("Loop{start=").append(start.getIndex()).append(", members=[");
 
-        if ((members != null) && (!members.isEmpty())) {
+        if (members != null && !members.isEmpty()) {
             Iterator<BasicBlock> iterator = members.iterator();
-            str += iterator.next().getIndex();
+            str.append(iterator.next().getIndex());
 
-            while (iterator.hasNext())
-                str += ", " + iterator.next().getIndex();
+            while (iterator.hasNext()) {
+                str.append(", ").append(iterator.next().getIndex());
+            }
         }
 
         return str + "], end=" + (end ==null ? "" : end.getIndex()) + "}";

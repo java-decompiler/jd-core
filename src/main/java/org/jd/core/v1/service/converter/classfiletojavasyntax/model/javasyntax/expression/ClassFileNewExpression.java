@@ -14,16 +14,11 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
 public class ClassFileNewExpression extends NewExpression {
-    protected BaseType parameterTypes;
-    protected boolean bound;
+    private BaseType parameterTypes;
+    private boolean bound;
 
     public ClassFileNewExpression(int lineNumber, ObjectType type) {
         super(lineNumber, type, null);
-        this.bound = false;
-    }
-
-    public ClassFileNewExpression(int lineNumber, ObjectType type, BodyDeclaration bodyDeclaration) {
-        super(lineNumber, type, null, bodyDeclaration);
         this.bound = false;
     }
 

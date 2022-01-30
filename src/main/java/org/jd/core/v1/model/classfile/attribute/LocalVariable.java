@@ -7,40 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class LocalVariable {
-    protected int startPc;
-    protected int length;
-    protected String name;
-    protected String descriptor;
-    protected int index;
-
-    public LocalVariable(int startPc, int length, String name, String descriptor, int index) {
-        this.startPc = startPc;
-        this.length = length;
-        this.name = name;
-        this.descriptor = descriptor;
-        this.index = index;
-    }
-
-    public int getStartPc() {
-        return startPc;
-    }
-
-    public int getLength() {
-        return length;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescriptor() {
-        return descriptor;
-    }
-
-    public int getIndex() {
-        return index;
-    }
+public record LocalVariable(int startPc, int length, String name, String descriptor, int index) {
 
     @Override
     public String toString() {

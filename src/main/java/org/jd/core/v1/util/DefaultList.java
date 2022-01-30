@@ -41,7 +41,7 @@ public class DefaultList<E> extends ArrayList<E> {
     }
 
     public DefaultList(E[] elements) {
-        if ((elements != null) && (elements.length > 0)) {
+        if (elements != null && elements.length > 0) {
             ensureCapacity(elements.length);
 
             for (E e : elements) {

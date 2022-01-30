@@ -9,7 +9,7 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
@@ -55,8 +55,8 @@ public class JavaAnonymousClassTest extends AbstractJdTest {
             // Recompile decompiled source code and check errors
             assertTrue(CompilerUtil.compile(
                     "1.5",
-                    new JavaSourceFileObject(internalClassName, source),
-                    new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
+                    new InMemoryJavaSourceFileObject(internalClassName, source),
+                    new InMemoryJavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
             ));
         }
     }
@@ -99,8 +99,8 @@ public class JavaAnonymousClassTest extends AbstractJdTest {
             // Recompile decompiled source code and check errors
             assertTrue(CompilerUtil.compile(
                     "1.7",
-                    new JavaSourceFileObject(internalClassName, source),
-                    new JavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
+                    new InMemoryJavaSourceFileObject(internalClassName, source),
+                    new InMemoryJavaSourceFileObject("org/jd/core/test/annotation/Name", "package org.jd.core.test.annotation; public @interface Name {String value();}")
                 ));
         }
     }

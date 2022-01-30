@@ -7,8 +7,19 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
+import org.apache.bcel.Const;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
@@ -26,14 +37,14 @@ import java.util.List;
 import java.util.Map;
 
 public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
-    protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
-    protected SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
-    protected String internalTypeName;
-    protected Map<String, FieldDeclarator> fields = new HashMap<>();
-    protected List<ClassFileConstructorOrMethodDeclaration> methods;
-    protected Boolean deleteStaticDeclaration;
+    private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    private final SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
+    private String internalTypeName;
+    private final Map<String, FieldDeclarator> fields = new HashMap<>();
+    private List<ClassFileConstructorOrMethodDeclaration> methods;
+    private Boolean deleteStaticDeclaration;
 
-    public void setInternalTypeName(String internalTypeName) {
+    void setInternalTypeName(String internalTypeName) {
         this.internalTypeName = internalTypeName;
     }
 
@@ -103,9 +114,6 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(MethodDeclaration declaration) {}
 
     @Override
-    public void visit(InstanceInitializerDeclaration declaration) {}
-
-    @Override
     public void visit(StaticInitializerDeclaration declaration) {
         ClassFileStaticInitializerDeclaration sid = (ClassFileStaticInitializerDeclaration) declaration;
 
@@ -116,7 +124,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                 DefaultList<Statement> list = statements.getList();
 
                 // Multiple statements
-                if ((!list.isEmpty()) && isAssertionsDisabledStatement(list.getFirst())) {
+                if (!list.isEmpty() && isAssertionsDisabledStatement(list.getFirst())) {
                     // Remove assert initialization statement
                     list.removeFirst();
                 }
@@ -152,17 +160,17 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                     // Remove assert initialization statement
                     statements = null;
                 }
-                if ((statements != null) && setStaticFieldInitializer(statements.getFirst())) {
+                if (statements != null && setStaticFieldInitializer(statements.getFirst())) {
                     // Remove field initialization statement
                     statements = null;
                 }
             }
 
-            if ((statements == null) || (statements.size() == 0)) {
+            if (statements == null || statements.size() == 0) {
                 deleteStaticDeclaration = Boolean.TRUE;
             } else {
                 int firstLineNumber = getFirstLineNumber(statements);
-                sid.setFirstLineNumber((firstLineNumber==-1) ? 0 : firstLineNumber);
+                sid.setFirstLineNumber(firstLineNumber==-1 ? 0 : firstLineNumber);
                 deleteStaticDeclaration = Boolean.FALSE;
             }
         }
@@ -174,7 +182,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
         if (expression.getLeftExpression().isFieldReferenceExpression()) {
             FieldReferenceExpression fre = (FieldReferenceExpression) expression.getLeftExpression();
 
-            if ((fre.getType() == PrimitiveType.TYPE_BOOLEAN) && fre.getInternalTypeName().equals(internalTypeName) && fre.getName().equals("$assertionsDisabled")) {
+            if (fre.getType() == PrimitiveType.TYPE_BOOLEAN && fre.getInternalTypeName().equals(internalTypeName) && "$assertionsDisabled".equals(fre.getName())) {
                 return true;
             }
         }
@@ -191,10 +199,10 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
             if (fre.getInternalTypeName().equals(internalTypeName)) {
                 FieldDeclarator fdr = fields.get(fre.getName());
 
-                if ((fdr != null) && (fdr.getVariableInitializer() == null)) {
+                if (fdr != null && fdr.getVariableInitializer() == null) {
                     FieldDeclaration fdn = fdr.getFieldDeclaration();
 
-                    if (((fdn.getFlags() & Declaration.FLAG_STATIC) != 0) && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
+                    if ((fdn.getFlags() & Const.ACC_STATIC) != 0 && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
                         expression = expression.getRightExpression();
 
                         searchLocalVariableReferenceVisitor.init(-1);

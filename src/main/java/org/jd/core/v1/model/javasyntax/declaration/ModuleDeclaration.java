@@ -10,12 +10,12 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import java.util.List;
 
 public class ModuleDeclaration extends TypeDeclaration {
-    protected String            version;
-    protected List<ModuleInfo>  requires;
-    protected List<PackageInfo> exports;
-    protected List<PackageInfo> opens;
-    protected List<String>      uses;
-    protected List<ServiceInfo> provides;
+    private final String            version;
+    private final List<ModuleInfo>  requires;
+    private final List<PackageInfo> exports;
+    private final List<PackageInfo> opens;
+    private final List<String>      uses;
+    private final List<ServiceInfo> provides;
 
     public ModuleDeclaration(int flags, String internalName, String name, String version, List<ModuleInfo> requires, List<PackageInfo> exports, List<PackageInfo> opens, List<String> uses, List<ServiceInfo> provides) {
         super(null, flags, internalName, name, null);
@@ -44,20 +44,7 @@ public class ModuleDeclaration extends TypeDeclaration {
         return "ModuleDeclaration{" + internalTypeName + "}";
     }
 
-    public static class ModuleInfo {
-        protected String name;
-        protected int flags;
-        protected String version;
-
-        public ModuleInfo(String name, int flags, String version) {
-            this.name = name;
-            this.flags = flags;
-            this.version = version;
-        }
-
-        public String getName() { return name; }
-        public int getFlags() { return flags; }
-        public String getVersion() { return version; }
+    public static record ModuleInfo(String name, int flags, String version) {
 
         @Override
         public String toString() {
@@ -74,20 +61,7 @@ public class ModuleDeclaration extends TypeDeclaration {
         }
     }
 
-    public static class PackageInfo {
-        protected String       internalName;
-        protected int flags;
-        protected List<String> moduleInfoNames;
-
-        public PackageInfo(String internalName, int flags, List<String> moduleInfoNames) {
-            this.internalName = internalName;
-            this.flags = flags;
-            this.moduleInfoNames = moduleInfoNames;
-        }
-
-        public String getInternalName() { return internalName; }
-        public int getFlags() { return flags; }
-        public List<String> getModuleInfoNames() { return moduleInfoNames; }
+    public static record PackageInfo(String internalName, int flags, List<String> moduleInfoNames) {
 
         @Override
         public String toString() {
@@ -104,17 +78,7 @@ public class ModuleDeclaration extends TypeDeclaration {
         }
     }
 
-    public static class ServiceInfo {
-        protected String       interfaceTypeName;
-        protected List<String> implementationTypeNames;
-
-        public ServiceInfo(String interfaceTypeName, List<String> implementationTypeNames) {
-            this.interfaceTypeName = interfaceTypeName;
-            this.implementationTypeNames = implementationTypeNames;
-        }
-
-        public String getInterfaceTypeName() { return interfaceTypeName; }
-        public List<String> getImplementationTypeNames() { return implementationTypeNames; }
+    public static record ServiceInfo(String interfaceTypeName, List<String> implementationTypeNames) {
 
         @Override
         public String toString() {

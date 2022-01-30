@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class AttributeInnerClasses implements Attribute {
-    protected InnerClass[] classes;
+    private final InnerClass[] classes;
 
     public AttributeInnerClasses(InnerClass[] classes) {
         this.classes = classes;

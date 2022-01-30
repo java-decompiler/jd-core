@@ -16,19 +16,19 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class AbstractLocalVariable {
-    protected Frame frame;
+    private Frame frame;
     protected AbstractLocalVariable next;
     protected boolean declared;
-    protected int index;
+    protected final int index;
     protected int fromOffset;
-    protected int toOffset;
+    private int toOffset;
     protected String name;
-    protected DefaultList<LocalVariableReference> references = new DefaultList<>();
-    protected Set<AbstractLocalVariable> variablesOnRight = null;
-    protected Set<AbstractLocalVariable> variablesOnLeft = null;
+    private final DefaultList<LocalVariableReference> references = new DefaultList<>();
+    private Set<AbstractLocalVariable> variablesOnRight;
+    private Set<AbstractLocalVariable> variablesOnLeft;
 
     protected AbstractLocalVariable(int index, int offset, String name) {
-        this(index, offset, name, (offset == 0));
+        this(index, offset, name, offset == 0);
     }
 
     protected AbstractLocalVariable(int index, int offset, String name, boolean declared) {
@@ -40,10 +40,10 @@ public abstract class AbstractLocalVariable {
     }
 
     public Frame getFrame() { return frame; }
-    public void setFrame(Frame frame) { this.frame = frame; }
+    void setFrame(Frame frame) { this.frame = frame; }
 
     public AbstractLocalVariable getNext() { return next; }
-    public void setNext(AbstractLocalVariable next) { this.next = next; }
+    void setNext(AbstractLocalVariable next) { this.next = next; }
 
     public boolean isDeclared() { return declared; }
     public void setDeclared(boolean declared) { this.declared = declared; }
@@ -52,7 +52,7 @@ public abstract class AbstractLocalVariable {
 
     public int getFromOffset() { return fromOffset; }
 
-    public void setFromOffset(int fromOffset) {
+    void setFromOffset(int fromOffset) {
         if (fromOffset > toOffset) {
             throw new IllegalArgumentException("fromOffset > toOffset");
         }
@@ -62,13 +62,15 @@ public abstract class AbstractLocalVariable {
     public int getToOffset() { return toOffset; }
 
     public void setFromToOffset(int offset) {
-        if (this.fromOffset > offset)
+        if (this.fromOffset > offset) {
             this.fromOffset = offset;
-        if (this.toOffset < offset)
+        }
+        if (this.toOffset < offset) {
             this.toOffset = offset;
+        }
     }
 
-    public void setToOffset(int offset) {
+    void setToOffset(int offset) {
         this.toOffset = offset;
     }
 

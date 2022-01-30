@@ -12,9 +12,38 @@ import org.jd.core.v1.model.javafragment.StartSingleStatementBlockFragment;
 import org.jd.core.v1.model.javafragment.StartStatementsBlockFragment;
 import org.jd.core.v1.model.javafragment.TokensFragment;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfElseStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfStatement;
+import org.jd.core.v1.model.javasyntax.statement.LabelStatement;
+import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.SynchronizedStatement;
+import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement;
+import org.jd.core.v1.model.javasyntax.statement.TypeDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.token.EndBlockToken;
+import org.jd.core.v1.model.token.EndMarkerToken;
+import org.jd.core.v1.model.token.KeywordToken;
+import org.jd.core.v1.model.token.NewLineToken;
+import org.jd.core.v1.model.token.StartBlockToken;
+import org.jd.core.v1.model.token.StartMarkerToken;
+import org.jd.core.v1.model.token.TextToken;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 
 import java.util.Iterator;
@@ -28,7 +57,6 @@ public class StatementVisitor extends ExpressionVisitor {
     public static final KeywordToken CATCH = new KeywordToken("catch");
     public static final KeywordToken CONTINUE = new KeywordToken("continue");
     public static final KeywordToken DEFAULT = new KeywordToken("default");
-    public static final KeywordToken DO = new KeywordToken("do");
     public static final KeywordToken ELSE = new KeywordToken("else");
     public static final KeywordToken FINAL = new KeywordToken("final");
     public static final KeywordToken FINALLY = new KeywordToken("finally");
@@ -81,11 +109,6 @@ public class StatementVisitor extends ExpressionVisitor {
 
         tokens.add(TextToken.SEMICOLON);
         fragments.addTokensFragment(tokens);
-    }
-
-    @Override
-    public void visit(ByteCodeStatement statement) {
-        visitComment(statement.getText());
     }
 
     @Override
@@ -348,15 +371,15 @@ public class StatementVisitor extends ExpressionVisitor {
     @Override
     public void visit(LabelStatement statement) {
         tokens = new Tokens();
-        tokens.add(newTextToken(statement.getLabel()));
+        tokens.add(newTextToken(statement.label()));
         tokens.add(TextToken.COLON);
 
-        if (statement.getStatement() == null) {
+        if (statement.statement() == null) {
             fragments.addTokensFragment(tokens);
         } else {
             tokens.add(TextToken.SPACE);
             fragments.addTokensFragment(tokens);
-            statement.getStatement().accept(this);
+            statement.statement().accept(this);
         }
     }
 
@@ -654,7 +677,7 @@ public class StatementVisitor extends ExpressionVisitor {
 
     @Override
     public void visit(TypeDeclarationStatement statement) {
-        statement.getTypeDeclaration().accept(this);
+        statement.typeDeclaration().accept(this);
         fragments.add(TokensFragment.SEMICOLON);
     }
 

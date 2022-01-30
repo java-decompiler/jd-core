@@ -12,8 +12,8 @@ import org.jd.core.v1.model.javasyntax.expression.Expression;
 import java.util.Objects;
 
 public class ReturnExpressionStatement implements Statement {
-    protected int lineNumber;
-    protected Expression expression;
+    private int lineNumber;
+    private Expression expression;
 
     public ReturnExpressionStatement(Expression expression) {
         this(expression.getLineNumber(), expression);

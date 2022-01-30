@@ -9,8 +9,6 @@ package org.jd.core.v1.model.javasyntax.reference;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-
 public class AnnotationReferences<T extends AnnotationReference> extends DefaultList<T> implements BaseAnnotationReference {
 
     private static final long serialVersionUID = 1L;
@@ -20,10 +18,6 @@ public class AnnotationReferences<T extends AnnotationReference> extends Default
 
     public AnnotationReferences(int capacity) {
         super(capacity);
-    }
-
-    public AnnotationReferences(Collection<T> collection) {
-        super(collection);
     }
 
     @Override

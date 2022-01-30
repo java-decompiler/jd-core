@@ -7,13 +7,21 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
+import org.apache.bcel.classfile.ConstantNameAndType;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
-import org.jd.core.v1.model.classfile.constant.ConstantNameAndType;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.TypeArguments;
@@ -23,9 +31,13 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
+import static org.apache.bcel.Const.ALOAD_0;
+import static org.apache.bcel.Const.ALOAD_1;
+import static org.apache.bcel.Const.PUTFIELD;
+
 public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
-    protected TypeMaker typeMaker;
-    protected SearchFieldVisitor searchFieldVisitor = new SearchFieldVisitor();
+    private final TypeMaker typeMaker;
+    private final SearchFieldVisitor searchFieldVisitor = new SearchFieldVisitor();
 
     public UpdateOuterFieldTypeVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -47,37 +59,37 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
         if (!declaration.isStatic()) {
             ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration) declaration;
 
-            if ((cfcd.getClassFile().getOuterClassFile() != null) && !declaration.isStatic()) {
+            if (cfcd.getClassFile().getOuterClassFile() != null && !declaration.isStatic()) {
                 Method method = cfcd.getMethod();
                 byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
                 int offset = 0;
                 int opcode = code[offset] & 255;
 
-                if (opcode != 42) { // ALOAD_0
+                if (opcode != ALOAD_0) {
                     return;
                 }
 
                 opcode = code[++offset] & 255;
 
-                if (opcode != 43) { // ALOAD_1
+                if (opcode != ALOAD_1) {
                     return;
                 }
 
                 opcode = code[++offset] & 255;
 
-                if (opcode != 181) { // PUTFIELD
+                if (opcode != PUTFIELD) {
                     return;
                 }
 
-                int index = ((code[++offset] & 255) << 8) | (code[++offset] & 255);
+                int index = (code[++offset] & 255) << 8 | code[++offset] & 255;
                 ConstantPool constants = method.getConstants();
                 ConstantMemberRef constantMemberRef = constants.getConstant(index);
                 String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                 ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
                 TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(descriptor.substring(1, descriptor.length() - 1));
 
-                if ((typeTypes != null) && (typeTypes.typeParameters != null)) {
+                if (typeTypes != null && typeTypes.getTypeParameters() != null) {
                     String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
                     searchFieldVisitor.init(name);
 
@@ -86,18 +98,18 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
                         if (searchFieldVisitor.found()) {
                             BaseTypeArgument typeArguments;
 
-                            if (typeTypes.typeParameters.isList()) {
-                                TypeArguments tas = new TypeArguments(typeTypes.typeParameters.size());
-                                for (TypeParameter typeParameter : typeTypes.typeParameters) {
+                            if (typeTypes.getTypeParameters().isList()) {
+                                TypeArguments tas = new TypeArguments(typeTypes.getTypeParameters().size());
+                                for (TypeParameter typeParameter : typeTypes.getTypeParameters()) {
                                     tas.add(new GenericType(typeParameter.getIdentifier()));
                                 }
                                 typeArguments = tas;
                             } else {
-                                typeArguments = new GenericType(typeTypes.typeParameters.getFirst().getIdentifier());
+                                typeArguments = new GenericType(typeTypes.getTypeParameters().getFirst().getIdentifier());
                             }
 
                             // Update generic type of outer field reference
-                            typeMaker.setFieldType(typeName, name, typeTypes.thisType.createType(typeArguments));
+                            typeMaker.setFieldType(typeName, name, typeTypes.getThisType().createType(typeArguments));
                             break;
                         }
                     }
@@ -127,8 +139,8 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(EnumDeclaration declaration) {}
 
     protected static class SearchFieldVisitor extends AbstractJavaSyntaxVisitor {
-        protected String name;
-        protected boolean found;
+        private String name;
+        private boolean found;
 
         public void init(String name) {
             this.name = name;

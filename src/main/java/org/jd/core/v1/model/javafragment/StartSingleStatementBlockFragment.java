@@ -9,13 +9,13 @@ package org.jd.core.v1.model.javafragment;
 import org.jd.core.v1.model.fragment.StartFlexibleBlockFragment;
 
 public class StartSingleStatementBlockFragment extends StartFlexibleBlockFragment implements JavaFragment {
-    protected EndSingleStatementBlockFragment end;
+    private EndSingleStatementBlockFragment end;
 
     public StartSingleStatementBlockFragment(int minimalLineCount, int lineCount, int maximalLineCount, int weight, String label) {
         super(minimalLineCount, lineCount, maximalLineCount, weight, label);
     }
 
-    public void setLineCount(int lineCount) {
+    void setLineCount(int lineCount) {
         this.lineCount = lineCount;
     }
 
@@ -23,7 +23,7 @@ public class StartSingleStatementBlockFragment extends StartFlexibleBlockFragmen
         return end;
     }
 
-    public void setEndSingleStatementBlockFragment(EndSingleStatementBlockFragment end) {
+    void setEndSingleStatementBlockFragment(EndSingleStatementBlockFragment end) {
         this.end = end;
     }
 

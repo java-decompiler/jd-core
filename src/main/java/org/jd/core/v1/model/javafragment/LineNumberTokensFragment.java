@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LineNumberTokensFragment extends FixedFragment implements JavaFragment {
-    protected List<Token> tokens;
+    private final List<Token> tokens;
 
     public LineNumberTokensFragment(Token... tokens) {
         this(Arrays.asList(tokens));
@@ -65,17 +65,12 @@ public class LineNumberTokensFragment extends FixedFragment implements JavaFragm
     }
 
     protected static class SearchLineNumberVisitor extends AbstractNopTokenVisitor {
-        public int lineNumber;
-        public int newLineCounter;
-
-        public void reset() {
-            this.lineNumber = Printer.UNKNOWN_LINE_NUMBER;
-            this.newLineCounter = 0;
-        }
+        private int lineNumber;
+        private int newLineCounter;
 
         @Override
         public void visit(LineNumberToken token) {
-            lineNumber = token.getLineNumber();
+            lineNumber = token.lineNumber();
         }
 
         @Override

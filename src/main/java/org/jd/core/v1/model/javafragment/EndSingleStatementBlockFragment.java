@@ -9,7 +9,7 @@ package org.jd.core.v1.model.javafragment;
 import org.jd.core.v1.model.fragment.EndFlexibleBlockFragment;
 
 public class EndSingleStatementBlockFragment extends EndFlexibleBlockFragment implements JavaFragment {
-    protected final StartSingleStatementBlockFragment start;
+    private final StartSingleStatementBlockFragment start;
 
     public EndSingleStatementBlockFragment(int minimalLineCount, int lineCount, int maximalLineCount, int weight, String label, StartSingleStatementBlockFragment start) {
         super(minimalLineCount, lineCount, maximalLineCount, weight, label);
@@ -17,7 +17,7 @@ public class EndSingleStatementBlockFragment extends EndFlexibleBlockFragment im
         start.setEndSingleStatementBlockFragment(this);
     }
 
-    public void setLineCount(int lineCount) {
+    void setLineCount(int lineCount) {
         this.lineCount = lineCount;
     }
 

@@ -9,7 +9,7 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
@@ -42,7 +42,7 @@ public class Java9InterfaceTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 40 */", "return ZonedDateTime.of(localDateTime, zoneId);")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.9", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.9", new InMemoryJavaSourceFileObject(internalClassName, source)));
         } catch (IllegalArgumentException e) {
             if (e.getMessage().contains("invalid source release: 1.9")) {
                 System.err.println("testJdk901InterfaceWithDefaultMethods() need a Java SDK 9+");

@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util;
 
-public class StringUtil {
+public final class StringUtil {
 
     private StringUtil() {
         super();
@@ -19,7 +19,7 @@ public class StringUtil {
         for (int i = 0; i < length; i++) {
             char c = s.charAt(i);
 
-            if ((c == '\\') || (c == '"') || (c < ' ')) {
+            if (c == '\\' || c == '"' || c < ' ') {
                 StringBuilder sb = new StringBuilder(length * 2);
 
                 sb.append(s.substring(0, i));

@@ -11,27 +11,18 @@ import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class FormalParameter implements BaseFormalParameter {
-    protected BaseAnnotationReference annotationReferences;
-    protected boolean fina1;
-    protected Type type;
-    protected boolean varargs;
-    protected String name;
+    protected final BaseAnnotationReference annotationReferences;
+    private boolean fina1;
+    private final Type type;
+    protected final boolean varargs;
+    private String name;
 
     public FormalParameter(Type type, String name) {
-        this.type = type;
-        this.name = name;
-    }
-
-    public FormalParameter(BaseAnnotationReference annotationReferences, Type type, String name) {
-        this.annotationReferences = annotationReferences;
-        this.type = type;
-        this.name = name;
+        this(type, false, name);
     }
 
     public FormalParameter(Type type, boolean varargs, String name) {
-        this.type = type;
-        this.varargs = varargs;
-        this.name = name;
+        this(null, type, varargs, name);
     }
 
     public FormalParameter(BaseAnnotationReference annotationReferences, Type type, boolean varargs, String name) {
@@ -76,16 +67,18 @@ public class FormalParameter implements BaseFormalParameter {
 
     @Override
     public String toString() {
-        String s = "FormalParameter{";
+        StringBuilder s = new StringBuilder("FormalParameter{");
 
-        if (annotationReferences != null)
-            s += annotationReferences + " ";
+        if (annotationReferences != null) {
+            s.append(annotationReferences).append(" ");
+        }
 
-        if (varargs)
-            s += type.createType(type.getDimension()-1) + "... ";
-        else
-            s += type + " ";
+        if (varargs) {
+            s.append(type.createType(type.getDimension()-1)).append("... ");
+        } else {
+            s.append(type).append(" ");
+        }
 
-        return s + name + "}";
+        return s.append(name).append("}").toString();
     }
 }

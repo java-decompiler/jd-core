@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
 public class DoubleConstantExpression extends AbstractLineNumberTypeExpression {
-    protected double value;
+    private final double value;
 
     public DoubleConstantExpression(double value) {
         super(PrimitiveType.TYPE_DOUBLE);
@@ -40,8 +40,8 @@ public class DoubleConstantExpression extends AbstractLineNumberTypeExpression {
         return "DoubleConstantExpression{" + value + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new DoubleConstantExpression(lineNumber, value);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new DoubleConstantExpression(lineNumber, value);
+    }
 }

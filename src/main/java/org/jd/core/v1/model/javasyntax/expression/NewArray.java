@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class NewArray extends AbstractLineNumberTypeExpression {
-    protected BaseExpression dimensionExpressionList;
+    private BaseExpression dimensionExpressionList;
 
     public NewArray(int lineNumber, Type type, BaseExpression dimensionExpressionList) {
         super(lineNumber, type);
@@ -44,8 +44,8 @@ public class NewArray extends AbstractLineNumberTypeExpression {
         return "NewArray{" + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new NewArray(lineNumber, type, dimensionExpressionList);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new NewArray(lineNumber, type, dimensionExpressionList);
+    }
 }

@@ -8,7 +8,7 @@
 package org.jd.core.v1;
 
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
@@ -22,14 +22,13 @@ public class JavaAutoboxingTest extends AbstractJdTest {
     // https://github.com/java-decompiler/jd-core/issues/14
     public void testAutoboxing() throws Exception {
         String internalClassName = AutoboxingAndUnboxing.class.getName().replace('.', '/');
-        String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName, Collections.emptyMap());
-        assertTrue(source.indexOf("// Byte code:") == -1);
+        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName, Collections.emptyMap());
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(": 5 */", "Integer intObj = 10;")));
         assertTrue(source.matches(PatternMaker.make(": 6 */", "int i = intObj;")));
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
 }

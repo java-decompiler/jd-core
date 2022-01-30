@@ -7,16 +7,16 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-import org.jd.core.v1.model.classfile.constant.ConstantValue;
+import org.apache.bcel.classfile.Constant;
 
 public class ElementValuePrimitiveType implements AttributeElementValue {
     /*
      * type = {'B', 'D', 'F', 'I', 'J', 'S', 'Z', 'C', 's'}
      */
-    protected int type;
-    protected ConstantValue constValue;
+    private final int type;
+    private final Constant constValue;
 
-    public ElementValuePrimitiveType(int type, ConstantValue constValue) {
+    public ElementValuePrimitiveType(int type, Constant constValue) {
         this.type = type;
         this.constValue = constValue;
     }
@@ -26,7 +26,7 @@ public class ElementValuePrimitiveType implements AttributeElementValue {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends ConstantValue> T getConstValue() {
+    public <T extends Constant> T getConstValue() {
         return (T)constValue;
     }
 

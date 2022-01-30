@@ -7,14 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class AttributeMethodParameters implements Attribute {
-    protected MethodParameter[] parameters;
+import org.apache.bcel.classfile.MethodParameter;
 
-    public AttributeMethodParameters(MethodParameter[] parameters) {
-        this.parameters = parameters;
-    }
-
-    public MethodParameter[] getParameters() {
-        return parameters;
-    }
+public record AttributeMethodParameters(MethodParameter[] parameters) implements Attribute {
 }

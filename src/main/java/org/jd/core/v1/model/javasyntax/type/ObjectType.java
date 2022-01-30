@@ -9,6 +9,7 @@ package org.jd.core.v1.model.javasyntax.type;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class ObjectType implements Type {
     public static final ObjectType TYPE_BOOLEAN           = new ObjectType(StringConstants.JAVA_LANG_BOOLEAN, "java.lang.Boolean", "Boolean");
@@ -48,13 +49,13 @@ public class ObjectType implements Type {
         public String toString() { return "UndefinedObjectType"; }
     };
 
-    protected String internalName;
-    protected String qualifiedName;
-    protected String name;
+    protected final String internalName;
+    protected final String qualifiedName;
+    protected final String name;
 
-    protected BaseTypeArgument typeArguments;
-    protected int dimension;
-    protected String descriptor;
+    protected final BaseTypeArgument typeArguments;
+    protected final int dimension;
+    protected final String descriptor;
 
     public ObjectType(String internalName, String qualifiedName, String name) {
         this(internalName, qualifiedName, name, null, 0);
@@ -90,6 +91,7 @@ public class ObjectType implements Type {
         this.qualifiedName = this.name = PrimitiveType.getPrimitiveType(primitiveDescriptor.charAt(0)).getName();
         this.dimension = dimension;
         this.descriptor = createDescriptor(primitiveDescriptor, dimension);
+        this.typeArguments = null;
     }
 
     protected static String createDescriptor(String descriptor, int dimension) {
@@ -103,15 +105,6 @@ public class ObjectType implements Type {
             default:
                 return new String(new char[dimension]).replace('\0', '[') + descriptor;
         }
-    }
-
-    public ObjectType(ObjectType ot) {
-        this.internalName = ot.getInternalName();
-        this.qualifiedName = ot.getQualifiedName();
-        this.name = ot.getName();
-        this.typeArguments = ot.getTypeArguments();
-        this.dimension = ot.getDimension();
-        this.descriptor = ot.getDescriptor();
     }
 
     @Override
@@ -198,21 +191,21 @@ public class ObjectType implements Type {
         }
 
         if (StringConstants.JAVA_LANG_CLASS.equals(internalName)) {
-            boolean wildcard1 = typeArguments == null || typeArguments.getClass() == WildcardTypeArgument.class;
-            boolean wildcard2 = that.typeArguments == null || that.typeArguments.getClass() == WildcardTypeArgument.class;
+            boolean wildcard1 = typeArguments == null || typeArguments.isWildcardTypeArgument();
+            boolean wildcard2 = that.typeArguments == null || that.typeArguments.isWildcardTypeArgument();
 
             if (wildcard1 && wildcard2) {
                 return true;
             }
         }
 
-        return typeArguments != null ? typeArguments.equals(that.typeArguments) : that.typeArguments == null;
+        return Objects.equals(typeArguments, that.typeArguments);
     }
 
     @Override
     public int hashCode() {
-        int result = 735485092 + internalName.hashCode();
-        result = 31 * result + (typeArguments != null ? typeArguments.hashCode() : 0);
+        int result = 735_485_092 + internalName.hashCode();
+        result = 31 * result + Objects.hash(typeArguments);
         return 31 * result + dimension;
     }
 
@@ -228,7 +221,7 @@ public class ObjectType implements Type {
 
     @Override
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
-        if (typeArgument.getClass() == ObjectType.class || typeArgument.getClass() == InnerObjectType.class) {
+        if (typeArgument instanceof ObjectType || typeArgument instanceof InnerObjectType) {
             ObjectType ot = (ObjectType)typeArgument;
 
             if (dimension != ot.getDimension() || !internalName.equals(ot.getInternalName())) {
@@ -241,13 +234,12 @@ public class ObjectType implements Type {
             return typeArguments != null && typeArguments.isTypeArgumentAssignableFrom(typeBounds, ot.getTypeArguments());
         }
 
-        if (typeArgument.getClass() == GenericType.class) {
-            GenericType gt = (GenericType)typeArgument;
+        if (typeArgument instanceof GenericType) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            GenericType gt = (GenericType) typeArgument;
             BaseType bt = typeBounds.get(gt.getName());
-
             if (bt != null) {
                 for (Type type : bt) {
-                    if (dimension == type.getDimension() && (type.getClass() == ObjectType.class || type.getClass() == InnerObjectType.class)) {
+                    if (dimension == type.getDimension() && (type instanceof ObjectType || type instanceof InnerObjectType)) {
                         ObjectType ot = (ObjectType) type;
 
                         if (internalName.equals(ot.getInternalName())) {
@@ -259,17 +251,6 @@ public class ObjectType implements Type {
         }
 
         return false;
-    }
-
-    protected boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, ObjectType objectType) {
-        if (dimension != objectType.getDimension() || !internalName.equals(objectType.getInternalName())) {
-            return false;
-        }
-
-        if (objectType.getTypeArguments() == null) {
-            return typeArguments == null;
-        }
-        return typeArguments != null && typeArguments.isTypeArgumentAssignableFrom(typeBounds, objectType.getTypeArguments());
     }
 
     @Override

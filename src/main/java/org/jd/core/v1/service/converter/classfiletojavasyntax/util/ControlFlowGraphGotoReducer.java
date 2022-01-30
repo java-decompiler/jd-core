@@ -16,7 +16,7 @@ import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.B
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_INFINITE_GOTO;
 
-public class ControlFlowGraphGotoReducer {
+public final class ControlFlowGraphGotoReducer {
 
     private ControlFlowGraphGotoReducer() {
         super();

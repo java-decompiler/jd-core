@@ -8,19 +8,36 @@
 package org.jd.core.v1.service.writer.visitor;
 
 import org.jd.core.v1.api.printer.Printer;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.token.AbstractNopTokenVisitor;
+import org.jd.core.v1.model.token.BooleanConstantToken;
+import org.jd.core.v1.model.token.CharacterConstantToken;
+import org.jd.core.v1.model.token.DeclarationToken;
+import org.jd.core.v1.model.token.EndBlockToken;
+import org.jd.core.v1.model.token.EndMarkerToken;
+import org.jd.core.v1.model.token.KeywordToken;
+import org.jd.core.v1.model.token.LineNumberToken;
+import org.jd.core.v1.model.token.NewLineToken;
+import org.jd.core.v1.model.token.NumericConstantToken;
+import org.jd.core.v1.model.token.ReferenceToken;
+import org.jd.core.v1.model.token.StartBlockToken;
+import org.jd.core.v1.model.token.StartMarkerToken;
+import org.jd.core.v1.model.token.StringConstantToken;
+import org.jd.core.v1.model.token.TextToken;
+import org.jd.core.v1.model.token.Token;
+import org.jd.core.v1.model.token.TokenVisitor;
 
 import java.util.List;
 
+import static org.jd.core.v1.api.printer.Printer.UNKNOWN_LINE_NUMBER;
+
 public class PrintTokenVisitor implements TokenVisitor {
-    public static int UNKNOWN_LINE_NUMBER = Printer.UNKNOWN_LINE_NUMBER;
 
-    protected SearchLineNumberVisitor searchLineNumberVisitor = new SearchLineNumberVisitor();
+    private final SearchLineNumberVisitor searchLineNumberVisitor = new SearchLineNumberVisitor();
 
-    protected Printer printer;
-    protected List<Token> tokens;
-    protected int index;
-    protected int newLineCount;
+    private Printer printer;
+    private List<Token> tokens;
+    private int index;
+    private int newLineCount;
 
     public void start(Printer printer, List<Token> tokens) {
         this.printer = printer;
@@ -37,7 +54,7 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(BooleanConstantToken token) {
         prepareNewLine();
-        printer.printKeyword(token.getValue() ? "true" : "false");
+        printer.printKeyword(token.value() ? "true" : "false");
         index++;
     }
 
@@ -58,7 +75,7 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(StartBlockToken token) {
         prepareNewLine();
-        printer.printText(token.getText());
+        printer.printText(token.text());
         printer.indent();
         if (token == StartBlockToken.START_RESOURCES_BLOCK) {
             printer.indent();
@@ -73,34 +90,34 @@ public class PrintTokenVisitor implements TokenVisitor {
             printer.unindent();
         }
         prepareNewLine();
-        printer.printText(token.getText());
+        printer.printText(token.text());
         index++;
     }
 
     @Override
     public void visit(StartMarkerToken token) {
         prepareNewLine();
-        printer.startMarker(token.getType());
+        printer.startMarker(token.type());
         index++;
     }
 
     @Override
     public void visit(EndMarkerToken token) {
         prepareNewLine();
-        printer.endMarker(token.getType());
+        printer.endMarker(token.type());
         index++;
     }
 
     @Override
     public void visit(NewLineToken token) {
-        newLineCount += token.getCount();
+        newLineCount += token.count();
         index++;
     }
 
     @Override
     public void visit(KeywordToken token) {
         prepareNewLine();
-        printer.printKeyword(token.getKeyword());
+        printer.printKeyword(token.keyword());
         index++;
     }
 
@@ -112,7 +129,7 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(NumericConstantToken token) {
         prepareNewLine();
-        printer.printNumericConstant(token.getText());
+        printer.printNumericConstant(token.text());
         index++;
     }
 
@@ -126,14 +143,14 @@ public class PrintTokenVisitor implements TokenVisitor {
     @Override
     public void visit(StringConstantToken token) {
         prepareNewLine();
-        printer.printStringConstant('"' + token.getText() + '"', token.getOwnerInternalName());
+        printer.printStringConstant('"' + token.text() + '"', token.getOwnerInternalName());
         index++;
     }
 
     @Override
     public void visit(TextToken token) {
         prepareNewLine();
-        printer.printText(token.getText());
+        printer.printText(token.text());
         index++;
     }
 
@@ -163,10 +180,12 @@ public class PrintTokenVisitor implements TokenVisitor {
         for (int i=index; i>=0; i--) {
             tokens.get(i).accept(searchLineNumberVisitor);
 
-            if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER)
+            if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER) {
                 return searchLineNumberVisitor.lineNumber;
-            if (searchLineNumberVisitor.newLineCounter > 0)
+            }
+            if (searchLineNumberVisitor.newLineCounter > 0) {
                 break;
+            }
         }
 
         // Forward search
@@ -177,18 +196,20 @@ public class PrintTokenVisitor implements TokenVisitor {
         for (int i=index; i<size; i++) {
             tokens.get(i).accept(searchLineNumberVisitor);
 
-            if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER)
+            if (searchLineNumberVisitor.lineNumber != UNKNOWN_LINE_NUMBER) {
                 return searchLineNumberVisitor.lineNumber;
-            if (searchLineNumberVisitor.newLineCounter > 0)
+            }
+            if (searchLineNumberVisitor.newLineCounter > 0) {
                 break;
+            }
         }
 
         return UNKNOWN_LINE_NUMBER;
     }
 
     protected static class SearchLineNumberVisitor extends AbstractNopTokenVisitor {
-        public int lineNumber;
-        public int newLineCounter;
+        private int lineNumber;
+        private int newLineCounter;
 
         public void reset() {
             this.lineNumber = UNKNOWN_LINE_NUMBER;
@@ -197,7 +218,7 @@ public class PrintTokenVisitor implements TokenVisitor {
 
         @Override
         public void visit(LineNumberToken token) {
-            lineNumber = token.getLineNumber();
+            lineNumber = token.lineNumber();
         }
 
         @Override

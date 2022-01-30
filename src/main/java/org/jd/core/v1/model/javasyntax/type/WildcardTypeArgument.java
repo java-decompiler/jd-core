@@ -9,7 +9,7 @@ package org.jd.core.v1.model.javasyntax.type;
 
 import java.util.Map;
 
-public class WildcardTypeArgument implements TypeArgument {
+public final class WildcardTypeArgument implements TypeArgument {
     public static final WildcardTypeArgument WILDCARD_TYPE_ARGUMENT = new WildcardTypeArgument();
 
     private WildcardTypeArgument() {}

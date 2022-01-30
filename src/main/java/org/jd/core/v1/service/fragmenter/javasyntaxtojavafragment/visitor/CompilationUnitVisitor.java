@@ -9,21 +9,87 @@ package org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.visitor;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
-import org.jd.core.v1.model.javafragment.*;
+import org.jd.core.v1.model.javafragment.EndMovableJavaBlockFragment;
+import org.jd.core.v1.model.javafragment.ImportsFragment;
+import org.jd.core.v1.model.javafragment.StartBlockFragment;
+import org.jd.core.v1.model.javafragment.StartBodyFragment;
+import org.jd.core.v1.model.javafragment.StartMovableJavaBlockFragment;
+import org.jd.core.v1.model.javafragment.TokensFragment;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.BaseFieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarators;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarators;
+import org.jd.core.v1.model.javasyntax.declaration.MemberDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MemberDeclarations;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ModuleDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.TypeDeclarations;
+import org.jd.core.v1.model.javasyntax.declaration.VariableInitializer;
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
-import org.jd.core.v1.model.javasyntax.reference.*;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationReference;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationReferences;
+import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
+import org.jd.core.v1.model.javasyntax.reference.BaseElementValue;
+import org.jd.core.v1.model.javasyntax.reference.BaseElementValuePair;
+import org.jd.core.v1.model.javasyntax.reference.ElementValueArrayInitializerElementValue;
+import org.jd.core.v1.model.javasyntax.reference.ElementValuePair;
+import org.jd.core.v1.model.javasyntax.reference.ElementValuePairs;
+import org.jd.core.v1.model.javasyntax.reference.ElementValues;
+import org.jd.core.v1.model.javasyntax.reference.ExpressionElementValue;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
-import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.token.DeclarationToken;
+import org.jd.core.v1.model.token.EndBlockToken;
+import org.jd.core.v1.model.token.EndMarkerToken;
+import org.jd.core.v1.model.token.KeywordToken;
+import org.jd.core.v1.model.token.NewLineToken;
+import org.jd.core.v1.model.token.ReferenceToken;
+import org.jd.core.v1.model.token.StartBlockToken;
+import org.jd.core.v1.model.token.StartMarkerToken;
+import org.jd.core.v1.model.token.TextToken;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 
 import java.util.Iterator;
 import java.util.List;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.*;
+import static org.apache.bcel.Const.ACC_ABSTRACT;
+import static org.apache.bcel.Const.ACC_BRIDGE;
+import static org.apache.bcel.Const.ACC_FINAL;
+import static org.apache.bcel.Const.ACC_NATIVE;
+import static org.apache.bcel.Const.ACC_OPEN;
+import static org.apache.bcel.Const.ACC_PRIVATE;
+import static org.apache.bcel.Const.ACC_PROTECTED;
+import static org.apache.bcel.Const.ACC_PUBLIC;
+import static org.apache.bcel.Const.ACC_STATIC;
+import static org.apache.bcel.Const.ACC_STRICT;
+import static org.apache.bcel.Const.ACC_SYNCHRONIZED;
+import static org.apache.bcel.Const.ACC_SYNTHETIC;
+import static org.apache.bcel.Const.ACC_TRANSIENT;
+import static org.apache.bcel.Const.ACC_TRANSITIVE;
+import static org.apache.bcel.Const.ACC_VOLATILE;
+import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_ANONYMOUS;
+import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_DEFAULT;
 
 public class CompilationUnitVisitor extends StatementVisitor {
     private static final String MODULE_INFO = "module-info";
@@ -45,9 +111,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
     public static final TextToken COMMENT_BRIDGE = new TextToken("/* bridge */");
     public static final TextToken COMMENT_SYNTHETIC = new TextToken("/* synthetic */");
 
-    protected AnnotationVisitor annotationVisitor = new AnnotationVisitor();
-    protected SingleLineStatementVisitor singleLineStatementVisitor = new SingleLineStatementVisitor();
-    protected String mainInternalName;
+    private final AnnotationVisitor annotationVisitor = new AnnotationVisitor();
+    private final SingleLineStatementVisitor singleLineStatementVisitor = new SingleLineStatementVisitor();
+    private final String mainInternalName;
 
     public CompilationUnitVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         super(loader, mainInternalTypeName, majorVersion, importsFragment);
@@ -56,17 +122,17 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(AnnotationDeclaration declaration) {
-        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
+        if ((declaration.getFlags() & ACC_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
-            buildFragmentsForTypeDeclaration(declaration, declaration.getFlags() & ~FLAG_ABSTRACT, ANNOTATION);
+            buildFragmentsForTypeDeclaration(declaration, declaration.getFlags() & ~ACC_ABSTRACT, ANNOTATION);
 
             fragments.addTokensFragment(tokens);
 
             BaseFieldDeclarator annotationDeclaratorList = declaration.getAnnotationDeclarators();
             BodyDeclaration bodyDeclaration = declaration.getBodyDeclaration();
 
-            if ((annotationDeclaratorList == null) && (bodyDeclaration == null)) {
+            if (annotationDeclaratorList == null && bodyDeclaration == null) {
                 tokens.add(TextToken.SPACE);
                 tokens.add(TextToken.LEFTRIGHTCURLYBRACKETS);
             } else {
@@ -173,10 +239,10 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 if (tokens.isEmpty()) {
                     JavaFragmentFactory.addSpacerBetweenArrayInitializerBlock(fragments);
 
-                    if ((size > 10) && (i % 10 == 0)) {
+                    if (size > 10 && i % 10 == 0) {
                         JavaFragmentFactory.addNewLineBetweenArrayInitializerBlock(fragments);
                     }
-                } else if ((size > 10) && (i % 10 == 0)) {
+                } else if (size > 10 && i % 10 == 0) {
                     fragments.addTokensFragment(tokens);
 
                     JavaFragmentFactory.addSpacerBetweenArrayInitializerBlock(fragments);
@@ -211,7 +277,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(ClassDeclaration declaration) {
-        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
+        if ((declaration.getFlags() & ACC_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags(), CLASS);
@@ -220,7 +286,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             // Build fragments for super type
             BaseType superType = declaration.getSuperType();
-            if ((superType != null) && !superType.equals(ObjectType.TYPE_OBJECT)) {
+            if (superType != null && !superType.equals(ObjectType.TYPE_OBJECT)) {
                 fragments.addTokensFragment(tokens);
 
                 JavaFragmentFactory.addSpacerBeforeExtends(fragments);
@@ -237,8 +303,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
             // Build fragments for interfaces
             BaseType interfaces = declaration.getInterfaces();
             if (interfaces != null) {
-                if (!tokens.isEmpty())
+                if (!tokens.isEmpty()) {
                     fragments.addTokensFragment(tokens);
+                }
 
                 JavaFragmentFactory.addSpacerBeforeImplements(fragments);
 
@@ -322,7 +389,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (ACC_SYNTHETIC|ACC_BRIDGE)) == 0) {
             BaseStatement statements = declaration.getStatements();
 
             if ((declaration.getFlags() & FLAG_ANONYMOUS) == 0) {
@@ -415,7 +482,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 restoreContext();
 
                 fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
-            } else if ((statements != null) && (statements.size() > 0)) {
+            } else if (statements != null && statements.size() > 0) {
                 int fragmentCount0 = fragments.size();
                 fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK);
 
@@ -475,14 +542,14 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(ElementValuePair reference) {
-        tokens.add(newTextToken(reference.getName()));
+        tokens.add(newTextToken(reference.name()));
         tokens.add(TextToken.SPACE_EQUAL_SPACE);
-        reference.getElementValue().accept(this);
+        reference.elementValue().accept(this);
     }
 
     @Override
     public void visit(EnumDeclaration declaration) {
-        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
+        if ((declaration.getFlags() & ACC_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
             buildFragmentsForTypeDeclaration(declaration, declaration.getFlags(), ENUM);
@@ -517,11 +584,11 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             List<EnumDeclaration.Constant> constants = declaration.getConstants();
 
-            if ((constants != null) && (!constants.isEmpty())) {
+            if (constants != null && !constants.isEmpty()) {
                 int preferredLineNumber = 0;
 
                 for (EnumDeclaration.Constant constant : constants) {
-                    if ((constant.getArguments() != null) || (constant.getBodyDeclaration() != null)) {
+                    if (constant.getArguments() != null || constant.getBodyDeclaration() != null) {
                         preferredLineNumber = 1;
                         break;
                     }
@@ -545,7 +612,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             BodyDeclaration bodyDeclaration = declaration.getBodyDeclaration();
 
             if (bodyDeclaration != null) {
-                if ((constants != null) && (!constants.isEmpty())) {
+                if (constants != null && !constants.isEmpty()) {
                     Fragments f = fragments;
 
                     fragments = new Fragments();
@@ -573,16 +640,6 @@ public class CompilationUnitVisitor extends StatementVisitor {
     @Override
     public void visit(EnumDeclaration.Constant declaration) {
         tokens = new Tokens();
-
-        // Build fragments for annotations
-        BaseAnnotationReference annotationReferences = declaration.getAnnotationReferences();
-
-        if (annotationReferences != null) {
-            annotationReferences.accept(annotationVisitor);
-            fragments.addTokensFragment(tokens);
-            JavaFragmentFactory.addSpacerAfterMemberAnnotations(fragments);
-            tokens = new Tokens();
-        }
 
         // Build token for type declaration
         tokens.addLineNumberToken(declaration.getLineNumber());
@@ -613,7 +670,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(FieldDeclaration declaration) {
-        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
+        if ((declaration.getFlags() & ACC_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_FIELD_BLOCK);
 
             tokens = new Tokens();
@@ -654,33 +711,13 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens = new Tokens();
         tokens.add(TextToken.SPACE);
+        tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
 
-        switch (fieldDeclarator.getDimension()) {
-            case 0:
-                tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
-                break;
-            case 1:
-                tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), "[" + descriptor));
-                tokens.add(TextToken.DIMENSION_1);
-                break;
-            case 2:
-                tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), "[[" + descriptor));
-                tokens.add(TextToken.DIMENSION_2);
-                break;
-            default:
-                descriptor = new String(new char[fieldDeclarator.getDimension()]).replace('\0', '[') + descriptor;
-                tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
-                tokens.add(newTextToken(new String(new char[fieldDeclarator.getDimension()]).replace("\0", "[]")));
-                break;
-        }
-
-        if (variableInitializer == null) {
-            fragments.addTokensFragment(tokens);
-        } else {
+        if ((variableInitializer != null)) {
             tokens.add(TextToken.SPACE_EQUAL_SPACE);
             variableInitializer.accept(this);
-            fragments.addTokensFragment(tokens);
         }
+        fragments.addTokensFragment(tokens);
     }
 
     @Override
@@ -746,31 +783,11 @@ public class CompilationUnitVisitor extends StatementVisitor {
     }
 
     @Override
-    public void visit(InstanceInitializerDeclaration declaration) {
-        BaseStatement statements = declaration.getStatements();
-
-        if (statements != null) {
-            fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK);
-
-            storeContext();
-            currentMethodParamNames.clear();
-
-            StartBodyFragment start = JavaFragmentFactory.addStartMethodBody(fragments);
-            statements.accept(this);
-            JavaFragmentFactory.addEndMethodBody(fragments, start);
-
-            fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
-
-            restoreContext();
-        }
-    }
-
-    @Override
     public void visit(InterfaceDeclaration declaration) {
-        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
+        if ((declaration.getFlags() & ACC_SYNTHETIC) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_TYPE_BLOCK);
 
-            buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags() & ~FLAG_ABSTRACT, INTERFACE);
+            buildFragmentsForClassOrInterfaceDeclaration(declaration, declaration.getFlags() & ~ACC_ABSTRACT, INTERFACE);
 
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
 
@@ -830,7 +847,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens = new Tokens();
 
-        if ((declaration.getFlags() & FLAG_OPEN) != 0) {
+        if ((declaration.getFlags() & ACC_OPEN) != 0) {
             tokens.add(OPEN);
             tokens.add(TextToken.SPACE);
         }
@@ -844,7 +861,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens = new Tokens();
 
-        if ((declaration.getRequires() != null) && !declaration.getRequires().isEmpty()) {
+        if (declaration.getRequires() != null && !declaration.getRequires().isEmpty()) {
             Iterator<ModuleDeclaration.ModuleInfo> iterator = declaration.getRequires().iterator();
             visitModuleDeclaration(iterator.next());
             while (iterator.hasNext()) {
@@ -854,7 +871,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             needNewLine = true;
         }
 
-        if ((declaration.getExports() != null) && !declaration.getExports().isEmpty()) {
+        if (declaration.getExports() != null && !declaration.getExports().isEmpty()) {
             if (needNewLine) {
                 tokens.add(NewLineToken.NEWLINE_2);
             }
@@ -867,7 +884,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             needNewLine = true;
         }
 
-        if ((declaration.getOpens() != null) && !declaration.getOpens().isEmpty()) {
+        if (declaration.getOpens() != null && !declaration.getOpens().isEmpty()) {
             if (needNewLine) {
                 tokens.add(NewLineToken.NEWLINE_2);
             }
@@ -880,7 +897,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             needNewLine = true;
         }
 
-        if ((declaration.getUses() != null) && !declaration.getUses().isEmpty()) {
+        if (declaration.getUses() != null && !declaration.getUses().isEmpty()) {
             if (needNewLine) {
                 tokens.add(NewLineToken.NEWLINE_2);
             }
@@ -893,7 +910,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             needNewLine = true;
         }
 
-        if ((declaration.getProvides() != null) && !declaration.getProvides().isEmpty()) {
+        if (declaration.getProvides() != null && !declaration.getProvides().isEmpty()) {
             if (needNewLine) {
                 tokens.add(NewLineToken.NEWLINE_2);
             }
@@ -915,38 +932,38 @@ public class CompilationUnitVisitor extends StatementVisitor {
     protected void visitModuleDeclaration(ModuleDeclaration.ModuleInfo moduleInfo) {
         tokens.add(REQUIRES);
 
-        if ((moduleInfo.getFlags() & FLAG_STATIC) != 0) {
+        if ((moduleInfo.flags() & ACC_STATIC) != 0) {
             tokens.add(TextToken.SPACE);
             tokens.add(STATIC);
         }
-        if ((moduleInfo.getFlags() & FLAG_TRANSITIVE) != 0) {
+        if ((moduleInfo.flags() & ACC_TRANSITIVE) != 0) {
             tokens.add(TextToken.SPACE);
             tokens.add(TRANSITIVE);
         }
 
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfo.getName(), null, null));
+        tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfo.name(), null, null));
         tokens.add(TextToken.SEMICOLON);
     }
 
     protected void visitModuleDeclaration(ModuleDeclaration.PackageInfo packageInfo, KeywordToken keywordToken) {
         tokens.add(keywordToken);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.PACKAGE, packageInfo.getInternalName(), packageInfo.getInternalName().replace('/', '.'), null, null));
+        tokens.add(new ReferenceToken(Printer.PACKAGE, packageInfo.internalName(), packageInfo.internalName().replace('/', '.'), null, null));
 
-        if ((packageInfo.getModuleInfoNames() != null) && !packageInfo.getModuleInfoNames().isEmpty()) {
+        if (packageInfo.moduleInfoNames() != null && !packageInfo.moduleInfoNames().isEmpty()) {
             tokens.add(TextToken.SPACE);
             tokens.add(TO);
 
-            if (packageInfo.getModuleInfoNames().size() == 1) {
+            if (packageInfo.moduleInfoNames().size() == 1) {
                 tokens.add(TextToken.SPACE);
-                String moduleInfoName = packageInfo.getModuleInfoNames().get(0);
+                String moduleInfoName = packageInfo.moduleInfoNames().get(0);
                 tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName, null, null));
             } else {
                 tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
                 tokens.add(NewLineToken.NEWLINE_1);
 
-                Iterator<String> iterator = packageInfo.getModuleInfoNames().iterator();
+                Iterator<String> iterator = packageInfo.moduleInfoNames().iterator();
 
                 String moduleInfoName = iterator.next();
                 tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName, null, null));
@@ -975,20 +992,20 @@ public class CompilationUnitVisitor extends StatementVisitor {
     protected void visitModuleDeclaration(ModuleDeclaration.ServiceInfo serviceInfo) {
         tokens.add(PROVIDES);
         tokens.add(TextToken.SPACE);
-        String internalTypeName = serviceInfo.getInterfaceTypeName();
+        String internalTypeName = serviceInfo.interfaceTypeName();
         tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
         tokens.add(TextToken.SPACE);
         tokens.add(WITH);
 
-        if (serviceInfo.getImplementationTypeNames().size() == 1) {
+        if (serviceInfo.implementationTypeNames().size() == 1) {
             tokens.add(TextToken.SPACE);
-            internalTypeName = serviceInfo.getImplementationTypeNames().get(0);
+            internalTypeName = serviceInfo.implementationTypeNames().get(0);
             tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
         } else {
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
             tokens.add(NewLineToken.NEWLINE_1);
 
-            Iterator<String> iterator = serviceInfo.getImplementationTypeNames().iterator();
+            Iterator<String> iterator = serviceInfo.implementationTypeNames().iterator();
 
             internalTypeName = iterator.next();
             tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
@@ -1071,7 +1088,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                     iterator.next().accept(this);
                 }
 
-                if ((fragmentCount1 != -1) && (fragmentCount2 == fragments.size())) {
+                if (fragmentCount1 != -1 && fragmentCount2 == fragments.size()) {
                     fragments.subList(fragmentCount1, fragments.size()).clear();
                 }
             }
@@ -1080,7 +1097,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
     @Override
     public void visit(MethodDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC | FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (ACC_SYNTHETIC | ACC_BRIDGE)) == 0) {
             fragments.add(StartMovableJavaBlockFragment.START_MOVABLE_METHOD_BLOCK);
 
             tokens = new Tokens();
@@ -1147,10 +1164,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             if (statements == null) {
                 BaseElementValue elementValue = declaration.getDefaultAnnotationValue();
 
-                if (elementValue == null) {
-                    tokens.add(TextToken.SEMICOLON);
-                    fragments.addTokensFragment(tokens);
-                } else {
+                if ((elementValue != null)) {
                     tokens.add(TextToken.SPACE);
                     tokens.add(DEFAULT);
                     tokens.add(TextToken.SPACE);
@@ -1159,9 +1173,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
                     elementValue.accept(this);
 
                     tokens = new Tokens();
-                    tokens.add(TextToken.SEMICOLON);
-                    fragments.addTokensFragment(tokens);
                 }
+                tokens.add(TextToken.SEMICOLON);
+                fragments.addTokensFragment(tokens);
             } else {
                 fragments.addTokensFragment(tokens);
                 singleLineStatementVisitor.init();
@@ -1196,16 +1210,6 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
         }
-    }
-
-    @Override
-    public void visit(ObjectReference reference) {
-        visit((ObjectType) reference);
-    }
-
-    @Override
-    public void visit(InnerObjectReference reference) {
-        visit((InnerObjectType) reference);
     }
 
     @Override
@@ -1281,31 +1285,31 @@ public class CompilationUnitVisitor extends StatementVisitor {
     }
 
     protected void buildTokensForTypeAccessFlags(int flags) {
-        if ((flags & FLAG_PUBLIC) != 0) {
+        if ((flags & ACC_PUBLIC) != 0) {
             tokens.add(PUBLIC);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_PROTECTED) != 0) {
+        if ((flags & ACC_PROTECTED) != 0) {
             tokens.add(PROTECTED);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_PRIVATE) != 0) {
+        if ((flags & ACC_PRIVATE) != 0) {
             tokens.add(PRIVATE);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_STATIC) != 0) {
+        if ((flags & ACC_STATIC) != 0) {
             tokens.add(STATIC);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_FINAL) != 0) {
+        if ((flags & ACC_FINAL) != 0) {
             tokens.add(FINAL);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_ABSTRACT) != 0) {
+        if ((flags & ACC_ABSTRACT) != 0) {
             tokens.add(ABSTRACT);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_SYNTHETIC) != 0) {
+        if ((flags & ACC_SYNTHETIC) != 0) {
             tokens.add(StartMarkerToken.COMMENT);
             tokens.add(COMMENT_SYNTHETIC);
             tokens.add(EndMarkerToken.COMMENT);
@@ -1314,35 +1318,35 @@ public class CompilationUnitVisitor extends StatementVisitor {
     }
 
     protected void buildTokensForFieldAccessFlags(int flags) {
-        if ((flags & FLAG_PUBLIC) != 0) {
+        if ((flags & ACC_PUBLIC) != 0) {
             tokens.add(PUBLIC);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_PROTECTED) != 0) {
+        if ((flags & ACC_PROTECTED) != 0) {
             tokens.add(PROTECTED);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_PRIVATE) != 0) {
+        if ((flags & ACC_PRIVATE) != 0) {
             tokens.add(PRIVATE);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_STATIC) != 0) {
+        if ((flags & ACC_STATIC) != 0) {
             tokens.add(STATIC);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_FINAL) != 0) {
+        if ((flags & ACC_FINAL) != 0) {
             tokens.add(FINAL);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_VOLATILE) != 0) {
+        if ((flags & ACC_VOLATILE) != 0) {
             tokens.add(VOLATILE);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_TRANSIENT) != 0) {
+        if ((flags & ACC_TRANSIENT) != 0) {
             tokens.add(TRANSIENT);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_SYNTHETIC) != 0) {
+        if ((flags & ACC_SYNTHETIC) != 0) {
             tokens.add(StartMarkerToken.COMMENT);
             tokens.add(COMMENT_SYNTHETIC);
             tokens.add(EndMarkerToken.COMMENT);
@@ -1351,49 +1355,49 @@ public class CompilationUnitVisitor extends StatementVisitor {
     }
 
     protected void buildTokensForMethodAccessFlags(int flags) {
-        if ((flags & FLAG_PUBLIC) != 0) {
+        if ((flags & ACC_PUBLIC) != 0) {
             tokens.add(PUBLIC);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_PROTECTED) != 0) {
+        if ((flags & ACC_PROTECTED) != 0) {
             tokens.add(PROTECTED);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_PRIVATE) != 0) {
+        if ((flags & ACC_PRIVATE) != 0) {
             tokens.add(PRIVATE);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_STATIC) != 0) {
+        if ((flags & ACC_STATIC) != 0) {
             tokens.add(STATIC);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_FINAL) != 0) {
+        if ((flags & ACC_FINAL) != 0) {
             tokens.add(FINAL);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_SYNCHRONIZED) != 0) {
+        if ((flags & ACC_SYNCHRONIZED) != 0) {
             tokens.add(SYNCHRONIZED);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_BRIDGE) != 0) {
+        if ((flags & ACC_BRIDGE) != 0) {
             tokens.add(StartMarkerToken.COMMENT);
             tokens.add(COMMENT_BRIDGE);
             tokens.add(EndMarkerToken.COMMENT);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_NATIVE) != 0) {
+        if ((flags & ACC_NATIVE) != 0) {
             tokens.add(NATIVE);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_ABSTRACT) != 0) {
+        if ((flags & ACC_ABSTRACT) != 0) {
             tokens.add(ABSTRACT);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_STRICT) != 0) {
+        if ((flags & ACC_STRICT) != 0) {
             tokens.add(STRICT);
             tokens.add(TextToken.SPACE);
         }
-        if ((flags & FLAG_SYNTHETIC) != 0) {
+        if ((flags & ACC_SYNTHETIC) != 0) {
             tokens.add(StartMarkerToken.COMMENT);
             tokens.add(COMMENT_SYNTHETIC);
             tokens.add(EndMarkerToken.COMMENT);

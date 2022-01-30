@@ -6,13 +6,32 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarators;
+import org.jd.core.v1.model.javasyntax.declaration.VariableInitializer;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
 import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
 import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileLocalVariableDeclarator;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileForStatement;
@@ -24,12 +43,28 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLoca
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
 
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_INT;
 
 public class Frame {
-    protected static final AbstractLocalVariableComparator ABSTRACT_LOCAL_VARIABLE_COMPARATOR = new AbstractLocalVariableComparator();
     protected static final Set<String> CAPITALIZED_JAVA_LANGUAGE_KEYWORDS = new HashSet<>(Arrays.asList(
         "Abstract", "Continue", "For", "New", "Switch", "Assert", "Default", "Goto", "Package", "Synchronized",
         "Boolean", "Do", "If", "Private", "This", "Break", "Double", "Implements", "Protected", "Throw", "Byte", "Else",
@@ -38,11 +73,10 @@ public class Frame {
         "Volatile", "Const", "Float", "Native", "Super", "While"));
 
     protected AbstractLocalVariable[] localVariableArray = new AbstractLocalVariable[10];
-    protected Map<NewExpression, AbstractLocalVariable> newExpressions;
     protected DefaultList<Frame> children;
-    protected Frame parent;
-    protected Statements statements;
-    protected AbstractLocalVariable exceptionLocalVariable;
+    private final Frame parent;
+    private final Statements statements;
+    private AbstractLocalVariable exceptionLocalVariable;
 
     public Frame(Frame parent, Statements statements) {
         this.parent = parent;
@@ -100,9 +134,9 @@ public class Frame {
         }
 
         if (alvToMerge != null
-                && ((!lv.isAssignableFrom(typeBounds, alvToMerge) && !alvToMerge.isAssignableFrom(typeBounds, lv))
-                        || (lv.getName() != null && alvToMerge.getName() != null
-                                && !lv.getName().equals(alvToMerge.getName())))) {
+                && (!lv.isAssignableFrom(typeBounds, alvToMerge) && !alvToMerge.isAssignableFrom(typeBounds, lv)
+                        || lv.getName() != null && alvToMerge.getName() != null
+                                && !lv.getName().equals(alvToMerge.getName()))) {
             alvToMerge = null;
         }
 
@@ -191,22 +225,6 @@ public class Frame {
             children = new DefaultList<>();
         }
         children.add(child);
-    }
-
-    public void close() {
-        // Update type for 'new' expression
-        if (newExpressions != null) {
-            ObjectType ot1;
-            ObjectType ot2;
-            for (Map.Entry<NewExpression, AbstractLocalVariable> entry : newExpressions.entrySet()) {
-                ot1 = entry.getKey().getObjectType();
-                ot2 = (ObjectType) entry.getValue().getType();
-
-                if (ot1.getTypeArguments() == null && ot2.getTypeArguments() != null) {
-                    entry.getKey().setObjectType(ot1.createType(ot2.getTypeArguments()));
-                }
-            }
-        }
     }
 
     public void createNames(Set<String> parentNames) {
@@ -414,14 +432,14 @@ public class Frame {
         if (!map.isEmpty()) {
             SearchUndeclaredLocalVariableVisitor searchUndeclaredLocalVariableVisitor = new SearchUndeclaredLocalVariableVisitor();
 
-            Statements statements;
+            Statements localStatements;
             ListIterator<Statement> iterator;
             Set<AbstractLocalVariable> undeclaredLocalVariables;
             Statement statement;
             Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement;
             for (Map.Entry<Frame, Set<AbstractLocalVariable>> entry : map.entrySet()) {
-                statements = entry.getKey().statements;
-                iterator = statements.listIterator();
+                localStatements = entry.getKey().statements;
+                iterator = localStatements.listIterator();
                 undeclaredLocalVariables = entry.getValue();
 
                 while (iterator.hasNext()) {
@@ -451,7 +469,7 @@ public class Frame {
                             }
 
                             DefaultList<AbstractLocalVariable> sorted = new DefaultList<>(undeclaredLocalVariablesInStatement);
-                            sorted.sort(ABSTRACT_LOCAL_VARIABLE_COMPARATOR);
+                            sorted.sort(Comparator.comparing(AbstractLocalVariable::getIndex));
 
                             for (AbstractLocalVariable lv : sorted) {
                                 // Add declaration before current statement
@@ -554,7 +572,7 @@ public class Frame {
         Type type = localVariable.getType();
         VariableInitializer variableInitializer;
 
-        if (!boe.getRightExpression().isNewInitializedArray() || (type.isObjectType() && ((ObjectType)type).getTypeArguments() != null)) {
+        if (!boe.getRightExpression().isNewInitializedArray() || type.isObjectType() && ((ObjectType)type).getTypeArguments() != null) {
             variableInitializer = new ExpressionVariableInitializer(boe.getRightExpression());
         } else {
             variableInitializer = ((NewInitializedArray) boe.getRightExpression()).getArrayInitializer();
@@ -883,10 +901,10 @@ public class Frame {
     protected static class GenerateLocalVariableNameVisitor implements TypeArgumentVisitor {
         protected static final String[] INTEGER_NAMES = { "i", "j", "k", "m", "n" };
 
-        protected StringBuilder sb = new StringBuilder();
-        protected Set<String> blackListNames;
-        protected Map<Type, Boolean> types;
-        protected String name;
+        private final StringBuilder sb = new StringBuilder();
+        private final Set<String> blackListNames;
+        private final Map<Type, Boolean> types;
+        private String name;
 
         public GenerateLocalVariableNameVisitor(Set<String> blackListNames, Map<Type, Boolean> types) {
             this.blackListNames = blackListNames;
@@ -902,11 +920,19 @@ public class Frame {
             sb.setLength(0);
 
             switch (type.getJavaPrimitiveFlags()) {
-                case FLAG_BYTE : sb.append("b"); break;
-                case FLAG_CHAR : sb.append("c"); break;
-                case FLAG_DOUBLE : sb.append("d"); break;
-                case FLAG_FLOAT : sb.append("f"); break;
-                case FLAG_INT :
+                case FLAG_BYTE:
+                    sb.append("b");
+                    break;
+                case FLAG_CHAR:
+                    sb.append("c");
+                    break;
+                case FLAG_DOUBLE:
+                    sb.append("d");
+                    break;
+                case FLAG_FLOAT:
+                    sb.append("f");
+                    break;
+                case FLAG_INT:
                     for (String in : INTEGER_NAMES) {
                         if (!blackListNames.contains(in)) {
                             name = in;
@@ -916,9 +942,15 @@ public class Frame {
                     }
                     sb.append("i");
                     break;
-                case FLAG_LONG : sb.append("l"); break;
-                case FLAG_SHORT : sb.append("s"); break;
-                case FLAG_BOOLEAN : sb.append("bool"); break;
+                case FLAG_LONG:
+                    sb.append("l");
+                    break;
+                case FLAG_SHORT:
+                    sb.append("s");
+                    break;
+                case FLAG_BOOLEAN:
+                    sb.append("bool");
+                    break;
             }
 
             generate(type);
@@ -1006,7 +1038,7 @@ public class Frame {
             int length = sb.length();
             int counter = 1;
 
-            if (types.get(type)) {
+            if (Boolean.TRUE.equals(types.get(type))) {
                 sb.append(counter);
                 counter++;
             }
@@ -1035,15 +1067,4 @@ public class Frame {
         public void visit(WildcardTypeArgument type) {}
     }
 
-    protected static class AbstractLocalVariableComparator implements Comparator<AbstractLocalVariable> {
-        @Override
-        public int compare(AbstractLocalVariable alv1, AbstractLocalVariable alv2) {
-            return alv1.getIndex() - alv2.getIndex();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            return false;
-        }
-    }
 }

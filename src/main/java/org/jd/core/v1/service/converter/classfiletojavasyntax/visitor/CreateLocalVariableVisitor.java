@@ -7,16 +7,24 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.*;
+import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.GenericLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.LocalVariableVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.ObjectLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.PrimitiveLocalVariable;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 public class CreateLocalVariableVisitor extends AbstractNopTypeArgumentVisitor implements LocalVariableVisitor {
-    protected TypeMaker typeMaker;
-    protected int index;
-    protected int offset;
+    private final TypeMaker typeMaker;
+    private int index;
+    private int offset;
 
-    protected AbstractLocalVariable localVariable;
+    private AbstractLocalVariable localVariable;
 
     public CreateLocalVariableVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;

@@ -20,7 +20,7 @@ public abstract class AbstractTypeArgumentVisitor implements TypeArgumentVisitor
 
     @Override
     public void visit(WildcardExtendsTypeArgument argument) {
-        argument.getType().accept(this);
+        argument.type().accept(this);
     }
 
     @Override public void visit(PrimitiveType type) {}
@@ -38,7 +38,7 @@ public abstract class AbstractTypeArgumentVisitor implements TypeArgumentVisitor
 
     @Override
     public void visit(WildcardSuperTypeArgument argument) {
-        argument.getType().accept(this);
+        argument.type().accept(this);
     }
 
     @Override

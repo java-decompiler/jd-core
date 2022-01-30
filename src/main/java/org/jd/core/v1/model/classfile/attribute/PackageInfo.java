@@ -9,28 +9,7 @@ package org.jd.core.v1.model.classfile.attribute;
 
 import java.util.Arrays;
 
-public class PackageInfo {
-    protected String   internalName;
-    protected int flags;
-    protected String[] moduleInfoNames;
-
-    public PackageInfo(String internalName, int flags, String[] moduleInfoNames) {
-        this.internalName = internalName;
-        this.flags = flags;
-        this.moduleInfoNames = moduleInfoNames;
-    }
-
-    public String getInternalName() {
-        return internalName;
-    }
-
-    public int getFlags() {
-        return flags;
-    }
-
-    public String[] getModuleInfoNames() {
-        return moduleInfoNames;
-    }
+public record PackageInfo(String internalName, int flags, String[] moduleInfoNames) {
 
     @Override
     public String toString() {

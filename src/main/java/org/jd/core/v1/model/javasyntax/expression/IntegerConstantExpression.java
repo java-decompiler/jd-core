@@ -12,7 +12,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
 public class IntegerConstantExpression extends AbstractLineNumberTypeExpression {
-    protected int value;
+    private final int value;
 
     public IntegerConstantExpression(Type type, int value) {
         super(type);
@@ -65,8 +65,8 @@ public class IntegerConstantExpression extends AbstractLineNumberTypeExpression 
         return "IntegerConstantExpression{type=" + type + ", value=" + value + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new IntegerConstantExpression(lineNumber, type, value);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new IntegerConstantExpression(lineNumber, type, value);
+    }
 }

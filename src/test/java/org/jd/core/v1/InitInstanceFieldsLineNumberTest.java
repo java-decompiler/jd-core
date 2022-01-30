@@ -8,7 +8,7 @@
 package org.jd.core.v1;
 
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
@@ -23,11 +23,11 @@ public class InitInstanceFieldsLineNumberTest extends AbstractJdTest {
         String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make(": 6 */     System.out.println(\"Instance creation\")")));
+        assertTrue(source.matches(PatternMaker.make(": 6 */     System.out.println(\"Instance creation\" + this.fieldBottom)")));
         assertTrue(source.matches(PatternMaker.make(": 9 */   private String fieldBottom = \"fieldBottom\"")));
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
 
     @Override

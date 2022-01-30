@@ -7,22 +7,7 @@
 
 package org.jd.core.v1.model.javasyntax.statement;
 
-public class LabelStatement implements Statement {
-    protected String label;
-    protected Statement statement;
-
-    public LabelStatement(String label, Statement statement) {
-        this.label = label;
-        this.statement = statement;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public Statement getStatement() {
-        return statement;
-    }
+public record LabelStatement(String label, Statement statement) implements Statement {
 
     @Override
     public boolean isLabelStatement() { return true; }

@@ -7,18 +7,122 @@
 
 package org.jd.core.v1.model.javasyntax;
 
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.reference.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.Declaration;
+import org.jd.core.v1.model.javasyntax.declaration.DeclarationVisitor;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarators;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarators;
+import org.jd.core.v1.model.javasyntax.declaration.MemberDeclarations;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ModuleDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.TypeDeclarations;
+import org.jd.core.v1.model.javasyntax.expression.ArrayExpression;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
+import org.jd.core.v1.model.javasyntax.expression.CastExpression;
+import org.jd.core.v1.model.javasyntax.expression.CommentExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.EnumConstantReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.ExpressionVisitor;
+import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.InstanceOfExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaFormalParametersExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaIdentifiersExpression;
+import org.jd.core.v1.model.javasyntax.expression.LengthExpression;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewArray;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
+import org.jd.core.v1.model.javasyntax.expression.NoExpression;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.ParenthesesExpression;
+import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
+import org.jd.core.v1.model.javasyntax.expression.TernaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationReference;
+import org.jd.core.v1.model.javasyntax.reference.AnnotationReferences;
+import org.jd.core.v1.model.javasyntax.reference.ElementValueArrayInitializerElementValue;
+import org.jd.core.v1.model.javasyntax.reference.ElementValuePair;
+import org.jd.core.v1.model.javasyntax.reference.ElementValuePairs;
+import org.jd.core.v1.model.javasyntax.reference.ElementValues;
+import org.jd.core.v1.model.javasyntax.reference.ExpressionElementValue;
+import org.jd.core.v1.model.javasyntax.reference.Reference;
+import org.jd.core.v1.model.javasyntax.reference.ReferenceVisitor;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfElseStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfStatement;
+import org.jd.core.v1.model.javasyntax.statement.LabelStatement;
+import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.NoStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.StatementVisitor;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.SynchronizedStatement;
+import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement;
+import org.jd.core.v1.model.javasyntax.statement.TypeDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
+import org.jd.core.v1.model.javasyntax.type.AbstractTypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterVisitor;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
+import org.jd.core.v1.model.javasyntax.type.TypeParameters;
+import org.jd.core.v1.model.javasyntax.type.TypeVisitor;
+import org.jd.core.v1.model.javasyntax.type.Types;
 
 import java.util.Iterator;
 import java.util.List;
 
 public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisitor implements DeclarationVisitor, ExpressionVisitor, ReferenceVisitor, StatementVisitor, TypeVisitor, TypeParameterVisitor {
     public void visit(CompilationUnit compilationUnit) {
-        compilationUnit.getTypeDeclarations().accept(this);
+        compilationUnit.typeDeclarations().accept(this);
     }
 
     @Override
@@ -84,7 +188,6 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(EnumDeclaration.Constant declaration) {
-        safeAccept(declaration.getAnnotationReferences());
         safeAccept(declaration.getArguments());
         safeAccept(declaration.getBodyDeclaration());
     }
@@ -129,11 +232,6 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     @Override
     public void visit(FormalParameters list) {
         acceptListDeclaration(list);
-    }
-
-    @Override
-    public void visit(InstanceInitializerDeclaration declaration) {
-        safeAccept(declaration.getStatements());
     }
 
     @Override
@@ -434,22 +532,12 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(ElementValuePair reference) {
-        reference.getElementValue().accept(this);
+        reference.elementValue().accept(this);
     }
 
     @Override
     public void visit(ElementValuePairs list) {
         acceptListReference(list);
-    }
-
-    @Override
-    public void visit(ObjectReference reference) {
-        visit((ObjectType) reference);
-    }
-
-    @Override
-    public void visit(InnerObjectReference reference) {
-        visit((InnerObjectType) reference);
     }
 
     @Override
@@ -461,8 +549,6 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     @Override
     public void visit(BreakStatement statement) {}
 
-    @Override
-    public void visit(ByteCodeStatement statement) {}
 
     @Override
     public void visit(ContinueStatement statement) {}
@@ -511,7 +597,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(LabelStatement statement) {
-        safeAccept(statement.getStatement());
+        safeAccept(statement.statement());
     }
 
     @Override
@@ -608,7 +694,7 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
 
     @Override
     public void visit(TypeDeclarationStatement statement) {
-        statement.getTypeDeclaration().accept(this);
+        statement.typeDeclaration().accept(this);
     }
 
     @Override
@@ -629,8 +715,9 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     public void visit(TypeParameters parameters) {
         Iterator<TypeParameter> iterator = parameters.iterator();
 
-        while (iterator.hasNext())
+        while (iterator.hasNext()) {
             iterator.next().accept(this);
+        }
     }
 
     public void visit(TypeDeclaration declaration) {
@@ -649,66 +736,78 @@ public abstract class AbstractJavaSyntaxVisitor extends AbstractTypeArgumentVisi
     }
 
     public void acceptListDeclaration(List<? extends Declaration> list) {
-        for (Declaration declaration : list)
+        for (Declaration declaration : list) {
             declaration.accept(this);
+        }
     }
 
     public void acceptListExpression(List<? extends Expression> list) {
-        for (Expression expression : list)
+        for (Expression expression : list) {
             expression.accept(this);
+        }
     }
 
     public void acceptListReference(List<? extends Reference> list) {
-        for (Reference reference : list)
+        for (Reference reference : list) {
             reference.accept(this);
+        }
     }
 
     public void acceptListStatement(List<? extends Statement> list) {
-        for (Statement statement : list)
+        for (Statement statement : list) {
             statement.accept(this);
+        }
     }
 
     public void safeAccept(Declaration declaration) {
-        if (declaration != null)
+        if (declaration != null) {
             declaration.accept(this);
+        }
     }
 
     public void safeAccept(BaseExpression expression) {
-        if (expression != null)
+        if (expression != null) {
             expression.accept(this);
+        }
     }
 
     public void safeAccept(Reference reference) {
-        if (reference != null)
+        if (reference != null) {
             reference.accept(this);
+        }
     }
 
     public void safeAccept(BaseStatement list) {
-        if (list != null)
+        if (list != null) {
             list.accept(this);
+        }
     }
 
     public void safeAccept(BaseType list) {
-        if (list != null)
+        if (list != null) {
             list.accept(this);
+        }
     }
 
     public void safeAccept(BaseTypeParameter list) {
-        if (list != null)
+        if (list != null) {
             list.accept(this);
+        }
     }
 
     public void safeAcceptListDeclaration(List<? extends Declaration> list) {
         if (list != null) {
-            for (Declaration declaration : list)
+            for (Declaration declaration : list) {
                 declaration.accept(this);
+            }
         }
     }
 
     public void safeAcceptListStatement(List<? extends Statement> list) {
         if (list != null) {
-            for (Statement statement : list)
+            for (Statement statement : list) {
                 statement.accept(this);
+            }
         }
     }
 }

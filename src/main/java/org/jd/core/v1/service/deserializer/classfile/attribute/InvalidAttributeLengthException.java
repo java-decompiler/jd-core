@@ -1,8 +1,8 @@
 package org.jd.core.v1.service.deserializer.classfile.attribute;
 
-import org.jd.core.v1.service.deserializer.classfile.ClassFileFormatException;
+import jd.core.process.deserializer.ClassFormatException;
 
-public class InvalidAttributeLengthException extends ClassFileFormatException {
+public class InvalidAttributeLengthException extends ClassFormatException {
 
     private static final long serialVersionUID = 1L;
 

@@ -10,8 +10,8 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ThisExpression extends AbstractLineNumberExpression {
-    protected Type type;
-    protected boolean explicit;
+    private final Type type;
+    private final boolean explicit;
 
     public ThisExpression(Type type) {
         this.type = type;
@@ -33,10 +33,6 @@ public class ThisExpression extends AbstractLineNumberExpression {
         return explicit;
     }
 
-    public void setExplicit(boolean explicit) {
-        this.explicit = explicit;
-    }
-
     @Override
     public boolean isThisExpression() { return true; }
 
@@ -50,8 +46,8 @@ public class ThisExpression extends AbstractLineNumberExpression {
         return "ThisExpression{" + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new ThisExpression(lineNumber, type);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new ThisExpression(lineNumber, type);
+    }
 }

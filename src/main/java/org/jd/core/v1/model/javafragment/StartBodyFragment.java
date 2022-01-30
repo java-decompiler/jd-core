@@ -9,7 +9,7 @@ package org.jd.core.v1.model.javafragment;
 import org.jd.core.v1.model.fragment.StartFlexibleBlockFragment;
 
 public class StartBodyFragment extends StartFlexibleBlockFragment implements JavaFragment {
-    protected EndBodyFragment end;
+    private EndBodyFragment end;
 
     public StartBodyFragment(int minimalLineCount, int lineCount, int maximalLineCount, int weight, String label) {
         super(minimalLineCount, lineCount, maximalLineCount, weight, label);
@@ -23,7 +23,7 @@ public class StartBodyFragment extends StartFlexibleBlockFragment implements Jav
         this.end = end;
     }
 
-    public void setLineCount(int lineCount) {
+    void setLineCount(int lineCount) {
         this.lineCount = lineCount;
     }
 

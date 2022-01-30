@@ -4,13 +4,14 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 
+import java.util.Objects;
+
 public class ExpressionVariableInitializer implements VariableInitializer {
-    protected Expression expression;
+    private Expression expression;
 
     public ExpressionVariableInitializer(Expression expression) {
         this.expression = expression;
@@ -32,19 +33,18 @@ public class ExpressionVariableInitializer implements VariableInitializer {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ExpressionVariableInitializer)) return false;
-
-        ExpressionVariableInitializer that = (ExpressionVariableInitializer) o;
-
-        if (expression != null ? !expression.equals(that.expression) : that.expression != null) return false;
-
-        return true;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        return Objects.equals(expression, ((ExpressionVariableInitializer)o).expression);
     }
 
     @Override
     public int hashCode() {
-        return 25107399 + (expression != null ? expression.hashCode() : 0);
+        return 25_107_399 + Objects.hash(expression);
     }
 
     @Override

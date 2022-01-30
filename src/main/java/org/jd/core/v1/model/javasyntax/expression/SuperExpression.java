@@ -10,11 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class SuperExpression extends AbstractLineNumberExpression {
-    protected Type type;
-
-    public SuperExpression(Type type) {
-        this.type = type;
-    }
+    private final Type type;
 
     public SuperExpression(int lineNumber, Type type) {
         super(lineNumber);
@@ -39,8 +35,8 @@ public class SuperExpression extends AbstractLineNumberExpression {
         return "SuperExpression{" + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new SuperExpression(lineNumber, type);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new SuperExpression(lineNumber, type);
+    }
 }

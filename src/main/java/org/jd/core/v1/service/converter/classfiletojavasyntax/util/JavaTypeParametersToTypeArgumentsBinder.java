@@ -7,21 +7,26 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.type.*;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileConstructorInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 
 public class JavaTypeParametersToTypeArgumentsBinder extends AbstractTypeParametersToTypeArgumentsBinder {
     @Override
     public ClassFileConstructorInvocationExpression newConstructorInvocationExpression(
             int lineNumber, ObjectType objectType, String descriptor, TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
-        return new ClassFileConstructorInvocationExpression(lineNumber, objectType, descriptor, clone(methodTypes.parameterTypes), parameters);
+        return new ClassFileConstructorInvocationExpression(lineNumber, objectType, descriptor, clone(methodTypes.getParameterTypes()), parameters);
     }
 
     @Override
     public ClassFileSuperConstructorInvocationExpression newSuperConstructorInvocationExpression(
             int lineNumber, ObjectType objectType, String descriptor, TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
-        return new ClassFileSuperConstructorInvocationExpression(lineNumber, objectType, descriptor, clone(methodTypes.parameterTypes), parameters);
+        return new ClassFileSuperConstructorInvocationExpression(lineNumber, objectType, descriptor, clone(methodTypes.getParameterTypes()), parameters);
     }
 
     @Override
@@ -29,8 +34,8 @@ public class JavaTypeParametersToTypeArgumentsBinder extends AbstractTypeParamet
             int lineNumber, Expression expression, ObjectType objectType, String name, String descriptor,
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
         return new ClassFileMethodInvocationExpression(
-            lineNumber, methodTypes.typeParameters, methodTypes.returnedType, expression,
-            objectType.getInternalName(), name, descriptor, clone(methodTypes.parameterTypes), parameters);
+            lineNumber, methodTypes.getTypeParameters(), methodTypes.getReturnedType(), expression,
+            objectType.getInternalName(), name, descriptor, clone(methodTypes.getParameterTypes()), parameters);
     }
 
     @Override

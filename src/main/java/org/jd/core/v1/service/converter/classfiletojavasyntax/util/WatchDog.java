@@ -13,7 +13,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class WatchDog {
-    protected Set<Link> links = new HashSet<>();
+    protected final Set<Link> links = new HashSet<>();
 
     public void clear() {
         links.clear();
@@ -32,8 +32,8 @@ public class WatchDog {
     }
 
     protected static class Link {
-        protected int parentIndex;
-        protected int childIndex;
+        private final int parentIndex;
+        private final int childIndex;
 
         public Link(BasicBlock parent, BasicBlock child) {
             this.parentIndex = parent.getIndex();
@@ -42,14 +42,14 @@ public class WatchDog {
 
         @Override
         public int hashCode() {
-            return 4807589 + parentIndex + 31 * childIndex;
+            return 4_807_589 + parentIndex + 31 * childIndex;
         }
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof Link) {
-                Link other = (Link)o;
-                return (parentIndex == other.parentIndex) && (childIndex == other.childIndex);
+            if (o instanceof Link) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+                Link other = (Link) o;
+                return parentIndex == other.parentIndex && childIndex == other.childIndex;
             }
             return false;
         }

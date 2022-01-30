@@ -24,13 +24,6 @@ public class UnmodifiableTypes extends Types {
         super(collection);
     }
 
-    public UnmodifiableTypes(Type type, Type... types) {
-        super(type, types);
-        if (types.length <= 0) {
-            throw new IllegalArgumentException("Use 'Type' implementation instead");
-        }
-    }
-
     @Override
     public Type removeFirst() {
         throw new UnsupportedOperationException();
@@ -97,7 +90,7 @@ public class UnmodifiableTypes extends Types {
     }
 
     /** --- ListIterator --- */
-    private class UnmodifiableTypesListIterator implements ListIterator<Type> {
+    private static class UnmodifiableTypesListIterator implements ListIterator<Type> {
         protected ListIterator<Type> listIterator;
 
         public UnmodifiableTypesListIterator(ListIterator<Type> listIterator) {

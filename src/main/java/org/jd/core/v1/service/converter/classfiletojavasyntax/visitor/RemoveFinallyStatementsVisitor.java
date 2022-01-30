@@ -7,23 +7,42 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.DoWhileStatement;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfElseStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfStatement;
+import org.jd.core.v1.model.javasyntax.statement.LabelStatement;
+import org.jd.core.v1.model.javasyntax.statement.LambdaExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.NoStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.StatementVisitor;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.SynchronizedStatement;
+import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement;
+import org.jd.core.v1.model.javasyntax.statement.TypeDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.List;
 
 public class RemoveFinallyStatementsVisitor implements StatementVisitor {
-    protected DeclaredSyntheticLocalVariableVisitor declaredSyntheticLocalVariableVisitor = new DeclaredSyntheticLocalVariableVisitor();
-    protected LocalVariableMaker localVariableMaker;
-    protected int statementCountInFinally;
-    protected int statementCountToRemove;
-    protected boolean lastFinallyStatementIsATryStatement;
-
-    public RemoveFinallyStatementsVisitor(LocalVariableMaker localVariableMaker) {
-        this.localVariableMaker = localVariableMaker;
-    }
+    private final DeclaredSyntheticLocalVariableVisitor declaredSyntheticLocalVariableVisitor = new DeclaredSyntheticLocalVariableVisitor();
+    private int statementCountInFinally;
+    private int statementCountToRemove;
+    private boolean lastFinallyStatementIsATryStatement;
 
     public void init() {
         this.statementCountInFinally = 0;
@@ -116,7 +135,7 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
 
     private static WhileStatement getInfiniteWhileStatement(Statement statement) {
         if (statement.isLabelStatement()) {
-            statement = ((LabelStatement)statement).getStatement();
+            statement = ((LabelStatement)statement).statement();
         }
 
         if (statement == null || !statement.isWhileStatement() || !statement.getCondition().isBooleanExpression()) {
@@ -154,11 +173,16 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
 
         if (finallyStatements != null) {
             switch (finallyStatements.size()) {
-                case 0: break;
-                case 1: finallyStatements.getFirst().accept(this); break;
-                default: for (Statement stmt : finallyStatements) {
-                    stmt.accept(this);
-                } break;
+                case 0:
+                    break;
+                case 1:
+                    finallyStatements.getFirst().accept(this);
+                    break;
+                default:
+                    for (Statement stmt : finallyStatements) {
+                        stmt.accept(this);
+                    }
+                    break;
             }
 
             if (statementCountInFinally == 0 && !finallyStatements.isEmpty()) {
@@ -240,8 +264,6 @@ public class RemoveFinallyStatementsVisitor implements StatementVisitor {
     public void visit(AssertStatement statement) {}
     @Override
     public void visit(BreakStatement statement) {}
-    @Override
-    public void visit(ByteCodeStatement statement) {}
     @Override
     public void visit(CommentStatement statement) {}
     @Override

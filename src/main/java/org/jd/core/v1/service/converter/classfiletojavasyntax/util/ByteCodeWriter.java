@@ -7,10 +7,100 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantClass;
+import org.apache.bcel.classfile.ConstantDouble;
+import org.apache.bcel.classfile.ConstantFloat;
+import org.apache.bcel.classfile.ConstantInteger;
+import org.apache.bcel.classfile.ConstantLong;
+import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantString;
+import org.apache.bcel.classfile.ConstantUtf8;
+import org.apache.bcel.classfile.LineNumber;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.*;
-import org.jd.core.v1.model.classfile.constant.*;
+import org.jd.core.v1.model.classfile.attribute.AttributeCode;
+import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
+import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTable;
+import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTypeTable;
+import org.jd.core.v1.model.classfile.attribute.CodeException;
+import org.jd.core.v1.model.classfile.attribute.LocalVariable;
+import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
+import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
+import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import static org.apache.bcel.Const.ALOAD;
+import static org.apache.bcel.Const.ANEWARRAY;
+import static org.apache.bcel.Const.ASTORE;
+import static org.apache.bcel.Const.BIPUSH;
+import static org.apache.bcel.Const.CHECKCAST;
+import static org.apache.bcel.Const.DLOAD;
+import static org.apache.bcel.Const.DSTORE;
+import static org.apache.bcel.Const.FLOAD;
+import static org.apache.bcel.Const.FSTORE;
+import static org.apache.bcel.Const.GETFIELD;
+import static org.apache.bcel.Const.GETSTATIC;
+import static org.apache.bcel.Const.GOTO;
+import static org.apache.bcel.Const.GOTO_W;
+import static org.apache.bcel.Const.IFEQ;
+import static org.apache.bcel.Const.IFGE;
+import static org.apache.bcel.Const.IFGT;
+import static org.apache.bcel.Const.IFLE;
+import static org.apache.bcel.Const.IFLT;
+import static org.apache.bcel.Const.IFNE;
+import static org.apache.bcel.Const.IFNONNULL;
+import static org.apache.bcel.Const.IFNULL;
+import static org.apache.bcel.Const.IF_ACMPEQ;
+import static org.apache.bcel.Const.IF_ACMPNE;
+import static org.apache.bcel.Const.IF_ICMPEQ;
+import static org.apache.bcel.Const.IF_ICMPGE;
+import static org.apache.bcel.Const.IF_ICMPGT;
+import static org.apache.bcel.Const.IF_ICMPLE;
+import static org.apache.bcel.Const.IF_ICMPLT;
+import static org.apache.bcel.Const.IF_ICMPNE;
+import static org.apache.bcel.Const.IINC;
+import static org.apache.bcel.Const.ILOAD;
+import static org.apache.bcel.Const.INSTANCEOF;
+import static org.apache.bcel.Const.INVOKEDYNAMIC;
+import static org.apache.bcel.Const.INVOKEINTERFACE;
+import static org.apache.bcel.Const.INVOKESPECIAL;
+import static org.apache.bcel.Const.INVOKESTATIC;
+import static org.apache.bcel.Const.INVOKEVIRTUAL;
+import static org.apache.bcel.Const.ISTORE;
+import static org.apache.bcel.Const.JSR;
+import static org.apache.bcel.Const.JSR_W;
+import static org.apache.bcel.Const.LDC;
+import static org.apache.bcel.Const.LDC2_W;
+import static org.apache.bcel.Const.LDC_W;
+import static org.apache.bcel.Const.LLOAD;
+import static org.apache.bcel.Const.LOOKUPSWITCH;
+import static org.apache.bcel.Const.LSTORE;
+import static org.apache.bcel.Const.MULTIANEWARRAY;
+import static org.apache.bcel.Const.NEW;
+import static org.apache.bcel.Const.NEWARRAY;
+import static org.apache.bcel.Const.PUTFIELD;
+import static org.apache.bcel.Const.PUTSTATIC;
+import static org.apache.bcel.Const.RET;
+import static org.apache.bcel.Const.SIPUSH;
+import static org.apache.bcel.Const.TABLESWITCH;
+import static org.apache.bcel.Const.T_BOOLEAN;
+import static org.apache.bcel.Const.T_BYTE;
+import static org.apache.bcel.Const.T_CHAR;
+import static org.apache.bcel.Const.T_DOUBLE;
+import static org.apache.bcel.Const.T_FLOAT;
+import static org.apache.bcel.Const.T_INT;
+import static org.apache.bcel.Const.T_LONG;
+import static org.apache.bcel.Const.T_SHORT;
+import static org.apache.bcel.Const.WIDE;
 
 /**
  * Example:
@@ -26,7 +116,7 @@ import org.jd.core.v1.model.classfile.constant.*;
  //   12: aload_2
  //   13: ifnull +49 -> 62
  //   16: aload_2
- //   17: invokestatic 146	jd/core/process/deserializer/ClassFileDeserializer:Deserialize	(Ljava/io/DataInput;)Ljd/core/model/classfile/ClassFile;
+ //   17: invokestatic 146    jd/core/process/deserializer/ClassFileDeserializer:Deserialize    (Ljava/io/DataInput;)Ljd/core/model/classfile/ClassFile;
  //   20: astore_3
  //   21: goto +41 -> 62
  //   24: astore 4
@@ -35,7 +125,7 @@ import org.jd.core.v1.model.classfile.constant.*;
  //   28: aload_2
  //   29: ifnull +46 -> 75
  //   32: aload_2
- //   33: invokevirtual 149	java/io/DataInputStream:close	()V
+ //   33: invokevirtual 149    java/io/DataInputStream:close    ()V
  //   36: goto +39 -> 75
  //   39: astore 6
  //   41: goto +34 -> 75
@@ -43,7 +133,7 @@ import org.jd.core.v1.model.classfile.constant.*;
  //   46: aload_2
  //   47: ifnull +12 -> 59
  //   50: aload_2
- //   51: invokevirtual 149	java/io/DataInputStream:close	()V
+ //   51: invokevirtual 149    java/io/DataInputStream:close    ()V
  //   54: goto +5 -> 59
  //   57: astore 6
  //   59: aload 5
@@ -51,55 +141,56 @@ import org.jd.core.v1.model.classfile.constant.*;
  //   62: aload_2
  //   63: ifnull +12 -> 75
  //   66: aload_2
- //   67: invokevirtual 149	java/io/DataInputStream:close	()V
+ //   67: invokevirtual 149    java/io/DataInputStream:close    ()V
  //   70: goto +5 -> 75
  //   73: astore 6
  //   75: aload_3
  //   76: areturn
  // Line number table:
- //   #Java source line	-> byte code offset
- //   #112	-> 0
- //   #113	-> 2
- //   #117	-> 4
- //   #118	-> 12
- //   #119	-> 16
- //   #120	-> 21
- //   #121	-> 24
- //   #123	-> 26
- //   #128	-> 28
- //   #129	-> 32
- //   #127	-> 44
- //   #128	-> 46
- //   #129	-> 50
- //   #130	-> 59
- //   #128	-> 62
- //   #129	-> 66
- //   #132	-> 75
+ //   #Java source line    -> byte code offset
+ //   #112    -> 0
+ //   #113    -> 2
+ //   #117    -> 4
+ //   #118    -> 12
+ //   #119    -> 16
+ //   #120    -> 21
+ //   #121    -> 24
+ //   #123    -> 26
+ //   #128    -> 28
+ //   #129    -> 32
+ //   #127    -> 44
+ //   #128    -> 46
+ //   #129    -> 50
+ //   #130    -> 59
+ //   #128    -> 62
+ //   #129    -> 66
+ //   #132    -> 75
  // Local variable table:
- //   start	length	slot	name	signature
- //   0	77	0	loader	Loader
- //   0	77	1	internalClassPath	String
- //   1	66	2	dis	java.io.DataInputStream
- //   3	73	3	classFile	ClassFile
- //   24	3	4	e	IOException
- //   44	16	5	localObject	Object
- //   39	1	6	localIOException1	IOException
- //   57	1	6	localIOException2	IOException
- //   73	1	6	localIOException3	IOException
+ //   start    length    slot    name    signature
+ //   0    77    0    loader    Loader
+ //   0    77    1    internalClassPath    String
+ //   1    66    2    dis    java.io.DataInputStream
+ //   3    73    3    classFile    ClassFile
+ //   24    3    4    e    IOException
+ //   44    16    5    localObject    Object
+ //   39    1    6    localIOException1    IOException
+ //   57    1    6    localIOException2    IOException
+ //   73    1    6    localIOException3    IOException
  // Exception table:
- //   from	to	target	type
- //   4	21	24	java/io/IOException
- //   32	36	39	java/io/IOException
- //   4	28	44	finally
- //   50	54	57	java/io/IOException
- //   66	70	73	java/io/IOException
+ //   from    to    target    type
+ //   4    21    24    java/io/IOException
+ //   32    36    39    java/io/IOException
+ //   4    28    44    finally
+ //   50    54    57    java/io/IOException
+ //   66    70    73    java/io/IOException
  */
-public class ByteCodeWriter {
+public final class ByteCodeWriter {
+
+    public static final String DECOMPILATION_FAILED_AT_LINE = "Decompilation failed at line #";
 
     public static final String ILLEGAL_OPCODE = "<illegal opcode>";
 
     private ByteCodeWriter() {
-        super();
     }
 
     public static String write(String linePrefix, Method method) {
@@ -134,7 +225,7 @@ public class ByteCodeWriter {
         return sb.toString();
     }
 
-    protected static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+    private static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
         byte[] code = attributeCode.getCode();
         int length = code.length;
 
@@ -142,142 +233,180 @@ public class ByteCodeWriter {
         writeByteCode(linePrefix, sb, constants, code, 0, length);
     }
 
-    protected static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, byte[] code, int fromOffset, int toOffset) {
+    private static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, byte[] code, int fromOffset, int toOffset) {
         for (int offset=fromOffset; offset<toOffset; offset++) {
             int opcode = code[offset] & 255;
 
             sb.append(linePrefix).append("  ").append(offset).append(": ").append(OPCODE_NAMES[opcode]);
 
             switch (opcode) {
-                case 16: // BIPUSH
+                case BIPUSH:
                     sb.append(" #").append((byte) (code[++offset] & 255));
                     break;
-                case 17: // SIPUSH
-                    sb.append(" #").append((short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                case SIPUSH:
+                    sb.append(" #").append((short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
-                case 18:
+                case LDC:
                     writeLDC(sb, constants, constants.getConstant(code[++offset] & 255));
                     break;
-                case 19: case 20: // LDC_W, LDC2_W
-                    writeLDC(sb, constants, constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                case LDC_W, LDC2_W:
+                    writeLDC(sb, constants, constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
-                case 21: case 22: case 23: case 24: case 25: // ILOAD, LLOAD, FLOAD, DLOAD, ALOAD
-                case 54: case 55: case 56: case 57: case 58: // ISTORE, LSTORE, FSTORE, DSTORE, ASTORE
-                case 169: // RET
-                    sb.append(" #").append((code[++offset] & 255));
+                case ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,
+                     ISTORE, LSTORE, FSTORE, DSTORE, ASTORE,
+                     RET:
+                    sb.append(" #").append(code[++offset] & 255);
                     break;
-                case 132: // IINC
-                    sb.append(" #").append((code[++offset] & 255)).append(", ").append((byte)(code[++offset] & 255));
+                case IINC:
+                    sb.append(" #").append(code[++offset] & 255).append(", ").append((byte)(code[++offset] & 255));
                     break;
-                case 153: case 154: case 155: case 156: case 157: case 158: // IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE
-                case 159: case 160: case 161: case 162: case 163: case 164: case 165: case 166: // IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE
-                case 167: case 168: // GOTO, JSR
-                    sb.append(" -> ").append(offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                case IFEQ, IFNE, IFLT, IFGE, IFGT, IFLE,
+                     IF_ICMPEQ, IF_ICMPNE, IF_ICMPLT, IF_ICMPGE, IF_ICMPGT, IF_ICMPLE, IF_ACMPEQ, IF_ACMPNE,
+                     GOTO, JSR:
+                    sb.append(" -> ").append(offset + (short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
-                case 170: // TABLESWITCH
+                case TABLESWITCH:
                     // Skip padding
-                    int i = (offset + 4) & 0xFFFC;
+                    int i = offset + 4 & 0xFFFC;
 
-                    sb.append(" default").append(" -> ").append(offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255)));
+                    sb.append(" default").append(" -> ").append(offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255));
 
-                    int low = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
-                    int high = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
+                    int low = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
+                    int high = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
 
                     for (int value = low; value <= high; value++) {
-                        sb.append(", ").append(value).append(" -> ").append(offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255)));
+                        sb.append(", ").append(value).append(" -> ").append(offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255));
                     }
 
-                    offset = (i - 1);
+                    offset = i - 1;
                     break;
-                case 171: // LOOKUPSWITCH
+                case LOOKUPSWITCH:
                     // Skip padding
-                    i = (offset + 4) & 0xFFFC;
+                    i = offset + 4 & 0xFFFC;
 
-                    sb.append(" default").append(" -> ").append(offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255)));
+                    sb.append(" default").append(" -> ").append(offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255));
 
-                    int npairs = ((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255);
+                    int npairs = (code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255;
 
                     for (int k = 0; k < npairs; k++) {
-                        sb.append(", ").append(((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255));
-                        sb.append(" -> ").append(offset + (((code[i++] & 255) << 24) | ((code[i++] & 255) << 16) | ((code[i++] & 255) << 8) | (code[i++] & 255)));
+                        sb.append(", ").append((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255);
+                        sb.append(" -> ").append(offset + ((code[i++] & 255) << 24 | (code[i++] & 255) << 16 | (code[i++] & 255) << 8 | code[i++] & 255));
                     }
 
-                    offset = (i - 1);
+                    offset = i - 1;
                     break;
-                case 178: case 179: // GETSTATIC, PUTSTATIC
-                    ConstantMemberRef constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                case GETSTATIC, PUTSTATIC:
+                    ConstantMemberRef constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
                     ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    String descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
 
                     sb.append(" ").append(typeName).append('.').append(name).append(" : ").append(descriptor);
                     break;
-                case 180: case 181: case 182: case 183: case 184: // GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                case GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC:
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
                     break;
-                case 185: case 186: // INVOKEINTERFACE, INVOKEDYNAMIC
-                    constantMemberRef = constants.getConstant(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                case INVOKEINTERFACE, INVOKEDYNAMIC:
+                    constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getDescriptorIndex());
+                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
 
                     offset += 2; // Skip 2 bytes
                     break;
-                case 187: case 189: case 192: case 193: // NEW, ANEWARRAY, CHECKCAST, INSTANCEOF
-                    typeName = constants.getConstantTypeName(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                case NEW, ANEWARRAY, CHECKCAST, INSTANCEOF:
+                    typeName = constants.getConstantTypeName((code[++offset] & 255) << 8 | code[++offset] & 255);
                     sb.append(" ").append(typeName);
                     break;
-                case 188: // NEWARRAY
-                    switch ((code[++offset] & 255)) {
-                        case 4:  sb.append(" boolean"); break;
-                        case 5:  sb.append(" char"); break;
-                        case 6:  sb.append(" float"); break;
-                        case 7:  sb.append(" double"); break;
-                        case 8:  sb.append(" byte"); break;
-                        case 9:  sb.append(" short"); break;
-                        case 10: sb.append(" int"); break;
-                        case 11: sb.append(" long"); break;
+                case NEWARRAY:
+                    switch (code[++offset] & 255) {
+                        case T_BOOLEAN:
+                            sb.append(" boolean");
+                            break;
+                        case T_CHAR:
+                            sb.append(" char");
+                            break;
+                        case T_FLOAT:
+                            sb.append(" float");
+                            break;
+                        case T_DOUBLE:
+                            sb.append(" double");
+                            break;
+                        case T_BYTE:
+                            sb.append(" byte");
+                            break;
+                        case T_SHORT:
+                            sb.append(" short");
+                            break;
+                        case T_INT:
+                            sb.append(" int");
+                            break;
+                        case T_LONG:
+                            sb.append(" long");
+                            break;
                     }
                     break;
-                case 196: // WIDE
+                case WIDE:
                     opcode = code[++offset] & 255;
-                    i = ((code[++offset] & 255) << 8) | (code[++offset] & 255);
+                    i = (code[++offset] & 255) << 8 | code[++offset] & 255;
 
-                    if (opcode == 132) { // IINC
-                        sb.append(" iinc #").append(i).append(' ').append((short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                    if (opcode == IINC) {
+                        sb.append(" iinc #").append(i).append(' ').append((short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     } else {
                         switch (opcode) {
-                            case 21: sb.append(" iload #").append(i); break;
-                            case 22: sb.append(" lload #").append(i); break;
-                            case 23: sb.append(" fload #").append(i); break;
-                            case 24: sb.append(" dload #").append(i); break;
-                            case 25: sb.append(" aload #").append(i); break;
-                            case 54: sb.append(" istore #").append(i); break;
-                            case 55: sb.append(" lstore #").append(i); break;
-                            case 56: sb.append(" fstore #").append(i); break;
-                            case 57: sb.append(" dstore #").append(i); break;
-                            case 58: sb.append(" astore #").append(i); break;
-                            case 169: sb.append(" ret #").append(i); break;
+                            case ILOAD:
+                                sb.append(" iload #").append(i);
+                                break;
+                            case LLOAD:
+                                sb.append(" lload #").append(i);
+                                break;
+                            case FLOAD:
+                                sb.append(" fload #").append(i);
+                                break;
+                            case DLOAD:
+                                sb.append(" dload #").append(i);
+                                break;
+                            case ALOAD:
+                                sb.append(" aload #").append(i);
+                                break;
+                            case ISTORE:
+                                sb.append(" istore #").append(i);
+                                break;
+                            case LSTORE:
+                                sb.append(" lstore #").append(i);
+                                break;
+                            case FSTORE:
+                                sb.append(" fstore #").append(i);
+                                break;
+                            case DSTORE:
+                                sb.append(" dstore #").append(i);
+                                break;
+                            case ASTORE:
+                                sb.append(" astore #").append(i);
+                                break;
+                            case RET:
+                                sb.append(" ret #").append(i);
+                                break;
                         }
                     }
                     break;
-                case 197: // MULTIANEWARRAY
-                    typeName = constants.getConstantTypeName(((code[++offset] & 255) << 8) | (code[++offset] & 255));
+                case MULTIANEWARRAY:
+                    typeName = constants.getConstantTypeName((code[++offset] & 255) << 8 | code[++offset] & 255);
                     sb.append(typeName).append(' ').append(code[++offset] & 255);
                     break;
-                case 198: case 199: // IFNULL, IFNONNULL
-                    sb.append(" -> ").append(offset + (short)(((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                case IFNULL, IFNONNULL:
+                    sb.append(" -> ").append(offset + (short)((code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
-                case 200: case 201: // GOTO_W, JSR_W
-                    sb.append(" -> ").append(offset + (((code[++offset] & 255) << 24) | ((code[++offset] & 255) << 16) | ((code[++offset] & 255) << 8) | (code[++offset] & 255)));
+                case GOTO_W, JSR_W:
+                    sb.append(" -> ").append(offset + ((code[++offset] & 255) << 24 | (code[++offset] & 255) << 16 | (code[++offset] & 255) << 8 | code[++offset] & 255));
                     break;
             }
 
@@ -285,37 +414,49 @@ public class ByteCodeWriter {
         }
     }
 
-    protected static void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
+    private static void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
         switch (constant.getTag()) {
-            case Constant.CONSTANT_INTEGER:
-                sb.append(' ').append(((ConstantInteger) constant).getValue());
+            case Const.CONSTANT_Integer:
+                sb.append(' ').append(((ConstantInteger) constant).getBytes());
                 break;
-            case Constant.CONSTANT_FLOAT:
-                sb.append(' ').append(((ConstantFloat) constant).getValue());
+            case Const.CONSTANT_Float:
+                sb.append(' ').append(((ConstantFloat) constant).getBytes());
                 break;
-            case Constant.CONSTANT_CLASS:
+            case Const.CONSTANT_Class:
                 int typeNameIndex = ((ConstantClass) constant).getNameIndex();
-                sb.append(' ').append(((ConstantUtf8)constants.getConstant(typeNameIndex)).getValue());
+                sb.append(' ').append(((ConstantUtf8)constants.getConstant(typeNameIndex)).getBytes());
                 break;
-            case Constant.CONSTANT_LONG:
-                sb.append(' ').append(((ConstantLong) constant).getValue());
+            case Const.CONSTANT_Long:
+                sb.append(' ').append(((ConstantLong) constant).getBytes());
                 break;
-            case Constant.CONSTANT_DOUBLE:
-                sb.append(' ').append(((ConstantDouble) constant).getValue());
+            case Const.CONSTANT_Double:
+                sb.append(' ').append(((ConstantDouble) constant).getBytes());
                 break;
-            case Constant.CONSTANT_STRING:
+            case Const.CONSTANT_String:
                 sb.append(" '");
                 int stringIndex = ((ConstantString) constant).getStringIndex();
                 String str = constants.getConstantUtf8(stringIndex);
 
                 for (char c : str.toCharArray()) {
                     switch (c) {
-                        case '\b': sb.append("\\\\b"); break;
-                        case '\f': sb.append("\\\\f"); break;
-                        case '\n': sb.append("\\\\n"); break;
-                        case '\r': sb.append("\\\\r"); break;
-                        case '\t': sb.append("\\\\t"); break;
-                        default: sb.append(c); break;
+                        case '\b':
+                            sb.append("\\\\b");
+                            break;
+                        case '\f':
+                            sb.append("\\\\f");
+                            break;
+                        case '\n':
+                            sb.append("\\\\n");
+                            break;
+                        case '\r':
+                            sb.append("\\\\r");
+                            break;
+                        case '\t':
+                            sb.append("\\\\t");
+                            break;
+                        default:
+                            sb.append(c);
+                            break;
                     }
                 }
 
@@ -324,35 +465,65 @@ public class ByteCodeWriter {
         }
     }
 
-    protected static void writeLineNumberTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
+    private static void writeLineNumberTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
         AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
 
         if (lineNumberTable != null) {
             sb.append(linePrefix).append("Line number table:\n");
             sb.append(linePrefix).append("  Java source line number -> byte code offset\n");
 
-            for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
+            for (LineNumber lineNumber : lineNumberTable.lineNumberTable()) {
                 sb.append(linePrefix).append("  #");
                 sb.append(lineNumber.getLineNumber()).append("\t-> ");
-                sb.append(lineNumber.getStartPc()).append('\n');
+                sb.append(lineNumber.getStartPC()).append('\n');
             }
         }
     }
 
-    protected static void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
+    public static List<Statement> getLineNumberTableAsStatements(Method method) {
+
+        List<Statement> comments = new ArrayList<>();
+
+        AttributeCode attributeCode = method.getAttribute("Code");
+
+        if (attributeCode == null) {
+            return null;
+        }
+
+        TreeMap<Integer, List<Integer>> lineNumberToOffsets = new TreeMap<>();
+
+        AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
+
+        if (lineNumberTable != null) {
+
+            for (LineNumber lineNumber : lineNumberTable.lineNumberTable()) {
+                lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPC());
+            }
+            for (Entry<Integer, List<Integer>> entry : lineNumberToOffsets.entrySet()) {
+                int lineNumber = entry.getKey();
+                List<Integer> offsets = entry.getValue();
+                BooleanExpression condition = new BooleanExpression(entry.getKey(), false);
+                StringConstantExpression message = new StringConstantExpression(lineNumber, DECOMPILATION_FAILED_AT_LINE + lineNumber + " -> offsets " + offsets);
+                comments.add(new AssertStatement(condition, message));
+            }
+        }
+        return comments;
+    }
+
+    private static void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
         AttributeLocalVariableTable localVariableTable = attributeCode.getAttribute("LocalVariableTable");
 
         if (localVariableTable != null) {
             sb.append(linePrefix).append("Local variable table:\n");
             sb.append(linePrefix).append("  start\tlength\tslot\tname\tdescriptor\n");
 
-            for (LocalVariable localVariable : localVariableTable.getLocalVariableTable()) {
+            for (LocalVariable localVariable : localVariableTable.localVariableTable()) {
                 sb.append(linePrefix).append("  ");
-                sb.append(localVariable.getStartPc()).append('\t');
-                sb.append(localVariable.getLength()).append('\t');
-                sb.append(localVariable.getIndex()).append('\t');
-                sb.append(localVariable.getName()).append('\t');
-                sb.append(localVariable.getDescriptor()).append('\n');
+                sb.append(localVariable.startPc()).append('\t');
+                sb.append(localVariable.length()).append('\t');
+                sb.append(localVariable.index()).append('\t');
+                sb.append(localVariable.name()).append('\t');
+                sb.append(localVariable.descriptor()).append('\n');
             }
         }
 
@@ -362,18 +533,18 @@ public class ByteCodeWriter {
             sb.append(linePrefix).append("Local variable type table:\n");
             sb.append(linePrefix).append("  start\tlength\tslot\tname\tsignature\n");
 
-            for (LocalVariableType localVariable : localVariableTypeTable.getLocalVariableTypeTable()) {
+            for (LocalVariableType localVariable : localVariableTypeTable.localVariableTypeTable()) {
                 sb.append(linePrefix).append("  ");
-                sb.append(localVariable.getStartPc()).append('\t');
-                sb.append(localVariable.getLength()).append('\t');
-                sb.append(localVariable.getIndex()).append('\t');
-                sb.append(localVariable.getName()).append('\t');
-                sb.append(localVariable.getSignature()).append('\n');
+                sb.append(localVariable.startPc()).append('\t');
+                sb.append(localVariable.length()).append('\t');
+                sb.append(localVariable.index()).append('\t');
+                sb.append(localVariable.name()).append('\t');
+                sb.append(localVariable.signature()).append('\n');
             }
         }
     }
 
-    protected static void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+    private static void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
         CodeException[] codeExceptions = attributeCode.getExceptionTable();
 
         if (codeExceptions != null) {
@@ -382,14 +553,14 @@ public class ByteCodeWriter {
 
             for (CodeException codeException : codeExceptions) {
                 sb.append(linePrefix).append("  ");
-                sb.append(codeException.getStartPc()).append('\t');
-                sb.append(codeException.getEndPc()).append('\t');
-                sb.append(codeException.getHandlerPc()).append('\t');
+                sb.append(codeException.startPc()).append('\t');
+                sb.append(codeException.endPc()).append('\t');
+                sb.append(codeException.handlerPc()).append('\t');
 
-                if (codeException.getCatchType() == 0) {
+                if (codeException.catchType() == 0) {
                     sb.append("finally");
                 } else {
-                    sb.append(constants.getConstantTypeName(codeException.getCatchType()));
+                    sb.append(constants.getConstantTypeName(codeException.catchType()));
                 }
 
                 sb.append('\n');
@@ -397,7 +568,7 @@ public class ByteCodeWriter {
         }
     }
 
-    protected static final String[] OPCODE_NAMES = {
+    private static final String[] OPCODE_NAMES = {
         "nop", "aconst_null", "iconst_m1", "iconst_0", "iconst_1",
         "iconst_2", "iconst_3", "iconst_4", "iconst_5", "lconst_0",
         "lconst_1", "fconst_0", "fconst_1", "fconst_2", "dconst_0",

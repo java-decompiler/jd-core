@@ -9,22 +9,7 @@ package org.jd.core.v1.model.classfile.attribute;
 
 import java.util.Arrays;
 
-public class ServiceInfo {
-    protected String   interfaceTypeName;
-    protected String[] implementationTypeNames;
-
-    public ServiceInfo(String interfaceTypeName, String[] implementationTypeNames) {
-        this.interfaceTypeName = interfaceTypeName;
-        this.implementationTypeNames = implementationTypeNames;
-    }
-
-    public String getInterfaceTypeName() {
-        return interfaceTypeName;
-    }
-
-    public String[] getImplementationTypeNames() {
-        return implementationTypeNames;
-    }
+public record ServiceInfo(String interfaceTypeName, String[] implementationTypeNames) {
 
     @Override
     public String toString() {

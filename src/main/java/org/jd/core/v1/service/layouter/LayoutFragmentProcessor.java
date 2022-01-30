@@ -31,15 +31,13 @@ public class LayoutFragmentProcessor {
 
     public void process(DecompileContext decompileContext) {
         int maxLineNumber = decompileContext.getMaxLineNumber();
-        boolean containsByteCode = decompileContext.containsByteCode();
-        boolean showBridgeAndSynthetic = decompileContext.isShowBridgeAndSynthetic();
         Map<String, Object> configuration = decompileContext.getConfiguration();
-        Object realignLineNumbersConfiguration = (configuration == null) ? "false" : configuration.get("realignLineNumbers");
-        boolean realignLineNumbers = (realignLineNumbersConfiguration == null) ? false : "true".equals(realignLineNumbersConfiguration.toString());
+        Object realignLineNumbersConfiguration = configuration == null ? "false" : configuration.get("realignLineNumbers");
+        boolean realignLineNumbers = realignLineNumbersConfiguration != null && "true".equals(realignLineNumbersConfiguration.toString());
 
         List<Fragment> fragments = decompileContext.getBody();
 
-        if ((maxLineNumber != UNKNOWN_LINE_NUMBER) && !containsByteCode && !showBridgeAndSynthetic && realignLineNumbers) {
+        if (maxLineNumber != UNKNOWN_LINE_NUMBER && realignLineNumbers) {
             BuildSectionsVisitor buildSectionsVisitor = new BuildSectionsVisitor();
 
             // Create sections
@@ -79,7 +77,7 @@ public class LayoutFragmentProcessor {
                     for (Section section : sections) {
                         changed |= section.layout(false);
                     }
-                    if (changed == false) {
+                    if (!changed) {
                         // Nothing changed -> Quit loop
                         break;
                     }
@@ -105,12 +103,11 @@ public class LayoutFragmentProcessor {
                     break;
                 }
 
-                if (sumOfRates > newSumOfRates) {
-                    sumOfRates = newSumOfRates;
-                } else {
+                if (sumOfRates <= newSumOfRates) {
                     // The sum of the constraints does not decrease -> Quit loop
                     break;
                 }
+                sumOfRates = newSumOfRates;
 
                 if (! mostConstrainedSection.releaseConstraints(holder)) {
                     break;

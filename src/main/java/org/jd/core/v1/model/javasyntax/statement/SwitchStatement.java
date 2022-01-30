@@ -14,8 +14,8 @@ import java.util.List;
 public class SwitchStatement implements Statement {
     public static final DefaultLabel DEFAULT_LABEL = new DefaultLabel();
 
-    protected Expression condition;
-    protected List<Block> blocks;
+    private Expression condition;
+    private final List<Block> blocks;
 
     public SwitchStatement(Expression condition, List<Block> blocks) {
         this.condition = condition;
@@ -61,7 +61,7 @@ public class SwitchStatement implements Statement {
     }
 
     public static class ExpressionLabel implements Label {
-        protected Expression expression;
+        private Expression expression;
 
         public ExpressionLabel(Expression expression) {
             this.expression = expression;
@@ -88,8 +88,8 @@ public class SwitchStatement implements Statement {
     }
 
     // --- Block --- //
-    public static abstract class Block implements Statement {
-        protected BaseStatement statements;
+    public abstract static class Block implements Statement {
+        private final BaseStatement statements;
 
         protected Block(BaseStatement statements) {
             this.statements = statements;
@@ -102,7 +102,7 @@ public class SwitchStatement implements Statement {
     }
 
     public static class LabelBlock extends Block {
-        protected Label label;
+        private final Label label;
 
         public LabelBlock(Label label, BaseStatement statements) {
             super(statements);
@@ -128,7 +128,7 @@ public class SwitchStatement implements Statement {
     }
 
     public static class MultiLabelsBlock extends Block {
-        protected List<Label> labels;
+        private final List<Label> labels;
 
         public MultiLabelsBlock(List<Label> labels, BaseStatement statements) {
             super(statements);

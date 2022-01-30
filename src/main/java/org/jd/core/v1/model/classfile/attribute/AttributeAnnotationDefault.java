@@ -7,14 +7,5 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class AttributeAnnotationDefault implements Attribute {
-    protected AttributeElementValue defaultValue;
-
-    public AttributeAnnotationDefault(AttributeElementValue defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
-    public AttributeElementValue getDefaultValue() {
-        return defaultValue;
-    }
+public record AttributeAnnotationDefault(AttributeElementValue defaultValue) implements Attribute {
 }

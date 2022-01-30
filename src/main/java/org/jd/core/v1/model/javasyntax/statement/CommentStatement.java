@@ -8,18 +8,18 @@
 package org.jd.core.v1.model.javasyntax.statement;
 
 public class CommentStatement implements Statement {
-    protected String text;
+    private String text;
 
-    public CommentStatement(String text) {
-        this.text = text;
+    @Override
+    public void accept(StatementVisitor visitor) {
+        visitor.visit(this);
     }
 
     public String getText() {
         return text;
     }
 
-    @Override
-    public void accept(StatementVisitor visitor) {
-        visitor.visit(this);
+    public void setText(String text) {
+        this.text = text;
     }
 }

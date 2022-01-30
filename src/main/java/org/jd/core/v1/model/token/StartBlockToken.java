@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.model.token;
 
-public class StartBlockToken implements Token {
+public record StartBlockToken(String text) implements Token {
 
     public static final StartBlockToken START_BLOCK = new StartBlockToken("{");
     public static final StartBlockToken START_ARRAY_BLOCK = new StartBlockToken("[");
@@ -15,16 +15,6 @@ public class StartBlockToken implements Token {
     public static final StartBlockToken START_PARAMETERS_BLOCK = new StartBlockToken("(");
     public static final StartBlockToken START_RESOURCES_BLOCK = new StartBlockToken("(");
     public static final StartBlockToken START_DECLARATION_OR_STATEMENT_BLOCK = new StartBlockToken("");
-
-    protected String text;
-
-    protected StartBlockToken(String text) {
-        this.text = text;
-    }
-
-    public String getText() {
-        return text;
-    }
 
     @Override
     public String toString() {

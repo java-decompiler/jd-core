@@ -10,20 +10,10 @@ package org.jd.core.v1.model.token;
 /**
  * Must be create outside of blocks [StartStatementToken ... EndStatementToken]
  */
-public class NewLineToken implements Token {
+public record NewLineToken(int count) implements Token {
 
     public static final NewLineToken NEWLINE_1 = new NewLineToken(1);
     public static final NewLineToken NEWLINE_2 = new NewLineToken(2);
-
-    protected int count;
-
-    public NewLineToken(int count) {
-        this.count = count;
-    }
-
-    public int getCount() {
-        return count;
-    }
 
     @Override
     public String toString() {

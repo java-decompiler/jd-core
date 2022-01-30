@@ -12,8 +12,8 @@ public abstract class FlexibleFragment implements Fragment {
     protected       int maximalLineCount;
     protected       int initialLineCount;
     protected       int lineCount;
-    protected final int weight;
-    protected final String label;
+    private final int weight;
+    private final String label;
 
     protected FlexibleFragment(int minimalLineCount, int lineCount, int maximalLineCount, int weight, String label) {
         this.minimalLineCount = minimalLineCount;

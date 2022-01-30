@@ -8,19 +8,10 @@ package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-
 public class FormalParameters extends DefaultList<FormalParameter> implements BaseFormalParameter {
     private static final long serialVersionUID = 1L;
 
     public FormalParameters() {}
-
-    public FormalParameters(Collection<FormalParameter> collection) {
-        super(collection);
-        if (collection.size() <= 1) {
-            throw new IllegalArgumentException("Use 'FormalParameter' instead");
-        }
-    }
 
     public FormalParameters(FormalParameter parameter, FormalParameter... parameters) {
         super(parameter, parameters);

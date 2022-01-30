@@ -11,9 +11,9 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class MethodReferenceExpression extends AbstractLineNumberTypeExpression {
     protected Expression expression;
-    protected String internalTypeName;
-    protected String name;
-    protected String descriptor;
+    private final String internalTypeName;
+    protected final String name;
+    protected final String descriptor;
 
     public MethodReferenceExpression(Type type, Expression expression, String internalTypeName, String name, String descriptor) {
         super(type);
@@ -60,8 +60,8 @@ public class MethodReferenceExpression extends AbstractLineNumberTypeExpression 
         visitor.visit(this);
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new MethodReferenceExpression(lineNumber, type, expression, internalTypeName, name, descriptor);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new MethodReferenceExpression(lineNumber, type, expression, internalTypeName, name, descriptor);
+    }
 }

@@ -7,22 +7,7 @@
 
 package org.jd.core.v1.model.javasyntax.reference;
 
-public class ElementValuePair implements BaseElementValuePair {
-    protected String name;
-    protected BaseElementValue elementValue;
-
-    public ElementValuePair(String name, BaseElementValue elementValue) {
-        this.name = name;
-        this.elementValue = elementValue;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public BaseElementValue getElementValue() {
-        return elementValue;
-    }
+public record ElementValuePair(String name, BaseElementValue elementValue) implements BaseElementValuePair {
 
     @Override
     public void accept(ReferenceVisitor visitor) {

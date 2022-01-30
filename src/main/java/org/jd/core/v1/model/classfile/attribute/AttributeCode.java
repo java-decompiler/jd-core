@@ -10,11 +10,11 @@ package org.jd.core.v1.model.classfile.attribute;
 import java.util.Map;
 
 public class AttributeCode implements Attribute {
-    protected int maxStack;
-    protected int maxLocals;
-    protected byte[] code;
-    protected CodeException[] exceptionTable;
-    protected Map<String, Attribute> attributes;
+    private final int maxStack;
+    private final int maxLocals;
+    private final byte[] code;
+    private final CodeException[] exceptionTable;
+    private final Map<String, Attribute> attributes;
 
     public AttributeCode(int maxStack, int maxLocals, byte[] code, CodeException[] exceptionTable, Map<String, Attribute> attributes) {
         this.maxStack = maxStack;
@@ -42,6 +42,6 @@ public class AttributeCode implements Attribute {
 
     @SuppressWarnings("unchecked")
     public <T extends Attribute> T getAttribute(String name) {
-        return (attributes == null) ? null : (T)attributes.get(name);
+        return attributes == null ? null : (T)attributes.get(name);
     }
 }

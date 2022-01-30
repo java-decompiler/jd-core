@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
 public class FloatConstantExpression extends AbstractLineNumberTypeExpression {
-    protected float value;
+    private final float value;
 
     public FloatConstantExpression(float value) {
         super(PrimitiveType.TYPE_FLOAT);
@@ -40,8 +40,8 @@ public class FloatConstantExpression extends AbstractLineNumberTypeExpression {
         return "FloatConstantExpression{" + value + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new FloatConstantExpression(lineNumber, value);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new FloatConstantExpression(lineNumber, value);
+    }
 }

@@ -11,12 +11,7 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
 public class SuperConstructorInvocationExpression extends ConstructorReferenceExpression {
-    protected BaseExpression parameters;
-
-    public SuperConstructorInvocationExpression(ObjectType type, String descriptor, BaseExpression parameters) {
-        super(PrimitiveType.TYPE_VOID, type, descriptor);
-        this.parameters = parameters;
-    }
+    private BaseExpression parameters;
 
     public SuperConstructorInvocationExpression(int lineNumber, ObjectType type, String descriptor, BaseExpression parameters) {
         super(lineNumber, PrimitiveType.TYPE_VOID, type, descriptor);

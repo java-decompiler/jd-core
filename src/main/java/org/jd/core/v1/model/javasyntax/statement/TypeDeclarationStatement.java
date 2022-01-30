@@ -9,16 +9,7 @@ package org.jd.core.v1.model.javasyntax.statement;
 
 import org.jd.core.v1.model.javasyntax.declaration.TypeDeclaration;
 
-public class TypeDeclarationStatement implements Statement {
-    protected TypeDeclaration typeDeclaration;
-
-    public TypeDeclarationStatement(TypeDeclaration typeDeclaration) {
-        this.typeDeclaration = typeDeclaration;
-    }
-
-    public TypeDeclaration getTypeDeclaration() {
-        return typeDeclaration;
-    }
+public record TypeDeclarationStatement(TypeDeclaration typeDeclaration) implements Statement {
 
     @Override
     public void accept(StatementVisitor visitor) {

@@ -7,13 +7,28 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.TypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterVisitor;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
+import org.jd.core.v1.model.javasyntax.type.TypeParameters;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 
 import java.util.Map;
 
 public class BindTypeParametersToNonWildcardTypeArgumentsVisitor implements TypeParameterVisitor, TypeArgumentVisitor {
-    protected Map<String, TypeArgument> bindings;
-    protected BaseTypeArgument result;
+    private Map<String, TypeArgument> bindings;
+    private BaseTypeArgument result;
 
     public void init(Map<String, TypeArgument> bindings) {
         this.bindings = bindings;
@@ -62,8 +77,8 @@ public class BindTypeParametersToNonWildcardTypeArgumentsVisitor implements Type
     }
 
     // --- TypeArgumentVisitor --- //
-    @Override public void visit(WildcardExtendsTypeArgument argument) { result = argument.getType(); }
-    @Override public void visit(WildcardSuperTypeArgument argument) { result = argument.getType(); }
+    @Override public void visit(WildcardExtendsTypeArgument argument) { result = argument.type(); }
+    @Override public void visit(WildcardSuperTypeArgument argument) { result = argument.type(); }
 
     @Override public void visit(DiamondTypeArgument argument) { result = null; }
     @Override public void visit(WildcardTypeArgument argument) { result = null; }

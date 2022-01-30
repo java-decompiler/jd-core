@@ -19,7 +19,11 @@ import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.PrimitiveIterator;
 
 import junit.framework.TestCase;
 

@@ -9,7 +9,7 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
@@ -68,7 +68,7 @@ public class JavaSwitchTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 288:   0 */", "default:")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -101,7 +101,7 @@ public class JavaSwitchTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 80: 80 */", "System.out.println(\"'One' or 'POe'\");")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.7", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.7", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -117,7 +117,7 @@ public class JavaSwitchTest extends AbstractJdTest {
             assertNotEquals(-1, source.indexOf("/* 239: 239 */"));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.5", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -133,7 +133,7 @@ public class JavaSwitchTest extends AbstractJdTest {
             assertNotEquals(-1, source.indexOf("/* 239: 239 */"));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.5", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.5", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 
@@ -154,7 +154,7 @@ public class JavaSwitchTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make("/* 134:", "case LEFT:")));
 
             // Recompile decompiled source code and check errors
-            assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
 }

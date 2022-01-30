@@ -29,8 +29,6 @@ public class DecompileContext {
     private int majorVersion;
     private int minorVersion;
     private int maxLineNumber = Printer.UNKNOWN_LINE_NUMBER;
-    private boolean containsByteCode;
-    private boolean showBridgeAndSynthetic;
 
     private ClassFile classFile;
     private CompilationUnit compilationUnit;
@@ -115,22 +113,6 @@ public class DecompileContext {
 
     public void setMaxLineNumber(int maxLineNumber) {
         this.maxLineNumber = maxLineNumber;
-    }
-
-    public boolean containsByteCode() {
-        return containsByteCode;
-    }
-
-    public void setContainsByteCode(boolean containsByteCode) {
-        this.containsByteCode = containsByteCode;
-    }
-
-    public boolean isShowBridgeAndSynthetic() {
-        return showBridgeAndSynthetic;
-    }
-
-    public void setShowBridgeAndSynthetic(boolean showBridgeAndSynthetic) {
-        this.showBridgeAndSynthetic = showBridgeAndSynthetic;
     }
 
     public ClassFile getClassFile() {

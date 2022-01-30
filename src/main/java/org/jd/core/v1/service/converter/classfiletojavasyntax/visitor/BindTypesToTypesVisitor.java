@@ -7,18 +7,28 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeVisitor;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.Types;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 
 import java.util.Map;
 
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 
 public class BindTypesToTypesVisitor extends AbstractNopTypeVisitor {
-    protected TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
-    protected BindTypeArgumentsToTypeArgumentsVisitor bindTypeArgumentsToTypeArgumentsVisitor = new BindTypeArgumentsToTypeArgumentsVisitor();
+    private final TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
+    private final BindTypeArgumentsToTypeArgumentsVisitor bindTypeArgumentsToTypeArgumentsVisitor = new BindTypeArgumentsToTypeArgumentsVisitor();
 
-    protected Map<String, TypeArgument> bindings;
-    protected BaseType result;
+    private Map<String, TypeArgument> bindings;
+    private BaseType result;
 
     public void setBindings(Map<String, TypeArgument> bindings) {
         this.bindings = bindings;
@@ -98,9 +108,7 @@ public class BindTypesToTypesVisitor extends AbstractNopTypeVisitor {
     public void visit(GenericType type) {
         TypeArgument ta = bindings.get(type.getName());
 
-        if (ta == null) {
-            result = TYPE_OBJECT.createType(type.getDimension());
-        } else if (ta == WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT) {
+        if ((ta == null) || (ta == WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT)) {
             result = TYPE_OBJECT.createType(type.getDimension());
         } else {
             typeArgumentToTypeVisitor.init();

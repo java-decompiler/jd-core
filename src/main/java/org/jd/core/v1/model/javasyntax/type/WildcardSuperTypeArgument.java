@@ -8,24 +8,16 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 import java.util.Map;
+import java.util.Objects;
 
-public class WildcardSuperTypeArgument implements TypeArgument {
-    protected Type type;
-
-    public WildcardSuperTypeArgument(Type type) {
-        this.type = type;
-    }
-
-    @Override
-    public Type getType() {
-        return type;
-    }
+public record WildcardSuperTypeArgument(Type type) implements TypeArgument {
 
     @Override
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
         if (typeArgument.isWildcardSuperTypeArgument()) {
-            return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument.getType());
-        } else if (typeArgument instanceof Type) {
+            return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument.type());
+        }
+        if (typeArgument instanceof Type) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
             return type.isTypeArgumentAssignableFrom(typeBounds, typeArgument);
         }
 
@@ -34,17 +26,21 @@ public class WildcardSuperTypeArgument implements TypeArgument {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         WildcardSuperTypeArgument that = (WildcardSuperTypeArgument) o;
 
-        return type != null ? type.equals(that.type) : that.type == null;
+        return Objects.equals(type, that.type);
     }
 
     @Override
     public int hashCode() {
-        return 979510081 + (type != null ? type.hashCode() : 0);
+        return 979_510_081 + Objects.hash(type);
     }
 
     @Override

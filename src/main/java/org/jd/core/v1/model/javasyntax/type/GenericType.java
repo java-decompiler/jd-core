@@ -4,14 +4,13 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.type;
 
 import java.util.Map;
 
 public class GenericType implements Type {
-    protected String name;
-    protected int  dimension;
+    private final String name;
+    private final int  dimension;
 
     public GenericType(String name) {
         this.name = name;
@@ -43,29 +42,30 @@ public class GenericType implements Type {
         if (dimension < 0) {
             throw new IllegalArgumentException("GenericType.createType(dim) : create type with negative dimension");
         }
-        if (this.dimension == dimension)
+        if (this.dimension == dimension) {
             return this;
+        }
         return new GenericType(name, dimension);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         GenericType that = (GenericType) o;
 
-        if (dimension != that.dimension) return false;
-        if (!name.equals(that.name)) return false;
-
-        return true;
+        return dimension == that.dimension && name.equals(that.name);
     }
 
     @Override
     public int hashCode() {
-        int result = 991890290 + name.hashCode();
-        result = 31 * result + dimension;
-        return result;
+        int result = 991_890_290 + name.hashCode();
+        return 31 * result + dimension;
     }
 
     @Override

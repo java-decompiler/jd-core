@@ -16,7 +16,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 
 import java.util.Iterator;
 
-public class SynchronizedStatementMaker {
+public final class SynchronizedStatementMaker {
     private SynchronizedStatementMaker() {
     }
 
@@ -56,7 +56,7 @@ public class SynchronizedStatementMaker {
     }
 
     protected static class RemoveMonitorExitVisitor extends AbstractJavaSyntaxVisitor {
-        protected AbstractLocalVariable localVariable;
+        private final AbstractLocalVariable localVariable;
 
         public RemoveMonitorExitVisitor(AbstractLocalVariable localVariable) {
             this.localVariable = localVariable;

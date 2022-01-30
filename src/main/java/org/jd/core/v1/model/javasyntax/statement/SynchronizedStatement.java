@@ -10,8 +10,8 @@ package org.jd.core.v1.model.javasyntax.statement;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class SynchronizedStatement implements Statement {
-    protected Expression monitor;
-    protected BaseStatement statements;
+    private Expression monitor;
+    private final BaseStatement statements;
 
     public SynchronizedStatement(Expression monitor, BaseStatement statements) {
         this.monitor = monitor;

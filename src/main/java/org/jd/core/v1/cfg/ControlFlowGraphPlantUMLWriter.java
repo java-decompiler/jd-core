@@ -13,15 +13,58 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlo
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.DefaultList;
 
+import java.awt.Desktop;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.zip.Deflater;
+import java.util.TreeSet;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.GROUP_CODE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.LOOP_CONTINUE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.LOOP_END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.LOOP_START;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.RETURN;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SWITCH_BREAK;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITIONAL_BRANCH;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_AND;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_OR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO_IN_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_IF;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_IF_ELSE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_INFINITE_GOTO;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_JSR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_JUMP;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RET;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RETURN;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RETURN_VALUE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_START;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_STATEMENTS;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH_DECLARATION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_THROW;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_DECLARATION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_ECLIPSE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_JSR;
+
+import net.sourceforge.plantuml.FileFormat;
+import net.sourceforge.plantuml.FileFormatOption;
+import net.sourceforge.plantuml.SourceStringReader;
 
 /**
  * A state diagram writer.
@@ -29,41 +72,67 @@ import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.B
  * http://plantuml.com/state.html
  * http://plantuml.com/plantuml
  */
-public class ControlFlowGraphPlantUMLWriter {
-    protected static final int MAX_OFFSET = Integer.MAX_VALUE;
+public final class ControlFlowGraphPlantUMLWriter {
+    private static final String EOL = "\\n\\\n";
 
-    //protected static final String PLANTUML_URL_PREFIX   = "http://plantuml.com/plantuml/png/";
-    protected static final String PLANTUML_URL_PREFIX   = "http://plantuml.com/plantuml/svg/";
-    protected static final char[] PLANTUML_ENCODE_6_BIT = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_".toCharArray();
-    protected static final BasicBlockComparator BASIC_BLOCK_COMPARATOR = new BasicBlockComparator();
+    private static final String REDUCED = "<<Reduced>>\n";
+
+    private static final String AS = "\" as ";
+
+    private static final String STATE = "state \"";
+    
+    private static final int MAX_OFFSET = Integer.MAX_VALUE;
+
+    private ControlFlowGraphPlantUMLWriter() {
+    }
+    
+    public static void showGraph(ControlFlowGraph cfg) {
+        try {
+            SourceStringReader reader = new SourceStringReader(ControlFlowGraphPlantUMLWriter.write(cfg));
+            final ByteArrayOutputStream os = new ByteArrayOutputStream();
+            // Write the first image to "os"
+            reader.outputImage(os, new FileFormatOption(FileFormat.SVG));
+
+            // The XML is stored into svg
+            final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
+            Method method = cfg.getMethod();
+            String className = method.getClassName().replace('/', '.');
+            String svgFileName = className + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+            File svgFile = File.createTempFile(svgFileName, ".svg");
+            svgFile.deleteOnExit();
+            Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                    desktop.browse(svgFile.toURI());
+                }
+            }
+        } catch (IOException e) {
+            assert ExceptionUtil.printStackTrace(e);
+        }
+    }
 
     public static String write(ControlFlowGraph cfg) {
         if (cfg.getBasicBlocks() == null) {
             return null;
-        }
-        boolean dark = true;
-        Set<BasicBlock> set = new HashSet<>();
+        } else {
+            Set<BasicBlock> set = new TreeSet<>(Comparator.comparingInt(BasicBlock::getIndex));
 
-        search(set, cfg.getStart());
+            search(set, cfg.getStart());
 
-        DefaultList<BasicBlock> list = new DefaultList<>(set);
-        list.sort(BASIC_BLOCK_COMPARATOR);
+            DefaultList<BasicBlock> list = new DefaultList<>(set);
 
-        StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
+            sb.append("@startuml\n");
+            sb.append("skinparam state {\n");
+            sb.append("  BackgroundColor<<Reduced>> #BBD7B7\n");
+            sb.append("  BorderColor<<Reduced>> Green\n");
+            sb.append("  BackgroundColor<<Synthetic>> PowderBlue\n");
+            sb.append("  BorderColor<<Synthetic>> DodgerBlue\n");
+            sb.append("  BackgroundColor<<ToReduce>> Orange\n");
+            sb.append("  BorderColor<<ToReduce>> #FF740E\n");
+            sb.append("}\n");
 
-        //sb.append("scale 0.6\n");
-        //sb.append("scale max 2000 width\n");
-        //sb.append("skinparam shadowing false\n");
-        sb.append("skinparam state {\n");
-        sb.append("  BackgroundColor<<Reduced>> #BBD7B7\n");
-        sb.append("  BorderColor<<Reduced>> Green\n");
-        sb.append("  BackgroundColor<<Synthetic>> PowderBlue\n");
-        sb.append("  BorderColor<<Synthetic>> DodgerBlue\n");
-        sb.append("  BackgroundColor<<ToReduce>> Orange\n");
-        sb.append("  BorderColor<<ToReduce>> #FF740E\n");
-        sb.append("}\n");
-
-        if (dark) {
             sb.append("skinparam BackgroundColor #2B2B2B\n");
             sb.append("skinparam state {\n");
             sb.append("  StartColor #999999\n");
@@ -74,57 +143,44 @@ public class ControlFlowGraphPlantUMLWriter {
             sb.append("  ArrowColor #999999\n");
             sb.append("  ArrowFontColor #AAAAAA\n");
             sb.append("}\n");
-        } else {
-            //sb.append("skinparam BackgroundColor #DDDDDD\n");
-            sb.append("skinparam state {\n");
-            sb.append("  BorderColor Gold\n");
-            sb.append("}\n");
-            sb.append("skinparam sequence {\n");
-            sb.append("  ArrowColor Black\n");
-            sb.append("}\n");
+
+            Method method = cfg.getMethod();
+
+            for (BasicBlock basicBlock : list) {
+                writeState(sb, method, basicBlock);
+            }
+
+            for (BasicBlock basicBlock : list) {
+                writeLink(sb, basicBlock);
+            }
+            sb.append("@enduml\n");
+            return sb.toString();
         }
-
-        Method method = cfg.getMethod();
-
-        for (BasicBlock basicBlock : list) {
-            writeState(sb, method, basicBlock);
-        }
-
-        for (BasicBlock basicBlock : list) {
-            writeLink(sb, basicBlock);
-        }
-
-        return sb.toString();
     }
 
-    protected static void search(Set<BasicBlock> set, BasicBlock basicBlock) {
-        if (set.contains(basicBlock) == false) {
+    private static void search(Set<BasicBlock> set, BasicBlock basicBlock) {
+        if (!set.contains(basicBlock)) {
             set.add(basicBlock);
 
             switch (basicBlock.getType()) {
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_LOOP:
-                case TYPE_GOTO:
-                case TYPE_GOTO_IN_TERNARY_OPERATOR:
+                case TYPE_START, TYPE_STATEMENTS, TYPE_LOOP, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR:
                     search(set, basicBlock.getNext());
                     break;
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_JSR:
+                case TYPE_CONDITIONAL_BRANCH, TYPE_JSR:
                     search(set, basicBlock.getNext());
                     search(set, basicBlock.getBranch());
                     break;
                 case TYPE_SWITCH:
                     search(set, basicBlock.getNext());
+                    // intended fall through
                 case TYPE_SWITCH_DECLARATION:
                     for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
                         search(set, switchCase.getBasicBlock());
                     }
                     break;
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     search(set, basicBlock.getSub1());
+                    // intended fall through
                 case TYPE_TRY_DECLARATION:
                     search(set, basicBlock.getNext());
                     for (BasicBlock.ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
@@ -136,14 +192,13 @@ public class ControlFlowGraphPlantUMLWriter {
                     search(set, basicBlock.getNext());
                     search(set, basicBlock.getSub1());
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     search(set, basicBlock.getNext());
+                    // intended fall through
                 case TYPE_CONDITION_TERNARY_OPERATOR:
                     search(set, basicBlock.getCondition());
-                case TYPE_CONDITION:
-                case TYPE_CONDITION_OR:
-                case TYPE_CONDITION_AND:
+                    // intended fall through
+                case TYPE_CONDITION, TYPE_CONDITION_OR, TYPE_CONDITION_AND:
                     search(set, basicBlock.getSub1());
                     search(set, basicBlock.getSub2());
                     break;
@@ -151,7 +206,7 @@ public class ControlFlowGraphPlantUMLWriter {
         }
     }
 
-    protected static void writeState(StringBuilder sb, Method method, BasicBlock basicBlock) {
+    private static void writeState(StringBuilder sb, Method method, BasicBlock basicBlock) {
         if (basicBlock.getFromOffset() > MAX_OFFSET) {
             return;
         }
@@ -159,14 +214,8 @@ public class ControlFlowGraphPlantUMLWriter {
         String id = getStateId(basicBlock);
 
         switch (basicBlock.getType()) {
-            case TYPE_STATEMENTS:
-            case TYPE_IF:
-            case TYPE_IF_ELSE:
-            case TYPE_TERNARY_OPERATOR:
-            case TYPE_TRY:
-            case TYPE_TRY_JSR:
-            case TYPE_TRY_ECLIPSE:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append("<<Reduced>>\n");
+            case TYPE_STATEMENTS, TYPE_IF, TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR, TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
+                sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append(REDUCED);
                 writeStateOffsets(sb, id, basicBlock);
                 writeLineNumbers(sb, id, basicBlock);
                 writeStateEnd(sb, id, basicBlock.getNext(), "next");
@@ -177,30 +226,23 @@ public class ControlFlowGraphPlantUMLWriter {
                 if (basicBlock == RETURN) {
                     break;
                 }
-            case TYPE_THROW:
-            case TYPE_RETURN_VALUE:
-            case TYPE_RET:
-            case TYPE_SWITCH:
-            case TYPE_INFINITE_GOTO:
-            case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append("<<Reduced>>\n");
+                // intended fall through
+            case TYPE_THROW, TYPE_RETURN_VALUE, TYPE_RET, TYPE_SWITCH, TYPE_INFINITE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR:
+                sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append(REDUCED);
                 writeStateOffsets(sb, id, basicBlock);
                 writeLineNumbers(sb, id, basicBlock);
                 writeStatePredecessors(sb, id, basicBlock);
                 writeStateCode(sb, id, method, basicBlock);
                 break;
-            case TYPE_CONDITION:
-            case TYPE_CONDITION_OR:
-            case TYPE_CONDITION_AND:
-            case TYPE_CONDITION_TERNARY_OPERATOR:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append("<<Reduced>>\n");
+            case TYPE_CONDITION, TYPE_CONDITION_OR, TYPE_CONDITION_AND, TYPE_CONDITION_TERNARY_OPERATOR:
+                sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append(REDUCED);
                 writeStateOffsets(sb, id, basicBlock);
                 writeLineNumbers(sb, id, basicBlock);
                 writeInverseCondition(sb, id, basicBlock);
                 writeStateCode(sb, id, method, basicBlock);
                 break;
             case TYPE_JSR:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append('\n');
+                sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append('\n');
                 writeStateOffsets(sb, id, basicBlock);
                 writeLineNumbers(sb, id, basicBlock);
                 writeStateEnd(sb, id, basicBlock.getNext(), "next");
@@ -209,29 +251,21 @@ public class ControlFlowGraphPlantUMLWriter {
                 writeStateCode(sb, id, method, basicBlock);
                 break;
             case TYPE_CONDITIONAL_BRANCH:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append('\n');
+                sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append('\n');
                 writeStateOffsets(sb, id, basicBlock);
                 writeLineNumbers(sb, id, basicBlock);
                 writeStatePredecessors(sb, id, basicBlock);
                 writeStateCode(sb, id, method, basicBlock);
                 break;
-            case TYPE_TRY_DECLARATION:
-            case TYPE_GOTO:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append("<<ToReduce>>\n");
-                writeStateOffsets(sb, id, basicBlock);
-                writeLineNumbers(sb, id, basicBlock);
-                writeStatePredecessors(sb, id, basicBlock);
-                writeStateCode(sb, id, method, basicBlock);
-                break;
-            case TYPE_SWITCH_DECLARATION:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append("<<ToReduce>>\n");
+            case TYPE_TRY_DECLARATION, TYPE_GOTO, TYPE_SWITCH_DECLARATION:
+                sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append("<<ToReduce>>\n");
                 writeStateOffsets(sb, id, basicBlock);
                 writeLineNumbers(sb, id, basicBlock);
                 writeStatePredecessors(sb, id, basicBlock);
                 writeStateCode(sb, id, method, basicBlock);
                 break;
             case TYPE_LOOP:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append(" {\n");
+                sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append(" {\n");
                 sb.append("[*] --> ").append(getStateId(basicBlock.getSub1())).append('\n');
 
                 Set<BasicBlock> set = new HashSet<>();
@@ -240,31 +274,31 @@ public class ControlFlowGraphPlantUMLWriter {
 
                 set.remove(basicBlock);
 
-                for (BasicBlock bb : set)
+                for (BasicBlock bb : set) {
                     writeState(sb, method, bb);
-
-                for (BasicBlock bb : set)
+                }
+                for (BasicBlock bb : set) {
                     writeLink(sb, bb);
-
+                }
                 sb.append("}\n");
                 writeStateOffsets(sb, id, basicBlock);
                 writeStateEnd(sb, id, basicBlock.getNext(), "next");
                 writeStatePredecessors(sb, id, basicBlock);
                 break;
             case TYPE_JUMP:
-                sb.append("state \"").append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append("\" as ").append(id).append("<<Synthetic>>\n");
+                sb.append(STATE).append(basicBlock.getTypeName()).append(" : ").append(basicBlock.getIndex()).append(AS).append(id).append("<<Synthetic>>\n");
                 sb.append(id).append(" : offset = ").append(basicBlock.getFromOffset()).append("\n");
                 sb.append(id).append(" : targetOffset = ").append(basicBlock.getToOffset()).append("\n");
                 break;
         }
     }
 
-    protected static void writeStateOffsets(StringBuilder sb, String id, BasicBlock basicBlock) {
+    private static void writeStateOffsets(StringBuilder sb, String id, BasicBlock basicBlock) {
         sb.append(id).append(" : fromOffset = ").append(basicBlock.getFromOffset()).append("\n");
         sb.append(id).append(" : toOffset = ").append(basicBlock.getToOffset()).append("\n");
     }
 
-    protected static void writeStatePredecessors(StringBuilder sb, String id, BasicBlock basicBlock) {
+    private static void writeStatePredecessors(StringBuilder sb, String id, BasicBlock basicBlock) {
         Set<BasicBlock> predecessors = basicBlock.getPredecessors();
 
         if (!predecessors.isEmpty()) {
@@ -281,22 +315,22 @@ public class ControlFlowGraphPlantUMLWriter {
         }
     }
 
-    protected static void writeInverseCondition(StringBuilder sb, String id, BasicBlock basicBlock) {
+    private static void writeInverseCondition(StringBuilder sb, String id, BasicBlock basicBlock) {
         if (basicBlock.matchType(TYPE_CONDITION|TYPE_CONDITION_TERNARY_OPERATOR|TYPE_GOTO_IN_TERNARY_OPERATOR)) {
             sb.append(id).append(" : inverseCondition = ").append(basicBlock.mustInverseCondition()).append("\n");
         }
     }
 
-    protected static void writeStateCode(StringBuilder sb, String id, Method method, BasicBlock basicBlock) {
+    private static void writeStateCode(StringBuilder sb, String id, Method method, BasicBlock basicBlock) {
         if ((method != null) && basicBlock.matchType(GROUP_CODE) && (basicBlock.getFromOffset() < basicBlock.getToOffset())) {
             String byteCode = ByteCodeWriter.write("  ", method, basicBlock.getFromOffset(), basicBlock.getToOffset());
 
-            byteCode = byteCode.substring(0, byteCode.length()-1).replaceAll("\n", "\\\\n\\\\\n");
-            sb.append(id).append(" : code =\\n\\\n").append(byteCode).append("\n");
+            byteCode = byteCode.substring(0, byteCode.length()-1).replace("\n", EOL).replace('[', '{');
+            sb.append(id).append(" : code =").append(EOL).append(byteCode).append("\n");
         }
     }
 
-    protected static void writeLineNumbers(StringBuilder sb, String id, BasicBlock basicBlock) {
+    private static void writeLineNumbers(StringBuilder sb, String id, BasicBlock basicBlock) {
         if (basicBlock.getFirstLineNumber() > 0) {
             sb.append(id).append(" : firstLineNumber = ").append(basicBlock.getFirstLineNumber()).append("\n");
         }
@@ -305,13 +339,13 @@ public class ControlFlowGraphPlantUMLWriter {
         }
     }
 
-    protected static void writeStateEnd(StringBuilder sb, String id, BasicBlock basicBlock, String label) {
+    private static void writeStateEnd(StringBuilder sb, String id, BasicBlock basicBlock, String label) {
         if (basicBlock == END) {
             sb.append(id).append(" : ").append(label).append(" = &#9673;\n");
         }
     }
 
-    protected static void writeLink(StringBuilder sb, BasicBlock basicBlock) {
+    private static void writeLink(StringBuilder sb, BasicBlock basicBlock) {
         if (basicBlock.getFromOffset() > MAX_OFFSET) {
             return;
         }
@@ -322,20 +356,20 @@ public class ControlFlowGraphPlantUMLWriter {
             case TYPE_START:
                 sb.append("[*] --> ").append(getStateId(basicBlock.getNext())).append('\n');
                 break;
-            case TYPE_STATEMENTS:
-            case TYPE_GOTO:
-            case TYPE_GOTO_IN_TERNARY_OPERATOR:
+            case TYPE_STATEMENTS, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR:
                 writeLink(sb, id, basicBlock.getNext(), "next");
                 break;
             case TYPE_CONDITION:
                 writeLink(sb, id, basicBlock.getSub1(), "sub1");
                 writeLink(sb, id, basicBlock.getSub2(), "sub2");
+                // intended fall through
             case TYPE_CONDITIONAL_BRANCH:
                 writeLink(sb, id, basicBlock.getNext(), "next");
                 writeLink(sb, id, basicBlock.getBranch(), "branch");
                 break;
             case TYPE_SWITCH:
                 writeLink(sb, id, basicBlock.getNext(), "next");
+                // intended fall through
             case TYPE_SWITCH_DECLARATION:
                 BasicBlock next = basicBlock.getNext();
 
@@ -345,9 +379,7 @@ public class ControlFlowGraphPlantUMLWriter {
                     }
                 }
                 break;
-            case TYPE_TRY:
-            case TYPE_TRY_JSR:
-            case TYPE_TRY_ECLIPSE:
+            case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                 writeLink(sb, id, basicBlock.getSub1(), "try");
                 writeLink(sb, id, basicBlock.getNext(), "next");
 
@@ -399,9 +431,9 @@ public class ControlFlowGraphPlantUMLWriter {
                     writeLink(sb, id, basicBlock.getNext(), "next");
                 }
                 break;
-            case TYPE_IF_ELSE:
-            case TYPE_TERNARY_OPERATOR:
+            case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                 writeLink(sb, id, basicBlock.getSub2(), "else");
+                // intended fall through
             case TYPE_IF:
                 writeLink(sb, id, basicBlock.getCondition(), "condition");
                 writeLink(sb, id, basicBlock.getNext(), "next");
@@ -409,15 +441,15 @@ public class ControlFlowGraphPlantUMLWriter {
                 break;
             case TYPE_CONDITION_TERNARY_OPERATOR:
                 writeLink(sb, id, basicBlock.getCondition(), "condition");
-            case TYPE_CONDITION_OR:
-            case TYPE_CONDITION_AND:
+                // intended fall through
+            case TYPE_CONDITION_OR, TYPE_CONDITION_AND:
                 writeLink(sb, id, basicBlock.getSub1(), "left");
                 writeLink(sb, id, basicBlock.getSub2(), "right");
                 break;
         }
     }
 
-    protected static void writeLink(StringBuilder sb, String fromId, BasicBlock to, String label) {
+    private static void writeLink(StringBuilder sb, String fromId, BasicBlock to, String label) {
         if (to.getFromOffset() > MAX_OFFSET) {
             return;
         }
@@ -442,60 +474,7 @@ public class ControlFlowGraphPlantUMLWriter {
         }
     }
 
-    protected static String getStateId(BasicBlock basicBlock) {
+    private static String getStateId(BasicBlock basicBlock) {
         return (basicBlock == END) || (basicBlock == LOOP_END) ? "[*]" : "state_" + basicBlock.getIndex();
-    }
-
-    public static String writePlantUMLUrl(String plantuml) throws Exception {
-        byte[] input = plantuml.getBytes("UTF-8");
-
-        // Compress
-        Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION, true);
-
-        deflater.setInput(input);
-        deflater.finish();
-
-        byte[] output = new byte[input.length * 2];
-        int compressedDataLength = deflater.deflate(output);
-
-        if (deflater.finished()) {
-            // Encode
-            final StringBuilder sb = new StringBuilder((output.length*4 + 2) / 3);
-
-            for (int i=0; i<compressedDataLength; i+=3) {
-                append3bytes(
-                    sb,
-                    output[i] & 0xFF,
-                    i+1 < output.length ? output[i+1] & 0xFF : 0,
-                    i+2 < output.length ? output[i+2] & 0xFF : 0);
-            }
-
-            return PLANTUML_URL_PREFIX + sb.toString();
-        }
-        return null;
-    }
-
-    protected static void append3bytes(StringBuilder sb, int b1, int b2, int b3) {
-        int c1 = b1 >> 2;
-        int c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
-        int c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
-        int c4 = b3 & 0x3F;
-
-        sb.append(PLANTUML_ENCODE_6_BIT[c1 & 0x3F]);
-        sb.append(PLANTUML_ENCODE_6_BIT[c2 & 0x3F]);
-        sb.append(PLANTUML_ENCODE_6_BIT[c3 & 0x3F]);
-        sb.append(PLANTUML_ENCODE_6_BIT[c4 & 0x3F]);
-    }
-
-    public static class BasicBlockComparator implements Comparator<BasicBlock> {
-        @Override
-        public int compare(BasicBlock bb1, BasicBlock bb2) {
-            return bb1.getIndex() - bb2.getIndex();
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return this==other;
-        }
     }
 }

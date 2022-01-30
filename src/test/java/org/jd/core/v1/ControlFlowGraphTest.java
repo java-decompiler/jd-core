@@ -9,21 +9,23 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.cfg.ControlFlowGraphPlantUMLWriter;
+import org.jd.core.v1.cfg.ControlFlowGraphPlantURLWriter;
+import org.jd.core.v1.cfg.MethodUtil;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.ExceptionHandler;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.Loop;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.*;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.ConvertClassFileProcessor;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphGotoReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphLoopReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ControlFlowGraphReducer;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.WatchDog;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
@@ -31,9 +33,46 @@ import org.junit.Test;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.BitSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.GROUP_CONDITION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.GROUP_SINGLE_SUCCESSOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SWITCH_BREAK;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITIONAL_BRANCH;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_AND;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_OR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_DELETED;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO_IN_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_IF;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_IF_ELSE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_JSR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_JUMP;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP_CONTINUE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP_END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP_START;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RET;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RETURN;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RETURN_VALUE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_START;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_STATEMENTS;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH_BREAK;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH_DECLARATION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_THROW;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_DECLARATION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_ECLIPSE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_JSR;
 import static org.junit.Assert.assertNotEquals;
 
 import junit.framework.TestCase;
@@ -2666,7 +2705,7 @@ public class ControlFlowGraphTest extends TestCase {
     }
 
     protected ControlFlowGraph checkCFGReduction(Method method) throws Exception {
-        ControlFlowGraph cfg = ControlFlowGraphMaker.make(method);
+        ControlFlowGraph cfg = new ControlFlowGraphMaker().make(method);
 
         assertNotNull(cfg);
 
@@ -2675,12 +2714,12 @@ public class ControlFlowGraphTest extends TestCase {
         assertNotNull(root);
 
         String plantuml = ControlFlowGraphPlantUMLWriter.write(cfg);
-        System.out.println("Step 0: " + ControlFlowGraphPlantUMLWriter.writePlantUMLUrl(plantuml));
+        System.out.println("Step 0: " + ControlFlowGraphPlantURLWriter.writePlantUMLUrl(plantuml));
 
         ControlFlowGraphGotoReducer.reduce(cfg);
 
         plantuml = ControlFlowGraphPlantUMLWriter.write(cfg);
-        System.out.println("Step 1: " + ControlFlowGraphPlantUMLWriter.writePlantUMLUrl(plantuml));
+        System.out.println("Step 1: " + ControlFlowGraphPlantURLWriter.writePlantUMLUrl(plantuml));
 
         // --- Test natural loops --- //
         BitSet[] dominators = ControlFlowGraphLoopReducer.buildDominatorIndexes(cfg);
@@ -2692,13 +2731,13 @@ public class ControlFlowGraphTest extends TestCase {
 
         ControlFlowGraphLoopReducer.reduce(cfg);
         plantuml = ControlFlowGraphPlantUMLWriter.write(cfg);
-        System.out.println("Step 2: " + ControlFlowGraphPlantUMLWriter.writePlantUMLUrl(plantuml));
+        System.out.println("Step 2: " + ControlFlowGraphPlantURLWriter.writePlantUMLUrl(plantuml));
 
         BitSet visited = new BitSet();
         BitSet jsrTargets = new BitSet();
 
         for (int i=0, count=3; i<5; i++, count++) {
-            List<ControlFlowGraphReducer> preferredReducers = ControlFlowGraphReducer.getPreferredReducers(method);
+            List<ControlFlowGraphReducer> preferredReducers = ControlFlowGraphReducer.getPreferredReducers();
             
             boolean reduced = false;
             
@@ -2709,7 +2748,7 @@ public class ControlFlowGraphTest extends TestCase {
                 System.out.println("# of visited blocks: " + visited.cardinality());
                 visited.clear();
                 plantuml = ControlFlowGraphPlantUMLWriter.write(cfg);
-                System.out.println("Step " + count + ": " + ControlFlowGraphPlantUMLWriter.writePlantUMLUrl(plantuml));
+                System.out.println("Step " + count + ": " + ControlFlowGraphPlantURLWriter.writePlantUMLUrl(plantuml));
     
                 if (reduced) {
                     break;
@@ -2930,56 +2969,6 @@ public class ControlFlowGraphTest extends TestCase {
     }
 
     protected Method searchMethod(Loader loader, TypeMaker typeMaker, String internalTypeName, String methodName, String methodDescriptor) throws Exception {
-        DecompileContext decompileContext = new DecompileContext();
-        decompileContext.setMainInternalTypeName(internalTypeName);
-        decompileContext.setLoader(loader);
-        decompileContext.setTypeMaker(typeMaker);
-
-        ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
-        decompileContext.setClassFile(classFile);
-
-        CompilationUnit compilationUnit = converter.process(classFile, typeMaker, decompileContext);
-
-        assertNotNull(compilationUnit);
-
-        BaseTypeDeclaration typeDeclarations = compilationUnit.getTypeDeclarations();
-        BodyDeclaration bodyDeclaration = null;
-
-        if (typeDeclarations instanceof EnumDeclaration) {
-            bodyDeclaration = ((EnumDeclaration)typeDeclarations).getBodyDeclaration();
-        } else if (typeDeclarations instanceof AnnotationDeclaration) {
-            bodyDeclaration = ((AnnotationDeclaration)typeDeclarations).getBodyDeclaration();
-        } else if (typeDeclarations instanceof InterfaceDeclaration) {
-            bodyDeclaration = ((InterfaceDeclaration)typeDeclarations).getBodyDeclaration();
-        }
-
-        if (bodyDeclaration != null) {
-            ClassFileBodyDeclaration cfbd = (ClassFileBodyDeclaration) bodyDeclaration;
-
-            for (ClassFileMemberDeclaration md : cfbd.getMethodDeclarations()) {
-                if (md instanceof ClassFileMethodDeclaration) {
-                    ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration) md;
-                    if (cfmd.getName().equals(methodName)) {
-                        if ((methodDescriptor == null) || cfmd.getDescriptor().equals(methodDescriptor)) {
-                            return cfmd.getMethod();
-                        }
-                    }
-                } else if (md instanceof ClassFileConstructorDeclaration) {
-                    ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration) md;
-                    if (cfcd.getMethod().getName().equals(methodName)) {
-                        if ((methodDescriptor == null) || cfcd.getDescriptor().equals(methodDescriptor)) {
-                            return cfcd.getMethod();
-                        }
-                    }
-                } else if (md instanceof ClassFileStaticInitializerDeclaration) {
-                    ClassFileStaticInitializerDeclaration cfsid = (ClassFileStaticInitializerDeclaration) md;
-                    if (cfsid.getMethod().getName().equals(methodName)) {
-                        return cfsid.getMethod();
-                    }
-                }
-            }
-        }
-
-        return null;
+        return MethodUtil.searchMethod(loader, typeMaker, internalTypeName, methodName, methodDescriptor);
     }
 }

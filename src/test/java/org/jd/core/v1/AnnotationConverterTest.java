@@ -84,7 +84,7 @@ public class AnnotationConverterTest extends TestCase {
             ElementValuePairs elementValuePairArrayList = (ElementValuePairs)annotationReference1.getElementValuePairs();
 
             assertEquals(2, elementValuePairArrayList.size());
-            assertEquals("value", elementValuePairArrayList.getFirst().getName());
+            assertEquals("value", elementValuePairArrayList.getFirst().name());
             assertEquals(
                     "AnnotationElementValue{" +
                         "type=ObjectType{org/jd/core/test/annotation/Name}, " +
@@ -95,8 +95,8 @@ public class AnnotationConverterTest extends TestCase {
                             "ElementValuePair{name=last, elementValue=ExpressionElementValue{StringConstantExpression{\"Duck\"}}}" +
                         "]}" +
                     "}",
-                    elementValuePairArrayList.get(0).getElementValue().toString());
-            assertEquals("contributors", elementValuePairArrayList.get(1).getName());
+                    elementValuePairArrayList.get(0).elementValue().toString());
+            assertEquals("contributors", elementValuePairArrayList.get(1).name());
             assertEquals(
                     "ElementValueArrayInitializerElementValue{" +
                         "ElementValues{[" +
@@ -114,7 +114,7 @@ public class AnnotationConverterTest extends TestCase {
                                 "elementValuePairs=null}" +
                         "]}" +
                     "}",
-                    elementValuePairArrayList.get(1).getElementValue().toString());
+                    elementValuePairArrayList.get(1).elementValue().toString());
         }
     }
 }

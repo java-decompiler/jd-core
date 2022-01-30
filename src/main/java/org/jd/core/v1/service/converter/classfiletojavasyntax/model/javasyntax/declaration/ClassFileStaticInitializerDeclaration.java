@@ -20,12 +20,12 @@ import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import java.util.Map;
 
 public class ClassFileStaticInitializerDeclaration extends StaticInitializerDeclaration implements ClassFileConstructorOrMethodDeclaration {
-    protected ClassFileBodyDeclaration bodyDeclaration;
-    protected ClassFile classFile;
-    protected Method method;
-    protected Map<String, TypeArgument> bindings;
-    protected Map<String, BaseType> typeBounds;
-    protected int firstLineNumber;
+    private final ClassFileBodyDeclaration bodyDeclaration;
+    private final ClassFile classFile;
+    private final Method method;
+    private final Map<String, TypeArgument> bindings;
+    private final Map<String, BaseType> typeBounds;
+    private int firstLineNumber;
 
     public ClassFileStaticInitializerDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, Map<String, TypeArgument> bindings,

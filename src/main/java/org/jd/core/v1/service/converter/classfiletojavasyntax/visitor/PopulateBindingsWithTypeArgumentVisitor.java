@@ -6,7 +6,20 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.TypeArgumentVisitor;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 
 import java.util.Iterator;
@@ -16,12 +29,12 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_CLASS_WILDCARD;
 
 public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisitor {
-    protected TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
-    protected TypeMaker typeMaker;
-    protected Map<String, BaseType> contextualTypeBounds;
-    protected Map<String, TypeArgument> bindings;
-    protected Map<String, BaseType> typeBounds;
-    protected BaseTypeArgument current;
+    private final TypeArgumentToTypeVisitor typeArgumentToTypeVisitor = new TypeArgumentToTypeVisitor();
+    private final TypeMaker typeMaker;
+    private Map<String, BaseType> contextualTypeBounds;
+    private Map<String, TypeArgument> bindings;
+    private Map<String, BaseType> typeBounds;
+    private BaseTypeArgument current;
 
     public PopulateBindingsWithTypeArgumentVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -116,9 +129,9 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
     public void visit(WildcardExtendsTypeArgument type) {
         if (current != null) {
             if (current.isWildcardExtendsTypeArgument()) {
-                current = current.getType();
+                current = current.type();
             }
-            type.getType().accept(this);
+            type.type().accept(this);
         }
     }
 
@@ -126,9 +139,9 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
     public void visit(WildcardSuperTypeArgument type) {
         if (current != null) {
             if (current.isWildcardSuperTypeArgument()) {
-                current = current.getType();
+                current = current.type();
             }
-            type.getType().accept(this);
+            type.type().accept(this);
         }
     }
 

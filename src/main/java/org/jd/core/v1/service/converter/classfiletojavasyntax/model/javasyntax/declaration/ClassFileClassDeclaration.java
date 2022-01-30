@@ -14,7 +14,7 @@ import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
 public class ClassFileClassDeclaration extends ClassDeclaration implements ClassFileTypeDeclaration {
-    protected int firstLineNumber;
+    private final int firstLineNumber;
 
     public ClassFileClassDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseTypeParameter typeParameters, ObjectType superType, BaseType interfaces, ClassFileBodyDeclaration bodyDeclaration) {
         super(annotationReferences, flags, internalName, name, typeParameters, superType, interfaces, bodyDeclaration);

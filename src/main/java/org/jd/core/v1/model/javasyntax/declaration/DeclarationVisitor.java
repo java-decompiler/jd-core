@@ -21,7 +21,6 @@ public interface DeclarationVisitor {
     void visit(FieldDeclarators declarations);
     void visit(FormalParameter declaration);
     void visit(FormalParameters declarations);
-    void visit(InstanceInitializerDeclaration declaration);
     void visit(InterfaceDeclaration declaration);
     void visit(LocalVariableDeclaration declaration);
     void visit(LocalVariableDeclarator declarator);

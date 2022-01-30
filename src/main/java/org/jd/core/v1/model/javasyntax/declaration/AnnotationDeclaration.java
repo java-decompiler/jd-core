@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
 
 public class AnnotationDeclaration extends TypeDeclaration {
-    protected BaseFieldDeclarator annotationDeclarators;
+    private final BaseFieldDeclarator annotationDeclarators;
 
     public AnnotationDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseFieldDeclarator annotationDeclarators, BodyDeclaration bodyDeclaration) {
         super(annotationReferences, flags, internalName, name, bodyDeclaration);

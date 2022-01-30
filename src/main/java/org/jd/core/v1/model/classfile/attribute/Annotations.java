@@ -8,13 +8,13 @@
 package org.jd.core.v1.model.classfile.attribute;
 
 public class Annotations implements Attribute {
-    protected Annotation[] annotations;
+    private final Annotation[] annotationArray;
 
     public Annotations(Annotation[] annotations) {
-        this.annotations = annotations;
+        this.annotationArray = annotations;
     }
 
     public Annotation[] getAnnotations() {
-        return annotations;
+        return annotationArray;
     }
 }

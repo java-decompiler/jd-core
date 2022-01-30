@@ -7,12 +7,57 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.reference.InnerObjectReference;
-import org.jd.core.v1.model.javasyntax.reference.ObjectReference;
-import org.jd.core.v1.model.javasyntax.statement.*;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.BaseMemberDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.VariableInitializer;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.CastExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.EnumConstantReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaIdentifiersExpression;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
+import org.jd.core.v1.model.javasyntax.expression.TernaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ThrowStatement;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
+import org.jd.core.v1.model.javasyntax.type.Types;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
@@ -27,18 +72,18 @@ import org.jd.core.v1.util.StringConstants;
 
 import java.util.Map;
 
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_BRIDGE;
-import static org.jd.core.v1.model.javasyntax.declaration.Declaration.FLAG_SYNTHETIC;
+import static org.apache.bcel.Const.ACC_BRIDGE;
+import static org.apache.bcel.Const.ACC_SYNTHETIC;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
 
 public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
-    protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
 
-    protected TypeMaker typeMaker;
-    protected Map<String, BaseType> typeBounds;
-    protected Type returnedType;
-    protected BaseType exceptionTypes;
-    protected Type type;
+    private final TypeMaker typeMaker;
+    private Map<String, BaseType> typeBounds;
+    private Type returnedType;
+    private BaseType exceptionTypes;
+    private Type type;
 
     public AddCastExpressionVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -59,7 +104,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(FieldDeclaration declaration) {
-        if ((declaration.getFlags() & FLAG_SYNTHETIC) == 0) {
+        if ((declaration.getFlags() & ACC_SYNTHETIC) == 0) {
             Type t = type;
 
             type = declaration.getType();
@@ -73,17 +118,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         VariableInitializer variableInitializer = declarator.getVariableInitializer();
 
         if (variableInitializer != null) {
-            int extraDimension = declarator.getDimension();
-
-            if (extraDimension == 0) {
-                variableInitializer.accept(this);
-            } else {
-                Type t = type;
-
-                type = type.createType(type.getDimension() + extraDimension);
-                variableInitializer.accept(this);
-                type = t;
-            }
+            variableInitializer.accept(this);
         }
     }
 
@@ -102,7 +137,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ConstructorDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (ACC_SYNTHETIC|ACC_BRIDGE)) == 0) {
             BaseStatement statements = declaration.getStatements();
 
             if (statements != null) {
@@ -120,7 +155,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(MethodDeclaration declaration) {
-        if ((declaration.getFlags() & (FLAG_SYNTHETIC|FLAG_BRIDGE)) == 0) {
+        if ((declaration.getFlags() & (ACC_SYNTHETIC|ACC_BRIDGE)) == 0) {
             BaseStatement statements = declaration.getStatements();
 
             if (statements != null) {
@@ -289,10 +324,10 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         Expression exp = expression.getExpression();
 
         if (exp != null && !exp.isObjectTypeReferenceExpression()) {
-            Type type = typeMaker.makeFromInternalTypeName(expression.getInternalTypeName());
+            Type localType = typeMaker.makeFromInternalTypeName(expression.getInternalTypeName());
 
-            if (type.getName() != null) {
-                expression.setExpression(updateExpression(type, exp, false, true));
+            if (localType.getName() != null) {
+                expression.setExpression(updateExpression(localType, exp, false, true));
             }
         }
     }
@@ -420,7 +455,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                     ObjectType ot1 = (ObjectType)type;
                     ObjectType ot2 = (ObjectType)ceExpressionType;
 
-                    if (ot1.equals(ot2) || (unique && typeMaker.isAssignable(typeBounds, ot1, ot2))) {
+                    if (ot1.equals(ot2) || unique && typeMaker.isAssignable(typeBounds, ot1, ot2)) {
                         // Remove cast expression
                         expression = expression.getExpression();
                     }
@@ -464,8 +499,6 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(BreakStatement statement) {}
     @Override
-    public void visit(ByteCodeStatement statement) {}
-    @Override
     public void visit(ContinueStatement statement) {}
     @Override
     public void visit(NullExpression expression) {}
@@ -477,10 +510,6 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     public void visit(ThisExpression expression) {}
     @Override
     public void visit(TypeReferenceDotClassExpression expression) {}
-    @Override
-    public void visit(ObjectReference reference) {}
-    @Override
-    public void visit(InnerObjectReference reference) {}
     @Override
     public void visit(TypeArguments type) {}
     @Override

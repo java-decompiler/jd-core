@@ -15,7 +15,7 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import java.util.Set;
 
 public class PopulateBlackListNamesVisitor extends AbstractNopTypeArgumentVisitor {
-    protected Set<String> blackListNames;
+    private final Set<String> blackListNames;
 
     public PopulateBlackListNamesVisitor(Set<String> blackListNames) {
         this.blackListNames = blackListNames;

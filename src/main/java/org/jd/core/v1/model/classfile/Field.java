@@ -12,10 +12,10 @@ import org.jd.core.v1.model.classfile.attribute.Attribute;
 import java.util.Map;
 
 public class Field {
-    protected int accessFlags;
-    protected String name;
-    protected String descriptor;
-    protected Map<String, Attribute> attributes;
+    private final int accessFlags;
+    private final String name;
+    private final String descriptor;
+    private final Map<String, Attribute> attributes;
 
     public Field(int accessFlags, String name, String descriptor, Map<String, Attribute> attributes) {
         this.accessFlags = accessFlags;
@@ -38,7 +38,7 @@ public class Field {
 
     @SuppressWarnings("unchecked")
     public <T extends Attribute> T getAttribute(String name) {
-        return (attributes == null) ? null : (T)attributes.get(name);
+        return attributes == null ? null : (T)attributes.get(name);
     }
 
     @Override

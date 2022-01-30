@@ -10,10 +10,10 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class BinaryOperatorExpression extends AbstractLineNumberTypeExpression {
-    protected Expression leftExpression;
-    protected String operator;
-    protected Expression rightExpression;
-    protected int priority;
+    private Expression leftExpression;
+    private String operator;
+    private Expression rightExpression;
+    private int priority;
 
     public BinaryOperatorExpression(int lineNumber, Type type, Expression leftExpression, String operator, Expression rightExpression, int priority) {
         super(lineNumber, type);
@@ -72,8 +72,8 @@ public class BinaryOperatorExpression extends AbstractLineNumberTypeExpression {
         return "BinaryOperatorExpression{" + leftExpression.toString() + ' ' + operator + ' ' + rightExpression.toString() + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new BinaryOperatorExpression(lineNumber, type, leftExpression, operator, rightExpression, priority);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new BinaryOperatorExpression(lineNumber, type, leftExpression, operator, rightExpression, priority);
+    }
 }

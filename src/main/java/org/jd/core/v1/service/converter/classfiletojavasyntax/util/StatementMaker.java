@@ -7,13 +7,36 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Constants;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
-import org.jd.core.v1.model.javasyntax.expression.*;
-import org.jd.core.v1.model.javasyntax.statement.*;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.TernaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
+import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
+import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
+import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
+import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfElseStatement;
+import org.jd.core.v1.model.javasyntax.statement.IfStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ReturnStatement;
+import org.jd.core.v1.model.javasyntax.statement.Statement;
+import org.jd.core.v1.model.javasyntax.statement.Statements;
+import org.jd.core.v1.model.javasyntax.statement.SwitchStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement;
+import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
@@ -29,39 +52,100 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileBreakContinueStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileTryStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.*;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.MergeTryWithResourcesStatementVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RemoveBinaryOpReturnStatementsVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RemoveFinallyStatementsVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.UpdateIntegerConstantTypeVisitor;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.DefaultStack;
 import org.jd.core.v1.util.StringConstants;
 
-import java.util.*;
+import java.util.BitSet;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
+import static org.apache.bcel.Const.ACC_SYNTHETIC;
+import static org.apache.bcel.Const.ASTORE;
+import static org.apache.bcel.Const.MAJOR_1_7;
 import static org.jd.core.v1.model.javasyntax.expression.Expression.UNKNOWN_LINE_NUMBER;
 import static org.jd.core.v1.model.javasyntax.expression.NoExpression.NO_EXPRESSION;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.*;
-import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.*;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_SHORT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BOOLEAN_TYPE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BOOLEAN;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_CHAR;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_DOUBLE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_FLOAT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_INT;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_LONG;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_SHORT;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.GROUP_END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.GROUP_SINGLE_SUCCESSOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.LOOP_END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.LOOP_START;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITIONAL_BRANCH;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_AND;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_OR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_CONDITION_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_GOTO_IN_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_IF;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_IF_ELSE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_INFINITE_GOTO;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_JSR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_JUMP;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP_CONTINUE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP_END;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_LOOP_START;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RET;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RETURN;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_RETURN_VALUE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_START;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_STATEMENTS;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH_BREAK;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_SWITCH_DECLARATION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TERNARY_OPERATOR;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_THROW;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_DECLARATION;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_ECLIPSE;
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_JSR;
 
 public class StatementMaker {
     protected static final SwitchCaseComparator SWITCH_CASE_COMPARATOR = new SwitchCaseComparator();
     protected static final NullExpression FINALLY_EXCEPTION_EXPRESSION = new NullExpression(new ObjectType(StringConstants.JAVA_LANG_EXCEPTION, "java.lang.Exception", "Exception"));
     protected static final MergeTryWithResourcesStatementVisitor MERGE_TRY_WITH_RESOURCES_STATEMENT_VISITOR = new MergeTryWithResourcesStatementVisitor();
 
-    protected TypeMaker typeMaker;
-    protected Map<String, BaseType> typeBounds;
-    protected LocalVariableMaker localVariableMaker;
-    protected ByteCodeParser byteCodeParser;
-    protected int majorVersion;
-    protected String internalTypeName;
-    protected ClassFileBodyDeclaration bodyDeclaration;
-    protected DefaultStack<Expression> stack = new DefaultStack<>();
-    protected RemoveFinallyStatementsVisitor removeFinallyStatementsVisitor;
-    protected RemoveBinaryOpReturnStatementsVisitor removeBinaryOpReturnStatementsVisitor;
-    protected UpdateIntegerConstantTypeVisitor updateIntegerConstantTypeVisitor;
-    protected SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
-    protected MemberVisitor memberVisitor = new MemberVisitor();
-    protected boolean removeFinallyStatementsFlag;
-    protected boolean mergeTryWithResourcesStatementFlag;
+    private final TypeMaker typeMaker;
+    private final Map<String, BaseType> typeBounds;
+    private final LocalVariableMaker localVariableMaker;
+    private final ByteCodeParser byteCodeParser;
+    private final int majorVersion;
+    private final String internalTypeName;
+    private final ClassFileBodyDeclaration bodyDeclaration;
+    private final DefaultStack<Expression> stack = new DefaultStack<>();
+    private final RemoveFinallyStatementsVisitor removeFinallyStatementsVisitor;
+    private final RemoveBinaryOpReturnStatementsVisitor removeBinaryOpReturnStatementsVisitor;
+    private final UpdateIntegerConstantTypeVisitor updateIntegerConstantTypeVisitor;
+    private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
+    private final MemberVisitor memberVisitor = new MemberVisitor();
+    private boolean removeFinallyStatementsFlag;
+    private boolean mergeTryWithResourcesStatementFlag;
 
     public StatementMaker(TypeMaker typeMaker, LocalVariableMaker localVariableMaker, ClassFileConstructorOrMethodDeclaration comd) {
         ClassFile classFile = comd.getClassFile();
@@ -73,13 +157,12 @@ public class StatementMaker {
         this.internalTypeName = classFile.getInternalTypeName();
         this.bodyDeclaration = comd.getBodyDeclaration();
         this.byteCodeParser = new ByteCodeParser(typeMaker, localVariableMaker, classFile, this.bodyDeclaration, comd);
-        this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor(localVariableMaker);
+        this.removeFinallyStatementsVisitor = new RemoveFinallyStatementsVisitor();
         this.removeBinaryOpReturnStatementsVisitor = new RemoveBinaryOpReturnStatementsVisitor(localVariableMaker);
         this.updateIntegerConstantTypeVisitor = new UpdateIntegerConstantTypeVisitor(comd.getReturnedType());
     }
 
-    public Statements make(ControlFlowGraph cfg) {
-        Statements statements = new Statements();
+    public Statements make(ControlFlowGraph cfg, Statements statements) {
         Statements jumps = new Statements();
         WatchDog watchdog = new WatchDog();
 
@@ -118,26 +201,26 @@ public class StatementMaker {
         boolean breakToReturn = breakToReturn(cfg, statements, jumps);
 
         if (!breakToReturn && !jumps.isEmpty()) {
-        	updateJumpStatements(jumps, cfg);
+            updateJumpStatements(jumps, cfg);
         }
 
         return statements;
     }
 
-	protected boolean breakToReturn(ControlFlowGraph cfg, Statements statements, Statements jumps) {
-		boolean breakToReturn = false;
+    protected boolean breakToReturn(ControlFlowGraph cfg, Statements statements, Statements jumps) {
+        boolean breakToReturn = false;
         if (jumps.size() == 1) {
             ClassFileBreakContinueStatement jumpStatement = (ClassFileBreakContinueStatement)jumps.get(0);
             for (Statement stmt : statements) {
-            	if (stmt.isReturnExpressionStatement() && stmt.getLineNumber() == cfg.getLineNumber(jumpStatement.getTargetOffset())) {
-					int lineNumber = cfg.getLineNumber(jumpStatement.getOffset()) + 1;
-					jumpStatement.setStatement(new ReturnExpressionStatement(lineNumber, stmt.getExpression().copyTo(lineNumber)));
-					breakToReturn = true;
-            	}
+                if (stmt.isReturnExpressionStatement() && stmt.getLineNumber() == cfg.getLineNumber(jumpStatement.getTargetOffset())) {
+                    int lineNumber = cfg.getLineNumber(jumpStatement.getOffset()) + 1;
+                    jumpStatement.setStatement(new ReturnExpressionStatement(lineNumber, stmt.getExpression().copyTo(lineNumber)));
+                    breakToReturn = true;
+                }
             }
         }
-		return breakToReturn;
-	}
+        return breakToReturn;
+    }
 
     /**
      * A recursive, next neighbour first, statements builder from basic blocks.
@@ -169,17 +252,14 @@ public class StatementMaker {
             case TYPE_RETURN:
                 statements.add(ReturnStatement.RETURN);
                 break;
-            case TYPE_RETURN_VALUE:
-            case TYPE_GOTO_IN_TERNARY_OPERATOR:
-            case TYPE_RET:
-            parseByteCode(basicBlock, statements);
+            case TYPE_RETURN_VALUE, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_RET:
+                parseByteCode(basicBlock, statements);
                 break;
             case TYPE_SWITCH:
                 parseSwitch(watchdog, basicBlock, statements, jumps);
                 break;
-            case TYPE_SWITCH_BREAK:
-            case TYPE_LOOP_END:
-            statements.add(BreakStatement.BREAK);
+            case TYPE_SWITCH_BREAK, TYPE_LOOP_END:
+                statements.add(BreakStatement.BREAK);
                 break;
             case TYPE_TRY:
                 parseTry(watchdog, basicBlock, statements, jumps, false, false);
@@ -269,11 +349,10 @@ public class StatementMaker {
             case TYPE_LOOP:
                 parseLoop(watchdog, basicBlock, statements, jumps);
                 break;
-            case TYPE_LOOP_START:
-            case TYPE_LOOP_CONTINUE:
+            case TYPE_LOOP_START, TYPE_LOOP_CONTINUE:
                 statements.add(ContinueStatement.CONTINUE);
                 break;
-        case TYPE_JUMP:
+            case TYPE_JUMP:
                 Statement jump = new ClassFileBreakContinueStatement(basicBlock.getFromOffset(), basicBlock.getToOffset());
                 statements.add(jump);
                 jumps.add(jump);
@@ -411,7 +490,10 @@ public class StatementMaker {
         Statements finallyStatements = null;
 
         tryStatements = makeSubStatements(watchdog, basicBlock.getSub1(), statements, jumps);
-
+        if (basicBlock.getNext().getType() == TYPE_LOOP_CONTINUE) {
+            tryStatements.add(ContinueStatement.CONTINUE);
+            basicBlock.setNext(END);
+        }
         for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
             if (exceptionHandler.getInternalThrowableName() == null) {
                 // 'finally' handler
@@ -460,13 +542,18 @@ public class StatementMaker {
                 int offset = bb.getFromOffset();
                 byte[] code = bb.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
 
-                if (code[offset] == 58) {
-                    offset += 2; // ASTORE
+                if (code[offset] == ASTORE) {
+                    offset += 2;
                 } else {
                     offset++;    // POP, ASTORE_1 ... ASTORE_3
                 }
 
                 AbstractLocalVariable exception = localVariableMaker.getExceptionLocalVariable(index, offset, ot);
+
+                if (bb != null && bb.getNext().getPredecessors().size() > 1) {
+                    bb.getNext().getPredecessors().remove(bb);
+                    bb.setNext(END);
+                }
 
                 makeStatements(watchdog, bb, catchStatements, jumps);
                 localVariableMaker.popFrame();
@@ -500,7 +587,7 @@ public class StatementMaker {
         if (finallyStatements != null && !finallyStatements.isEmpty() && finallyStatements.getFirst().isMonitorExitStatement()) {
             statement = SynchronizedStatementMaker.make(localVariableMaker, statements, tryStatements);
         } else {
-            if (majorVersion >= 51) { // (majorVersion >= Java 7)
+            if (majorVersion >= MAJOR_1_7) {
                 assert !jsr;
                 statement = TryWithResourcesStatementMaker.make(localVariableMaker, statements, tryStatements, catchClauses, finallyStatements);
             }
@@ -513,6 +600,7 @@ public class StatementMaker {
 
         statements.add(statement);
         makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
+        
     }
 
     protected void removeExceptionReference(Statements catchStatements) {
@@ -620,10 +708,10 @@ public class StatementMaker {
             sub1 = sub1.getSub1();
         }
 
-        if (sub1.getType() == TYPE_IF) {
+        if (sub1.getType() == TYPE_IF || (sub1.getType() == TYPE_IF_ELSE && sub1.getSub2() == LOOP_END)) {
             BasicBlock ifBB = sub1;
 
-            if (ifBB.getNext() == LOOP_END) {
+            if (ifBB.getNext() == LOOP_END || ifBB.getSub2() == LOOP_END) {
                 // 'while' or 'for' loop
                 makeStatements(watchdog, ifBB.getCondition(), statements, jumps);
                 statements.add(LoopStatementMaker.makeLoop(
@@ -707,17 +795,14 @@ public class StatementMaker {
                         count += countStartLoop(switchCase.getBasicBlock());
                     }
                     break;
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     count += countStartLoop(bb.getSub1());
 
                     for (ExceptionHandler exceptionHandler : bb.getExceptionHandlers()) {
                         count += countStartLoop(exceptionHandler.getBasicBlock());
                     }
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     count += countStartLoop(bb.getSub2());
                     // intended fall through
                 case TYPE_IF:
@@ -774,30 +859,21 @@ public class StatementMaker {
             visited.set(basicBlock.getIndex());
 
             switch (basicBlock.getType()) {
-                case TYPE_CONDITIONAL_BRANCH:
-                case TYPE_JSR:
-                case TYPE_CONDITION:
+                case TYPE_CONDITIONAL_BRANCH, TYPE_JSR, TYPE_CONDITION:
                     if (basicBlock.getBranch() == LOOP_END) {
                         basicBlock.setBranch(LOOP_START);
                     } else {
                         changeEndLoopToStartLoop(visited, basicBlock.getBranch());
                     }
                     // intended fall through
-                case TYPE_START:
-                case TYPE_STATEMENTS:
-                case TYPE_GOTO:
-                case TYPE_GOTO_IN_TERNARY_OPERATOR:
-                case TYPE_LOOP:
+                case TYPE_START, TYPE_STATEMENTS, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_LOOP:
                     if (basicBlock.getNext() == LOOP_END) {
                         basicBlock.setNext(LOOP_START);
                     } else {
                         changeEndLoopToStartLoop(visited, basicBlock.getNext());
                     }
                     break;
-                case TYPE_TRY_DECLARATION:
-                case TYPE_TRY:
-                case TYPE_TRY_JSR:
-                case TYPE_TRY_ECLIPSE:
+                case TYPE_TRY_DECLARATION, TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
                     for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
                         if (exceptionHandler.getBasicBlock() == LOOP_END) {
                             exceptionHandler.setBasicBlock(LOOP_START);
@@ -806,8 +882,7 @@ public class StatementMaker {
                         }
                     }
                     break;
-                case TYPE_IF_ELSE:
-                case TYPE_TERNARY_OPERATOR:
+                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
                     if (basicBlock.getSub2() == LOOP_END) {
                         basicBlock.setSub2(LOOP_START);
                     } else {
@@ -826,8 +901,7 @@ public class StatementMaker {
                         changeEndLoopToStartLoop(visited, basicBlock.getNext());
                     }
                     break;
-                case TYPE_SWITCH:
-                case TYPE_SWITCH_DECLARATION:
+                case TYPE_SWITCH, TYPE_SWITCH_DECLARATION:
                     for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
                         if (switchCase.getBasicBlock() == LOOP_END) {
                             switchCase.setBasicBlock(LOOP_START);
@@ -951,7 +1025,7 @@ public class StatementMaker {
         for (ClassFileFieldDeclaration field : bodyDeclaration.getFieldDeclarations()) {
             field.getFieldDeclarators().accept(memberVisitor);
             if (memberVisitor.found()) {
-                field.setFlags(field.getFlags() | Constants.ACC_SYNTHETIC);
+                field.setFlags(field.getFlags() | ACC_SYNTHETIC);
                 break;
             }
         }
@@ -962,7 +1036,7 @@ public class StatementMaker {
         for (ClassFileConstructorOrMethodDeclaration member : bodyDeclaration.getMethodDeclarations()) {
             member.accept(memberVisitor);
             if (memberVisitor.found()) {
-                member.setFlags(member.getFlags() | Constants.ACC_SYNTHETIC);
+                member.setFlags(member.getFlags() | ACC_SYNTHETIC);
                 break;
             }
         }
@@ -1008,12 +1082,18 @@ public class StatementMaker {
 
         while (iterator.hasNext()) {
             ClassFileBreakContinueStatement statement = (ClassFileBreakContinueStatement)iterator.next();
-
-            statement.setStatement(new CommentStatement("// goto line number " + cfg.getLineNumber(statement.getTargetOffset())));
+            CommentStatement commentStatement = new CommentStatement();
+            commentStatement.setText("// goto line number " + cfg.getLineNumber(statement.getTargetOffset()));
+            statement.setStatement(commentStatement);
         }
     }
 
-    protected static class SwitchCaseComparator implements Comparator<SwitchCase> {
+    protected static class SwitchCaseComparator implements java.io.Serializable, Comparator<SwitchCase> {
+        /**
+         * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+         */
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int compare(SwitchCase sc1, SwitchCase sc2) {
             int diff = sc1.getOffset() - sc2.getOffset();
@@ -1027,8 +1107,8 @@ public class StatementMaker {
     }
 
     protected static class MemberVisitor extends AbstractJavaSyntaxVisitor {
-        protected String name;
-        protected boolean found;
+        private String name;
+        private boolean found;
 
         public void init(String name) {
             this.name = name;

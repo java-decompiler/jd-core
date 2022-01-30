@@ -11,10 +11,10 @@ import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ForEachStatement implements Statement {
-    protected Type type;
-    protected String name;
+    protected final Type type;
+    private final String name;
     protected Expression expression;
-    protected BaseStatement statements;
+    private final BaseStatement statements;
 
     public ForEachStatement(Type type, String name, Expression expression, BaseStatement statements) {
         this.type = type;

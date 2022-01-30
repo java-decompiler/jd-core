@@ -8,13 +8,13 @@
 package org.jd.core.v1.model.javasyntax.declaration;
 
 public class LocalVariableDeclarator implements BaseLocalVariableDeclarator {
-    protected int lineNumber;
-    protected String name;
+    private final int lineNumber;
+    private String name;
     protected int dimension;
-    protected VariableInitializer variableInitializer;
+    protected final VariableInitializer variableInitializer;
 
     public LocalVariableDeclarator(String name) {
-        this.name = name;
+        this(0, name, null);
     }
 
     public LocalVariableDeclarator(int lineNumber, String name, VariableInitializer variableInitializer) {

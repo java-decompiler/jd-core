@@ -17,7 +17,7 @@ import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
 public class ObjectLocalVariable extends AbstractLocalVariable {
-    protected TypeMaker typeMaker;
+    private final TypeMaker typeMaker;
     protected Type type;
 
     public ObjectLocalVariable(TypeMaker typeMaker, int index, int offset, Type type, String name) {

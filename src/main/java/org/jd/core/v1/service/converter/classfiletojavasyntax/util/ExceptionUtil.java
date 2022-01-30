@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-public class ExceptionUtil {
+public final class ExceptionUtil {
 
     private ExceptionUtil() {
         super();

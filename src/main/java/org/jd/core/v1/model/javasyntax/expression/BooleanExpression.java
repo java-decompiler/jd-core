@@ -12,9 +12,8 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class BooleanExpression extends AbstractLineNumberExpression {
     public static final BooleanExpression TRUE = new BooleanExpression(true);
-    public static final BooleanExpression FALSE = new BooleanExpression(false);
 
-    protected boolean value;
+    private final boolean value;
 
     protected BooleanExpression(boolean value) {
         this.value = value;
@@ -51,8 +50,8 @@ public class BooleanExpression extends AbstractLineNumberExpression {
         return "BooleanExpression{" + value + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new BooleanExpression(lineNumber, value);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new BooleanExpression(lineNumber, value);
+    }
 }

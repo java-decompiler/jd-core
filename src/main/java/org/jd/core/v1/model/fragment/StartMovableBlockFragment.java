@@ -8,7 +8,7 @@
 package org.jd.core.v1.model.fragment;
 
 public class StartMovableBlockFragment extends FlexibleFragment {
-    protected int type;
+    private final int type;
 
     public StartMovableBlockFragment(int type) {
         super(0, 0, 0, 0, "Start movable block");

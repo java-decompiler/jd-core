@@ -9,23 +9,23 @@ package org.jd.core.v1.model.javasyntax.reference;
 
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 
+import java.util.Objects;
+
 public class AnnotationReference implements BaseAnnotationReference {
-    protected ObjectType type;
-    protected BaseElementValue elementValue;
-    protected BaseElementValuePair elementValuePairs;
+    protected final ObjectType type;
+    protected final BaseElementValue elementValue;
+    protected final BaseElementValuePair elementValuePairs;
 
     public AnnotationReference(ObjectType type) {
-        this.type = type;
+        this(type, null, null);
     }
 
     public AnnotationReference(ObjectType type, BaseElementValue elementValue) {
-        this.type = type;
-        this.elementValue = elementValue;
+        this(type, elementValue, null);
     }
 
     public AnnotationReference(ObjectType type, BaseElementValuePair elementValuePairs) {
-        this.type = type;
-        this.elementValuePairs = elementValuePairs;
+        this(type, null, elementValuePairs);
     }
 
     protected AnnotationReference(ObjectType type, BaseElementValue elementValue, BaseElementValuePair elementValuePairs) {
@@ -48,24 +48,23 @@ public class AnnotationReference implements BaseAnnotationReference {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AnnotationReference)) return false;
-
-        AnnotationReference that = (AnnotationReference) o;
-
-        if (elementValue != null ? !elementValue.equals(that.elementValue) : that.elementValue != null) return false;
-        if (elementValuePairs != null ? !elementValuePairs.equals(that.elementValuePairs) : that.elementValuePairs != null)
+        if (this == o) {
+            return true;
+        }
+        if (o == null || o.getClass() != getClass()) {
             return false;
-        if (!type.equals(that.type)) return false;
-
-        return true;
+        }
+        AnnotationReference that = (AnnotationReference) o;
+        return Objects.equals(type, that.type) 
+            && Objects.equals(elementValue, that.elementValue)
+            && Objects.equals(elementValuePairs, that.elementValuePairs);
     }
 
     @Override
     public int hashCode() {
-        int result = 970748295 + type.hashCode();
-        result = 31 * result + (elementValue != null ? elementValue.hashCode() : 0);
-        result = 31 * result + (elementValuePairs != null ? elementValuePairs.hashCode() : 0);
+        int result = 970_748_295 + type.hashCode();
+        result = 31 * result + Objects.hash(elementValue);
+        result = 31 * result + Objects.hash(elementValuePairs);
         return result;
     }
 

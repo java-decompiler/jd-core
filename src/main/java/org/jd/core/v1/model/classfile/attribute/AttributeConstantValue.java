@@ -7,16 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-import org.jd.core.v1.model.classfile.constant.ConstantValue;
+import org.apache.bcel.classfile.Constant;
 
-public class AttributeConstantValue implements Attribute {
-    protected ConstantValue constantValue;
-
-    public AttributeConstantValue(ConstantValue constantValue) {
-        this.constantValue = constantValue;
-    }
-
-    public ConstantValue getConstantValue() {
-        return constantValue;
-    }
+public record AttributeConstantValue(Constant constantValue) implements Attribute {
 }

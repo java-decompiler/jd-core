@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.model.token;
 
-public class EndBlockToken implements Token {
+public record EndBlockToken(String text) implements Token {
 
     public static final EndBlockToken END_BLOCK = new EndBlockToken("}");
     public static final EndBlockToken END_ARRAY_BLOCK = new EndBlockToken("]");
@@ -15,16 +15,6 @@ public class EndBlockToken implements Token {
     public static final EndBlockToken END_PARAMETERS_BLOCK = new EndBlockToken(")");
     public static final EndBlockToken END_RESOURCES_BLOCK = new EndBlockToken(")");
     public static final EndBlockToken END_DECLARATION_OR_STATEMENT_BLOCK = new EndBlockToken("");
-
-    protected String text;
-
-    public EndBlockToken(String text) {
-        this.text = text;
-    }
-
-    public String getText() {
-        return text;
-    }
 
     @Override
     public String toString() {

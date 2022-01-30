@@ -7,17 +7,7 @@
 
 package org.jd.core.v1.model.token;
 
-public class NumericConstantToken implements Token {
-
-    protected String text;
-
-    public NumericConstantToken(String text) {
-        this.text = text;
-    }
-
-    public String getText() {
-        return text;
-    }
+public record NumericConstantToken(String text) implements Token {
 
     @Override
     public String toString() {

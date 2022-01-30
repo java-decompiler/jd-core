@@ -7,17 +7,7 @@
 
 package org.jd.core.v1.model.token;
 
-public class KeywordToken implements Token {
-
-    protected String keyword;
-
-    public KeywordToken(String keyword) {
-        this.keyword = keyword;
-    }
-
-    public String getKeyword() {
-        return keyword;
-    }
+public record KeywordToken(String keyword) implements Token {
 
     @Override
     public String toString() {

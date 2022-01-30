@@ -17,7 +17,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariableMaker;
 
 public class RemoveBinaryOpReturnStatementsVisitor extends AbstractJavaSyntaxVisitor {
-    protected LocalVariableMaker localVariableMaker;
+    private final LocalVariableMaker localVariableMaker;
 
     public RemoveBinaryOpReturnStatementsVisitor(LocalVariableMaker localVariableMaker) {
         this.localVariableMaker = localVariableMaker;
@@ -42,7 +42,7 @@ public class RemoveBinaryOpReturnStatementsVisitor extends AbstractJavaSyntaxVis
                         if (leftExpression.isLocalVariableReferenceExpression()) {
                             ClassFileLocalVariableReferenceExpression lvr2 = (ClassFileLocalVariableReferenceExpression) leftExpression;
 
-                            if ((lvr1.getLocalVariable() == lvr2.getLocalVariable()) && (lvr1.getLocalVariable().getReferences().size() == 2)) {
+                            if (lvr1.getLocalVariable() == lvr2.getLocalVariable() && lvr1.getLocalVariable().getReferences().size() == 2) {
                                 ReturnExpressionStatement res = (ReturnExpressionStatement) lastStatement;
 
                                 // Remove synthetic assignment statement

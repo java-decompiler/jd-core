@@ -12,13 +12,8 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class EnumConstantReferenceExpression extends AbstractLineNumberExpression {
-    protected ObjectType type;
-    protected String name;
-
-    public EnumConstantReferenceExpression(ObjectType type, String name) {
-        this.type = type;
-        this.name = name;
-    }
+    private final ObjectType type;
+    private final String name;
 
     public EnumConstantReferenceExpression(int lineNumber, ObjectType type, String name) {
         super(lineNumber);
@@ -51,8 +46,8 @@ public class EnumConstantReferenceExpression extends AbstractLineNumberExpressio
         return "EnumConstantReferenceExpression{type=" + type + ", name=" + name + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new EnumConstantReferenceExpression(lineNumber, type, name);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new EnumConstantReferenceExpression(lineNumber, type, name);
+    }
 }

@@ -7,16 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class ElementValueArrayValue implements AttributeElementValue {
-    protected AttributeElementValue[] values;
-
-    public ElementValueArrayValue(AttributeElementValue[] values) {
-        this.values = values;
-    }
-
-    public AttributeElementValue[] getValues() {
-        return values;
-    }
+public record ElementValueArrayValue(AttributeElementValue[] values) implements AttributeElementValue {
 
     @Override
     public void accept(ElementValueVisitor visitor) {

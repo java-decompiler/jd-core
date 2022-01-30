@@ -13,21 +13,25 @@ import org.jd.core.v1.model.classfile.attribute.Attribute;
 import java.util.List;
 import java.util.Map;
 
-import static org.jd.core.v1.model.classfile.Constants.*;
+import static org.apache.bcel.Const.ACC_ANNOTATION;
+import static org.apache.bcel.Const.ACC_ENUM;
+import static org.apache.bcel.Const.ACC_INTERFACE;
+import static org.apache.bcel.Const.ACC_MODULE;
+import static org.apache.bcel.Const.ACC_STATIC;
 
 public class ClassFile {
-    protected int majorVersion;
-    protected int minorVersion;
-    protected int accessFlags;
-    protected String internalTypeName;
-    protected String superTypeName;
-    protected String[] interfaceTypeNames;
-    protected Field[] fields;
-    protected Method[] methods;
-    protected Map<String, Attribute> attributes;
+    private final int majorVersion;
+    private final int minorVersion;
+    private int accessFlags;
+    private final String internalTypeName;
+    private final String superTypeName;
+    private final String[] interfaceTypeNames;
+    private final Field[] fields;
+    private final Method[] methods;
+    private final Map<String, Attribute> attributes;
 
-    protected ClassFile outerClassFile;
-    protected List<ClassFile> innerClassFiles;
+    private ClassFile outerClassFile;
+    private List<ClassFile> innerClassFiles;
 
     public ClassFile(int majorVersion, int minorVersion, int accessFlags, String internalTypeName, String superTypeName, String[] interfaceTypeNames, Field[] fields, Method[] methods, Map<String, Attribute> attributes) {
         this.majorVersion = majorVersion;
@@ -79,7 +83,7 @@ public class ClassFile {
 
     @SuppressWarnings("unchecked")
     public <T extends Attribute> T getAttribute(String name) {
-        return (attributes == null) ? null : (T)attributes.get(name);
+        return attributes == null ? null : (T)attributes.get(name);
     }
 
     public ClassFile getOuterClassFile() {

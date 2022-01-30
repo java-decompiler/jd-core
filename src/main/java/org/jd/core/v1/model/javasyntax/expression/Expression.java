@@ -64,5 +64,5 @@ public interface Expression extends BaseExpression {
 
     int getPriority();
 
-	Expression copyTo(int lineNumber);
+    Expression copyTo(int lineNumber);
 }

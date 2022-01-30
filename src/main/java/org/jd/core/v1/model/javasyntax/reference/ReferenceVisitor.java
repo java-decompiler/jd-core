@@ -16,6 +16,4 @@ public interface ReferenceVisitor {
     void visit(ElementValuePair reference);
     void visit(ElementValuePairs references);
     void visit(ExpressionElementValue reference);
-    void visit(InnerObjectReference reference);
-    void visit(ObjectReference reference);
 }

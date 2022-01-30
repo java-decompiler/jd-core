@@ -13,14 +13,8 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import java.util.List;
 
 public class LambdaIdentifiersExpression extends AbstractLambdaExpression {
-    protected Type returnedType;
-    protected List<String> parameterNames;
-
-    public LambdaIdentifiersExpression(Type type, Type returnedType, List<String> parameterNames, BaseStatement statements) {
-        super(type, statements);
-        this.returnedType = returnedType;
-        this.parameterNames = parameterNames;
-    }
+    private final Type returnedType;
+    private final List<String> parameterNames;
 
     public LambdaIdentifiersExpression(int lineNumber, Type type, Type returnedType, List<String> parameterNames, BaseStatement statements) {
         super(lineNumber, type, statements);
@@ -46,8 +40,8 @@ public class LambdaIdentifiersExpression extends AbstractLambdaExpression {
         return "LambdaIdentifiersExpression{" + parameterNames + " -> " + statements + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new LambdaIdentifiersExpression(lineNumber, type, returnedType, parameterNames, statements);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new LambdaIdentifiersExpression(lineNumber, type, returnedType, parameterNames, statements);
+    }
 }

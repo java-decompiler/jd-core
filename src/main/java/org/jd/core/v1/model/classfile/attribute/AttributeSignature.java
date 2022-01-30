@@ -7,16 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class AttributeSignature implements Attribute {
-    protected String signature;
-
-    public AttributeSignature(String signature) {
-        this.signature = signature;
-    }
-
-    public String getSignature() {
-        return signature;
-    }
+public record AttributeSignature(String signature) implements Attribute {
 
     @Override
     public String toString() {

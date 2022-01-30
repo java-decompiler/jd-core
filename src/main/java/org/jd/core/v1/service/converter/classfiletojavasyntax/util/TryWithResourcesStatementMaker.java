@@ -20,7 +20,7 @@ import org.jd.core.v1.util.DefaultList;
 
 import java.util.List;
 
-public class TryWithResourcesStatementMaker {
+public final class TryWithResourcesStatementMaker {
 
     private TryWithResourcesStatementMaker() {
         super();
@@ -31,7 +31,7 @@ public class TryWithResourcesStatementMaker {
             DefaultList<TryStatement.CatchClause> catchClauses, Statements finallyStatements) {
         int size = statements.size();
 
-        if ((size < 2) || (finallyStatements == null) || (finallyStatements.size() != 1) || !checkThrowable(catchClauses)) {
+        if (size < 2 || finallyStatements == null || finallyStatements.size() != 1 || !checkThrowable(catchClauses)) {
             return null;
         }
 
@@ -79,7 +79,7 @@ public class TryWithResourcesStatementMaker {
 
         statement = finallyStatements.getFirst();
 
-        if (statement.isIfStatement() && (lv1 == getLocalVariable(statement.getCondition()))) {
+        if (statement.isIfStatement() && lv1 == getLocalVariable(statement.getCondition())) {
             statement = statement.getStatements().getFirst();
 
             if (statement.isIfElseStatement()) {
@@ -97,7 +97,7 @@ public class TryWithResourcesStatementMaker {
         return null;
     }
 
-    protected static Statement parsePatternAddSuppressed(
+    private static Statement parsePatternAddSuppressed(
             LocalVariableMaker localVariableMaker, Statements statements, Statements tryStatements,
             Statements finallyStatements, Expression boe, AbstractLocalVariable lv1, AbstractLocalVariable lv2,
             Statement statement) {
@@ -129,7 +129,7 @@ public class TryWithResourcesStatementMaker {
 
         MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
-        if ((ts.getFinallyStatements() != null) || (lv2 != getLocalVariable(ies.getCondition())) ||
+        if (ts.getFinallyStatements() != null || lv2 != getLocalVariable(ies.getCondition()) ||
                 !checkThrowable(ts.getCatchClauses()) || !checkCloseInvocation(mie, lv1)) {
             return null;
         }
@@ -166,7 +166,7 @@ public class TryWithResourcesStatementMaker {
 
         mie = (MethodInvocationExpression) expression;
 
-        if (!mie.getName().equals("addSuppressed") || !mie.getDescriptor().equals("(Ljava/lang/Throwable;)V")) {
+        if (!"addSuppressed".equals(mie.getName()) || !"(Ljava/lang/Throwable;)V".equals(mie.getDescriptor())) {
             return null;
         }
 
@@ -182,24 +182,24 @@ public class TryWithResourcesStatementMaker {
         return newTryStatement(localVariableMaker, statements, tryStatements, finallyStatements, boe, lv1, lv2);
     }
 
-    protected static boolean checkThrowable(List<? extends TryStatement.CatchClause> catchClauses) {
-        return (catchClauses.size() == 1) && catchClauses.get(0).getType().equals(ObjectType.TYPE_THROWABLE);
+    private static boolean checkThrowable(List<? extends TryStatement.CatchClause> catchClauses) {
+        return catchClauses.size() == 1 && catchClauses.get(0).getType().equals(ObjectType.TYPE_THROWABLE);
     }
 
-    protected static AbstractLocalVariable getLocalVariable(Expression condition) {
+    private static AbstractLocalVariable getLocalVariable(Expression condition) {
         if (!condition.isBinaryOperatorExpression()) {
             return null;
         }
 
-        if (!condition.getOperator().equals("!=") || !condition.getRightExpression().isNullExpression() || !condition.getLeftExpression().isLocalVariableReferenceExpression()) {
+        if (!"!=".equals(condition.getOperator()) || !condition.getRightExpression().isNullExpression() || !condition.getLeftExpression().isLocalVariableReferenceExpression()) {
             return null;
         }
 
         return ((ClassFileLocalVariableReferenceExpression) condition.getLeftExpression()).getLocalVariable();
     }
 
-    protected static boolean checkCloseInvocation(MethodInvocationExpression mie, AbstractLocalVariable lv) {
-        if (mie.getName().equals("close") && mie.getDescriptor().equals("()V")) {
+    private static boolean checkCloseInvocation(MethodInvocationExpression mie, AbstractLocalVariable lv) {
+        if ("close".equals(mie.getName()) && "()V".equals(mie.getDescriptor())) {
             Expression expression = mie.getExpression();
 
             if (expression.isLocalVariableReferenceExpression()) {
@@ -210,7 +210,7 @@ public class TryWithResourcesStatementMaker {
         return false;
     }
 
-    protected static Statement parsePatternCloseResource(
+    private static Statement parsePatternCloseResource(
             LocalVariableMaker localVariableMaker, Statements statements, Statements tryStatements, Statements finallyStatements,
             Expression boe, AbstractLocalVariable lv1, AbstractLocalVariable lv2, Statement statement) {
         Expression expression = statement.getExpression();
@@ -221,7 +221,7 @@ public class TryWithResourcesStatementMaker {
 
         MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
-        if (!mie.getName().equals("$closeResource") || !mie.getDescriptor().equals("(Ljava/lang/Throwable;Ljava/lang/AutoCloseable;)V")) {
+        if (!"$closeResource".equals(mie.getName()) || !"(Ljava/lang/Throwable;Ljava/lang/AutoCloseable;)V".equals(mie.getDescriptor())) {
             return null;
         }
 
@@ -247,7 +247,7 @@ public class TryWithResourcesStatementMaker {
         return newTryStatement(localVariableMaker, statements, tryStatements, finallyStatements, boe, lv1, lv2);
     }
 
-    protected static ClassFileTryStatement newTryStatement(
+    private static ClassFileTryStatement newTryStatement(
             LocalVariableMaker localVariableMaker, Statements statements, Statements tryStatements,
             Statements finallyStatements, Expression boe, AbstractLocalVariable lv1, AbstractLocalVariable lv2) {
 

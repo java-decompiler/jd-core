@@ -12,7 +12,7 @@ import org.jd.core.v1.model.fragment.StartFlexibleBlockFragment;
 import org.jd.core.v1.util.DefaultList;
 
 public class StartStatementsBlockFragment extends StartFlexibleBlockFragment implements JavaFragment {
-    protected Group group;
+    private final Group group;
 
     public StartStatementsBlockFragment(int minimalLineCount, int lineCount, int maximalLineCount, int weight, String label) {
         super(minimalLineCount, lineCount, maximalLineCount, weight, label);
@@ -35,8 +35,8 @@ public class StartStatementsBlockFragment extends StartFlexibleBlockFragment imp
     }
 
     public static class Group {
-        protected DefaultList<FlexibleFragment> fragments = new DefaultList<>();
-        protected int minimalLineCount = Integer.MAX_VALUE;
+        private final DefaultList<FlexibleFragment> fragments = new DefaultList<>();
+        private int minimalLineCount = Integer.MAX_VALUE;
 
         Group(FlexibleFragment fragment) {
             this.fragments.add(fragment);

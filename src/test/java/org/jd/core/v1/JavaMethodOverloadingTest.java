@@ -8,7 +8,7 @@
 package org.jd.core.v1;
 
 import org.jd.core.v1.compiler.CompilerUtil;
-import org.jd.core.v1.compiler.JavaSourceFileObject;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
@@ -29,7 +29,7 @@ public class JavaMethodOverloadingTest extends AbstractJdTest {
         assertTrue(source.matches(PatternMaker.make(": 23 */", "use((Object)null);")));
 
         // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new JavaSourceFileObject(internalClassName, source)));
+        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
 
     // TODO: bug should be fix

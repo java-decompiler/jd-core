@@ -8,20 +8,11 @@ package org.jd.core.v1.model.javasyntax.declaration;
 
 import org.jd.core.v1.util.DefaultList;
 
-import java.util.Collection;
-
 public class MemberDeclarations extends DefaultList<MemberDeclaration> implements BaseMemberDeclaration {
     private static final long serialVersionUID = 1L;
 
     public MemberDeclarations(int capacity) {
         super(capacity);
-    }
-
-    public MemberDeclarations(Collection<MemberDeclaration> collection) {
-        super(collection);
-        if (collection.size() <= 1) {
-            throw new IllegalArgumentException("Use 'MemberDeclaration' implementation instead");
-        }
     }
 
     public MemberDeclarations(MemberDeclaration declaration, MemberDeclaration... declarations) {

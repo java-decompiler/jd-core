@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class LocalVariableReferenceExpression extends AbstractLineNumberTypeExpression {
-    protected String name;
+    private final String name;
 
     public LocalVariableReferenceExpression(Type type, String name) {
         super(type);
@@ -40,8 +40,8 @@ public class LocalVariableReferenceExpression extends AbstractLineNumberTypeExpr
         return "LocalVariableReferenceExpression{type=" + type + ", name=" + name + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new LocalVariableReferenceExpression(lineNumber, type, name);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new LocalVariableReferenceExpression(lineNumber, type, name);
+    }
 }

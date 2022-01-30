@@ -10,12 +10,7 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
-public class CommentExpression implements Expression {
-    protected String text;
-
-    public CommentExpression(String text) {
-        this.text = text;
-    }
+public record CommentExpression(String text) implements Expression {
 
     @Override
     public int getLineNumber() {
@@ -25,10 +20,6 @@ public class CommentExpression implements Expression {
     @Override
     public Type getType() {
         return PrimitiveType.TYPE_VOID;
-    }
-
-    public String getText() {
-        return text;
     }
 
     @Override
@@ -46,8 +37,8 @@ public class CommentExpression implements Expression {
         return "CommentExpression{" + text + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new CommentExpression(text);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new CommentExpression(text);
+    }
 }

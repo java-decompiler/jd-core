@@ -11,15 +11,11 @@ import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class MethodInvocationExpression extends MethodReferenceExpression {
-    protected BaseTypeArgument nonWildcardTypeArguments;
-    protected BaseExpression parameters;
+    private BaseTypeArgument nonWildcardTypeArguments;
+    private BaseExpression parameters;
 
     public MethodInvocationExpression(Type type, Expression expression, String internalTypeName, String name, String descriptor) {
         super(type, expression, internalTypeName, name, descriptor);
-    }
-
-    public MethodInvocationExpression(int lineNumber, Type type, Expression expression, String internalTypeName, String name, String descriptor) {
-        super(lineNumber, type, expression, internalTypeName, name, descriptor);
     }
 
     public MethodInvocationExpression(Type type, Expression expression, String internalTypeName, String name, String descriptor, BaseExpression parameters) {

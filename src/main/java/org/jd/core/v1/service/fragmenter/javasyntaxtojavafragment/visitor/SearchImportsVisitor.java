@@ -11,8 +11,45 @@ import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.javafragment.ImportsFragment;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.javasyntax.declaration.*;
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.EnumDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.FieldDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.InterfaceDeclaration;
+import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.ArrayExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
+import org.jd.core.v1.model.javasyntax.expression.CastExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.InstanceOfExpression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaFormalParametersExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaIdentifiersExpression;
+import org.jd.core.v1.model.javasyntax.expression.LengthExpression;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.MethodReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewArray;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
+import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
+import org.jd.core.v1.model.javasyntax.expression.ParenthesesExpression;
+import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
+import org.jd.core.v1.model.javasyntax.expression.TernaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
+import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationReference;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
@@ -23,18 +60,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
-    protected Loader loader;
-    protected String internalPackagePrefix;
-    protected ImportsFragment importsFragment = JavaFragmentFactory.newImportsFragment();
-    protected int maxLineNumber = 0;
-    protected Set<String> localTypeNames = new HashSet<>();
-    protected Set<String> internalTypeNames = new HashSet<>();
-    protected Set<String> importTypeNames = new HashSet<>();
+    private final Loader loader;
+    private final String internalPackagePrefix;
+    private final ImportsFragment importsFragment = JavaFragmentFactory.newImportsFragment();
+    private int maxLineNumber;
+    private final Set<String> localTypeNames = new HashSet<>();
+    private final Set<String> internalTypeNames = new HashSet<>();
+    private final Set<String> importTypeNames = new HashSet<>();
 
     public SearchImportsVisitor(Loader loader, String mainInternalName) {
         this.loader = loader;
         int index = mainInternalName.lastIndexOf('/');
-        this.internalPackagePrefix = (index == -1) ? "" : mainInternalName.substring(0, index + 1);
+        this.internalPackagePrefix = index == -1 ? "" : mainInternalName.substring(0, index + 1);
     }
 
     public ImportsFragment getImportsFragment() {
@@ -48,8 +85,8 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(CompilationUnit compilationUnit) {
-        compilationUnit.getTypeDeclarations().accept(new TypeVisitor(localTypeNames));
-        compilationUnit.getTypeDeclarations().accept(this);
+        compilationUnit.typeDeclarations().accept(new TypeVisitor(localTypeNames));
+        compilationUnit.typeDeclarations().accept(this);
     }
 
     @Override
@@ -101,111 +138,149 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(BinaryOperatorExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(BooleanExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(CastExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(ConstructorInvocationExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(ConstructorReferenceExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(DoubleConstantExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(FieldReferenceExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         safeAccept(expression.getExpression());
     }
 
     @Override
     public void visit(FloatConstantExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(IntegerConstantExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(InstanceOfExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LambdaFormalParametersExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LambdaIdentifiersExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LengthExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LocalVariableReferenceExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(LongConstantExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(MethodInvocationExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(MethodReferenceExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         expression.getExpression().accept(this);
     }
 
     @Override
     public void visit(NewArray expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         safeAccept(expression.getDimensionExpressionList());
     }
 
     @Override
     public void visit(NewExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
 
         BaseType type = expression.getType();
 
@@ -216,66 +291,88 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(NewInitializedArray expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(NullExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
     }
 
     @Override
     public void visit(ObjectTypeReferenceExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(ParenthesesExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(PostOperatorExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(PreOperatorExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(StringConstantExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(SuperExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(TernaryOperatorExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(ThisExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
     @Override
     public void visit(TypeReferenceDotClassExpression expression) {
-        if (maxLineNumber < expression.getLineNumber()) maxLineNumber = expression.getLineNumber();
+        if (maxLineNumber < expression.getLineNumber()) {
+            maxLineNumber = expression.getLineNumber();
+        }
         super.visit(expression);
     }
 
@@ -295,7 +392,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
                             importTypeNames.add(typeName);
                         }
                     } else if (internalTypeName.startsWith(internalPackagePrefix)) {
-                        if ((internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1) && !localTypeNames.contains(typeName)) {
+                        if (internalTypeName.indexOf('/', internalPackagePrefix.length()) != -1 && !localTypeNames.contains(typeName)) {
                             importsFragment.addImport(internalTypeName, type.getQualifiedName());
                             importTypeNames.add(typeName);
                         }
@@ -309,7 +406,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     protected static class TypeVisitor extends AbstractJavaSyntaxVisitor {
-        Set<String> mainTypeNames;
+        private final Set<String> mainTypeNames;
 
         public TypeVisitor(Set<String> mainTypeNames) {
             this.mainTypeNames = mainTypeNames;

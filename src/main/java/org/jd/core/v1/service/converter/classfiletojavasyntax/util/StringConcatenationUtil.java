@@ -7,7 +7,11 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
+import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.util.DefaultList;
@@ -16,7 +20,7 @@ import org.jd.core.v1.util.StringConstants;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
-public class StringConcatenationUtil {
+public final class StringConcatenationUtil {
 
     private StringConcatenationUtil() {
         super();
@@ -26,7 +30,7 @@ public class StringConcatenationUtil {
         if (expression.isMethodInvocationExpression()) {
             MethodInvocationExpression mie = (MethodInvocationExpression) expression;
 
-            if ((mie.getParameters() != null) && !mie.getParameters().isList() && "append".equals(mie.getName())) {
+            if (mie.getParameters() != null && !mie.getParameters().isList() && "append".equals(mie.getName())) {
                 Expression concatenatedStringExpression = mie.getParameters().getFirst();
                 Expression expr = mie.getExpression();
                 boolean firstParameterHaveGenericType = false;
@@ -34,7 +38,7 @@ public class StringConcatenationUtil {
                 while (expr.isMethodInvocationExpression()) {
                     mie = (MethodInvocationExpression) expr;
 
-                    if ((mie.getParameters() == null) || mie.getParameters().isList() || !"append".equals(mie.getName())) {
+                    if (mie.getParameters() == null || mie.getParameters().isList() || !"append".equals(mie.getName())) {
                         break;
                     }
 
@@ -71,7 +75,7 @@ public class StringConcatenationUtil {
 
         if (st.hasMoreTokens()) {
             String token = st.nextToken();
-            Expression expression = token.equals(StringConstants.START_OF_HEADING) ? createFirstStringConcatenationItem(parameters.getFirst()) : new StringConstantExpression(token);
+            Expression expression = StringConstants.START_OF_HEADING.equals(token) ? createFirstStringConcatenationItem(parameters.getFirst()) : new StringConstantExpression(token);
 
             if (parameters.isList()) {
                 DefaultList<Expression> list = parameters.getList();
@@ -79,13 +83,13 @@ public class StringConcatenationUtil {
 
                 while (st.hasMoreTokens()) {
                     token = st.nextToken();
-                    Expression e = token.equals(StringConstants.START_OF_HEADING) ? list.get(index++) : new StringConstantExpression(token);
+                    Expression e = StringConstants.START_OF_HEADING.equals(token) ? list.get(index++) : new StringConstantExpression(token);
                     expression = new BinaryOperatorExpression(expression.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", e, 6);
                 }
             } else {
                 while (st.hasMoreTokens()) {
                     token = st.nextToken();
-                    Expression e = token.equals(StringConstants.START_OF_HEADING) ? parameters.getFirst() : new StringConstantExpression(token);
+                    Expression e = StringConstants.START_OF_HEADING.equals(token) ? parameters.getFirst() : new StringConstantExpression(token);
                     expression = new BinaryOperatorExpression(expression.getLineNumber(), ObjectType.TYPE_STRING, expression, "+", e, 6);
                 }
             }

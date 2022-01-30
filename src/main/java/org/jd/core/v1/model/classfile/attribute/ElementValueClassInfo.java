@@ -7,16 +7,7 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class ElementValueClassInfo implements AttributeElementValue {
-    protected String classInfo;
-
-    public ElementValueClassInfo(String classInfo) {
-        this.classInfo = classInfo;
-    }
-
-    public String getClassInfo() {
-        return classInfo;
-    }
+public record ElementValueClassInfo(String classInfo) implements AttributeElementValue {
 
     @Override
     public void accept(ElementValueVisitor visitor) {

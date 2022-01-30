@@ -14,12 +14,11 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import java.util.List;
 
 public class EnumDeclaration extends TypeDeclaration {
-    protected BaseType interfaces;
+    private final BaseType interfaces;
     protected List<Constant> constants;
 
     public EnumDeclaration(int flags, String internalName, String name, List<Constant> constants, BodyDeclaration bodyDeclaration) {
-        super(null, flags, internalName, name, bodyDeclaration);
-        this.constants = constants;
+        this(null, flags, internalName, name, null, constants, bodyDeclaration);
     }
 
     public EnumDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseType interfaces, List<Constant> constants, BodyDeclaration bodyDeclaration) {
@@ -47,30 +46,17 @@ public class EnumDeclaration extends TypeDeclaration {
     }
 
     public static class Constant implements Declaration {
-        protected int lineNumber;
-        protected BaseAnnotationReference annotationReferences;
-        protected String name;
-        protected BaseExpression arguments;
-        protected BodyDeclaration bodyDeclaration;
+        private final int lineNumber;
+        protected final String name;
+        private BaseExpression arguments;
+        private final BodyDeclaration bodyDeclaration;
 
         public Constant(String name) {
-            this.name = name;
-        }
-
-        public Constant(int lineNumber, String name) {
-            this.lineNumber = lineNumber;
-            this.name = name;
+            this(name, null);
         }
 
         public Constant(String name, BaseExpression arguments) {
-            this.name = name;
-            this.arguments = arguments;
-        }
-
-        public Constant(int lineNumber, String name, BaseExpression arguments) {
-            this.lineNumber = lineNumber;
-            this.name = name;
-            this.arguments = arguments;
+            this(0, name, arguments, null);
         }
 
         public Constant(int lineNumber, String name, BaseExpression arguments, BodyDeclaration bodyDeclaration) {
@@ -80,20 +66,8 @@ public class EnumDeclaration extends TypeDeclaration {
             this.bodyDeclaration = bodyDeclaration;
         }
 
-        public Constant(int lineNumber, BaseAnnotationReference annotationReferences, String name, BaseExpression arguments, BodyDeclaration bodyDeclaration) {
-            this.lineNumber = lineNumber;
-            this.annotationReferences = annotationReferences;
-            this.name = name;
-            this.arguments = arguments;
-            this.bodyDeclaration = bodyDeclaration;
-        }
-
         public int getLineNumber() {
             return lineNumber;
-        }
-
-        public BaseAnnotationReference getAnnotationReferences() {
-            return annotationReferences;
         }
 
         public String getName() {

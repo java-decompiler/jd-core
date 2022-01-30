@@ -10,14 +10,14 @@ package org.jd.core.v1.model.javasyntax.expression;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ParenthesesExpression extends AbstractLineNumberExpression {
-    protected Expression expression;
+    private Expression expression;
 
     public ParenthesesExpression(Expression expression) {
         this(expression.getLineNumber(), expression);
     }
 
     public ParenthesesExpression(int lineNumber, Expression expression) {
-    	super(lineNumber);
+        super(lineNumber);
         this.expression = expression;
     }
 
@@ -40,8 +40,8 @@ public class ParenthesesExpression extends AbstractLineNumberExpression {
         visitor.visit(this);
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new ParenthesesExpression(lineNumber, expression);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new ParenthesesExpression(lineNumber, expression);
+    }
 }

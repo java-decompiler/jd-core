@@ -15,12 +15,10 @@ public class NewExpression extends AbstractLineNumberExpression {
     protected ObjectType type;
     protected String descriptor;
     protected BaseExpression parameters;
-    protected BodyDeclaration bodyDeclaration;
+    private final BodyDeclaration bodyDeclaration;
 
     public NewExpression(int lineNumber, ObjectType type, String descriptor) {
-        super(lineNumber);
-        this.type = type;
-        this.descriptor = descriptor;
+        this(lineNumber, type, descriptor, null);
     }
 
     public NewExpression(int lineNumber, ObjectType type, String descriptor, BodyDeclaration bodyDeclaration) {
@@ -84,8 +82,8 @@ public class NewExpression extends AbstractLineNumberExpression {
         return "NewExpression{new " + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new NewExpression(lineNumber, type, descriptor, bodyDeclaration);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new NewExpression(lineNumber, type, descriptor, bodyDeclaration);
+    }
 }

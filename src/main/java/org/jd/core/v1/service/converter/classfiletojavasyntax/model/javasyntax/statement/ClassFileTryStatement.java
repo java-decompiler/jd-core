@@ -14,8 +14,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 import org.jd.core.v1.util.DefaultList;
 
 public class ClassFileTryStatement extends TryStatement {
-    protected boolean jsr;
-    protected boolean eclipse;
+    private final boolean jsr;
+    private final boolean eclipse;
 
     public ClassFileTryStatement(BaseStatement tryStatements, DefaultList<TryStatement.CatchClause> catchClauses, BaseStatement finallyStatements, boolean jsr, boolean eclipse) {
         super(tryStatements, catchClauses, finallyStatements);
@@ -48,7 +48,7 @@ public class ClassFileTryStatement extends TryStatement {
     }
 
     public static class CatchClause extends TryStatement.CatchClause {
-        protected AbstractLocalVariable localVariable;
+        private final AbstractLocalVariable localVariable;
 
         public CatchClause(int lineNumber, ObjectType type, AbstractLocalVariable localVariable, BaseStatement statements) {
             super(lineNumber, type, null, statements);

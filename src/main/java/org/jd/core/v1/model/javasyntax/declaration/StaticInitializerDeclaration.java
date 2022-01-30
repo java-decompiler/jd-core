@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javasyntax.declaration;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 
 public class StaticInitializerDeclaration implements MemberDeclaration {
-    protected String descriptor;
+    protected final String descriptor;
     protected BaseStatement statements;
 
     public StaticInitializerDeclaration(String descriptor, BaseStatement statements) {

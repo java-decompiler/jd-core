@@ -10,7 +10,7 @@ package org.jd.core.v1.model.javafragment;
 import org.jd.core.v1.model.fragment.EndFlexibleBlockFragment;
 
 public class EndStatementsBlockFragment extends EndFlexibleBlockFragment implements JavaFragment {
-    protected final StartStatementsBlockFragment.Group group;
+    private final StartStatementsBlockFragment.Group group;
 
     public EndStatementsBlockFragment(int minimalLineCount, int lineCount, int maximalLineCount, int weight, String label, StartStatementsBlockFragment.Group group) {
         super(minimalLineCount, lineCount, maximalLineCount, weight, label);

@@ -12,12 +12,11 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 
 public class InterfaceDeclaration extends TypeDeclaration {
-    protected BaseTypeParameter typeParameters;
-    protected BaseType interfaces;
+    private final BaseTypeParameter typeParameters;
+    private final BaseType interfaces;
 
     public InterfaceDeclaration(int flags, String internalName, String name, BaseType interfaces) {
-        super(null, flags, internalName, name, null);
-        this.interfaces = interfaces;
+        this(null, flags, internalName, name, null, interfaces, null);
     }
 
     public InterfaceDeclaration(BaseAnnotationReference annotationReferences, int flags, String internalName, String name, BaseTypeParameter typeParameters, BaseType interfaces, BodyDeclaration bodyDeclaration) {

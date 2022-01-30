@@ -61,15 +61,11 @@ public class PrimitiveType implements Type {
         descriptorToType['Z' - 'B'] = TYPE_BOOLEAN;
     }
 
-    protected final String name;
-    protected final int flags;
-    protected final int leftFlags;
-    protected final int rightFlags;
-    protected final String descriptor;
-
-    protected PrimitiveType(PrimitiveType primitiveType) {
-        this(primitiveType.name, primitiveType.flags, primitiveType.leftFlags, primitiveType.rightFlags);
-    }
+    private final String name;
+    private final int flags;
+    private final int leftFlags;
+    private final int rightFlags;
+    private final String descriptor;
 
     protected PrimitiveType(String name, int flags, int leftFlags, int rightFlags) {
         this.name = name;
@@ -158,7 +154,7 @@ public class PrimitiveType implements Type {
 
     @Override
     public int hashCode() {
-        return 750039781 + flags;
+        return 750_039_781 + flags;
     }
 
     @Override

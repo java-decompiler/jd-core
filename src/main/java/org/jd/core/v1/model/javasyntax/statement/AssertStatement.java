@@ -10,8 +10,8 @@ package org.jd.core.v1.model.javasyntax.statement;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 
 public class AssertStatement implements Statement {
-    protected Expression condition;
-    protected Expression message;
+    private Expression condition;
+    private final Expression message;
 
     public AssertStatement(Expression condition, Expression message) {
         this.condition = condition;

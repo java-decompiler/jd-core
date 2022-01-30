@@ -19,7 +19,7 @@ public class BoolExp {
     private Object field4;
     private Object field5;
     private Object field6;
-
+    @edu.umd.cs.findbugs.annotations.SuppressFBWarnings
     @SuppressWarnings({ "unchecked", "unlikely-arg-type" })
     public boolean isValid(@SuppressWarnings("rawtypes") Vector v){
         if(field1 == null || "".equals(field1)){
@@ -33,7 +33,7 @@ public class BoolExp {
         if(field3 == null || "".equals(field3)){
             v.add( new String("Field #3 is not valid"));
         }
-
+        
         if(field4 == null || "".equals(field4 == null)){
             v.add(new String("Field #4 is not valid"));
         }

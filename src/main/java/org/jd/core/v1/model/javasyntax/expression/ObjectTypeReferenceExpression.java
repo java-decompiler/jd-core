@@ -11,24 +11,16 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 public class ObjectTypeReferenceExpression implements Expression {
-    protected int lineNumber;
-    protected ObjectType type;
-    protected boolean explicit;
+    private final int lineNumber;
+    private final ObjectType type;
+    private boolean explicit;
 
     public ObjectTypeReferenceExpression(ObjectType type) {
-        this.type = type;
-        this.explicit = true;
+        this(0, type, true);
     }
 
     public ObjectTypeReferenceExpression(int lineNumber, ObjectType type) {
-        this.lineNumber = lineNumber;
-        this.type = type;
-        this.explicit = true;
-    }
-
-    public ObjectTypeReferenceExpression(ObjectType type, boolean explicit) {
-        this.type = type;
-        this.explicit = explicit;
+        this(lineNumber, type, true);
     }
 
     public ObjectTypeReferenceExpression(int lineNumber, ObjectType type, boolean explicit) {
@@ -78,8 +70,8 @@ public class ObjectTypeReferenceExpression implements Expression {
         return "ObjectTypeReferenceExpression{" + type + "}";
     }
 
-	@Override
-	public Expression copyTo(int lineNumber) {
-		return new ObjectTypeReferenceExpression(lineNumber, type, explicit);
-	}
+    @Override
+    public Expression copyTo(int lineNumber) {
+        return new ObjectTypeReferenceExpression(lineNumber, type, explicit);
+    }
 }

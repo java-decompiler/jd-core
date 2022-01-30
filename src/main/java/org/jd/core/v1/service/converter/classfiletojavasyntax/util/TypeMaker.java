@@ -6,6 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.model.classfile.ClassFile;
@@ -15,20 +16,61 @@ import org.jd.core.v1.model.classfile.attribute.AttributeExceptions;
 import org.jd.core.v1.model.classfile.attribute.AttributeSignature;
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArgument;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
+import org.jd.core.v1.model.javasyntax.type.TypeParameter;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
+import org.jd.core.v1.model.javasyntax.type.TypeParameters;
+import org.jd.core.v1.model.javasyntax.type.UnmodifiableTypes;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileFormatException;
-import org.jd.core.v1.service.deserializer.classfile.ClassFileReader;
 import org.jd.core.v1.util.StringConstants;
 
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UTFDataFormatException;
-import java.util.*;
+import java.net.URL;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
+import static org.apache.bcel.Const.CONSTANT_Class;
+import static org.apache.bcel.Const.CONSTANT_Double;
+import static org.apache.bcel.Const.CONSTANT_Dynamic;
+import static org.apache.bcel.Const.CONSTANT_Fieldref;
+import static org.apache.bcel.Const.CONSTANT_Float;
+import static org.apache.bcel.Const.CONSTANT_Integer;
+import static org.apache.bcel.Const.CONSTANT_InterfaceMethodref;
+import static org.apache.bcel.Const.CONSTANT_InvokeDynamic;
+import static org.apache.bcel.Const.CONSTANT_Long;
+import static org.apache.bcel.Const.CONSTANT_MethodHandle;
+import static org.apache.bcel.Const.CONSTANT_MethodType;
+import static org.apache.bcel.Const.CONSTANT_Methodref;
+import static org.apache.bcel.Const.CONSTANT_Module;
+import static org.apache.bcel.Const.CONSTANT_NameAndType;
+import static org.apache.bcel.Const.CONSTANT_Package;
+import static org.apache.bcel.Const.CONSTANT_String;
+import static org.apache.bcel.Const.CONSTANT_Utf8;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
+
+import jd.core.CoreConstants;
+import jd.core.process.deserializer.ClassFormatException;
 
 /**
  * https://jcp.org/aboutJava/communityprocess/maintenance/jsr924/JVMS-SE5.0-Ch4-ClassFile.pdf
@@ -52,22 +94,27 @@ public class TypeMaker {
         INTERNALNAME_TO_OBJECTPRIMITIVETYPE.put(ObjectType.TYPE_PRIMITIVE_VOID.getInternalName(),    ObjectType.TYPE_PRIMITIVE_VOID);
     }
 
-    private Map<String, Type> signatureToType = new HashMap<>(1024);
-    private Map<String, Type> internalTypeNameFieldNameToType = new HashMap<>(1024);
-    private Map<String, ObjectType> descriptorToObjectType = new HashMap<>(1024);
-    private Map<String, ObjectType> internalTypeNameToObjectType = new HashMap<>(1024);
-    private Map<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
-    private Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToDeclaredParameterTypes = new HashMap<>(1024);
-    private Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToParameterTypes = new HashMap<>(1024);
-    private Map<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
-    private Map<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
+    /*
+     * Internal type names for which we have already loaded fields and methods
+     */
+    private static final Map<String, Boolean> loaded = new HashMap<>();
 
-    private Map<Long, Boolean> assignableRawTypes = new HashMap<>(1024);
-    private Map<Long, ObjectType> superParameterizedObjectTypes = new HashMap<>(1024);
+    private static final Map<String, Type> signatureToType = new HashMap<>(1024);
+    private static final Map<String, Type> internalTypeNameFieldNameToType = new HashMap<>(1024);
+    private static final Map<String, ObjectType> descriptorToObjectType = new HashMap<>(1024);
+    private static final Map<String, ObjectType> internalTypeNameToObjectType = new HashMap<>(1024);
+    private static final Map<String, TypeTypes> internalTypeNameToTypeTypes = new HashMap<>(1024);
+    private static final Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToDeclaredParameterTypes = new HashMap<>(1024);
+    private static final Map<String, Set<BaseType>> internalTypeNameMethodNameParameterCountToParameterTypes = new HashMap<>(1024);
+    private static final Map<String, MethodTypes> internalTypeNameMethodNameDescriptorToMethodTypes = new HashMap<>(1024);
+    private final Map<String, MethodTypes> signatureToMethodTypes = new HashMap<>(1024);
 
-    private Map<String, String[]> hierarchy = new HashMap<>(1024);
-    private ClassPathLoader classPathLoader = new ClassPathLoader();
-    private Loader loader;
+    private final Map<Long, Boolean> assignableRawTypes = new HashMap<>(1024);
+    private final Map<Long, ObjectType> superParameterizedObjectTypes = new HashMap<>(1024);
+
+    private static final Map<String, String[]> hierarchy = new HashMap<>(1024);
+    private static final ClassPathLoader classPathLoader = new ClassPathLoader();
+    private final Loader loader;
 
     public TypeMaker(Loader loader) {
         this.loader = loader;
@@ -127,7 +174,7 @@ public class TypeMaker {
         TypeTypes typeTypes = new TypeTypes();
         String internalTypeName = classFile.getInternalTypeName();
 
-        typeTypes.thisType = makeFromInternalTypeName(internalTypeName);
+        typeTypes.setThisType(makeFromInternalTypeName(internalTypeName));
 
         AttributeSignature attributeSignature = classFile.getAttribute(StringConstants.SIGNATURE_ATTRIBUTE_NAME);
 
@@ -136,28 +183,28 @@ public class TypeMaker {
             String[] interfaceTypeNames = classFile.getInterfaceTypeNames();
 
             if (superTypeName != null  && ! StringConstants.JAVA_LANG_OBJECT.equals(superTypeName)) {
-                typeTypes.superType = makeFromInternalTypeName(superTypeName);
+                typeTypes.setSuperType(makeFromInternalTypeName(superTypeName));
             }
 
             if (interfaceTypeNames != null) {
                 int length = interfaceTypeNames.length;
 
                 if (length == 1) {
-                    typeTypes.interfaces = makeFromInternalTypeName(interfaceTypeNames[0]);
+                    typeTypes.setInterfaces(makeFromInternalTypeName(interfaceTypeNames[0]));
                 } else {
                     UnmodifiableTypes list = new UnmodifiableTypes(length);
                     for (String interfaceTypeName : interfaceTypeNames) {
                         list.add(makeFromInternalTypeName(interfaceTypeName));
                     }
-                    typeTypes.interfaces = list;
+                    typeTypes.setInterfaces(list);
                 }
             }
         } else {
             // Parse 'signature' attribute
-            SignatureReader signatureReader = new SignatureReader(attributeSignature.getSignature());
+            SignatureReader signatureReader = new SignatureReader(attributeSignature.signature());
 
-            typeTypes.typeParameters = parseTypeParameters(signatureReader);
-            typeTypes.superType = parseClassTypeSignature(signatureReader, 0);
+            typeTypes.setTypeParameters(parseTypeParameters(signatureReader));
+            typeTypes.setSuperType(parseClassTypeSignature(signatureReader, 0));
 
             Type firstInterface = parseClassTypeSignature(signatureReader, 0);
 
@@ -165,7 +212,7 @@ public class TypeMaker {
                 Type nextInterface = parseClassTypeSignature(signatureReader, 0);
 
                 if (nextInterface == null) {
-                    typeTypes.interfaces = firstInterface;
+                    typeTypes.setInterfaces(firstInterface);
                 } else {
                     UnmodifiableTypes list = new UnmodifiableTypes(classFile.getInterfaceTypeNames().length);
 
@@ -176,7 +223,7 @@ public class TypeMaker {
                         nextInterface = parseClassTypeSignature(signatureReader, 0);
                     } while (nextInterface != null);
 
-                    typeTypes.interfaces = list;
+                    typeTypes.setInterfaces(list);
                 }
             }
         }
@@ -199,7 +246,7 @@ public class TypeMaker {
         if (attributeSignature == null) {
             methodTypes = parseMethodSignature(method.getDescriptor(), exceptionTypeNames);
         } else {
-            methodTypes = parseMethodSignature(method.getDescriptor(), attributeSignature.getSignature(), exceptionTypeNames);
+            methodTypes = parseMethodSignature(method.getDescriptor(), attributeSignature.signature(), exceptionTypeNames);
         }
 
         internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
@@ -212,7 +259,7 @@ public class TypeMaker {
             AttributeExceptions attributeExceptions = method.getAttribute("Exceptions");
 
             if (attributeExceptions != null) {
-                return attributeExceptions.getExceptionTypeNames();
+                return attributeExceptions.exceptionTypeNames();
             }
         }
 
@@ -222,7 +269,7 @@ public class TypeMaker {
     public Type parseFieldSignature(ClassFile classFile, Field field) {
         String key = classFile.getInternalTypeName() + ':' + field.getName();
         AttributeSignature attributeSignature = field.getAttribute(StringConstants.SIGNATURE_ATTRIBUTE_NAME);
-        String signature = (attributeSignature == null) ? field.getDescriptor() : attributeSignature.getSignature();
+        String signature = attributeSignature == null ? field.getDescriptor() : attributeSignature.signature();
         Type type = makeFromSignature(signature);
 
         internalTypeNameFieldNameToType.put(key, type);
@@ -231,15 +278,7 @@ public class TypeMaker {
     }
 
     public Type makeFromSignature(String signature) {
-        Type type = signatureToType.get(signature);
-
-        if (type == null) {
-            SignatureReader reader = new SignatureReader(signature);
-            type = parseReferenceTypeSignature(reader);
-            signatureToType.put(signature, type);
-        }
-
-        return type;
+        return signatureToType.computeIfAbsent(signature, this::parseReferenceTypeSignature);
     }
 
     public static int countDimension(String descriptor) {
@@ -260,28 +299,28 @@ public class TypeMaker {
         MethodTypes mtDescriptor = parseMethodSignature(descriptor, exceptionTypeNames);
         MethodTypes mtSignature  = parseMethodSignature(signature, exceptionTypeNames);
 
-        if (mtDescriptor.parameterTypes != null) {
-            if (mtSignature.parameterTypes == null) {
+        if (mtDescriptor.getParameterTypes() != null) {
+            if (mtSignature.getParameterTypes() == null) {
                 MethodTypes mt = new MethodTypes();
 
-                mt.typeParameters = mtSignature.typeParameters;
-                mt.parameterTypes = mtDescriptor.parameterTypes;
-                mt.returnedType = mtSignature.returnedType;
-                mt.exceptionTypes = mtSignature.exceptionTypes;
+                mt.setTypeParameters(mtSignature.getTypeParameters());
+                mt.setParameterTypes(mtDescriptor.getParameterTypes());
+                mt.setReturnedType(mtSignature.getReturnedType());
+                mt.setExceptionTypes(mtSignature.getExceptionTypes());
 
                 return mt;
             }
-            if (mtDescriptor.parameterTypes.size() != mtSignature.parameterTypes.size()) {
-                UnmodifiableTypes parameterTypes = new UnmodifiableTypes(mtDescriptor.parameterTypes.getList().subList(
-                    0, mtDescriptor.parameterTypes.size() - mtSignature.parameterTypes.size()));
-                parameterTypes.addAll(mtSignature.parameterTypes.getList());
+            if (mtDescriptor.getParameterTypes().size() != mtSignature.getParameterTypes().size()) {
+                UnmodifiableTypes parameterTypes = new UnmodifiableTypes(mtDescriptor.getParameterTypes().getList().subList(
+                    0, mtDescriptor.getParameterTypes().size() - mtSignature.getParameterTypes().size()));
+                parameterTypes.addAll(mtSignature.getParameterTypes().getList());
 
                 MethodTypes mt = new MethodTypes();
 
-                mt.typeParameters = mtSignature.typeParameters;
-                mt.parameterTypes = parameterTypes;
-                mt.returnedType = mtSignature.returnedType;
-                mt.exceptionTypes = mtSignature.exceptionTypes;
+                mt.setTypeParameters(mtSignature.getTypeParameters());
+                mt.setParameterTypes(parameterTypes);
+                mt.setReturnedType(mtSignature.getReturnedType());
+                mt.setExceptionTypes(mtSignature.getExceptionTypes());
 
                 return mt;
             }
@@ -316,7 +355,7 @@ public class TypeMaker {
 
             // Type parameters
             methodTypes = new MethodTypes();
-            methodTypes.typeParameters = parseTypeParameters(reader);
+            methodTypes.setTypeParameters(parseTypeParameters(reader));
 
             // Parameters
             if (reader.read() != '(') {
@@ -326,7 +365,7 @@ public class TypeMaker {
             Type firstParameterType = parseReferenceTypeSignature(reader);
 
             if (firstParameterType == null) {
-                methodTypes.parameterTypes = null;
+                methodTypes.setParameterTypes(null);
             } else {
                 Type nextParameterType = parseReferenceTypeSignature(reader);
                 UnmodifiableTypes types = new UnmodifiableTypes();
@@ -338,7 +377,7 @@ public class TypeMaker {
                     nextParameterType = parseReferenceTypeSignature(reader);
                 }
 
-                methodTypes.parameterTypes = types;
+                methodTypes.setParameterTypes(types);
             }
 
             if (reader.read() != ')') {
@@ -346,7 +385,7 @@ public class TypeMaker {
             }
 
             // Result
-            methodTypes.returnedType = parseReferenceTypeSignature(reader);
+            methodTypes.setReturnedType(parseReferenceTypeSignature(reader));
 
             // Exceptions
             Type firstException = parseExceptionSignature(reader);
@@ -355,7 +394,7 @@ public class TypeMaker {
                 // Signature does not contain exceptions
                 if (exceptionTypeNames != null) {
                     if (exceptionTypeNames.length == 1) {
-                        methodTypes.exceptionTypes = makeFromInternalTypeName(exceptionTypeNames[0]);
+                        methodTypes.setExceptionTypes(makeFromInternalTypeName(exceptionTypeNames[0]));
                     } else {
                         UnmodifiableTypes list = new UnmodifiableTypes(exceptionTypeNames.length);
 
@@ -363,14 +402,14 @@ public class TypeMaker {
                             list.add(makeFromInternalTypeName(exceptionTypeName));
                         }
 
-                        methodTypes.exceptionTypes = list;
+                        methodTypes.setExceptionTypes(list);
                     }
                 }
             } else {
                 Type nextException = parseExceptionSignature(reader);
 
                 if (nextException == null) {
-                    methodTypes.exceptionTypes = firstException;
+                    methodTypes.setExceptionTypes(firstException);
                 } else {
                     UnmodifiableTypes list = new UnmodifiableTypes();
 
@@ -381,7 +420,7 @@ public class TypeMaker {
                         nextException = parseExceptionSignature(reader);
                     } while (nextException != null);
 
-                    methodTypes.exceptionTypes = list;
+                    methodTypes.setExceptionTypes(list);
                 }
             }
 
@@ -532,7 +571,7 @@ public class TypeMaker {
                 }
 
                 name = reader.substring(index);
-                internalTypeName += '$' + name;
+                internalTypeName = String.join("$", internalTypeName, name);
                 if (Character.isDigit(name.charAt(0))) {
                     name = extractLocalClassName(name);
                     qualifiedName = null;
@@ -558,7 +597,7 @@ public class TypeMaker {
             // Skip ';'
             reader.index++;
 
-            return (dimension==0) ? ot : (ObjectType)ot.createType(dimension);
+            return dimension==0 ? ot : (ObjectType)ot.createType(dimension);
         }
         return null;
     }
@@ -587,6 +626,10 @@ public class TypeMaker {
         return typeArguments;
     }
 
+    private Type parseReferenceTypeSignature(String signature) {
+        return parseReferenceTypeSignature(new SignatureReader(signature));
+    }
+    
     /**
      * Rules:
      *  ReferenceTypeSignature: ClassTypeSignature | ArrayTypeSignature | TypeVariableSignature
@@ -608,23 +651,23 @@ public class TypeMaker {
 
             switch (c) {
                 case 'B':
-                    return (dimension == 0) ? PrimitiveType.TYPE_BYTE : PrimitiveType.TYPE_BYTE.createType(dimension);
+                    return dimension == 0 ? PrimitiveType.TYPE_BYTE : PrimitiveType.TYPE_BYTE.createType(dimension);
                 case 'C':
-                    return (dimension == 0) ? PrimitiveType.TYPE_CHAR : PrimitiveType.TYPE_CHAR.createType(dimension);
+                    return dimension == 0 ? PrimitiveType.TYPE_CHAR : PrimitiveType.TYPE_CHAR.createType(dimension);
                 case 'D':
-                    return (dimension == 0) ? PrimitiveType.TYPE_DOUBLE : PrimitiveType.TYPE_DOUBLE.createType(dimension);
+                    return dimension == 0 ? PrimitiveType.TYPE_DOUBLE : PrimitiveType.TYPE_DOUBLE.createType(dimension);
                 case 'F':
-                    return (dimension == 0) ? PrimitiveType.TYPE_FLOAT : PrimitiveType.TYPE_FLOAT.createType(dimension);
+                    return dimension == 0 ? PrimitiveType.TYPE_FLOAT : PrimitiveType.TYPE_FLOAT.createType(dimension);
                 case 'I':
-                    return (dimension == 0) ? PrimitiveType.TYPE_INT : PrimitiveType.TYPE_INT.createType(dimension);
+                    return dimension == 0 ? PrimitiveType.TYPE_INT : PrimitiveType.TYPE_INT.createType(dimension);
                 case 'J':
-                    return (dimension == 0) ? PrimitiveType.TYPE_LONG : PrimitiveType.TYPE_LONG.createType(dimension);
+                    return dimension == 0 ? PrimitiveType.TYPE_LONG : PrimitiveType.TYPE_LONG.createType(dimension);
                 case 'L':
                     // Unread 'L'
                     reader.index--;
                     return parseClassTypeSignature(reader, dimension);
                 case 'S':
-                    return (dimension == 0) ? PrimitiveType.TYPE_SHORT : PrimitiveType.TYPE_SHORT.createType(dimension);
+                    return dimension == 0 ? PrimitiveType.TYPE_SHORT : PrimitiveType.TYPE_SHORT.createType(dimension);
                 case 'T':
                     int index = reader.index;
 
@@ -642,7 +685,7 @@ public class TypeMaker {
                     assert dimension == 0;
                     return PrimitiveType.TYPE_VOID;
                 case 'Z':
-                    return (dimension == 0) ? PrimitiveType.TYPE_BOOLEAN : PrimitiveType.TYPE_BOOLEAN.createType(dimension);
+                    return dimension == 0 ? PrimitiveType.TYPE_BOOLEAN : PrimitiveType.TYPE_BOOLEAN.createType(dimension);
                 default:
                     // Unread 'c'
                     reader.index--;
@@ -682,10 +725,7 @@ public class TypeMaker {
             }
 
             switch (c) {
-                case 'B': case 'C': case 'D': case 'F': case 'I': case 'J':
-            case 'S':
-            case 'V':
-            case 'Z':
+                case 'B', 'C', 'D', 'F', 'I', 'J', 'S', 'V', 'Z':
                 return true;
                 case 'L':
                     // Unread 'L'
@@ -767,7 +807,7 @@ public class TypeMaker {
 
     private static boolean isATypeArgument(SignatureReader reader) {
         switch (reader.read()) {
-            case '+': case '-':
+            case '+', '-':
                 return isAReferenceTypeSignature(reader);
             case '*':
                 return true;
@@ -787,14 +827,14 @@ public class TypeMaker {
                 i++;
             }
 
-            return (i == len) ? null : name.substring(i);
+            return i == len ? null : name.substring(i);
         }
 
         return name;
     }
 
     public ObjectType makeFromDescriptorOrInternalTypeName(String descriptorOrInternalTypeName) {
-        return (descriptorOrInternalTypeName.charAt(0) == '[') ? makeFromDescriptor(descriptorOrInternalTypeName) : makeFromInternalTypeName(descriptorOrInternalTypeName);
+        return descriptorOrInternalTypeName.charAt(0) == '[' ? makeFromDescriptor(descriptorOrInternalTypeName) : makeFromInternalTypeName(descriptorOrInternalTypeName);
     }
 
     public ObjectType makeFromDescriptor(String descriptor) {
@@ -844,7 +884,7 @@ public class TypeMaker {
         return ot;
     }
 
-    private ObjectType create(String internalTypeName) {
+    private static ObjectType create(String internalTypeName) {
         int lastSlash = internalTypeName.lastIndexOf('/');
         int lastDollar = internalTypeName.lastIndexOf('$');
         ObjectType ot;
@@ -883,7 +923,7 @@ public class TypeMaker {
             return null;
         }
         String superInternalTypeName = superObjectType.getInternalName();
-        long superHashCode = superInternalTypeName.hashCode() * 31;
+        long superHashCode = superInternalTypeName.hashCode() * 31L;
         return searchSuperParameterizedType(superHashCode, superInternalTypeName, objectType);
     }
 
@@ -893,7 +933,7 @@ public class TypeMaker {
         }
         if (left.getDimension() <= 0 && right.getDimension() <= 0) {
             String leftInternalTypeName = left.getInternalName();
-            long leftHashCode = leftInternalTypeName.hashCode() * 31;
+            long leftHashCode = leftInternalTypeName.hashCode() * 31L;
             ObjectType ot = searchSuperParameterizedType(leftHashCode, leftInternalTypeName, right);
 
             if (ot != null && leftInternalTypeName.equals(ot.getInternalName())) {
@@ -927,28 +967,28 @@ public class TypeMaker {
             BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
             Map<String, TypeArgument> bindings;
 
-            if (rightTypeTypes.typeParameters == null || right.getTypeArguments() == null) {
+            if (rightTypeTypes.getTypeParameters() == null || right.getTypeArguments() == null) {
                 bindings = Collections.emptyMap();
             } else {
                 bindings = new HashMap<>();
 
-                if (rightTypeTypes.typeParameters.isList() && right.getTypeArguments().isTypeArgumentList()) {
-                    Iterator<TypeParameter> iteratorTypeParameter = rightTypeTypes.typeParameters.iterator();
+                if (rightTypeTypes.getTypeParameters().isList() && right.getTypeArguments().isTypeArgumentList()) {
+                    Iterator<TypeParameter> iteratorTypeParameter = rightTypeTypes.getTypeParameters().iterator();
                     Iterator<TypeArgument> iteratorTypeArgument = right.getTypeArguments().getTypeArgumentList().iterator();
 
                     while (iteratorTypeParameter.hasNext()) {
                         bindings.put(iteratorTypeParameter.next().getIdentifier(), iteratorTypeArgument.next());
                     }
                 } else {
-                    bindings.put(rightTypeTypes.typeParameters.getFirst().getIdentifier(), right.getTypeArguments().getTypeArgumentFirst());
+                    bindings.put(rightTypeTypes.getTypeParameters().getFirst().getIdentifier(), right.getTypeArguments().getTypeArgumentFirst());
                 }
             }
 
             bindTypesToTypesVisitor.setBindings(bindings);
 
-            if (rightTypeTypes.superType != null) {
+            if (rightTypeTypes.getSuperType() != null) {
                 bindTypesToTypesVisitor.init();
-                rightTypeTypes.superType.accept(bindTypesToTypesVisitor);
+                rightTypeTypes.getSuperType().accept(bindTypesToTypesVisitor);
                 ObjectType ot = (ObjectType) bindTypesToTypesVisitor.getType();
                 ot = searchSuperParameterizedType(leftHashCode, leftInternalTypeName, ot);
 
@@ -957,9 +997,9 @@ public class TypeMaker {
                     return ot;
                 }
             }
-            if (rightTypeTypes.interfaces != null) {
+            if (rightTypeTypes.getInterfaces() != null) {
                 ObjectType ot;
-                for (Type interfaze : rightTypeTypes.interfaces) {
+                for (Type interfaze : rightTypeTypes.getInterfaces()) {
                     bindTypesToTypesVisitor.init();
                     interfaze.accept(bindTypesToTypesVisitor);
                     ot = (ObjectType) bindTypesToTypesVisitor.getType();
@@ -986,7 +1026,7 @@ public class TypeMaker {
         }
         String leftInternalName = left.getInternalName();
         String rightInternalName = right.getInternalName();
-        return leftInternalName.equals(rightInternalName) || isRawTypeAssignable(leftInternalName.hashCode() * 31, leftInternalName, rightInternalName);
+        return leftInternalName.equals(rightInternalName) || isRawTypeAssignable(leftInternalName.hashCode() * 31L, leftInternalName, rightInternalName);
     }
 
     private boolean isRawTypeAssignable(long leftHashCode, String leftInternalName, String rightInternalName) {
@@ -1048,94 +1088,94 @@ public class TypeMaker {
         return typeTypes;
     }
 
-    private TypeTypes makeTypeTypes(String internalTypeName, byte[] data) throws UTFDataFormatException {
+    private TypeTypes makeTypeTypes(String internalTypeName, byte[] data) throws IOException {
         if (data == null) {
             return null;
         }
 
-        ClassFileReader reader = new ClassFileReader(data);
-        Object[] constants = loadClassFile(internalTypeName, reader);
+        try (DataInputStream reader = new DataInputStream(new ByteArrayInputStream(data))) {
+            Object[] constants = loadClassFile(internalTypeName, reader);
 
-        // Skip fields
-        skipMembers(reader);
+            // Skip fields
+            skipMembers(reader);
 
-        // Skip methods
-        skipMembers(reader);
+            // Skip methods
+            skipMembers(reader);
 
-        // Load attributes
-        String signature = null;
-        int count = reader.readUnsignedShort();
+            // Load attributes
+            String signature = null;
+            int count = reader.readUnsignedShort();
 
-        int attributeNameIndex;
-        int attributeLength;
-        for (int j=0; j<count; j++) {
-            attributeNameIndex = reader.readUnsignedShort();
-            attributeLength = reader.readInt();
+            int attributeNameIndex;
+            int attributeLength;
+            for (int j=0; j<count; j++) {
+                attributeNameIndex = reader.readUnsignedShort();
+                attributeLength = reader.readInt();
 
-            if (StringConstants.SIGNATURE_ATTRIBUTE_NAME.equals(constants[attributeNameIndex])) {
-                signature = (String)constants[reader.readUnsignedShort()];
-                break;
+                if (StringConstants.SIGNATURE_ATTRIBUTE_NAME.equals(constants[attributeNameIndex])) {
+                    signature = (String)constants[reader.readUnsignedShort()];
+                    break;
+                }
+                reader.skipBytes(attributeLength);
             }
-            reader.skip(attributeLength);
-        }
 
-        String[] superClassAndInterfaceNames = hierarchy.get(internalTypeName);
-        TypeTypes typeTypes = new TypeTypes();
+            String[] superClassAndInterfaceNames = hierarchy.get(internalTypeName);
+            TypeTypes typeTypes = new TypeTypes();
 
-        typeTypes.thisType = makeFromInternalTypeName(internalTypeName);
+            typeTypes.setThisType(makeFromInternalTypeName(internalTypeName));
 
-        if (signature == null) {
-            String superTypeName = superClassAndInterfaceNames[0];
+            if (signature == null) {
+                String superTypeName = superClassAndInterfaceNames[0];
 
-            typeTypes.superType = (superTypeName == null) ? null : makeFromInternalTypeName(superTypeName);
+                typeTypes.setSuperType(superTypeName == null ? null : makeFromInternalTypeName(superTypeName));
 
-            switch (superClassAndInterfaceNames.length) {
-                case 0:
-                case 1:
-                    break;
-                case 2:
-                    typeTypes.interfaces = makeFromInternalTypeName(superClassAndInterfaceNames[1]);
-                    break;
-                default:
-                    int length = superClassAndInterfaceNames.length;
-                    UnmodifiableTypes list = new UnmodifiableTypes(length-1);
-                    for (int i=1; i<length; i++) {
-                        list.add(makeFromInternalTypeName(superClassAndInterfaceNames[i]));
+                switch (superClassAndInterfaceNames.length) {
+                    case 0, 1:
+                        break;
+                    case 2:
+                        typeTypes.setInterfaces(makeFromInternalTypeName(superClassAndInterfaceNames[1]));
+                        break;
+                    default:
+                        int length = superClassAndInterfaceNames.length;
+                        UnmodifiableTypes list = new UnmodifiableTypes(length-1);
+                        for (int i=1; i<length; i++) {
+                            list.add(makeFromInternalTypeName(superClassAndInterfaceNames[i]));
+                        }
+                        typeTypes.setInterfaces(list);
+                        break;
+                }
+            } else {
+                // Parse 'signature' attribute
+                SignatureReader signatureReader = new SignatureReader(signature);
+
+                typeTypes.setTypeParameters(parseTypeParameters(signatureReader));
+                typeTypes.setSuperType(parseClassTypeSignature(signatureReader, 0));
+
+                Type firstInterface = parseClassTypeSignature(signatureReader, 0);
+
+                if (firstInterface != null) {
+                    Type nextInterface = parseClassTypeSignature(signatureReader, 0);
+
+                    if (nextInterface == null) {
+                        typeTypes.setInterfaces(firstInterface);
+                    } else {
+                        int length = superClassAndInterfaceNames.length;
+                        UnmodifiableTypes list = new UnmodifiableTypes(length-1);
+
+                        list.add(firstInterface);
+
+                        do {
+                            list.add(nextInterface);
+                            nextInterface = parseClassTypeSignature(signatureReader, 0);
+                        } while (nextInterface != null);
+
+                        typeTypes.setInterfaces(list);
                     }
-                    typeTypes.interfaces = list;
-                    break;
-            }
-        } else {
-            // Parse 'signature' attribute
-            SignatureReader signatureReader = new SignatureReader(signature);
-
-            typeTypes.typeParameters = parseTypeParameters(signatureReader);
-            typeTypes.superType = parseClassTypeSignature(signatureReader, 0);
-
-            Type firstInterface = parseClassTypeSignature(signatureReader, 0);
-
-            if (firstInterface != null) {
-                Type nextInterface = parseClassTypeSignature(signatureReader, 0);
-
-                if (nextInterface == null) {
-                    typeTypes.interfaces = firstInterface;
-                } else {
-                    int length = superClassAndInterfaceNames.length;
-                    UnmodifiableTypes list = new UnmodifiableTypes(length-1);
-
-                    list.add(firstInterface);
-
-                    do {
-                        list.add(nextInterface);
-                        nextInterface = parseClassTypeSignature(signatureReader, 0);
-                    } while (nextInterface != null);
-
-                    typeTypes.interfaces = list;
                 }
             }
-        }
 
-        return typeTypes;
+            return typeTypes;
+        }
     }
 
     public void setFieldType(String internalTypeName, String fieldName, Type type) {
@@ -1160,27 +1200,27 @@ public class TypeMaker {
         Type type = internalTypeNameFieldNameToType.get(key);
 
         // Load fields
-        if (type == null && loadFieldsAndMethods(internalTypeName)) {
+        if (type == null && loaded.computeIfAbsent(internalTypeName, this::loadFieldsAndMethods)) {
             type = internalTypeNameFieldNameToType.get(key);
 
             if (type == null) {
                 TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
                 if (typeTypes != null) {
-                    if (typeTypes.superType != null) {
-                        type = loadFieldType(typeTypes.superType, fieldName, descriptor);
+                    if (typeTypes.getSuperType() != null) {
+                        type = loadFieldType(typeTypes.getSuperType(), fieldName, descriptor);
                     }
 
-                    if (type == null && typeTypes.interfaces != null) {
-                        if (typeTypes.interfaces.isList()) {
-                            for (Type interfaze : typeTypes.interfaces) {
+                    if (type == null && typeTypes.getInterfaces() != null) {
+                        if (typeTypes.getInterfaces().isList()) {
+                            for (Type interfaze : typeTypes.getInterfaces()) {
                                 type = loadFieldType((ObjectType) interfaze, fieldName, descriptor);
                                 if (type != null) {
                                     break;
                                 }
                             }
                         } else {
-                            type = loadFieldType((ObjectType) typeTypes.interfaces.getFirst(), fieldName, descriptor);
+                            type = loadFieldType((ObjectType) typeTypes.getInterfaces().getFirst(), fieldName, descriptor);
                         }
                     }
                 }
@@ -1202,19 +1242,19 @@ public class TypeMaker {
         if (type != null && typeArguments != null) {
             TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
-            if (typeTypes != null && typeTypes.typeParameters != null) {
+            if (typeTypes != null && typeTypes.getTypeParameters() != null) {
                 BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
                 Map<String, TypeArgument> bindings = new HashMap<>();
 
-                if (typeTypes.typeParameters.isList() && typeArguments.isTypeArgumentList()) {
-                    Iterator<TypeParameter> iteratorTypeParameter = typeTypes.typeParameters.iterator();
+                if (typeTypes.getTypeParameters().isList() && typeArguments.isTypeArgumentList()) {
+                    Iterator<TypeParameter> iteratorTypeParameter = typeTypes.getTypeParameters().iterator();
                     Iterator<TypeArgument> iteratorTypeArgument = typeArguments.getTypeArgumentList().iterator();
 
                     while (iteratorTypeParameter.hasNext()) {
                         bindings.put(iteratorTypeParameter.next().getIdentifier(), iteratorTypeArgument.next());
                     }
                 } else {
-                    bindings.put(typeTypes.typeParameters.getFirst().getIdentifier(), typeArguments.getTypeArgumentFirst());
+                    bindings.put(typeTypes.getTypeParameters().getFirst().getIdentifier(), typeArguments.getTypeArgumentFirst());
                 }
 
                 bindTypesToTypesVisitor.setBindings(bindings);
@@ -1229,7 +1269,7 @@ public class TypeMaker {
     }
 
     public void setMethodReturnedType(String internalTypeName, String methodName, String descriptor, Type type) {
-        makeMethodTypes(internalTypeName, methodName, descriptor).returnedType = type;
+        makeMethodTypes(internalTypeName, methodName, descriptor).setReturnedType(type);
     }
 
     public MethodTypes makeMethodTypes(String descriptor) {
@@ -1253,27 +1293,27 @@ public class TypeMaker {
         MethodTypes methodTypes = internalTypeNameMethodNameDescriptorToMethodTypes.get(key);
 
         // Load method
-        if (methodTypes == null && loadFieldsAndMethods(internalTypeName)) {
+        if (methodTypes == null && loaded.computeIfAbsent(internalTypeName, this::loadFieldsAndMethods)) {
             methodTypes = internalTypeNameMethodNameDescriptorToMethodTypes.get(key);
 
             if (methodTypes == null) {
                 TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
                 if (typeTypes != null) {
-                    if (typeTypes.superType != null) {
-                        methodTypes = loadMethodTypes(typeTypes.superType, methodName, descriptor);
+                    if (typeTypes.getSuperType() != null) {
+                        methodTypes = loadMethodTypes(typeTypes.getSuperType(), methodName, descriptor);
                     }
 
-                    if (methodTypes == null && typeTypes.interfaces != null) {
-                        if (typeTypes.interfaces.isList()) {
-                            for (Type interfaze : typeTypes.interfaces) {
+                    if (methodTypes == null && typeTypes.getInterfaces() != null) {
+                        if (typeTypes.getInterfaces().isList()) {
+                            for (Type interfaze : typeTypes.getInterfaces()) {
                                 methodTypes = loadMethodTypes((ObjectType) interfaze, methodName, descriptor);
                                 if (methodTypes != null) {
                                     break;
                                 }
                             }
                         } else {
-                            methodTypes = loadMethodTypes((ObjectType) typeTypes.interfaces.getFirst(), methodName, descriptor);
+                            methodTypes = loadMethodTypes((ObjectType) typeTypes.getInterfaces().getFirst(), methodName, descriptor);
                         }
                     }
                 }
@@ -1295,44 +1335,44 @@ public class TypeMaker {
         if (methodTypes != null && typeArguments != null) {
             TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
-            if (typeTypes != null && typeTypes.typeParameters != null) {
+            if (typeTypes != null && typeTypes.getTypeParameters() != null) {
                 BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
                 Map<String, TypeArgument> bindings = new HashMap<>();
                 MethodTypes newMethodTypes = new MethodTypes();
 
-                if (typeTypes.typeParameters.isList() && typeArguments.isTypeArgumentList()) {
-                    Iterator<TypeParameter> iteratorTypeParameter = typeTypes.typeParameters.iterator();
+                if (typeTypes.getTypeParameters().isList() && typeArguments.isTypeArgumentList()) {
+                    Iterator<TypeParameter> iteratorTypeParameter = typeTypes.getTypeParameters().iterator();
                     Iterator<TypeArgument> iteratorTypeArgument = typeArguments.getTypeArgumentList().iterator();
 
                     while (iteratorTypeParameter.hasNext()) {
                         bindings.put(iteratorTypeParameter.next().getIdentifier(), iteratorTypeArgument.next());
                     }
                 } else {
-                    bindings.put(typeTypes.typeParameters.getFirst().getIdentifier(), typeArguments.getTypeArgumentFirst());
+                    bindings.put(typeTypes.getTypeParameters().getFirst().getIdentifier(), typeArguments.getTypeArgumentFirst());
                 }
 
                 bindTypesToTypesVisitor.setBindings(bindings);
 
-                if (methodTypes.parameterTypes == null) {
-                    newMethodTypes.parameterTypes = null;
+                if (methodTypes.getParameterTypes() == null) {
+                    newMethodTypes.setParameterTypes(null);
                 } else {
                     bindTypesToTypesVisitor.init();
-                    methodTypes.parameterTypes.accept(bindTypesToTypesVisitor);
+                    methodTypes.getParameterTypes().accept(bindTypesToTypesVisitor);
                     BaseType baseType = bindTypesToTypesVisitor.getType();
 
                     if (baseType.isList() && baseType.isTypes()) {
                         baseType = new UnmodifiableTypes(baseType.getList());
                     }
 
-                    newMethodTypes.parameterTypes = baseType;
+                    newMethodTypes.setParameterTypes(baseType);
                 }
 
                 bindTypesToTypesVisitor.init();
-                methodTypes.returnedType.accept(bindTypesToTypesVisitor);
-                newMethodTypes.returnedType = (Type)bindTypesToTypesVisitor.getType();
+                methodTypes.getReturnedType().accept(bindTypesToTypesVisitor);
+                newMethodTypes.setReturnedType((Type)bindTypesToTypesVisitor.getType());
 
-                newMethodTypes.typeParameters = null;
-                newMethodTypes.exceptionTypes = methodTypes.exceptionTypes;
+                newMethodTypes.setTypeParameters(null);
+                newMethodTypes.setExceptionTypes(methodTypes.getExceptionTypes());
 
                 methodTypes = newMethodTypes;
             }
@@ -1360,94 +1400,95 @@ public class TypeMaker {
         return ot;
     }
 
-    private ObjectType loadType(String internalTypeName, byte[] data) throws UTFDataFormatException {
+    private ObjectType loadType(String internalTypeName, byte[] data) throws IOException {
         if (data == null) {
             return null;
         }
 
-        ClassFileReader reader = new ClassFileReader(data);
-        Object[] constants = loadClassFile(internalTypeName, reader);
+        try (DataInputStream reader = new DataInputStream(new ByteArrayInputStream(data))) {
+            Object[] constants = loadClassFile(internalTypeName, reader);
 
-        // Skip fields
-        skipMembers(reader);
+            // Skip fields
+            skipMembers(reader);
 
-        // Skip methods
-        skipMembers(reader);
+            // Skip methods
+            skipMembers(reader);
 
-        String outerTypeName = null;
-        ObjectType outerObjectType = null;
+            String outerTypeName = null;
+            ObjectType outerObjectType = null;
 
-        // Load attributes
-        int count = reader.readUnsignedShort();
-        int attributeNameIndex;
-        int attributeLength;
-        for (int i = 0; i < count; i++) {
-            attributeNameIndex = reader.readUnsignedShort();
-            attributeLength = reader.readInt();
+            // Load attributes
+            int count = reader.readUnsignedShort();
+            int attributeNameIndex;
+            int attributeLength;
+            for (int i = 0; i < count; i++) {
+                attributeNameIndex = reader.readUnsignedShort();
+                attributeLength = reader.readInt();
 
-            if ("InnerClasses".equals(constants[attributeNameIndex])) {
-                int innerClassesCount = reader.readUnsignedShort();
+                if ("InnerClasses".equals(constants[attributeNameIndex])) {
+                    int innerClassesCount = reader.readUnsignedShort();
 
-                int innerTypeIndex;
-                int outerTypeIndex;
-                Integer cc;
-                String innerTypeName;
-                for(int j=0; j < innerClassesCount; j++) {
-                    innerTypeIndex = reader.readUnsignedShort();
-                    outerTypeIndex = reader.readUnsignedShort();
+                    int innerTypeIndex;
+                    int outerTypeIndex;
+                    Integer cc;
+                    String innerTypeName;
+                    for(int j=0; j < innerClassesCount; j++) {
+                        innerTypeIndex = reader.readUnsignedShort();
+                        outerTypeIndex = reader.readUnsignedShort();
 
-                    // Skip 'innerNameIndex' & innerAccessFlags'
-                    reader.skip(2 * 2);
+                        // Skip 'innerNameIndex' & innerAccessFlags'
+                        reader.skipBytes(2 * 2);
 
-                    cc = (Integer)constants[innerTypeIndex];
-                    innerTypeName = (String)constants[cc];
+                        cc = (Integer)constants[innerTypeIndex];
+                        innerTypeName = (String)constants[cc];
 
-                    if (innerTypeName.equals(internalTypeName)) {
-                        if (outerTypeIndex == 0) {
-                            // Synthetic inner class -> Search outer class
-                            int lastDollar = internalTypeName.lastIndexOf('$');
+                        if (innerTypeName.equals(internalTypeName)) {
+                            if (outerTypeIndex == 0) {
+                                // Synthetic inner class -> Search outer class
+                                int lastDollar = internalTypeName.lastIndexOf('$');
 
-                            if (lastDollar != -1) {
-                                outerTypeName = internalTypeName.substring(0, lastDollar);
+                                if (lastDollar != -1) {
+                                    outerTypeName = internalTypeName.substring(0, lastDollar);
+                                    outerObjectType = loadType(outerTypeName);
+                                }
+                            } else {
+                                // Return 'outerTypeName'
+                                cc = (Integer)constants[outerTypeIndex];
+                                outerTypeName = (String)constants[cc];
                                 outerObjectType = loadType(outerTypeName);
                             }
-                        } else {
-                            // Return 'outerTypeName'
-                            cc = (Integer)constants[outerTypeIndex];
-                            outerTypeName = (String)constants[cc];
-                            outerObjectType = loadType(outerTypeName);
+                            break;
                         }
-                        break;
                     }
+
+                    break;
                 }
-
-                break;
+                reader.skipBytes(attributeLength);
             }
-            reader.skip(attributeLength);
+
+            if (outerObjectType == null) {
+                int lastSlash = internalTypeName.lastIndexOf('/');
+                String qualifiedName = internalTypeName.replace('/', '.');
+                String name = qualifiedName.substring(lastSlash + 1);
+
+                return new ObjectType(internalTypeName, qualifiedName, name);
+            }
+            int index;
+
+            if (outerTypeName != null && internalTypeName.length() > outerTypeName.length() + 1) {
+                index = outerTypeName.length();
+            } else {
+                index = internalTypeName.lastIndexOf('$');
+            }
+
+            String innerName = internalTypeName.substring(index + 1);
+
+            if (Character.isDigit(innerName.charAt(0))) {
+                return new InnerObjectType(internalTypeName, null, extractLocalClassName(innerName), outerObjectType);
+            }
+            String qualifiedName = outerObjectType.getQualifiedName() + '.' + innerName;
+            return new InnerObjectType(internalTypeName, qualifiedName, innerName, outerObjectType);
         }
-
-        if (outerObjectType == null) {
-            int lastSlash = internalTypeName.lastIndexOf('/');
-            String qualifiedName = internalTypeName.replace('/', '.');
-            String name = qualifiedName.substring(lastSlash + 1);
-
-            return new ObjectType(internalTypeName, qualifiedName, name);
-        }
-        int index;
-
-        if (outerTypeName != null && internalTypeName.length() > outerTypeName.length() + 1) {
-            index = outerTypeName.length();
-        } else {
-            index = internalTypeName.lastIndexOf('$');
-        }
-
-        String innerName = internalTypeName.substring(index + 1);
-
-        if (Character.isDigit(innerName.charAt(0))) {
-            return new InnerObjectType(internalTypeName, null, extractLocalClassName(innerName), outerObjectType);
-        }
-        String qualifiedName = outerObjectType.getQualifiedName() + '.' + innerName;
-        return new InnerObjectType(internalTypeName, qualifiedName, innerName, outerObjectType);
     }
 
     private boolean loadFieldsAndMethods(String internalTypeName) {
@@ -1467,140 +1508,141 @@ public class TypeMaker {
         return false;
     }
 
-    private void loadFieldsAndMethods(String internalTypeName, byte[] data) throws UTFDataFormatException {
+    private void loadFieldsAndMethods(String internalTypeName, byte[] data) throws IOException {
         if (data != null) {
-            ClassFileReader reader = new ClassFileReader(data);
-            Object[] constants = loadClassFile(internalTypeName, reader);
+            try (DataInputStream reader = new DataInputStream(new ByteArrayInputStream(data))) {
+                Object[] constants = loadClassFile(internalTypeName, reader);
 
-            // Load fields
-            int count = reader.readUnsignedShort();
-            for (int i = 0; i < count; i++) {
-                // skip 'accessFlags'
-                reader.skip(2);
+                // Load fields
+                int count = reader.readUnsignedShort();
+                for (int i = 0; i < count; i++) {
+                    // skip 'accessFlags'
+                    reader.skipBytes(2);
 
-                int nameIndex = reader.readUnsignedShort();
-                int descriptorIndex = reader.readUnsignedShort();
+                    int nameIndex = reader.readUnsignedShort();
+                    int descriptorIndex = reader.readUnsignedShort();
 
-                // Load attributes
-                String signature = null;
-                int attributeCount = reader.readUnsignedShort();
+                    // Load attributes
+                    String signature = null;
+                    int attributeCount = reader.readUnsignedShort();
 
+                    int attributeNameIndex;
+                    int attributeLength;
+                    for (int j=0; j<attributeCount; j++) {
+                        attributeNameIndex = reader.readUnsignedShort();
+                        attributeLength = reader.readInt();
+
+                        if (StringConstants.SIGNATURE_ATTRIBUTE_NAME.equals(constants[attributeNameIndex])) {
+                            signature = (String)constants[reader.readUnsignedShort()];
+                        } else {
+                            reader.skipBytes(attributeLength);
+                        }
+                    }
+
+                    String name = (String)constants[nameIndex];
+                    String descriptor = (String)constants[descriptorIndex];
+                    String key = internalTypeName + ':' + name;
+
+                    if (signature == null) {
+                        internalTypeNameFieldNameToType.put(key, makeFromSignature(descriptor));
+                    } else {
+                        internalTypeNameFieldNameToType.put(key, makeFromSignature(signature));
+                    }
+                }
+
+                // Load methods
+                count = reader.readUnsignedShort();
+                int nameIndex;
+                int descriptorIndex;
+                String signature;
+                String[] exceptionTypeNames;
+                int attributeCount;
+                String name;
+                String descriptor;
+                String key;
+                MethodTypes methodTypes;
+                int parameterCount;
                 int attributeNameIndex;
                 int attributeLength;
-                for (int j=0; j<attributeCount; j++) {
-                    attributeNameIndex = reader.readUnsignedShort();
-                    attributeLength = reader.readInt();
+                for (int i = 0; i < count; i++) {
+                    // skip 'accessFlags'
+                    reader.skipBytes(2);
 
-                    if (StringConstants.SIGNATURE_ATTRIBUTE_NAME.equals(constants[attributeNameIndex])) {
-                        signature = (String)constants[reader.readUnsignedShort()];
-                    } else {
-                        reader.skip(attributeLength);
-                    }
-                }
+                    nameIndex = reader.readUnsignedShort();
+                    descriptorIndex = reader.readUnsignedShort();
 
-                String name = (String)constants[nameIndex];
-                String descriptor = (String)constants[descriptorIndex];
-                String key = internalTypeName + ':' + name;
+                    // Load attributes
+                    signature = null;
+                    exceptionTypeNames = null;
+                    attributeCount = reader.readUnsignedShort();
 
-                if (signature == null) {
-                    internalTypeNameFieldNameToType.put(key, makeFromSignature(descriptor));
-                } else {
-                    internalTypeNameFieldNameToType.put(key, makeFromSignature(signature));
-                }
-            }
+                    for (int j=0; j<attributeCount; j++) {
+                        attributeNameIndex = reader.readUnsignedShort();
+                        attributeLength = reader.readInt();
+                        name = (String)constants[attributeNameIndex];
 
-            // Load methods
-            count = reader.readUnsignedShort();
-            int nameIndex;
-            int descriptorIndex;
-            String signature;
-            String[] exceptionTypeNames;
-            int attributeCount;
-            String name;
-            String descriptor;
-            String key;
-            MethodTypes methodTypes;
-            int parameterCount;
-            int attributeNameIndex;
-            int attributeLength;
-            for (int i = 0; i < count; i++) {
-                // skip 'accessFlags'
-                reader.skip(2);
+                        switch (name) {
+                            case StringConstants.SIGNATURE_ATTRIBUTE_NAME:
+                                signature = (String)constants[reader.readUnsignedShort()];
+                                break;
+                            case "Exceptions":
+                                int exceptionCount = reader.readUnsignedShort();
+                                if (exceptionCount > 0) {
+                                    exceptionTypeNames = new String[exceptionCount];
 
-                nameIndex = reader.readUnsignedShort();
-                descriptorIndex = reader.readUnsignedShort();
-
-                // Load attributes
-                signature = null;
-                exceptionTypeNames = null;
-                attributeCount = reader.readUnsignedShort();
-
-                for (int j=0; j<attributeCount; j++) {
-                    attributeNameIndex = reader.readUnsignedShort();
-                    attributeLength = reader.readInt();
-                    name = (String)constants[attributeNameIndex];
-
-                    switch (name) {
-                        case StringConstants.SIGNATURE_ATTRIBUTE_NAME:
-                            signature = (String)constants[reader.readUnsignedShort()];
-                            break;
-                        case "Exceptions":
-                            int exceptionCount = reader.readUnsignedShort();
-                            if (exceptionCount > 0) {
-                                exceptionTypeNames = new String[exceptionCount];
-
-                                int exceptionClassIndex;
-                                Integer cc;
-                                for (int k=0; k<exceptionCount; k++) {
-                                    exceptionClassIndex = reader.readUnsignedShort();
-                                    cc = (Integer)constants[exceptionClassIndex];
-                                    exceptionTypeNames[k] = (String)constants[cc];
+                                    int exceptionClassIndex;
+                                    Integer cc;
+                                    for (int k=0; k<exceptionCount; k++) {
+                                        exceptionClassIndex = reader.readUnsignedShort();
+                                        cc = (Integer)constants[exceptionClassIndex];
+                                        exceptionTypeNames[k] = (String)constants[cc];
+                                    }
                                 }
-                            }
-                            break;
-                        default:
-                            reader.skip(attributeLength);
-                            break;
+                                break;
+                            default:
+                                reader.skipBytes(attributeLength);
+                                break;
+                        }
                     }
-                }
 
-                name = (String)constants[nameIndex];
-                descriptor = (String)constants[descriptorIndex];
-                key = internalTypeName + ':' + name + descriptor;
-                if (signature == null) {
-                    methodTypes = parseMethodSignature(descriptor, exceptionTypeNames);
-                } else {
-                    methodTypes = parseMethodSignature(descriptor, signature, exceptionTypeNames);
-                }
+                    name = (String)constants[nameIndex];
+                    descriptor = (String)constants[descriptorIndex];
+                    key = internalTypeName + ':' + name + descriptor;
+                    if (signature == null) {
+                        methodTypes = parseMethodSignature(descriptor, exceptionTypeNames);
+                    } else {
+                        methodTypes = parseMethodSignature(descriptor, signature, exceptionTypeNames);
+                    }
 
-                internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
+                    internalTypeNameMethodNameDescriptorToMethodTypes.put(key, methodTypes);
 
-                parameterCount = (methodTypes.parameterTypes == null) ? 0 : methodTypes.parameterTypes.size();
-                key = internalTypeName + ':' + name + ':' + parameterCount;
+                    parameterCount = methodTypes.getParameterTypes() == null ? 0 : methodTypes.getParameterTypes().size();
+                    key = internalTypeName + ':' + name + ':' + parameterCount;
 
-                if (parameterCount > 0) {
-                    internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.computeIfAbsent(key, k -> new HashSet<>()).add(methodTypes.parameterTypes);
-                } else {
-                    internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.computeIfAbsent(key, k -> Collections.emptySet());
+                    if (parameterCount > 0) {
+                        internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.computeIfAbsent(key, k -> new HashSet<>()).add(methodTypes.getParameterTypes());
+                    } else {
+                        internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.computeIfAbsent(key, k -> Collections.emptySet());
+                    }
                 }
             }
         }
     }
 
-    private Object[] loadClassFile(String internalTypeName, ClassFileReader reader) throws UTFDataFormatException {
+    private static Object[] loadClassFile(String internalTypeName, DataInput reader) throws IOException {
         int magic = reader.readInt();
 
-        if (magic != ClassFileReader.JAVA_MAGIC_NUMBER) {
-            throw new ClassFileFormatException("Invalid CLASS file");
+        if (magic != CoreConstants.JAVA_MAGIC_NUMBER) {
+            throw new ClassFormatException("Invalid CLASS file");
         }
 
         // Skip 'minorVersion', 'majorVersion'
-        reader.skip(2 * 2);
+        reader.skipBytes(2 * 2);
 
         Object[] constants = loadConstants(reader);
 
         // Skip 'accessFlags' & 'thisClassIndex'
-        reader.skip(2 * 2);
+        reader.skipBytes(2 * 2);
 
         // Load super class name
         int superClassIndex = reader.readUnsignedShort();
@@ -1632,104 +1674,109 @@ public class TypeMaker {
         return constants;
     }
 
-    private static void skipMembers(ClassFileReader reader) {
+    private static void skipMembers(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
         for (int i = 0; i < count; i++) {
             // skip 'accessFlags', 'nameIndex', 'descriptorIndex'
-            reader.skip(3 * 2);
+            reader.skipBytes(3 * 2);
             skipAttributes(reader);
         }
     }
 
-    private static Object[] loadConstants(ClassFileReader reader) throws UTFDataFormatException {
+    private static Object[] loadConstants(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
 
         if (count == 0) {
-            throw new ClassFileFormatException("Zero-length constant pool");
+            throw new ClassFormatException("Zero-length constant pool");
         }
                 Object[] constants = new Object[count];
 
         int tag;
         for (int i=1; i<count; i++) {
             tag = reader.readByte();
-
             switch (tag) {
-                case 1:
-                    constants[i] = reader.readUTF8();
+                case CONSTANT_Utf8:
+                    constants[i] = reader.readUTF();
                     break;
-                case 7:
+                case CONSTANT_Class:
                     constants[i] = Integer.valueOf(reader.readUnsignedShort());
                     break;
-                case 8: case 16: case 19: case 20:
-                    reader.skip(2);
+                case CONSTANT_String, CONSTANT_MethodType, CONSTANT_Module, CONSTANT_Package:
+                    reader.skipBytes(2);
                     break;
-                case 15:
-                    reader.skip(3);
+                case CONSTANT_MethodHandle:
+                    reader.skipBytes(3);
                     break;
-                case 3: case 4: case 9: case 10: case 11: case 12: case 17: case 18:
-                    reader.skip(4);
+                case CONSTANT_Integer,
+                     CONSTANT_Float,
+                     CONSTANT_Fieldref,
+                     CONSTANT_Methodref,
+                     CONSTANT_InterfaceMethodref,
+                     CONSTANT_NameAndType,
+                     CONSTANT_Dynamic,
+                     CONSTANT_InvokeDynamic:
+                    reader.skipBytes(4);
                     break;
-                case 5: case 6:
-                    reader.skip(8);
+                case CONSTANT_Long, CONSTANT_Double:
+                    reader.skipBytes(8);
                     i++;
                     break;
                 default:
-                    throw new ClassFileFormatException("Invalid constant pool entry");
+                    throw new ClassFormatException("Invalid constant pool entry");
             }
         }
 
         return constants;
     }
 
-    private static void skipAttributes(ClassFileReader reader) {
+    private static void skipAttributes(DataInput reader) throws IOException {
         int count = reader.readUnsignedShort();
 
         int attributeLength;
         for (int i = 0; i < count; i++) {
             // skip 'attributeNameIndex'
-            reader.skip(2);
+            reader.skipBytes(2);
 
             attributeLength = reader.readInt();
 
-            reader.skip(attributeLength);
+            reader.skipBytes(attributeLength);
         }
     }
 
     private static class ClassPathLoader implements Loader {
-        protected byte[] buffer = new byte[1024*5];
+
+        private static Map<String, byte[]> resourceCache = new HashMap<>();
+        private static Map<String, URL> resourceURLCache = new HashMap<>();
 
         @Override
         public byte[] load(String internalName) throws LoaderException {
-            InputStream is = getClass().getResourceAsStream("/" + internalName + StringConstants.CLASS_FILE_SUFFIX);
-
-            if (is == null) {
-                return null;
-            }
-            try (InputStream in=is; ByteArrayOutputStream out=new ByteArrayOutputStream()) {
-                int read = in.read(buffer);
-
-                while (read > 0) {
-                    out.write(buffer, 0, read);
-                    read = in.read(buffer);
+            byte[] resourceFromCache = resourceCache.get(internalName);
+            if (resourceFromCache == null) {
+                try (InputStream is = getClass().getResourceAsStream(toInternalPath(internalName))) {
+                    resourceFromCache = IOUtils.toByteArray(is);
+                    resourceCache.put(internalName, resourceFromCache);
+                } catch (IOException e) {
+                    throw new LoaderException(e);
                 }
-
-                return out.toByteArray();
-            } catch (IOException e) {
-                throw new LoaderException(e);
             }
+            return resourceFromCache;
         }
 
         @Override
         public boolean canLoad(String internalName) {
-            return getClass().getResource("/" + internalName + StringConstants.CLASS_FILE_SUFFIX) != null;
+            return resourceURLCache.computeIfAbsent(internalName, iName -> getClass().getResource(toInternalPath(iName))) != null;
+        }
+
+        private static String toInternalPath(String internalName) {
+            return "/" + internalName + StringConstants.CLASS_FILE_SUFFIX;
         }
     }
 
     private static class SignatureReader {
-        public String signature;
-        public char[] array;
-        public int length;
-        public int index;
+        private final String signature;
+        private final char[] array;
+        private final int length;
+        private int index;
 
         public SignatureReader(String signature) {
             this(signature, 0);
@@ -1751,9 +1798,8 @@ public class TypeMaker {
         }
 
         public boolean search(char c) {
-            int length = array.length;
 
-            for (int i=index; i<length; i++) {
+            for (int i=index; i<array.length; i++) {
                 if (array[i] == c) {
                     index = i;
                     return true;
@@ -1764,10 +1810,9 @@ public class TypeMaker {
         }
 
         public char searchEndMarker() {
-            int length = array.length;
 
             char c;
-            while (index < length) {
+            while (index < array.length) {
                 c = array[index];
 
                 if (c == ';' || c == '<' || c == '.') {
@@ -1819,6 +1864,7 @@ public class TypeMaker {
         return counter;
     }
 
+    @SuppressWarnings("all")
     private Set<BaseType> getSetOfParameterTypes(String internalTypeName, String suffixKey, boolean constructor) {
         String key = internalTypeName + suffixKey;
         Set<BaseType> setOfParameterTypes = internalTypeNameMethodNameParameterCountToParameterTypes.get(key);
@@ -1829,14 +1875,14 @@ public class TypeMaker {
             if (!constructor) {
                 TypeTypes typeTypes = makeTypeTypes(internalTypeName);
 
-                if (typeTypes != null && typeTypes.superType != null) {
-                    setOfParameterTypes.addAll(getSetOfParameterTypes(typeTypes.superType.getInternalName(), suffixKey, constructor));
+                if (typeTypes != null && typeTypes.getSuperType() != null) {
+                    setOfParameterTypes.addAll(getSetOfParameterTypes(typeTypes.getSuperType().getInternalName(), suffixKey, constructor));
                 }
             }
 
             Set<BaseType> declaredParameterTypes = internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.get(key);
 
-            if (declaredParameterTypes == null && loadFieldsAndMethods(internalTypeName)) {
+            if (declaredParameterTypes == null && loaded.computeIfAbsent(internalTypeName, this::loadFieldsAndMethods)) {
                 declaredParameterTypes = internalTypeNameMethodNameParameterCountToDeclaredParameterTypes.get(key);
             }
             if (declaredParameterTypes != null) {
@@ -1893,16 +1939,84 @@ public class TypeMaker {
     }
 
     public static class TypeTypes {
-        public ObjectType thisType;
-        public BaseTypeParameter typeParameters;
-        public ObjectType superType;
-        public BaseType interfaces;
+
+        private ObjectType thisType;
+        private BaseTypeParameter typeParameters;
+        private ObjectType superType;
+        private BaseType interfaces;
+
+        public BaseTypeParameter getTypeParameters() {
+            return typeParameters;
+        }
+
+        private void setTypeParameters(BaseTypeParameter typeParameters) {
+            this.typeParameters = typeParameters;
+        }
+
+        public ObjectType getThisType() {
+            return thisType;
+        }
+
+        private void setThisType(ObjectType thisType) {
+            this.thisType = thisType;
+        }
+
+        public BaseType getInterfaces() {
+            return interfaces;
+        }
+
+        private void setInterfaces(BaseType interfaces) {
+            this.interfaces = interfaces;
+        }
+
+
+        public ObjectType getSuperType() {
+            return superType;
+        }
+
+
+        private void setSuperType(ObjectType superType) {
+            this.superType = superType;
+        }
     }
 
     public static class MethodTypes {
-        public BaseTypeParameter typeParameters;
-        public BaseType parameterTypes;
-        public Type returnedType;
-        public BaseType exceptionTypes;
+
+        private BaseTypeParameter typeParameters;
+        private BaseType parameterTypes;
+        private Type returnedType;
+        private BaseType exceptionTypes;
+
+        public BaseType getParameterTypes() {
+            return parameterTypes;
+        }
+
+        void setParameterTypes(BaseType parameterTypes) {
+            this.parameterTypes = parameterTypes;
+        }
+
+        public Type getReturnedType() {
+            return returnedType;
+        }
+
+        void setReturnedType(Type returnedType) {
+            this.returnedType = returnedType;
+        }
+
+        public BaseType getExceptionTypes() {
+            return exceptionTypes;
+        }
+
+        void setExceptionTypes(BaseType exceptionTypes) {
+            this.exceptionTypes = exceptionTypes;
+        }
+
+        public BaseTypeParameter getTypeParameters() {
+            return typeParameters;
+        }
+
+        private void setTypeParameters(BaseTypeParameter typeParameters) {
+            this.typeParameters = typeParameters;
+        }
     }
 }

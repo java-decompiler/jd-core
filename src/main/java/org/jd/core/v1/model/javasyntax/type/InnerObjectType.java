@@ -7,16 +7,10 @@
 package org.jd.core.v1.model.javasyntax.type;
 
 public class InnerObjectType extends ObjectType {
-    protected ObjectType outerType;
+    private final ObjectType outerType;
 
     public InnerObjectType(String internalName, String qualifiedName, String name, ObjectType outerType) {
         super(internalName, qualifiedName, name);
-        this.outerType = outerType;
-        checkArguments(qualifiedName, name);
-    }
-
-    public InnerObjectType(String internalName, String qualifiedName, String name, int dimension, ObjectType outerType) {
-        super(internalName, qualifiedName, name, dimension);
         this.outerType = outerType;
         checkArguments(qualifiedName, name);
     }
@@ -31,11 +25,6 @@ public class InnerObjectType extends ObjectType {
         super(internalName, qualifiedName, name, typeArguments, dimension);
         this.outerType = outerType;
         checkArguments(qualifiedName, name);
-    }
-
-    public InnerObjectType(InnerObjectType iot) {
-        super(iot);
-        this.outerType = iot.outerType;
     }
 
     protected void checkArguments(String qualifiedName, String name) {
@@ -67,18 +56,16 @@ public class InnerObjectType extends ObjectType {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof InnerObjectType) || !super.equals(o)) {
+        if (!super.equals(o)) {
             return false;
         }
-
         InnerObjectType that = (InnerObjectType) o;
-
         return outerType.equals(that.outerType);
     }
 
     @Override
     public int hashCode() {
-        int result = 111476860 + super.hashCode();
+        int result = 111_476_860 + super.hashCode();
         return 31 * result + outerType.hashCode();
     }
 

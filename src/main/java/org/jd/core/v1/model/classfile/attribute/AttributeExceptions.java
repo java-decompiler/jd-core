@@ -7,14 +7,5 @@
 
 package org.jd.core.v1.model.classfile.attribute;
 
-public class AttributeExceptions implements Attribute {
-    protected String[] exceptionTypeNames;
-
-    public AttributeExceptions(String[] exceptionTypeNames) {
-        this.exceptionTypeNames = exceptionTypeNames;
-    }
-
-    public String[] getExceptionTypeNames() {
-        return exceptionTypeNames;
-    }
+public record AttributeExceptions(String[] exceptionTypeNames) implements Attribute {
 }

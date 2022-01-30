@@ -14,11 +14,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class MergeMembersUtil {
+public final class MergeMembersUtil {
     private MergeMembersUtil() {
     }
 
-    protected static final MemberDeclarationComparator MEMBER_DECLARATION_COMPARATOR = new MemberDeclarationComparator();
+    private static final MemberDeclarationComparator MEMBER_DECLARATION_COMPARATOR = new MemberDeclarationComparator();
 
     public static MemberDeclarations merge(
             List<? extends ClassFileMemberDeclaration> fields,
@@ -49,7 +49,7 @@ public class MergeMembersUtil {
         return result;
     }
 
-    protected static void merge(List<MemberDeclaration> result, List<? extends ClassFileMemberDeclaration> members) {
+    private static void merge(List<MemberDeclaration> result, List<? extends ClassFileMemberDeclaration> members) {
         if (members != null && !members.isEmpty()) {
             sort(members);
 
@@ -102,7 +102,7 @@ public class MergeMembersUtil {
         }
     }
 
-    protected static void sort(List<? extends ClassFileMemberDeclaration> members) {
+    private static void sort(List<? extends ClassFileMemberDeclaration> members) {
         int order = 0;
         int lastLineNumber = 0;
 
@@ -114,7 +114,7 @@ public class MergeMembersUtil {
             if (lineNumber > 0 && lineNumber != lastLineNumber) {
                 if (lastLineNumber > 0) {
                     if (order == 0) { // Unknown order
-                        order = (lineNumber > lastLineNumber) ? 1 : 2;
+                        order = lineNumber > lastLineNumber ? 1 : 2;
                     } else if (order == 1) { // Ascendant order
                         if (lineNumber < lastLineNumber) {
                             order = 3; // Random order
@@ -140,7 +140,12 @@ public class MergeMembersUtil {
         }
     }
 
-    protected static class MemberDeclarationComparator implements Comparator<ClassFileMemberDeclaration> {
+    protected static class MemberDeclarationComparator implements java.io.Serializable, Comparator<ClassFileMemberDeclaration> {
+        /**
+         * Comparators should be Serializable: A non-serializable Comparator can prevent an otherwise-Serializable ordered collection from being serializable.
+         */
+        private static final long serialVersionUID = 1L;
+
         @Override
         public int compare(ClassFileMemberDeclaration md1, ClassFileMemberDeclaration md2) {
             int lineNumber1 = md1.getFirstLineNumber();

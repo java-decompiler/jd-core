@@ -10,7 +10,11 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
 import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
 import org.jd.core.v1.model.javasyntax.declaration.VariableInitializer;
-import org.jd.core.v1.model.javasyntax.expression.*;
+import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
+import org.jd.core.v1.model.javasyntax.expression.Expression;
+import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
+import org.jd.core.v1.model.javasyntax.expression.NullExpression;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
@@ -19,19 +23,19 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import java.util.Collections;
 import java.util.ListIterator;
 
-public class NewArrayMaker {
+public final class NewArrayMaker {
 
     private NewArrayMaker() {
         super();
     }
 
-    protected static final ArrayVariableInitializer EMPTY_ARRAY = new ArrayVariableInitializer(PrimitiveType.TYPE_VOID);
+    private static final ArrayVariableInitializer EMPTY_ARRAY = new ArrayVariableInitializer(PrimitiveType.TYPE_VOID);
 
     public static Expression make(Statements statements, Expression newArray) {
         if (! statements.isEmpty()) {
             Expression ae = statements.getLast().getExpression().getLeftExpression();
 
-            if ((ae.getExpression() == newArray) && ae.getIndex().isIntegerConstantExpression()) {
+            if (ae.getExpression() == newArray && ae.getIndex().isIntegerConstantExpression()) {
                 return new NewInitializedArray(newArray.getLineNumber(), newArray.getType(), createVariableInitializer(statements.listIterator(statements.size()), newArray));
             }
         }
@@ -39,7 +43,7 @@ public class NewArrayMaker {
         return newArray;
     }
 
-    protected static ArrayVariableInitializer createVariableInitializer(ListIterator<Statement> li, Expression newArray) {
+    private static ArrayVariableInitializer createVariableInitializer(ListIterator<Statement> li, Expression newArray) {
         Statement statement = li.previous();
 
         li.remove();
@@ -63,10 +67,11 @@ public class NewArrayMaker {
                         array.add(new ExpressionVariableInitializer(boe.getRightExpression()));
                         li.remove();
                         continue;
-                    } else if (ae.getExpression().isNewArray()) {
+                    }
+                    if (ae.getExpression().isNewArray()) {
                         Expression lastE = array.getLast().getExpression();
 
-                        if (lastE.isNewArray() && (ae.getExpression() == lastE)) {
+                        if (lastE.isNewArray() && ae.getExpression() == lastE) {
                             array.removeLast();
                             li.next();
                             array.add(createVariableInitializer(li, lastE));
@@ -89,10 +94,10 @@ public class NewArrayMaker {
             if (expression.isNewArray()) {
                 BaseExpression del = expression.getDimensionExpressionList();
 
-                if (del.isIntegerConstantExpression() && (del.getIntegerValue() == 0)) {
+                if (del.isIntegerConstantExpression() && del.getIntegerValue() == 0) {
                     Type t = expression.getType();
 
-                    if ((type.getDimension() == t.getDimension() + 1) && (type.getDescriptor().length() == t.getDescriptor().length() + 1) && type.getDescriptor().endsWith(t.getDescriptor())) {
+                    if (type.getDimension() == t.getDimension() + 1 && type.getDescriptor().length() == t.getDescriptor().length() + 1 && type.getDescriptor().endsWith(t.getDescriptor())) {
                         vii.set(EMPTY_ARRAY);
                     }
                 }
@@ -105,7 +110,7 @@ public class NewArrayMaker {
 
             type = type.createType(type.getDimension()-1);
 
-            if ((type.getDimension() == 0) && type.isPrimitiveType()) {
+            if (type.getDimension() == 0 && type.isPrimitiveType()) {
                 evi = new ExpressionVariableInitializer(new IntegerConstantExpression(type, 0));
             } else {
                 evi = new ExpressionVariableInitializer(new NullExpression(type));

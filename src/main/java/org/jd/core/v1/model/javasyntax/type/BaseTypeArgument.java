@@ -42,5 +42,5 @@ public interface BaseTypeArgument extends TypeArgumentVisitable {
     default boolean isWildcardSuperTypeArgument() { return false; }
     default boolean isWildcardTypeArgument() { return false; }
 
-    default Type getType() { return ObjectType.TYPE_UNDEFINED_OBJECT; }
+    default Type type() { return ObjectType.TYPE_UNDEFINED_OBJECT; }
 }

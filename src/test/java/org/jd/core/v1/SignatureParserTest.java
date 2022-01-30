@@ -9,7 +9,12 @@ package org.jd.core.v1;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.javasyntax.type.*;
+import org.jd.core.v1.model.javasyntax.type.BaseType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
+import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeArguments;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
@@ -42,13 +47,13 @@ public class SignatureParserTest extends TestCase {
             TypeMaker.TypeTypes typeTypes = typeMaker.parseClassFileSignature(classFile);
 
             // Check type parameterTypes
-            assertNull(typeTypes.typeParameters);
+            assertNull(typeTypes.getTypeParameters());
 
             // Check super type
-            assertNotNull(typeTypes.superType);
+            assertNotNull(typeTypes.getSuperType());
             visitor.reset();
 
-            BaseType superType = typeTypes.superType;
+            BaseType superType = typeTypes.getSuperType();
 
             superType.accept(visitor);
             String source = visitor.toString();
@@ -56,9 +61,9 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("java.util.ArrayList", source);
 
             // Check interfaces
-            assertNotNull(typeTypes.interfaces);
+            assertNotNull(typeTypes.getInterfaces());
             visitor.reset();
-            typeTypes.interfaces.accept(visitor);
+            typeTypes.getInterfaces().accept(visitor);
             source = visitor.toString();
 
             Assert.assertEquals("java.io.Serializable, java.lang.Cloneable", source);
@@ -77,13 +82,13 @@ public class SignatureParserTest extends TestCase {
             TypeMaker.MethodTypes methodTypes = typeMaker.parseMethodSignature(classFile, classFile.getMethods()[1]);
 
             // Check type parameterTypes
-            assertNull(methodTypes.typeParameters);
+            assertNull(methodTypes.getTypeParameters());
 
             // Check parameterTypes
-            assertNotNull(methodTypes.parameterTypes);
-            assertEquals(2, methodTypes.parameterTypes.size());
+            assertNotNull(methodTypes.getParameterTypes());
+            assertEquals(2, methodTypes.getParameterTypes().size());
 
-            type = methodTypes.parameterTypes.getFirst();
+            type = methodTypes.getParameterTypes().getFirst();
             visitor.reset();
             type.accept(visitor);
             source = visitor.toString();
@@ -91,9 +96,9 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("int", source);
 
             // Check return type
-            assertNotNull(methodTypes.returnedType);
+            assertNotNull(methodTypes.getReturnedType());
 
-            BaseType returnedType = methodTypes.returnedType;
+            BaseType returnedType = methodTypes.getReturnedType();
             visitor.reset();
             returnedType.accept(visitor);
             source = visitor.toString();
@@ -101,20 +106,20 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("int", source);
 
             // Check exceptions
-            assertNull(methodTypes.exceptionTypes);
+            assertNull(methodTypes.getExceptionTypes());
 
             // Check method 'ping'
             //  public void ping(String host) throws UnknownHostException, UnsatisfiedLinkError
             methodTypes = typeMaker.parseMethodSignature(classFile, classFile.getMethods()[2]);
 
             // Check type parameterTypes
-            assertNull(methodTypes.typeParameters);
+            assertNull(methodTypes.getTypeParameters());
 
             // Check parameterTypes
-            assertNotNull(methodTypes.parameterTypes);
-            assertEquals(3, methodTypes.parameterTypes.size());
+            assertNotNull(methodTypes.getParameterTypes());
+            assertEquals(3, methodTypes.getParameterTypes().size());
 
-            type = methodTypes.parameterTypes.getList().get(1);
+            type = methodTypes.getParameterTypes().getList().get(1);
             visitor.reset();
             type.accept(visitor);
             source = visitor.toString();
@@ -122,9 +127,9 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("java.lang.String", source);
 
             // Check return type
-            assertNotNull(methodTypes.returnedType);
+            assertNotNull(methodTypes.getReturnedType());
 
-            returnedType = methodTypes.returnedType;
+            returnedType = methodTypes.getReturnedType();
             visitor.reset();
             returnedType.accept(visitor);
             source = visitor.toString();
@@ -132,10 +137,10 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("void", source);
 
             // Check exceptions
-            assertNotNull(methodTypes.exceptionTypes);
+            assertNotNull(methodTypes.getExceptionTypes());
 
             visitor.reset();
-            methodTypes.exceptionTypes.accept(visitor);
+            methodTypes.getExceptionTypes().accept(visitor);
             source = visitor.toString();
 
             Assert.assertEquals("java.net.UnknownHostException, java.lang.UnsatisfiedLinkError", source);
@@ -170,8 +175,8 @@ public class SignatureParserTest extends TestCase {
             //  T7::Ljava/util/Map<**>;
             //  T8::Ljava/util/Map<+Ljava/lang/Number;-Ljava/io/Serializable;>;
             //  T9:TT8;
-            assertNotNull(typeTypes.typeParameters);
-            typeTypes.typeParameters.accept(visitor);
+            assertNotNull(typeTypes.getTypeParameters());
+            typeTypes.getTypeParameters().accept(visitor);
 
             String source = visitor.toString();
             String expected =
@@ -188,7 +193,7 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals(expected, source);
 
             // Check super type
-            BaseType superType = typeTypes.superType;
+            BaseType superType = typeTypes.getSuperType();
             assertNotNull(superType);
             visitor.reset();
             superType.accept(visitor);
@@ -197,9 +202,9 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("java.util.ArrayList<T7>", source);
 
             // Check interfaces
-            assertNotNull(typeTypes.interfaces);
+            assertNotNull(typeTypes.getInterfaces());
             visitor.reset();
-            typeTypes.interfaces.accept(visitor);
+            typeTypes.getInterfaces().accept(visitor);
             source = visitor.toString();
 
             Assert.assertEquals("java.io.Serializable, java.lang.Comparable<T1>", source);
@@ -218,18 +223,18 @@ public class SignatureParserTest extends TestCase {
             TypeMaker.MethodTypes methodTypes = typeMaker.parseMethodSignature(classFile, classFile.getMethods()[3]);
 
             // Check type parameterTypes
-            assertNotNull(methodTypes.typeParameters);
+            assertNotNull(methodTypes.getTypeParameters());
             visitor.reset();
-            methodTypes.typeParameters.accept(visitor);
+            methodTypes.getTypeParameters().accept(visitor);
             source = visitor.toString();
 
             Assert.assertEquals("T, S extends T", source);
 
             // Check parameterTypes
-            assertNotNull(methodTypes.parameterTypes);
-            assertEquals(2, methodTypes.parameterTypes.size());
+            assertNotNull(methodTypes.getParameterTypes());
+            assertEquals(2, methodTypes.getParameterTypes().size());
 
-            type = methodTypes.parameterTypes.getFirst();
+            type = methodTypes.getParameterTypes().getFirst();
             visitor.reset();
             type.accept(visitor);
             source = visitor.toString();
@@ -237,9 +242,9 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("java.util.List<? super T>", source);
 
             // Check return type
-            assertNotNull(methodTypes.returnedType);
+            assertNotNull(methodTypes.getReturnedType());
 
-            BaseType returnedType = methodTypes.returnedType;
+            BaseType returnedType = methodTypes.getReturnedType();
             visitor.reset();
             returnedType.accept(visitor);
             source = visitor.toString();
@@ -247,10 +252,10 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("java.util.List<? extends java.lang.Number>", source);
 
             // Check exceptions
-            assertNotNull(methodTypes.exceptionTypes);
+            assertNotNull(methodTypes.getExceptionTypes());
 
             visitor.reset();
-            methodTypes.exceptionTypes.accept(visitor);
+            methodTypes.getExceptionTypes().accept(visitor);
             source = visitor.toString();
 
             Assert.assertEquals("java.security.InvalidParameterException, java.lang.ClassCastException", source);
@@ -260,18 +265,18 @@ public class SignatureParserTest extends TestCase {
             methodTypes = typeMaker.parseMethodSignature(classFile, classFile.getMethods()[4]);
 
             // Check type parameterTypes
-            assertNotNull(methodTypes.typeParameters);
+            assertNotNull(methodTypes.getTypeParameters());
             visitor.reset();
-            methodTypes.typeParameters.accept(visitor);
+            methodTypes.getTypeParameters().accept(visitor);
             source = visitor.toString();
 
             Assert.assertEquals("T1, T2 extends java.lang.Exception", source);
 
             // Check parameterTypes
-            assertNotNull(methodTypes.parameterTypes);
-            assertEquals(1, methodTypes.parameterTypes.size());
+            assertNotNull(methodTypes.getParameterTypes());
+            assertEquals(1, methodTypes.getParameterTypes().size());
 
-            type = methodTypes.parameterTypes.getFirst();
+            type = methodTypes.getParameterTypes().getFirst();
             visitor.reset();
             type.accept(visitor);
             source = visitor.toString();
@@ -279,9 +284,9 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("java.util.List<? super T1>", source);
 
             // Check return type
-            assertNotNull(methodTypes.returnedType);
+            assertNotNull(methodTypes.getReturnedType());
 
-            returnedType = methodTypes.returnedType;
+            returnedType = methodTypes.getReturnedType();
             visitor.reset();
             returnedType.accept(visitor);
             source = visitor.toString();
@@ -289,10 +294,10 @@ public class SignatureParserTest extends TestCase {
             Assert.assertEquals("java.util.List<? extends java.lang.Number>", source);
 
             // Check exceptions
-            assertNotNull(methodTypes.exceptionTypes);
+            assertNotNull(methodTypes.getExceptionTypes());
 
             visitor.reset();
-            methodTypes.exceptionTypes.accept(visitor);
+            methodTypes.getExceptionTypes().accept(visitor);
             source = visitor.toString();
 
             Assert.assertEquals("T2, java.security.InvalidParameterException", source);
@@ -305,7 +310,7 @@ public class SignatureParserTest extends TestCase {
             ZipLoader loader = new ZipLoader(is);
             TypeMaker typeMaker = new TypeMaker(loader);
 
-            Assert.assertEquals(PrimitiveType.TYPE_VOID, typeMaker.makeMethodTypes("()V").returnedType);
+            Assert.assertEquals(PrimitiveType.TYPE_VOID, typeMaker.makeMethodTypes("()V").getReturnedType());
         }
     }
 
@@ -315,7 +320,7 @@ public class SignatureParserTest extends TestCase {
             ZipLoader loader = new ZipLoader(is);
             TypeMaker typeMaker = new TypeMaker(loader);
 
-            Assert.assertEquals(PrimitiveType.TYPE_BOOLEAN, typeMaker.makeMethodTypes("()Z").returnedType);
+            Assert.assertEquals(PrimitiveType.TYPE_BOOLEAN, typeMaker.makeMethodTypes("()Z").getReturnedType());
         }
     }
 
@@ -325,7 +330,7 @@ public class SignatureParserTest extends TestCase {
             ZipLoader loader = new ZipLoader(is);
             TypeMaker typeMaker = new TypeMaker(loader);
 
-            Assert.assertEquals(ObjectType.TYPE_STRING, typeMaker.makeMethodTypes("()Ljava/lang/String;").returnedType);
+            Assert.assertEquals(ObjectType.TYPE_STRING, typeMaker.makeMethodTypes("()Ljava/lang/String;").getReturnedType());
         }
     }
 

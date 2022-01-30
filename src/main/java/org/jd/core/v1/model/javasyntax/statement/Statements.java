@@ -15,10 +15,6 @@ public class Statements extends DefaultList<Statement> implements BaseStatement 
 
     public Statements() {}
 
-    public Statements(int capacity) {
-        super(capacity);
-    }
-
     public Statements(List<Statement> list) {
         super(list);
         if (list.size() <= 1) {

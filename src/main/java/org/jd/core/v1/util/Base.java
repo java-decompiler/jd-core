@@ -35,7 +35,7 @@ public interface Base<T> extends Iterable<T> {
 
     @Override
     default Iterator<T> iterator() {
-        return new Iterator<T>() {
+        return new Iterator<>() {
             private boolean hasNext = true;
             @Override
             public boolean hasNext() {

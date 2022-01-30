@@ -4,7 +4,6 @@
  * This is a Copyleft license that gives the user the right to use,
  * copy and modify the code freely for non-commercial purposes.
  */
-
 package org.jd.core.v1.model.javasyntax.type;
 
 import org.jd.core.v1.util.DefaultList;
@@ -34,26 +33,22 @@ public class TypeArguments extends DefaultList<TypeArgument> implements BaseType
 
     @Override
     public boolean isTypeArgumentAssignableFrom(Map<String, BaseType> typeBounds, BaseTypeArgument typeArgument) {
-        if (typeArgument.getClass() != TypeArguments.class) {
-            return false;
-        }
-
-        TypeArguments ata = (TypeArguments)typeArgument;
-
-        if (size() != ata.size()) {
-            return false;
-        }
-
-        Iterator<TypeArgument> iterator1 = iterator();
-        Iterator<TypeArgument> iterator2 = ata.iterator();
-
-        while (iterator1.hasNext()) {
-            if (!iterator1.next().isTypeArgumentAssignableFrom(typeBounds, iterator2.next())) {
+        if (typeArgument instanceof TypeArguments) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
+            TypeArguments ata = (TypeArguments) typeArgument;
+            if (size() != ata.size()) {
                 return false;
             }
+            Iterator<TypeArgument> iterator1 = iterator();
+            Iterator<TypeArgument> iterator2 = ata.iterator();
+    
+            while (iterator1.hasNext()) {
+                if (!iterator1.next().isTypeArgumentAssignableFrom(typeBounds, iterator2.next())) {
+                    return false;
+                }
+            }
+            return true;
         }
-
-        return true;
+        return false;
     }
 
     @Override

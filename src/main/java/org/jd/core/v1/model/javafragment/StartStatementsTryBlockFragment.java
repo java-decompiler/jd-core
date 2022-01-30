@@ -12,10 +12,6 @@ public class StartStatementsTryBlockFragment extends StartStatementsBlockFragmen
         super(minimalLineCount, lineCount, maximalLineCount, weight, label);
     }
 
-    public StartStatementsTryBlockFragment(int minimalLineCount, int lineCount, int maximalLineCount, int weight, String label, Group group) {
-        super(minimalLineCount, lineCount, maximalLineCount, weight, label, group);
-    }
-
     @Override
     public void accept(JavaFragmentVisitor visitor) {
         visitor.visit(this);

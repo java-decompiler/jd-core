@@ -8,7 +8,12 @@ package org.jd.core.v1.model.javafragment;
 
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.fragment.FlexibleFragment;
-import org.jd.core.v1.model.token.*;
+import org.jd.core.v1.model.token.AbstractNopTokenVisitor;
+import org.jd.core.v1.model.token.EndBlockToken;
+import org.jd.core.v1.model.token.LineNumberToken;
+import org.jd.core.v1.model.token.StartBlockToken;
+import org.jd.core.v1.model.token.TextToken;
+import org.jd.core.v1.model.token.Token;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +28,7 @@ public class TokensFragment extends FlexibleFragment implements JavaFragment {
     public static final TokensFragment END_DECLARATION_OR_STATEMENT_BLOCK_SEMICOLON = new TokensFragment(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK, TextToken.SEMICOLON);
     public static final TokensFragment RETURN_SEMICOLON = new TokensFragment(RETURN, TextToken.SEMICOLON);
 
-    protected List<Token> tokens;
+    private final List<Token> tokens;
 
     public TokensFragment(Token... tokens) {
         this(Arrays.asList(tokens));
@@ -53,12 +58,12 @@ public class TokensFragment extends FlexibleFragment implements JavaFragment {
     }
 
     protected static class LineCountVisitor extends AbstractNopTokenVisitor {
-        public int lineCount;
+        private int lineCount;
 
         @Override
         public void visit(LineNumberToken token) {
             lineCount++;
-            if (token.getLineNumber() != Printer.UNKNOWN_LINE_NUMBER) {
+            if (token.lineNumber() != Printer.UNKNOWN_LINE_NUMBER) {
                 throw new IllegalArgumentException("LineNumberToken cannot have a known line number. Uses 'LineNumberTokensFragment' instead");
             }
         }

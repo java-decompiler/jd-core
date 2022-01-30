@@ -7,7 +7,14 @@
 
 package org.jd.core.v1.service.layouter.visitor;
 
-import org.jd.core.v1.model.fragment.*;
+import org.jd.core.v1.model.fragment.EndFlexibleBlockFragment;
+import org.jd.core.v1.model.fragment.EndMovableBlockFragment;
+import org.jd.core.v1.model.fragment.FixedFragment;
+import org.jd.core.v1.model.fragment.FlexibleFragment;
+import org.jd.core.v1.model.fragment.FragmentVisitor;
+import org.jd.core.v1.model.fragment.SpacerBetweenMovableBlocksFragment;
+import org.jd.core.v1.model.fragment.StartFlexibleBlockFragment;
+import org.jd.core.v1.model.fragment.StartMovableBlockFragment;
 
 public abstract class AbstractSearchMovableBlockFragmentVisitor implements FragmentVisitor {
     protected int depth;
