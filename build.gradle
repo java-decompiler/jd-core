@@ -24,7 +24,7 @@ sourceSets {
 }
 
 dependencies {
-	implementation 'net.sourceforge.plantuml:plantuml:1.2022.0'
+    implementation 'net.sourceforge.plantuml:plantuml:1.2022.0'
     implementation 'org.apache.bcel:bcel:6.5.0'
     implementation 'commons-io:commons-io:2.11.0'
     
