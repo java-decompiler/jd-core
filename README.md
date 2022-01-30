@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/nbauma109/jd-core.svg)](https://jitpack.io/#nbauma109/jd-core)
+
 # JD-Core
 
 JD-Core is a JAVA decompiler written in JAVA.
