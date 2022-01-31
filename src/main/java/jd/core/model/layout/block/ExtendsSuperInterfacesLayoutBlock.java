@@ -1,0 +1,48 @@
+/*******************************************************************************
+ * Copyright (C) 2007-2019 Emmanuel Dupuy GPLv3
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************/
+package jd.core.model.layout.block;
+
+import jd.core.model.classfile.ClassFile;
+import jd.core.model.instruction.bytecode.instruction.Instruction;
+
+public class ExtendsSuperInterfacesLayoutBlock extends LayoutBlock
+{
+    private final ClassFile classFile;
+
+    public ExtendsSuperInterfacesLayoutBlock(ClassFile classFile)
+    {
+        this(
+            LayoutBlockConstants.EXTENDS_SUPER_INTERFACES,
+            Instruction.UNKNOWN_LINE_NUMBER, Instruction.UNKNOWN_LINE_NUMBER,
+            0, 1, 1, classFile);
+    }
+
+    protected ExtendsSuperInterfacesLayoutBlock(
+        byte tag, int firstLineNumber, int lastLineNumber,
+        int minimalLineCount, int maximalLineCount, int preferedLineCount,
+        ClassFile classFile)
+    {
+        super(
+            tag, firstLineNumber, lastLineNumber,
+            minimalLineCount, maximalLineCount, preferedLineCount);
+        this.classFile = classFile;
+    }
+
+    public ClassFile getClassFile() {
+        return classFile;
+    }
+}
