@@ -78,13 +78,13 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
 
     @Test
     public void testJSoup() throws Exception {
-        // Decompile and recompile 'org.jsoup:jsoup:1.14.2'
+        // Decompile and recompile 'org.jsoup:jsoup:1.12.1'
         test(org.jsoup.Jsoup.class);
     }
 
     @Test
     public void testJUnit4() throws Exception {
-        // Decompile and recompile 'junit:junit:4.13.1'
+        // Decompile and recompile 'junit:junit:4.12'
         test(org.junit.Test.class);
     }
 
