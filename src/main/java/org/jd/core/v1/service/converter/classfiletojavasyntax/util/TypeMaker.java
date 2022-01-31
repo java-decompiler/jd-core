@@ -6,9 +6,8 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.apache.commons.io.IOUtils;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
+import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Field;
 import org.jd.core.v1.model.classfile.Method;
@@ -40,8 +39,6 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1740,35 +1737,6 @@ public class TypeMaker {
             attributeLength = reader.readInt();
 
             reader.skipBytes(attributeLength);
-        }
-    }
-
-    private static class ClassPathLoader implements Loader {
-
-        private static Map<String, byte[]> resourceCache = new HashMap<>();
-        private static Map<String, URL> resourceURLCache = new HashMap<>();
-
-        @Override
-        public byte[] load(String internalName) throws LoaderException {
-            byte[] resourceFromCache = resourceCache.get(internalName);
-            if (resourceFromCache == null) {
-                try (InputStream is = getClass().getResourceAsStream(toInternalPath(internalName))) {
-                    resourceFromCache = IOUtils.toByteArray(is);
-                    resourceCache.put(internalName, resourceFromCache);
-                } catch (IOException e) {
-                    throw new LoaderException(e);
-                }
-            }
-            return resourceFromCache;
-        }
-
-        @Override
-        public boolean canLoad(String internalName) {
-            return resourceURLCache.computeIfAbsent(internalName, iName -> getClass().getResource(toInternalPath(iName))) != null;
-        }
-
-        private static String toInternalPath(String internalName) {
-            return "/" + internalName + StringConstants.CLASS_FILE_SUFFIX;
         }
     }
 
