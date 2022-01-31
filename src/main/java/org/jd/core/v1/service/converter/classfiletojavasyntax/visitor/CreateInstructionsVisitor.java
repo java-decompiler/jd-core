@@ -116,7 +116,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
         createParametersVariablesAndStatements((ClassFileConstructorOrMethodDeclaration)declaration, false);
     }
 
-    protected void createParametersVariablesAndStatements(ClassFileConstructorOrMethodDeclaration comd, boolean constructor) {
+    public void createParametersVariablesAndStatements(ClassFileConstructorOrMethodDeclaration comd, boolean constructor) {
         ClassFile classFile = comd.getClassFile();
         Method method = comd.getMethod();
         AttributeCode attributeCode = method.getAttribute("Code");

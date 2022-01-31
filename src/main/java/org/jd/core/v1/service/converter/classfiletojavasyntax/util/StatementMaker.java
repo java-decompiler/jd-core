@@ -478,7 +478,7 @@ public class StatementMaker {
             SwitchStatementMaker.makeSwitchString(localVariableMaker, statements, switchStatement);
         } else if (condition.isArrayExpression()) {
             // Check pattern & make 'switch-enum'
-            SwitchStatementMaker.makeSwitchEnum(bodyDeclaration, switchStatement);
+            SwitchStatementMaker.makeSwitchEnum(bodyDeclaration, switchStatement, typeMaker);
         }
 
         makeStatements(watchdog, basicBlock.getNext(), statements, jumps);

@@ -23,6 +23,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateInstructionsVisitor;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
@@ -159,7 +160,7 @@ public final class SwitchStatementMaker {
         }
     }
 
-    public static void makeSwitchEnum(ClassFileBodyDeclaration bodyDeclaration, SwitchStatement switchStatement) {
+    public static void makeSwitchEnum(ClassFileBodyDeclaration bodyDeclaration, SwitchStatement switchStatement, TypeMaker typeMaker) {
         Expression expression = switchStatement.getCondition().getExpression();
 
         if (expression.isFieldReferenceExpression()) {
@@ -171,7 +172,12 @@ public final class SwitchStatementMaker {
                 if (syntheticClassDeclaration != null) {
                     // Javac switch-enum pattern
                     bodyDeclaration = (ClassFileBodyDeclaration) syntheticClassDeclaration.getBodyDeclaration();
-                    DefaultList<Statement> statements = bodyDeclaration.getMethodDeclarations().get(0).getStatements().getList();
+                    ClassFileConstructorOrMethodDeclaration methodDeclaration = bodyDeclaration.getMethodDeclarations().get(0);
+                    if (methodDeclaration.getStatements() == null) {
+                        CreateInstructionsVisitor createInstructionsVisitor = new CreateInstructionsVisitor(typeMaker);
+                        createInstructionsVisitor.createParametersVariablesAndStatements(methodDeclaration, false);
+                    }
+                    DefaultList<Statement> statements = methodDeclaration.getStatements().getList();
                     updateSwitchStatement(switchStatement, searchSwitchMap(fre, statements.iterator()));
                 }
             }
