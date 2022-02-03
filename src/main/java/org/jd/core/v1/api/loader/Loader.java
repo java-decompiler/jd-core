@@ -7,8 +7,10 @@
 
 package org.jd.core.v1.api.loader;
 
+import java.io.IOException;
+
 public interface Loader {
     boolean canLoad(String internalName);
 
-    byte[] load(String internalName) throws LoaderException;
+    byte[] load(String internalName) throws IOException;
 }

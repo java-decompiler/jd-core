@@ -9,7 +9,6 @@ package org.jd.core.v1;
 
 import org.jd.core.v1.api.Decompiler;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
@@ -35,7 +34,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     private final WriteTokenProcessor writer = new WriteTokenProcessor();
 
     @Override
-    public void decompile(Loader loader, Printer printer, String internalName) throws LoaderException, IOException {
+    public void decompile(Loader loader, Printer printer, String internalName) throws IOException {
         DecompileContext decompileContext = new DecompileContext();
 
         decompileContext.setMainInternalTypeName(internalName);
@@ -46,7 +45,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     }
 
     @Override
-    public void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws LoaderException, IOException {
+    public void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws IOException {
         DecompileContext decompileContext = new DecompileContext();
 
         decompileContext.setMainInternalTypeName(internalName);
@@ -57,7 +56,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
         decompile(decompileContext);
     }
 
-    protected void decompile(DecompileContext decompileContext) throws LoaderException, IOException {
+    protected void decompile(DecompileContext decompileContext) throws IOException {
         ClassFile classFile = this.deserializer.loadClassFile(decompileContext.getLoader(),
                 decompileContext.getMainInternalTypeName());
         decompileContext.setClassFile(classFile);

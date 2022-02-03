@@ -9,7 +9,11 @@ package org.jd.core.test;
 
 import java.lang.invoke.MethodType;
 import java.util.List;
-import java.util.function.*;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class Lambda {

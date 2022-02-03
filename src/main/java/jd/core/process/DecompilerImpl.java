@@ -17,8 +17,8 @@
 package jd.core.process;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class DecompilerImpl implements Decompiler
     public void decompile(
             Preferences preferences, Loader loader,
             Printer printer, String internalClassPath)
-        throws LoaderException
+        throws IOException
     {
 //long time0 = System.currentTimeMillis();
 
@@ -48,7 +48,7 @@ public class DecompilerImpl implements Decompiler
         ClassFile classFile =
             ClassFileDeserializer.deserialize(loader, internalClassPath);
         if (classFile == null) {
-            throw new LoaderException(
+            throw new IOException(
                 "Can not deserialize '" + internalClassPath + "'.");
         }
 

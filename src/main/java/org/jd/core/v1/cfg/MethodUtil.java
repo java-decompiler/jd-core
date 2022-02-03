@@ -1,7 +1,6 @@
 package org.jd.core.v1.cfg;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
@@ -27,7 +26,7 @@ public final class MethodUtil {
     private MethodUtil() {
     }
 
-    public static Method searchMethod(Loader loader, TypeMaker typeMaker, String internalTypeName, String methodName, String methodDescriptor) throws LoaderException, IOException {
+    public static Method searchMethod(Loader loader, TypeMaker typeMaker, String internalTypeName, String methodName, String methodDescriptor) throws IOException {
         ClassFileDeserializer deserializer = new ClassFileDeserializer();
         ConvertClassFileProcessor converter = new ConvertClassFileProcessor();
         DecompileContext decompileContext = new DecompileContext();

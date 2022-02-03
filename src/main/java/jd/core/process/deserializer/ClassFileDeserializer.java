@@ -31,7 +31,6 @@ import org.apache.bcel.classfile.ConstantString;
 import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.InnerClass;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.model.classfile.constant.ConstantInterfaceMethodref;
 import org.jd.core.v1.model.classfile.constant.ConstantMethodref;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
@@ -59,7 +58,7 @@ public final class ClassFileDeserializer
     }
 
     public static ClassFile deserialize(Loader loader, String internalClassPath)
-        throws LoaderException
+        throws IOException
     {
         ClassFile classFile = loadSingleClass(loader, internalClassPath);
         if (classFile == null) {
@@ -120,7 +119,7 @@ public final class ClassFileDeserializer
                     innerClassFiles.add(innerClassFile);
                 }
             }
-            catch (LoaderException e)
+            catch (IOException e)
             {
                 assert ExceptionUtil.printStackTrace(e);
             }
@@ -134,7 +133,7 @@ public final class ClassFileDeserializer
 
     private static ClassFile loadSingleClass(
             Loader loader, String internalClassPath)
-        throws LoaderException
+        throws IOException
     {
         ClassFile classFile = null;
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(loader.load(internalClassPath))))

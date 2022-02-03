@@ -42,7 +42,7 @@ interface,
 ```java
 Loader loader = new Loader() {
     @Override
-    public byte[] load(String internalName) throws LoaderException {
+    public byte[] load(String internalName) throws IOException {
         InputStream is = this.getClass().getResourceAsStream("/" + internalName + ".class");
 
         if (is == null) {
@@ -58,8 +58,6 @@ Loader loader = new Loader() {
                 }
 
                 return out.toByteArray();
-            } catch (IOException e) {
-                throw new LoaderException(e);
             }
         }
     }

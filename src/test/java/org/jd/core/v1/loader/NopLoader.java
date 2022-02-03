@@ -8,11 +8,12 @@
 package org.jd.core.v1.loader;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
+
+import java.io.IOException;
 
 public class NopLoader implements Loader {
     @Override
-    public byte[] load(String internalName) throws LoaderException {
+    public byte[] load(String internalName) throws IOException {
         return null;
     }
 

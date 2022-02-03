@@ -7,9 +7,10 @@
 
 package org.jd.core.v1.compiler;
 
+import java.net.URI;
+
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
-import java.net.URI;
 
 public class JavaSourceFileObject extends SimpleJavaFileObject {
     /**

@@ -7,7 +7,6 @@
 package org.jd.core.v1.loader;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.util.StringConstants;
 
 import java.io.ByteArrayOutputStream;
@@ -16,7 +15,7 @@ import java.io.InputStream;
 
 public class ClassPathLoader implements Loader {
     @Override
-    public byte[] load(String internalName) throws LoaderException {
+    public byte[] load(String internalName) throws IOException {
         InputStream is = this.getClass().getResourceAsStream("/" + internalName + StringConstants.CLASS_FILE_SUFFIX);
 
         if (is == null) {
@@ -32,8 +31,6 @@ public class ClassPathLoader implements Loader {
             }
 
             return out.toByteArray();
-        } catch (IOException e) {
-            throw new LoaderException(e);
         }
     }
 

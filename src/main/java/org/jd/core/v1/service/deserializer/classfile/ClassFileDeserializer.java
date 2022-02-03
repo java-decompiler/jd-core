@@ -21,7 +21,6 @@ import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.LineNumber;
 import org.apache.bcel.classfile.MethodParameter;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.ConstantPool;
 import org.jd.core.v1.model.classfile.Field;
@@ -103,7 +102,7 @@ import jd.core.process.deserializer.ClassFormatException;
 public final class ClassFileDeserializer {
     private static final int[] EMPTY_INT_ARRAY = {};
 
-    public ClassFile loadClassFile(Loader loader, String internalTypeName) throws LoaderException, IOException {
+    public ClassFile loadClassFile(Loader loader, String internalTypeName) throws IOException {
         ClassFile classFile = innerLoadClassFile(loader, internalTypeName);
 
         if (classFile == null) {
@@ -112,7 +111,7 @@ public final class ClassFileDeserializer {
         return classFile;
     }
 
-    private ClassFile innerLoadClassFile(Loader loader, String internalTypeName) throws LoaderException, IOException {
+    private ClassFile innerLoadClassFile(Loader loader, String internalTypeName) throws IOException {
         if (!loader.canLoad(internalTypeName)) {
             return null;
         }

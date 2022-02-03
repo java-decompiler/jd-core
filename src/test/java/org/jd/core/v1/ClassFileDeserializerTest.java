@@ -10,7 +10,6 @@ package org.jd.core.v1;
 import org.apache.bcel.classfile.ConstantInteger;
 import org.apache.bcel.classfile.ConstantUtf8;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
 import org.jd.core.v1.model.classfile.Field;
@@ -22,6 +21,7 @@ import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 import junit.framework.TestCase;
@@ -36,7 +36,7 @@ public class ClassFileDeserializerTest extends TestCase {
             }
 
             @Override
-            public byte[] load(String internalName) throws LoaderException {
+            public byte[] load(String internalName) throws IOException {
                 fail("Loader cannot load anything");
                 return null;
             }

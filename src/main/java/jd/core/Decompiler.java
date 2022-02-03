@@ -17,7 +17,8 @@
 package jd.core;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
+
+import java.io.IOException;
 
 import jd.core.preferences.Preferences;
 import jd.core.printer.Printer;
@@ -27,5 +28,5 @@ public interface Decompiler
     void decompile(
             Preferences preferences, Loader loader,
             Printer printer, String internalClassPath)
-        throws LoaderException;
+        throws IOException;
 }

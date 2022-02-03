@@ -8,12 +8,12 @@
 package org.jd.core.v1.loader;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.loader.LoaderException;
 import org.jd.core.v1.util.StringConstants;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 public class DirectoryLoader implements Loader {
     protected File base;
@@ -23,7 +23,7 @@ public class DirectoryLoader implements Loader {
     }
 
     @Override
-    public byte[] load(String internalName) throws LoaderException {
+    public byte[] load(String internalName) throws IOException {
         File file = newFile(internalName);
 
         if (file.exists()) {
@@ -38,7 +38,7 @@ public class DirectoryLoader implements Loader {
 
                 return out.toByteArray();
             } catch (Exception e) {
-                throw new LoaderException(e);
+                throw new IOException(e);
             }
         }
         return null;
