@@ -11,7 +11,7 @@ public class InfiniteLayout {
 
     public class InnerClass {
         protected int innerField1 = 0;
-
+        @SuppressWarnings("unused")
         public void innerMethod(int param1) {
             int localVariable1 = param1;
         }

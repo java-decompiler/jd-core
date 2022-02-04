@@ -16,24 +16,89 @@
  ******************************************************************************/
 package jd.core.preferences;
 
-public class Preferences
-{
-    protected boolean showDefaultConstructor;
-    protected boolean realignmentLineNumber;
+import java.util.Map;
 
-    public Preferences()
-    {
+public final class Preferences {
+
+    public static final String JD_CORE_VERSION             = "JdGuiPreferences.jdCoreVersion";
+    public static final String DISPLAY_DEFAULT_CONSTRUCTOR = "ClassFileViewerPreferences.displayDefaultConstructor";
+    public static final String WRITE_LINE_NUMBERS          = "ClassFileSaverPreferences.writeLineNumbers";
+    public static final String WRITE_METADATA              = "ClassFileSaverPreferences.writeMetadata";
+    public static final String ESCAPE_UNICODE_CHARACTERS   = "ClassFileSaverPreferences.escapeUnicodeCharacters";
+    public static final String OMIT_THIS_PREFIX            = "ClassFileSaverPreferences.omitThisPrefix";
+    public static final String WRITE_DEFAULT_CONSTRUCTOR   = "ClassFileSaverPreferences.writeDefaultConstructor";
+    public static final String REALIGN_LINE_NUMBERS        = "ClassFileSaverPreferences.realignLineNumbers";
+
+    private boolean showDefaultConstructor;
+    private boolean realignmentLineNumber;
+    private boolean showPrefixThis;
+    private boolean unicodeEscape;
+    private boolean showLineNumbers;
+    private boolean writeMetaData;
+
+    public Preferences() {
         this.showDefaultConstructor = false;
         this.realignmentLineNumber = true;
+        this.showPrefixThis = true;
+        this.unicodeEscape = false;
+        this.showLineNumbers = true;
+        this.writeMetaData = true;
     }
 
-    public boolean getShowDefaultConstructor()
-    {
+    public Preferences(Map<String, String> preferences) {
+        setUnicodeEscape(Boolean.parseBoolean(preferences.getOrDefault(ESCAPE_UNICODE_CHARACTERS, Boolean.FALSE.toString())));
+        setShowPrefixThis(!Boolean.parseBoolean(preferences.getOrDefault(OMIT_THIS_PREFIX, Boolean.FALSE.toString())));
+        setShowDefaultConstructor(Boolean.parseBoolean(preferences.getOrDefault(DISPLAY_DEFAULT_CONSTRUCTOR, Boolean.FALSE.toString())));
+        setRealignmentLineNumber(Boolean.parseBoolean(preferences.getOrDefault(REALIGN_LINE_NUMBERS, Boolean.FALSE.toString())));
+        setShowLineNumbers(Boolean.parseBoolean(preferences.getOrDefault(WRITE_LINE_NUMBERS, Boolean.FALSE.toString())));
+        setWriteMetaData(Boolean.parseBoolean(preferences.getOrDefault(WRITE_METADATA, Boolean.FALSE.toString())));
+    }
+
+    public boolean getShowDefaultConstructor() {
         return this.showDefaultConstructor;
     }
 
-    public boolean getRealignmentLineNumber()
-    {
+    public boolean getRealignmentLineNumber() {
         return this.realignmentLineNumber;
+    }
+
+    public void setShowDefaultConstructor(boolean b) {
+        showDefaultConstructor = b;
+    }
+
+    public void setRealignmentLineNumber(boolean b) {
+        realignmentLineNumber = b;
+    }
+
+    public void setShowPrefixThis(boolean b) {
+        showPrefixThis = b;
+    }
+
+    public void setUnicodeEscape(boolean b) {
+        unicodeEscape = b;
+    }
+
+    public void setShowLineNumbers(boolean b) {
+        showLineNumbers = b;
+    }
+
+    public boolean isShowPrefixThis() {
+        return showPrefixThis;
+    }
+
+    public boolean isUnicodeEscape() {
+        return unicodeEscape;
+    }
+
+    public boolean isShowLineNumbers() {
+        return showLineNumbers;
+    }
+
+    public boolean isWriteMetaData() {
+        return writeMetaData;
+    }
+
+    public void setWriteMetaData(boolean writeMetaData) {
+        this.writeMetaData = writeMetaData;
     }
 }
