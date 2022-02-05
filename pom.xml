@@ -10,6 +10,12 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
+	<scm>
+		<connection>scm:git:https://github.com/nbauma109/jd-core.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/nbauma109/jd-core.git</developerConnection>
+		<url>https://github.com/nbauma109/jd-core</url>
+		<tag>HEAD</tag>
+	</scm>
 	<build>
 		<resources>
 			<resource>
