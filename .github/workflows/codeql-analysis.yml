@@ -18,12 +18,13 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ master ]
   schedule:
-    - cron: '40 9 * * 4'
+    - cron: '32 8 * * 3'
 
 jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[maven-release-plugin]')"
     permissions:
       actions: read
       contents: read
@@ -39,10 +40,12 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-    - name: Setup JAVA
-      uses: actions/setup-java@v1
+    - name: Setup Java JDK
+      uses: actions/setup-java@v2.5.0
       with:
+        # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
         java-version: 17
+        distribution: zulu
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL

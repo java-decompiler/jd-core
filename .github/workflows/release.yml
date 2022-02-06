@@ -1,4 +1,4 @@
-name: "tagged-release"
+name: "Github Release"
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   tagged-release:
-    name: "Tagged Release"
+    name: "Github Release"
     runs-on: "ubuntu-latest"
 
     steps:
@@ -26,5 +26,4 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         prerelease: false
         files: |
-          **/LICENSE.txt
-          **/*.jar
+          **/jd-*.jar
