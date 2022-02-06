@@ -1,6 +1,8 @@
 [![](https://jitpack.io/v/nbauma109/jd-core.svg)](https://jitpack.io/#nbauma109/jd-core)
 [![](https://jitci.com/gh/nbauma109/jd-core/svg)](https://jitci.com/gh/nbauma109/jd-core)
 [![CodeQL](https://github.com/nbauma109/jd-core/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/nbauma109/jd-core/actions/workflows/codeql-analysis.yml)
+[![Maven Release](https://github.com/nbauma109/jd-core/actions/workflows/maven.yml/badge.svg)](https://github.com/nbauma109/jd-core/actions/workflows/maven.yml)
+[![Github Release](https://github.com/nbauma109/jd-core/actions/workflows/release.yml/badge.svg)](https://github.com/nbauma109/jd-core/actions/workflows/release.yml)
 
 # JD-Core
 
