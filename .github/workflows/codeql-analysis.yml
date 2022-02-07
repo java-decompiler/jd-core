@@ -14,9 +14,13 @@ name: "CodeQL"
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ master ]
+    paths-ignore:
+      - '**/README.md'
   schedule:
     - cron: '32 8 * * 3'
 
