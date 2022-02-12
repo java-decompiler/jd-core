@@ -9,7 +9,9 @@ package org.jd.core.v1.printer;
 
 import org.jd.core.v1.api.printer.Printer;
 
-public class StringBuilderPrinter implements Printer {
+import jd.core.VersionAware;
+
+public class StringBuilderPrinter implements Printer, VersionAware {
 
     protected static final String TAB = "  ";
     protected static final String NEWLINE = "\n";
