@@ -163,7 +163,7 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
             }
             // Add JD-Core version
             stringBuffer.append("\n * JD-Core Version:       ");
-            stringBuffer.append(preferences.get(JD_CORE_VERSION));
+            stringBuffer.append(getVersion());
             stringBuffer.append("\n */");
         }
         return stringBuffer.toString();
