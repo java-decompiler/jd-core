@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.nbauma109</groupId>
 	<artifactId>jd-core</artifactId>
@@ -31,6 +33,20 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
 				<version>3.2.2</version>
 				<configuration>
@@ -40,7 +56,7 @@
 							<addClasspath>false</addClasspath>
 						</manifest>
 						<manifestEntries>
-							<JDCore-Version>${project.version}</JDCore-Version>
+							<JD-Core-Version>${project.version}</JD-Core-Version>
 						</manifestEntries>
 					</archive>
 				</configuration>
@@ -85,7 +101,7 @@
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>
 			<artifactId>jd-util</artifactId>
-			<version>1.1.4</version>
+			<version>1.1.5</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
