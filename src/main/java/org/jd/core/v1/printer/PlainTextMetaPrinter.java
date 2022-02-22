@@ -47,8 +47,9 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
     public void startLine(int lineNumber) {
         printLineNumber(lineNumber);
 
-        for (int i=0; i<indentationCount; i++)
+        for (int i=0; i<indentationCount; i++) {
             sb.append(TAB);
+        }
     }
 
     @Override

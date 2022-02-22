@@ -15,7 +15,7 @@ public class ClassFileReader {
     public static final int JAVA_MAGIC_NUMBER = 0xCafeBabe;
 
     protected byte[] data;
-    protected int    offset = 0;
+    protected int    offset;
 
     public ClassFileReader(byte[] data) {
         this.data = data;
@@ -55,7 +55,7 @@ public class ClassFileReader {
         return Double.longBitsToDouble(readLong());
     }
 
-    public void readFully(byte target[]) {
+    public void readFully(byte[] target) {
         int length = target.length;
         System.arraycopy(data, offset, target, 0, length);
         offset += length;
@@ -78,21 +78,25 @@ public class ClassFileReader {
                     break;
                 case 12: case 13:
                     /* 110x xxxx   10xx xxxx*/
-                    if (offset+1 > maxOffset)
+                    if (offset+1 > maxOffset) {
                         throw new UTFDataFormatException("malformed input: partial character at end");
+                    }
                     char2 = data[offset++];
-                    if ((char2 & 0xC0) != 0x80)
+                    if ((char2 & 0xC0) != 0x80) {
                         throw new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + offset);
+                    }
                     charArray[charArrayOffset++] = (char)(((c & 0x1F) << 6) | (char2 & 0x3F));
                     break;
                 case 14:
                     /* 1110 xxxx  10xx xxxx  10xx xxxx */
-                    if (offset+2 > maxOffset)
+                    if (offset+2 > maxOffset) {
                         throw new UTFDataFormatException("malformed input: partial character at end");
+                    }
                     char2 = data[offset++];
                     char3 = data[offset++];
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
                         throw new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + (offset-1));
+                    }
                     charArray[charArrayOffset++] = (char)(((c & 0x0F) << 12) | ((char2 & 0x3F) << 6) | ((char3 & 0x3F) << 0));
                     break;
                 default:

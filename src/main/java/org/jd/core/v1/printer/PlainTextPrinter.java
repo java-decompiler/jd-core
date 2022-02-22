@@ -106,16 +106,18 @@ public class PlainTextPrinter implements Printer {
     }
     @Override
     public void unindent() {
-        if (this.indentationCount > 0)
+        if (this.indentationCount > 0) {
             this.indentationCount--;
+        }
     }
 
     @Override
     public void startLine(int lineNumber) {
         printLineNumber(lineNumber);
 
-        for (int i=0; i<indentationCount; i++)
+        for (int i=0; i<indentationCount; i++) {
             sb.append(TAB);
+        }
     }
 
     @Override
