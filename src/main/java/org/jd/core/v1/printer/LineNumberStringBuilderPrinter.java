@@ -8,19 +8,19 @@ package org.jd.core.v1.printer;
 
 import org.jd.core.v1.api.Decompiler;
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.util.StringConstants;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import static jd.core.preferences.Preferences.ESCAPE_UNICODE_CHARACTERS;
-import static jd.core.preferences.Preferences.JD_CORE_VERSION;
 import static jd.core.preferences.Preferences.REALIGN_LINE_NUMBERS;
 import static jd.core.preferences.Preferences.WRITE_LINE_NUMBERS;
 import static jd.core.preferences.Preferences.WRITE_METADATA;
 import static org.apache.bcel.Const.MAJOR_1_1;
 import static org.apache.bcel.Const.MAJOR_1_5;
+
+import jd.core.ClassUtil;
 
 public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
 
@@ -130,10 +130,7 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
         setShowLineNumbers(Boolean.parseBoolean(preferences.getOrDefault(WRITE_LINE_NUMBERS, Boolean.TRUE.toString())));
 
         // Format internal name
-        if (!entryPath.endsWith(StringConstants.CLASS_FILE_SUFFIX)) {
-            throw new IllegalArgumentException("Not a .class file: " + entryPath);
-        }
-        String entryInternalName = entryPath.substring(0, entryPath.length() - 6); // 6 = ".class".length()
+        String entryInternalName = ClassUtil.getInternalName(entryPath);
 
         // Decompile class file
         decompiler.decompile(loader, this, entryInternalName, configuration);
