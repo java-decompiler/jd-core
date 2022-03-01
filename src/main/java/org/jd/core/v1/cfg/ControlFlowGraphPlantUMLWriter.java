@@ -13,15 +13,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlo
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.SwitchCase;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ByteCodeWriter;
-import org.jd.core.v1.service.converter.classfiletojavasyntax.util.ExceptionUtil;
 import org.jd.core.v1.util.DefaultList;
 
-import java.awt.Desktop;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,10 +55,6 @@ import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.B
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_ECLIPSE;
 import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_TRY_JSR;
 
-import net.sourceforge.plantuml.FileFormat;
-import net.sourceforge.plantuml.FileFormatOption;
-import net.sourceforge.plantuml.SourceStringReader;
-
 /**
  * A state diagram writer.
  *
@@ -86,32 +75,6 @@ public final class ControlFlowGraphPlantUMLWriter {
     private ControlFlowGraphPlantUMLWriter() {
     }
     
-    public static void showGraph(ControlFlowGraph cfg) {
-        try {
-            SourceStringReader reader = new SourceStringReader(ControlFlowGraphPlantUMLWriter.write(cfg));
-            final ByteArrayOutputStream os = new ByteArrayOutputStream();
-            // Write the first image to "os"
-            reader.outputImage(os, new FileFormatOption(FileFormat.SVG));
-
-            // The XML is stored into svg
-            final String svg = new String(os.toByteArray(), StandardCharsets.UTF_8);
-            Method method = cfg.getMethod();
-            String className = method.getClassName().replace('/', '.');
-            String svgFileName = className + '.' + method.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-            File svgFile = File.createTempFile(svgFileName, ".svg");
-            svgFile.deleteOnExit();
-            Files.write(svgFile.toPath(), svg.getBytes(StandardCharsets.UTF_8));
-            if (Desktop.isDesktopSupported()) {
-                Desktop desktop = Desktop.getDesktop();
-                if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                    desktop.browse(svgFile.toURI());
-                }
-            }
-        } catch (IOException e) {
-            assert ExceptionUtil.printStackTrace(e);
-        }
-    }
-
     public static String write(ControlFlowGraph cfg) {
         if (cfg.getBasicBlocks() == null) {
             return null;
