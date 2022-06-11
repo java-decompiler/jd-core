@@ -110,6 +110,7 @@ public class ExpressionVisitor extends TypeVisitor {
     protected Fragments fragments = new Fragments();
     private final boolean diamondOperatorSupported;
     protected boolean inExpressionFlag;
+    protected boolean inInvokeNewFlag;
     protected Set<String> currentMethodParamNames = new HashSet<>();
     protected String currentTypeName;
     private final HexaExpressionVisitor hexaExpressionVisitor = new HexaExpressionVisitor();
@@ -123,6 +124,11 @@ public class ExpressionVisitor extends TypeVisitor {
         return fragments;
     }
 
+    @Override
+    protected boolean isInInvokeNew() {
+        return inInvokeNewFlag;
+    }
+    
     @Override
     public void visit(ArrayExpression expression) {
         visit(expression, expression.getExpression());
@@ -528,6 +534,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(NewExpression expression) {
+        inInvokeNewFlag = true;
         BodyDeclaration bodyDeclaration = expression.getBodyDeclaration();
 
         tokens.addLineNumberToken(expression);
@@ -543,6 +550,7 @@ public class ExpressionVisitor extends TypeVisitor {
         BaseType type = objectType;
 
         type.accept(this);
+
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
         BaseExpression parameters = expression.getParameters();
@@ -577,6 +585,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
             tokens = new Tokens();
         }
+        inInvokeNewFlag = false;
     }
 
     @Override

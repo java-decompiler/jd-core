@@ -92,7 +92,7 @@ public abstract class ControlFlowGraphReducer {
         if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
             visited.set(basicBlock.getIndex());
 
-            switch (basicBlock.getType()) {
+            return switch (basicBlock.getType()) {
                 case TYPE_START,
                      TYPE_STATEMENTS,
                      TYPE_IF,
@@ -101,23 +101,18 @@ public abstract class ControlFlowGraphReducer {
                      TYPE_TRY,
                      TYPE_TRY_JSR,
                      TYPE_TRY_ECLIPSE,
-                     TYPE_GOTO_IN_TERNARY_OPERATOR:
-                    return reduce(visited, basicBlock.getNext(), jsrTargets);
+                     TYPE_GOTO_IN_TERNARY_OPERATOR   -> reduce(visited, basicBlock.getNext(), jsrTargets);
                 case TYPE_CONDITIONAL_BRANCH,
                      TYPE_CONDITION,
                      TYPE_CONDITION_OR,
                      TYPE_CONDITION_AND,
-                     TYPE_CONDITION_TERNARY_OPERATOR:
-                    return reduceConditionalBranch(visited, basicBlock, jsrTargets);
-                case TYPE_SWITCH_DECLARATION:
-                    return reduceSwitchDeclaration(visited, basicBlock, jsrTargets);
-                case TYPE_TRY_DECLARATION:
-                    return reduceTryDeclaration(visited, basicBlock, jsrTargets);
-                case TYPE_JSR:
-                    return reduceJsr(visited, basicBlock, jsrTargets);
-                case TYPE_LOOP:
-                    return reduceLoop(visited, basicBlock, jsrTargets);
-            }
+                     TYPE_CONDITION_TERNARY_OPERATOR -> reduceConditionalBranch(visited, basicBlock, jsrTargets);
+                case TYPE_SWITCH_DECLARATION         -> reduceSwitchDeclaration(visited, basicBlock, jsrTargets);
+                case TYPE_TRY_DECLARATION            -> reduceTryDeclaration(visited, basicBlock, jsrTargets);
+                case TYPE_JSR                        -> reduceJsr(visited, basicBlock, jsrTargets);
+                case TYPE_LOOP                       -> reduceLoop(visited, basicBlock, jsrTargets);
+                default                              -> true;
+            };
         }
 
         return true;

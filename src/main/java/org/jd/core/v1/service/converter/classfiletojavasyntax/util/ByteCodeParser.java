@@ -2151,16 +2151,12 @@ public class ByteCodeParser {
         byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
         int opcode = code[offset] & 255;
 
-        switch (opcode) {
-            case ASTORE:
-                return code[++offset] & 255;
-            case ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3:
-                return opcode - ASTORE_0;
-            case POP, POP2:
-                return -1;
-            default:
-                throw new IllegalStateException();
-        }
+        return switch (opcode) {
+            case ASTORE -> code[++offset] & 255;
+            case ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3 -> opcode - ASTORE_0;
+            case POP, POP2 -> -1;
+            default -> throw new IllegalStateException();
+        };
     }
 
     private static class MemberVisitor extends AbstractJavaSyntaxVisitor {

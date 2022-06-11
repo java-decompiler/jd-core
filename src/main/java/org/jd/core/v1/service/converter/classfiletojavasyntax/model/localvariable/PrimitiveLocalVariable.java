@@ -12,6 +12,7 @@ import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BOOLEAN;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_BYTE;
@@ -22,22 +23,7 @@ import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_INT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_LONG;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_SHORT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.FLAG_VOID;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BOOLEAN_TYPE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_BYTE_TYPE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_CHAR_TYPE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_BOOLEAN_TYPE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_BYTE_TYPE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_NEGATIVE_SHORT_TYPE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.MAYBE_SHORT_TYPE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BOOLEAN;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_CHAR;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_DOUBLE;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_FLOAT;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_INT;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_LONG;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_SHORT;
-import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_VOID;
 
 public class PrimitiveLocalVariable extends AbstractLocalVariable {
     private static final String NON_ZERO_DIMENSION = "Non-zero dimension";
@@ -65,47 +51,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
 
     @Override
     public Type getType() {
-        switch (flags) {
-            case FLAG_BOOLEAN:
-                return TYPE_BOOLEAN;
-            case FLAG_CHAR:
-                return TYPE_CHAR;
-            case FLAG_FLOAT:
-                return TYPE_FLOAT;
-            case FLAG_DOUBLE:
-                return TYPE_DOUBLE;
-            case FLAG_BYTE:
-                return TYPE_BYTE;
-            case FLAG_SHORT:
-                return TYPE_SHORT;
-            case FLAG_INT:
-                return TYPE_INT;
-            case FLAG_LONG:
-                return TYPE_LONG;
-            case FLAG_VOID:
-                return TYPE_VOID;
-        }
-
-        switch (flags) {
-        case FLAG_CHAR|FLAG_INT:
-            return MAYBE_CHAR_TYPE;
-        case FLAG_CHAR|FLAG_SHORT|FLAG_INT:
-            return MAYBE_SHORT_TYPE;
-        case FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT:
-            return MAYBE_BYTE_TYPE;
-        case FLAG_BOOLEAN|FLAG_BYTE|FLAG_CHAR|FLAG_SHORT|FLAG_INT:
-            return MAYBE_BOOLEAN_TYPE;
-        case FLAG_BYTE|FLAG_SHORT|FLAG_INT:
-            return MAYBE_NEGATIVE_BYTE_TYPE;
-        case FLAG_SHORT|FLAG_INT:
-            return MAYBE_NEGATIVE_SHORT_TYPE;
-        case FLAG_BOOLEAN|FLAG_BYTE|FLAG_SHORT|FLAG_INT:
-            return MAYBE_NEGATIVE_BOOLEAN_TYPE;
-        default:
-            break;
-        }
-
-        return TYPE_INT;
+        return Optional.ofNullable(PrimitiveTypeUtil.getPrimitiveTypeFromFlags(flags)).orElse(TYPE_INT);
     }
 
     @Override

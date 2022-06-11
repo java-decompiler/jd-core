@@ -975,22 +975,18 @@ public class Frame {
             sb.setLength(0);
 
             if (type.getDimension() == 0) {
-                if ("Class".equals(str)) {
-                    sb.append("clazz");
-                } else if ("String".equals(str)) {
-                    sb.append("str");
-                } else if ("Boolean".equals(str)) {
-                    sb.append("bool");
-                } else {
-                    uncapitalize(str);
-                    if (CAPITALIZED_JAVA_LANGUAGE_KEYWORDS.contains(str)) {
-                        sb.append("_");
+                sb.append(switch (str) {
+                    case "Class"   -> "clazz";
+                    case "String"  -> "str";
+                    case "Boolean" -> "bool";
+                    default        -> {
+                        uncapitalize(str);
+                        yield CAPITALIZED_JAVA_LANGUAGE_KEYWORDS.contains(str) ? "_" : "";
                     }
-                }
+                });
             } else {
-                //                case 1:
-                                    sb.append("arrayOf");
-                                    capitalize(str);
+                sb.append("arrayOf");
+                capitalize(str);
             }
 
             generate(type);

@@ -66,7 +66,9 @@ public class ClassFileReader {
 
         char[] charArray = new char[utflenx];
         int maxOffset = offset + utflenx;
-        int c, char2, char3;
+        int c;
+        int char2;
+        int char3;
         int charArrayOffset = 0;
 
         while (offset < maxOffset) {
@@ -97,7 +99,7 @@ public class ClassFileReader {
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80)) {
                         throw new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + (offset-1));
                     }
-                    charArray[charArrayOffset++] = (char)(((c & 0x0F) << 12) | ((char2 & 0x3F) << 6) | ((char3 & 0x3F) << 0));
+                    charArray[charArrayOffset++] = (char)(((c & 0x0F) << 12) | ((char2 & 0x3F) << 6) | (char3 & 0x3F));
                     break;
                 default:
                     /* 10xx xxxx,  1111 xxxx */

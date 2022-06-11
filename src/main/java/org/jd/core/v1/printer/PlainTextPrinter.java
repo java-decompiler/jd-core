@@ -15,7 +15,7 @@ public class PlainTextPrinter implements Printer {
 
     protected int indentationCount;
     protected StringBuilder sb = new StringBuilder();
-    protected int realLineNumber = 0;
+    protected int realLineNumber;
     protected String format;
 
     protected boolean escapeUnicodeCharacters;

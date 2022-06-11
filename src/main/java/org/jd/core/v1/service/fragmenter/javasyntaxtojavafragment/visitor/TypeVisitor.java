@@ -295,22 +295,26 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     protected ReferenceToken newTypeReferenceToken(ObjectType ot, String ownerInternalName) {
         String internalName = ot.getInternalName();
         String qualifiedName = ot.getQualifiedName();
+        int printerType = isInInvokeNew() ? Printer.CONSTRUCTOR : Printer.TYPE;
         String name = ot.getName();
-
         if (packageContainsType(internalPackageName, internalName)) {
             // In the current package
-            return new ReferenceToken(Printer.TYPE, internalName, name, null, ownerInternalName);
+            return new ReferenceToken(printerType, internalName, name, null, ownerInternalName);
         }
         if (packageContainsType("java/lang/", internalName)) {
             // A 'java.lang' class
             String internalLocalTypeName = internalPackageName + name;
 
             if (loader.canLoad(internalLocalTypeName)) {
-                return new ReferenceToken(Printer.TYPE, internalName, qualifiedName, null, ownerInternalName);
+                return new ReferenceToken(printerType, internalName, qualifiedName, null, ownerInternalName);
             }
-            return new ReferenceToken(Printer.TYPE, internalName, name, null, ownerInternalName);
+            return new ReferenceToken(printerType, internalName, name, null, ownerInternalName);
         }
-        return new TypeReferenceToken(importsFragment, internalName, qualifiedName, name, ownerInternalName);
+        return new TypeReferenceToken(importsFragment, printerType, internalName, qualifiedName, name, ownerInternalName);
+    }
+
+    protected boolean isInInvokeNew() {
+        return false;
     }
 
     protected static boolean packageContainsType(String internalPackageName, String internalClassName) {
@@ -321,8 +325,8 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         protected ImportsFragment importsFragment;
         protected String qualifiedName;
 
-        public TypeReferenceToken(ImportsFragment importsFragment, String internalTypeName, String qualifiedName, String name, String ownerInternalName) {
-            super(Printer.TYPE, internalTypeName, name, null, ownerInternalName);
+        public TypeReferenceToken(ImportsFragment importsFragment, int printerType, String internalTypeName, String qualifiedName, String name, String ownerInternalName) {
+            super(printerType, internalTypeName, name, null, ownerInternalName);
             this.importsFragment = importsFragment;
             this.qualifiedName = qualifiedName;
         }
