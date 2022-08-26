@@ -38,6 +38,7 @@ public interface ClassFileConstructorOrMethodDeclaration extends ClassFileMember
 
     Map<String, BaseType> getTypeBounds();
 
+    BaseFormalParameter getFormalParameters();
     void setFormalParameters(BaseFormalParameter formalParameters);
 
     BaseStatement getStatements();

@@ -135,19 +135,26 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                             // Split 'static' block
                             BaseStatement newStatements;
 
+                            List<Statement> subList = null;
                             if (i == 1) {
-                                newStatements = list.removeFirst();
+                                newStatements = list.getFirst();
                             } else {
-                                List<Statement> subList = list.subList(0, i);
+                                subList = list.subList(0, i);
                                 newStatements = new Statements(subList);
-                                subList.clear();
                             }
 
-                            // Removes statements from original list
-                            len -= newStatements.size();
-                            i = 0;
-
-                            addStaticInitializerDeclaration(sid, getFirstLineNumber(newStatements), newStatements);
+                            int firstLineNumber = getFirstLineNumber(newStatements);
+                            if (firstLineNumber != -1) {
+                                // Removes statements from original list
+                                i = 0;
+                                len -= newStatements.size();
+                                if (newStatements.size() == 1) {
+                                    list.removeFirst();
+                                } else if (subList != null){
+                                    subList.clear();
+                                }
+                                addStaticInitializerDeclaration(sid, firstLineNumber, newStatements);
+                            }
                         }
                         // Remove field initialization statement
                         list.remove(i--);

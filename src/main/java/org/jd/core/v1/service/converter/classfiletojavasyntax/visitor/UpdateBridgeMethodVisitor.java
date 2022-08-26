@@ -114,7 +114,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             if (methodTypes != null) {
                 if (mie2.getExpression().isObjectTypeReferenceExpression()) {
                     // Static method invocation
-                    return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.getReturnedType(), mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.getParameterTypes(), mie1.getParameters());
+                    return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.getReturnedType(), mie2.getExpression(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.getParameterTypes(), mie1.getParameters(), methodTypes.isVarArgs());
                 }
                 BaseExpression mie1Parameters = mie1.getParameters();
                 BaseExpression newParameters = null;
@@ -129,7 +129,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
                         newParameters = new Expressions(p.subList(1, p.size()));
                         break;
                 }
-                return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.getReturnedType(), mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.getParameterTypes(), newParameters);
+                return new ClassFileMethodInvocationExpression(mie1.getLineNumber(), null, methodTypes.getReturnedType(), mie1Parameters.getFirst(), mie2.getInternalTypeName(), mie2.getName(), mie2.getDescriptor(), methodTypes.getParameterTypes(), newParameters, methodTypes.isVarArgs());
             }
         } else if (exp.isBinaryOperatorExpression()) {
             FieldReferenceExpression fre = getFieldReferenceExpression(exp.getLeftExpression());

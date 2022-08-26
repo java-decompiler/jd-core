@@ -234,7 +234,10 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
 
     @Override
     public void visit(MethodInvocationExpression expression) {
-        expression.setExpression(updateExpression(expression.getExpression()));
+        Expression newExpression = updateExpression(expression.getExpression());
+        if (!newExpression.getType().isPrimitiveType()) {
+            expression.setExpression(newExpression);
+        }
         if (expression.getParameters() != null) {
             expression.setParameters(updateBaseExpression(expression.getParameters()));
             expression.getParameters().accept(this);

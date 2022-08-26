@@ -40,6 +40,7 @@ import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.ParenthesesExpression;
 import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
 import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.QualifiedSuperExpression;
 import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.SuperConstructorInvocationExpression;
 import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
@@ -63,6 +64,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker.TypeTypes;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BaseTypeToTypeArgumentVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypeParametersToNonWildcardTypeArgumentsVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.BindTypesToTypesVisitor;
@@ -75,14 +77,15 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.TypeArgume
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import static org.apache.bcel.Const.ACC_STATIC;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_OBJECT;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_STRING;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
 
-public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParametersToTypeArgumentsBinder implements ExpressionVisitor {
-    protected static final RemoveNonWildcardTypeArgumentsVisitor REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR = new RemoveNonWildcardTypeArgumentsVisitor();
+public final class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParametersToTypeArgumentsBinder implements ExpressionVisitor {
+    private static final RemoveNonWildcardTypeArgumentsVisitor REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR = new RemoveNonWildcardTypeArgumentsVisitor();
 
     private final PopulateBindingsWithTypeParameterVisitor populateBindingsWithTypeParameterVisitor = new PopulateBindingsWithTypeParameterVisitor();
     private final BindTypesToTypesVisitor bindTypesToTypesVisitor = new BindTypesToTypesVisitor();
@@ -98,6 +101,8 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
     private final PopulateBindingsWithTypeArgumentVisitor populateBindingsWithTypeArgumentVisitor;
     private final Map<String, TypeArgument> contextualBindings;
     private final Map<String, BaseType> contextualTypeBounds;
+
+    private boolean parametersFirst;
 
     public Java5TypeParametersToTypeArgumentsBinder(TypeMaker typeMaker, String internalTypeName, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
@@ -116,12 +121,13 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         BaseType parameterTypes = clone(methodTypes.getParameterTypes());
         BaseTypeParameter methodTypeParameters = methodTypes.getTypeParameters();
 
-        populateBindings(bindings, null, null, null, methodTypeParameters, TYPE_OBJECT, null, null, null);
+        Map<String, BaseType> typeBounds = new HashMap<>();
+        populateBindings(bindings, null, null, null, methodTypeParameters, TYPE_OBJECT, null, null, null, typeBounds);
 
         parameterTypes = bind(bindings, parameterTypes);
         bindParameters(parameterTypes, parameters);
 
-        return new ClassFileConstructorInvocationExpression(lineNumber, objectType, descriptor, parameterTypes, parameters);
+        return new ClassFileConstructorInvocationExpression(lineNumber, objectType, descriptor, parameterTypes, parameters, methodTypes.isVarArgs());
     }
 
     @Override
@@ -141,14 +147,15 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
                 BaseTypeArgument typeArguments = typeTypes.getSuperType().getTypeArguments();
                 BaseTypeParameter methodTypeParameters = methodTypes.getTypeParameters();
 
-                populateBindings(bindings, null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, null, null);
+                Map<String, BaseType> typeBounds = new HashMap<>();
+                populateBindings(bindings, null, typeParameters, typeArguments, methodTypeParameters, TYPE_OBJECT, null, null, null, typeBounds);
             }
         }
 
         parameterTypes = bind(bindings, parameterTypes);
         bindParameters(parameterTypes, parameters);
 
-        return new ClassFileSuperConstructorInvocationExpression(lineNumber, objectType, descriptor, parameterTypes, parameters);
+        return new ClassFileSuperConstructorInvocationExpression(lineNumber, objectType, descriptor, parameterTypes, parameters, methodTypes.isVarArgs());
     }
 
     @Override
@@ -157,7 +164,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
         return new ClassFileMethodInvocationExpression(
             lineNumber, methodTypes.getTypeParameters(), methodTypes.getReturnedType(), expression,
-            objectType.getInternalName(), name, descriptor, clone(methodTypes.getParameterTypes()), parameters);
+            objectType.getInternalName(), name, descriptor, clone(methodTypes.getParameterTypes()), parameters, methodTypes.isVarArgs());
     }
 
     @Override
@@ -180,7 +187,8 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
                         Map<String, TypeArgument> bindings = new HashMap<>();
                         BaseTypeParameter typeParameters = typeTypes.getTypeParameters();
                         BaseTypeArgument typeArguments = expressionObjectType.getTypeArguments();
-                        boolean partialBinding = populateBindings(bindings, expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null);
+                        Map<String, BaseType> typeBounds = new HashMap<>();
+                        boolean partialBinding = populateBindings(bindings, expression, typeParameters, typeArguments, null, TYPE_OBJECT, null, null, null, typeBounds);
 
                         if (!partialBinding) {
                             type = (Type) bind(bindings, type);
@@ -194,13 +202,14 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
     }
 
     @Override
-    public void bindParameterTypesWithArgumentTypes(Type type, Expression expression) {
+    public void bindParameterTypesWithArgumentTypes(Type type, Expression expression, boolean parametersFirst) {
         this.type = type;
+        this.parametersFirst = parametersFirst;
         expression.accept(this);
         expression.accept(REMOVE_NON_WILDCARD_TYPE_ARGUMENTS_VISITOR);
     }
 
-    protected Type checkTypeArguments(Type type, AbstractLocalVariable localVariable) {
+    private Type checkTypeArguments(Type type, AbstractLocalVariable localVariable) {
         if (type.isObjectType()) {
             ObjectType objectType = (ObjectType)type;
 
@@ -221,14 +230,14 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         return type;
     }
 
-    protected void bindParameters(BaseType parameterTypes, BaseExpression parameters) {
+    private void bindParameters(BaseType parameterTypes, BaseExpression parameters) {
         if (parameterTypes != null) {
             if (parameterTypes.isList() && parameters.isList()) {
                 Iterator<Type> parameterTypesIterator = parameterTypes.iterator();
                 Iterator<Expression> parametersIterator = parameters.iterator();
 
                 Expression parameter;
-                while (parametersIterator.hasNext()) {
+                while (parametersIterator.hasNext() && parameterTypesIterator.hasNext()) {
                     parameter = parametersIterator.next();
                     this.type = parameterTypesIterator.next();
                     parameter.accept(this);
@@ -243,11 +252,10 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         }
     }
 
-    protected boolean populateBindings(
+    private boolean populateBindings(
             Map<String, TypeArgument> bindings, Expression expression,
             BaseTypeParameter typeParameters, BaseTypeArgument typeArguments, BaseTypeParameter methodTypeParameters,
-            Type returnType, Type returnExpressionType, BaseType parameterTypes, BaseExpression parameters) {
-        Map<String, BaseType> typeBounds = new HashMap<>();
+            Type returnType, Type returnExpressionType, BaseType parameterTypes, BaseExpression parameters, Map<String, BaseType> typeBounds) {
         boolean statik = expression != null && expression.isObjectTypeReferenceExpression();
 
         if (!statik) {
@@ -327,7 +335,78 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         return bindingsContainsNull;
     }
 
-    protected boolean eraseTypeArguments(Expression expression, BaseTypeParameter typeParameters, BaseTypeArgument typeArguments) {
+    private Type searchTypeFromParameters(GenericType genericType, BaseType parameterTypes, BaseExpression parameters) {
+        if (parameterTypes != null) {
+            if (parameterTypes.isList() && parameters.isList()) {
+                Iterator<Type> parameterTypesIterator = parameterTypes.iterator();
+                Iterator<Expression> parametersIterator = parameters.iterator();
+
+                Expression parameter;
+                while (parametersIterator.hasNext() && parameterTypesIterator.hasNext()) {
+                    parameter = parametersIterator.next();
+                    Type parameterType = parameterTypesIterator.next();
+                    Set<String> parametersInType = parameterType.findTypeParametersInType();
+                    if (parametersInType.contains(genericType.getName()) && parameter.getType() instanceof ObjectType) {
+                        Type typeFound = searchTypeFromParameter(genericType, parameter.getType(), parameterType, parametersInType);
+                        if (typeFound != null) {
+                            return typeFound;
+                        }
+                    }
+                }
+            } else {
+                Expression parameter = parameters.getFirst();
+                Type parameterType = parameterTypes.getFirst();
+                Set<String> parametersInType = parameterType.findTypeParametersInType();
+                if (parametersInType.contains(genericType.getName()) && parameter.getType() instanceof ObjectType) {
+                    Type typeFound = searchTypeFromParameter(genericType, parameter.getType(), parameterType, parametersInType);
+                    if (typeFound != null) {
+                        return typeFound;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private Type searchTypeFromParameter(GenericType genericType, Type parameterTypeWithArguments, Type parameterTypeWithParameters, Set<String> parametersInType) {
+        if (!TYPE_OBJECT.equals(parameterTypeWithArguments) && parameterTypeWithParameters != null) {
+            TypeTypes parameterTypeTypes = typeMaker.makeTypeTypes(parameterTypeWithArguments.getInternalName());
+            if (parameterTypeTypes != null) {
+                if (parameterTypeWithArguments.getInternalName().equals(parameterTypeWithParameters.getInternalName())) {
+                    Map<String, TypeArgument> bindings = new HashMap<>();
+                    for (String typeParameter : parametersInType) {
+                        bindings.put(typeParameter, null);
+                    }
+                    PopulateBindingsWithTypeArgumentVisitor bindingVisitor = new PopulateBindingsWithTypeArgumentVisitor(typeMaker);
+                    bindingVisitor.init(contextualTypeBounds, bindings, new HashMap<>(), parameterTypeWithArguments);
+                    parameterTypeWithParameters.accept(bindingVisitor);
+                    TypeArgument boundType = bindings.get(genericType.getName());
+                    if (boundType instanceof Type) {
+                        return (Type) boundType;
+                    }
+                }
+                ObjectType parameterSuperType = parameterTypeTypes.getSuperType();
+                if (parameterSuperType != null) {
+                    Type typeFound = searchTypeFromParameter(genericType, parameterSuperType, parameterTypeWithParameters, parametersInType);
+                    if (typeFound != null) {
+                        return typeFound;
+                    }
+                }
+                BaseType parameterInterfaces = parameterTypeTypes.getInterfaces();
+                if (parameterInterfaces != null) {
+                    for (Type parameterInterface : parameterInterfaces) {
+                        Type typeFound = searchTypeFromParameter(genericType, parameterInterface, parameterTypeWithParameters, parametersInType);
+                        if (typeFound != null) {
+                            return typeFound;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static boolean eraseTypeArguments(Expression expression, BaseTypeParameter typeParameters, BaseTypeArgument typeArguments) {
         if (typeParameters != null && typeArguments == null && expression != null) {
             if (expression.isCastExpression()) {
                 expression = expression.getExpression();
@@ -340,16 +419,20 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         return false;
     }
 
-    protected void populateBindingsWithTypeArgument(Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, Type type, Expression expression) {
+    private void populateBindingsWithTypeArgument(Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, Type type, Expression expression) {
         Type t = getExpressionType(expression);
 
-        if (t != null && t != TYPE_UNDEFINED_OBJECT) {
-            populateBindingsWithTypeArgumentVisitor.init(contextualTypeBounds, bindings, typeBounds, t);
-            type.accept(populateBindingsWithTypeArgumentVisitor);
+        populateBindingsWithTypeArgument(bindings, typeBounds, type, t);
+    }
+
+    private void populateBindingsWithTypeArgument(Map<String, TypeArgument> bindings, Map<String, BaseType> typeBounds, Type typeWithParameters, Type typeWithArguments) {
+        if (typeWithArguments != null && typeWithArguments != TYPE_UNDEFINED_OBJECT) {
+            populateBindingsWithTypeArgumentVisitor.init(contextualTypeBounds, bindings, typeBounds, typeWithArguments);
+            typeWithParameters.accept(populateBindingsWithTypeArgumentVisitor);
         }
     }
 
-    protected BaseType bind(Map<String, TypeArgument> bindings, BaseType parameterTypes) {
+    private BaseType bind(Map<String, TypeArgument> bindings, BaseType parameterTypes) {
         if (parameterTypes != null && !bindings.isEmpty()) {
             bindTypesToTypesVisitor.setBindings(bindings);
             bindTypesToTypesVisitor.init();
@@ -360,7 +443,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         return parameterTypes;
     }
 
-    protected Type getExpressionType(Expression expression) {
+    private Type getExpressionType(Expression expression) {
         if (expression.isMethodInvocationExpression()) {
             return getExpressionType((ClassFileMethodInvocationExpression)expression);
         }
@@ -371,7 +454,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         return expression.getType();
     }
 
-    protected Type getExpressionType(ClassFileMethodInvocationExpression mie) {
+    private Type getExpressionType(ClassFileMethodInvocationExpression mie) {
         Type t = mie.getType();
 
         searchInTypeArgumentVisitor.init();
@@ -396,7 +479,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         return t;
     }
 
-    protected Type getExpressionType(ClassFileNewExpression ne) {
+    private Type getExpressionType(ClassFileNewExpression ne) {
         ObjectType ot = ne.getObjectType();
 
         if (staticMethod || !ot.getInternalName().equals(internalTypeName)) {
@@ -410,7 +493,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
         return ot;
     }
 
-    protected static class RemoveNonWildcardTypeArgumentsVisitor extends AbstractNopExpressionVisitor {
+    private static class RemoveNonWildcardTypeArgumentsVisitor extends AbstractNopExpressionVisitor {
         @Override
         public void visit(MethodInvocationExpression expression) {
             expression.setNonWildcardTypeArguments(null);
@@ -429,6 +512,16 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
             BaseExpression parameters = mie.getParameters();
             Expression exp = mie.getExpression();
             Type expressionType = exp.getType();
+
+            if (parametersFirst) {
+                Type typeBeforeVisitingExpression = this.type;
+                exp.accept(this);
+                this.type = typeBeforeVisitingExpression;
+                
+                Type typeBeforeBindParameters = this.type;
+                bindParameters(parameterTypes, parameters);
+                this.type = typeBeforeBindParameters;
+            }            
 
             if (staticMethod || mie.getTypeParameters() != null || !mie.getInternalTypeName().equals(internalTypeName)) {
                 TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(mie.getInternalTypeName());
@@ -461,26 +554,42 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
 
                     Type t = mie.getType();
 
-                    if (type.isObjectType() && t.isObjectType()) {
+                    if (type.isObjectType()) {
                         ObjectType objectType = (ObjectType) type;
-                        ObjectType mieTypeObjectType = (ObjectType) t;
-                        t = typeMaker.searchSuperParameterizedType(objectType, mieTypeObjectType);
-                        if (t == null) {
-                            t = mie.getType();
+                        if (t.isObjectType()) {
+                            ObjectType mieTypeObjectType = (ObjectType) t;
+                            t = typeMaker.searchSuperParameterizedType(objectType, mieTypeObjectType);
+                            if (t == null) {
+                                t = mie.getType();
+                            }
+                        }
+                        if (t.isGenericType()) {
+                            GenericType mieTypeGenericType = (GenericType) t;
+                            type = searchTypeFromParameters(mieTypeGenericType, parameterTypes, parameters);
+                            if (type == null) {
+                                type = objectType;
+                            }
                         }
                     }
 
                     Map<String, TypeArgument> bindings = new HashMap<>();
-                    boolean partialBinding = populateBindings(bindings, exp, typeParameters, typeArguments, methodTypeParameters, type, t, parameterTypes, parameters);
+                    Map<String, BaseType> typeBounds = new HashMap<>();
+                    boolean partialBinding = populateBindings(bindings, exp, typeParameters, typeArguments, methodTypeParameters, type, t, parameterTypes, parameters, typeBounds);
 
+                    mie.setUnboundParameterTypes(parameterTypes);
                     parameterTypes = bind(bindings, parameterTypes);
                     mie.setParameterTypes(parameterTypes);
+                    mie.setUnboundType(mie.getType());
                     mie.setType((Type) bind(bindings, mie.getType()));
+                    mie.setTypeBounds(typeBounds);
+                    mie.setTypeBindings(bindings);
 
                     if (methodTypeParameters != null && !partialBinding) {
                         bindTypeParametersToNonWildcardTypeArgumentsVisitor.init(bindings);
                         methodTypeParameters.accept(bindTypeParametersToNonWildcardTypeArgumentsVisitor);
-                        mie.setNonWildcardTypeArguments(bindTypeParametersToNonWildcardTypeArgumentsVisitor.getTypeArgument());
+                        if (!(parameters instanceof LambdaIdentifiersExpression)) {
+                            mie.setNonWildcardTypeArguments(bindTypeParametersToNonWildcardTypeArgumentsVisitor.getTypeArgument());
+                        }
                     }
 
                     if (expressionType.isObjectType()) {
@@ -515,9 +624,11 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
             }
 
             this.type = expressionType;
-            exp.accept(this);
 
-            bindParameters(parameterTypes, parameters);
+            if (!parametersFirst) {
+                exp.accept(this);
+                bindParameters(parameterTypes, parameters);
+            }
 
             mie.setBound(true);
         }
@@ -571,7 +682,8 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
                     }
 
                     Map<String, TypeArgument> bindings = new HashMap<>();
-                    boolean partialBinding = populateBindings(bindings, null, typeParameters, typeArguments, null, type, t, parameterTypes, parameters);
+                    Map<String, BaseType> typeBounds = new HashMap<>();
+                    boolean partialBinding = populateBindings(bindings, null, typeParameters, typeArguments, null, type, t, parameterTypes, parameters, typeBounds);
 
                     parameterTypes = bind(bindings, parameterTypes);
                     ne.setParameterTypes(parameterTypes);
@@ -617,7 +729,7 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
                     if (expressionExpressionType.isObjectType()) {
                         ObjectType expressionExpressionObjectType = (ObjectType)expressionExpressionType;
 
-                        if (expressionExpressionObjectType.getTypeArguments() == null || objectType.getTypeArguments().isTypeArgumentAssignableFrom(contextualTypeBounds, expressionExpressionObjectType.getTypeArguments())) {
+                        if (expressionExpressionObjectType.getTypeArguments() == null || objectType.getTypeArguments().isTypeArgumentAssignableFrom(typeMaker, contextualBindings, contextualTypeBounds, expressionExpressionObjectType.getTypeArguments())) {
                             expression.setType(objectType);
                         }
                     } else if (expressionExpressionType.isGenericType()) {
@@ -704,6 +816,8 @@ public class Java5TypeParametersToTypeArgumentsBinder extends AbstractTypeParame
     public void visit(PostOperatorExpression expression) {}
     @Override
     public void visit(PreOperatorExpression expression) {}
+    @Override
+    public void visit(QualifiedSuperExpression expression) {}
     @Override
     public void visit(StringConstantExpression expression) {}
     @Override

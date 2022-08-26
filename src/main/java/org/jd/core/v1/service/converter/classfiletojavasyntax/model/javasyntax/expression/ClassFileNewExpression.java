@@ -17,13 +17,13 @@ public class ClassFileNewExpression extends NewExpression {
     private BaseType parameterTypes;
     private boolean bound;
 
-    public ClassFileNewExpression(int lineNumber, ObjectType type) {
-        super(lineNumber, type, null);
+    public ClassFileNewExpression(int lineNumber, ObjectType type, boolean varArgs) {
+        super(lineNumber, type, null, varArgs);
         this.bound = false;
     }
 
-    public ClassFileNewExpression(int lineNumber, ObjectType type, BodyDeclaration bodyDeclaration, boolean bound) {
-        super(lineNumber, type, null, bodyDeclaration);
+    public ClassFileNewExpression(int lineNumber, ObjectType type, BodyDeclaration bodyDeclaration, boolean bound, boolean varArgs) {
+        super(lineNumber, type, null, bodyDeclaration, varArgs);
         this.bound = bound;
     }
 

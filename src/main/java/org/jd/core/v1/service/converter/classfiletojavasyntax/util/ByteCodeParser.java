@@ -51,10 +51,12 @@ import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.MethodInvocationExpression;
 import org.jd.core.v1.model.javasyntax.expression.MethodReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.NewArray;
+import org.jd.core.v1.model.javasyntax.expression.NewExpression;
 import org.jd.core.v1.model.javasyntax.expression.NullExpression;
 import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
 import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.QualifiedSuperExpression;
 import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
 import org.jd.core.v1.model.javasyntax.expression.ThisExpression;
@@ -71,6 +73,7 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
 import org.jd.core.v1.model.javasyntax.type.WildcardTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.ControlFlowGraph;
@@ -78,6 +81,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileClassDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileConstructorOrMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFieldDeclaration;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileFormalParameter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileTypeDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileCmpExpression;
@@ -86,6 +90,8 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorEnterStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.statement.ClassFileMonitorExitStatement;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable.AbstractLocalVariable;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker.TypeTypes;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateInstructionsVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.EraseTypeArgumentVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RenameLocalVariablesVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchFirstLineNumberVisitor;
@@ -93,7 +99,10 @@ import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.DefaultStack;
 import org.jd.core.v1.util.StringConstants;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -138,7 +147,7 @@ public class ByteCodeParser {
     private final AttributeBootstrapMethods attributeBootstrapMethods;
     private final ClassFileBodyDeclaration bodyDeclaration;
     private final Map<String, BaseType> typeBounds;
-    private final Type returnedType;
+    private Type returnedType;
 
     public ByteCodeParser(
             TypeMaker typeMaker, LocalVariableMaker localVariableMaker, ClassFile classFile,
@@ -159,7 +168,7 @@ public class ByteCodeParser {
         }
     }
 
-    public void parse(BasicBlock basicBlock, Statements statements, DefaultStack<Expression> stack) {
+    public void parse(BasicBlock basicBlock, Statements statements, DefaultStack<Expression> stack, Deque<Expression> enclosingInstances) {
         ControlFlowGraph cfg = basicBlock.getControlFlowGraph();
         int fromOffset = basicBlock.getFromOffset();
         int toOffset = basicBlock.getToOffset();
@@ -372,9 +381,11 @@ public class ByteCodeParser {
                     break;
                 case POP, POP2:
                     expression1 = stack.pop();
-                    if (!expression1.isLocalVariableReferenceExpression() && !expression1.isFieldReferenceExpression() && !expression1.isThisExpression()) {
+                    if (expression1.isMethodInvocationExpression() && expression1.getExpression().getType().isInnerObjectType() && "getClass".equals(expression1.getName())) {
+                        enclosingInstances.push(expression1.getExpression());
+                    } else if (!expression1.isLocalVariableReferenceExpression() && !expression1.isFieldReferenceExpression() && !expression1.isThisExpression()) {
                         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
-                        statements.add(new ExpressionStatement(expression1));
+                        statements.add(new ExpressionStatement(expression1.isCastExpression()? expression1.getExpression() : expression1));
                     }
                     break;
                 case DUP: // ..., value => ..., value, value
@@ -780,7 +791,11 @@ public class ByteCodeParser {
                     parseXRETURN(statements, stack, lineNumber);
                     break;
                 case Const.RETURN:
-                    statements.add(RETURN);
+                    if (method.isLambda() && !stack.isEmpty()) {
+                        statements.add(new ExpressionStatement(stack.pop()));
+                    } else {
+                        statements.add(RETURN);
+                    }
                     break;
                 case GETSTATIC:
                     parseGetStatic(stack, constants, lineNumber, (code[++offset] & 255) << 8 | code[++offset] & 255);
@@ -801,7 +816,11 @@ public class ByteCodeParser {
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
                     name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
                     descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    
                     TypeMaker.MethodTypes methodTypes = makeMethodTypes(ot.getInternalName(), name, descriptor);
+
+                    methodTypes.handlePolymorphicSignature(typeName, name);
+                    
                     BaseExpression parameters = extractParametersFromStack(statements, stack, methodTypes.getParameterTypes());
 
                     if (opcode == INVOKESTATIC) {
@@ -814,6 +833,9 @@ public class ByteCodeParser {
                         }
                     } else {
                         expression1 = stack.pop();
+                        if (expression1 instanceof NewExpression && expression1.getType().isInnerObjectType() && !enclosingInstances.isEmpty()) {
+                            ((NewExpression)expression1).setQualifier(enclosingInstances.pop());
+                        }
                         if (expression1.isLocalVariableReferenceExpression()) {
                             ((ClassFileLocalVariableReferenceExpression)expression1).getLocalVariable().typeOnLeft(typeBounds, ot);
                         }
@@ -892,9 +914,23 @@ public class ByteCodeParser {
                             // Skip double cast
                             ((CastExpression) expression1).setType(type1);
                         } else {
-                            searchFirstLineNumberVisitor.init();
-                            expression1.accept(searchFirstLineNumberVisitor);
-                            stack.push(new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, forceExplicitCastExpression(stack.pop())));
+                            boolean castNeeded = true;
+                            if (expression1.getType().isGenericType()) {
+                                TypeTypes typeTypes = typeMaker.makeTypeTypes(typeName);
+                                if (typeTypes != null && typeTypes.getTypeParameters() instanceof TypeParameterWithTypeBounds) {
+                                    TypeParameterWithTypeBounds typeParameterWithTypeBounds = (TypeParameterWithTypeBounds) typeTypes.getTypeParameters();
+                                    String identifier = typeParameterWithTypeBounds.getIdentifier();
+                                    if (identifier.equals(expression1.getType().getName()) && typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) typeParameterWithTypeBounds.getTypeBounds())) {
+                                        castNeeded = false;
+                                    }
+                                }
+                            }
+                            if (castNeeded) {
+                                searchFirstLineNumberVisitor.init();
+                                expression1.accept(searchFirstLineNumberVisitor);
+                                CastExpression castExpression = new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type1, forceExplicitCastExpression(stack.pop()), true, true);
+                                stack.push(castExpression);
+                            }
                         }
                     }
                     break;
@@ -1398,7 +1434,7 @@ public class ByteCodeParser {
         String indyMethodName = constants.getConstantUtf8(indyCnat.getNameIndex());
         String indyDescriptor = constants.getConstantUtf8(indyCnat.getSignatureIndex());
         TypeMaker.MethodTypes indyMethodTypes = typeMaker.makeMethodTypes(indyDescriptor);
-
+        
         BaseExpression indyParameters = extractParametersFromStack(statements, stack, indyMethodTypes.getParameterTypes());
         BootstrapMethod bootstrapMethod = attributeBootstrapMethods.getBootstrapMethod(constantMemberRef.getClassIndex());
         int[] bootstrapArguments = bootstrapMethod.getBootstrapArguments();
@@ -1432,7 +1468,8 @@ public class ByteCodeParser {
                     // Create lambda expression
                     ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)methodDeclaration;
                     if (cfmd.getStatements() == null) {
-                        cfmd.setStatements(new Statements());
+                        CreateInstructionsVisitor createInstructionsVisitor = new CreateInstructionsVisitor(typeMaker);
+                        createInstructionsVisitor.createParametersVariablesAndStatements(cfmd, false);
                     }
                     stack.push(new LambdaIdentifiersExpression(
                             lineNumber, indyMethodTypes.getReturnedType(), indyMethodTypes.getReturnedType(),
@@ -1460,6 +1497,13 @@ public class ByteCodeParser {
     }
 
     private List<String> prepareLambdaParameterNames(BaseFormalParameter formalParameters, int parameterCount) {
+        if (formalParameters == null && parameterCount > 0) {
+            List<String> ignoredParameters = new ArrayList<>(parameterCount);
+            for (int i = 0; i < parameterCount; i++) {
+                ignoredParameters.add("ignoredParameter" + (i + 1));
+            }
+            return ignoredParameters;
+        }
         if (formalParameters == null || parameterCount == 0) {
             return null;
         }
@@ -1499,18 +1543,26 @@ public class ByteCodeParser {
                             expression = list.get(i);
 
                             if (expression.isLocalVariableReferenceExpression()) {
-                                String name = formalParameterList.get(i).getName();
+                                FormalParameter formalParameter = formalParameterList.get(i);
+                                if (formalParameter instanceof ClassFileFormalParameter) {
+                                    ClassFileFormalParameter classFileFormalParameter = (ClassFileFormalParameter) formalParameter;
+                                    AbstractLocalVariable localVariable = classFileFormalParameter.getLocalVariable();
+                                    if (!localVariable.isAssignableFrom(typeBounds, expression.getType())) {
+                                        continue;
+                                    }
+                                }
+                                
+                                String name = formalParameter.getName();
                                 String newName = expression.getName();
 
-                                if (!name.equals(newName)) {
+                                if (name.startsWith("param") && !name.equals(newName)) {
                                     mapping.put(name, newName);
                                 }
                             }
                         }
                     }
-
                     if (!mapping.isEmpty()) {
-                        renameLocalVariablesVisitor.init(mapping);
+                        renameLocalVariablesVisitor.init(mapping, true);
                         baseStatement.accept(renameLocalVariablesVisitor);
                     }
                 }
@@ -1556,8 +1608,9 @@ public class ByteCodeParser {
 
     private void parseASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, Expression valueRef) {
         typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(localVariable.getType(), valueRef);
-        localVariable.typeOnRight(typeBounds, valueRef.getType());
-
+        if (!ObjectType.TYPE_OBJECT.equals(localVariable.getType())) {
+            localVariable.typeOnRight(typeBounds, valueRef.getType());
+        }
         ClassFileLocalVariableReferenceExpression vre = new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable);
         Expression oldValueRef = valueRef;
 
@@ -1700,7 +1753,7 @@ public class ByteCodeParser {
         } else if (expression.getType().isPrimitiveType()) {
             PrimitiveType pt = (PrimitiveType)expression.getType();
 
-            typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(pt, expression);
+            typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(pt, expression, true);
 
             switch (pt.getJavaPrimitiveFlags()) {
                 case FLAG_BOOLEAN:
@@ -1873,7 +1926,7 @@ public class ByteCodeParser {
             ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalTypeName);
 
             if (typeDeclaration == null) {
-                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT);
+                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT, false);
             }
             if (typeDeclaration.isClassDeclaration()) {
                 ClassFileClassDeclaration declaration = (ClassFileClassDeclaration) typeDeclaration;
@@ -1886,16 +1939,16 @@ public class ByteCodeParser {
                 }
 
                 if (declaration.getInterfaces() != null) {
-                    return new ClassFileNewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), localBodyDeclaration, true);
+                    return new ClassFileNewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), localBodyDeclaration, true, false);
                 }
                 if (declaration.getSuperType() != null) {
-                    return new ClassFileNewExpression(lineNumber, declaration.getSuperType(), localBodyDeclaration, true);
+                    return new ClassFileNewExpression(lineNumber, declaration.getSuperType(), localBodyDeclaration, true, false);
                 }
-                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT, localBodyDeclaration, true);
+                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT, localBodyDeclaration, true, false);
             }
         }
 
-        return new ClassFileNewExpression(lineNumber, objectType);
+        return new ClassFileNewExpression(lineNumber, objectType, false);
     }
 
     /**
@@ -2079,6 +2132,10 @@ public class ByteCodeParser {
                 for (ClassFileConstructorOrMethodDeclaration member : bodyDeclaration.getMethodDeclarations()) {
                     member.accept(memberVisitor);
                     if (memberVisitor.found()) {
+                        String[] interfaceTypeNames = member.getClassFile().getInterfaceTypeNames();
+                        if (interfaceTypeNames != null && Arrays.asList(interfaceTypeNames).contains(ot.getInternalName())) {
+                            return new QualifiedSuperExpression(expression.getLineNumber(), ot);
+                        }
                         return new SuperExpression(expression.getLineNumber(), expression.getType());
                     }
                 }

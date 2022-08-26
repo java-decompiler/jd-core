@@ -7,24 +7,35 @@
 
 package org.jd.core.v1.model.token;
 
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
+
 public class ReferenceToken extends DeclarationToken {
 
-    private final String ownerInternalName;
+    private final ObjectType ownerType;
 
     /**
      * @param type @see org.jd.core.v1.model.token.DeclarationToken
      * @param internalTypeName
      * @param name
      * @param descriptor
-     * @param ownerInternalName
+     * @param ownerType
      */
-    public ReferenceToken(int type, String internalTypeName, String name, String descriptor, String ownerInternalName) {
+    public ReferenceToken(int type, String internalTypeName, String name, String descriptor, ObjectType ownerType) {
         super(type, internalTypeName, name, descriptor);
-        this.ownerInternalName = ownerInternalName;
+        this.ownerType = ownerType;
+    }
+
+    public ReferenceToken(int type, String internalName, String name, String descriptor, String ownerInternalName) {
+        this(type, internalName, name, descriptor, TypeMaker.create(ownerInternalName));
+    }
+
+    public ReferenceToken(int type, String internalName, String name) {
+        this(type, internalName, name, null, (ObjectType)null);
     }
 
     public String getOwnerInternalName() {
-        return ownerInternalName;
+        return ownerType == null ? null : ownerType.getInternalName();
     }
 
     @Override

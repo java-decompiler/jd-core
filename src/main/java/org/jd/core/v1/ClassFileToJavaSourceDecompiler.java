@@ -60,12 +60,12 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
         ClassFile classFile = this.deserializer.loadClassFile(decompileContext.getLoader(),
                 decompileContext.getMainInternalTypeName());
         decompileContext.setClassFile(classFile);
-
-        CompilationUnit compilationUnit = this.converter.process(decompileContext);
-        this.fragmenter.process(compilationUnit, decompileContext);
-        this.layouter.process(decompileContext);
-        DefaultList<Token> tokens = this.tokenizer.process(decompileContext.getBody());
+        decompileContext.setMainInternalTypeName(classFile.getInternalTypeName());
+        CompilationUnit compilationUnit = converter.process(decompileContext);
+        fragmenter.process(compilationUnit, decompileContext);
+        layouter.process(decompileContext);
+        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
         decompileContext.setTokens(tokens);
-        this.writer.process(decompileContext);
+        writer.process(decompileContext);
     }
 }

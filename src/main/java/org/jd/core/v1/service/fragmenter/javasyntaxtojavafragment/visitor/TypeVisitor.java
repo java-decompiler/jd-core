@@ -32,6 +32,7 @@ import org.jd.core.v1.model.token.LineNumberToken;
 import org.jd.core.v1.model.token.ReferenceToken;
 import org.jd.core.v1.model.token.TextToken;
 import org.jd.core.v1.model.token.Token;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.util.DefaultList;
 
 import java.util.HashMap;
@@ -76,19 +77,20 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     public static final int UNKNOWN_LINE_NUMBER = Printer.UNKNOWN_LINE_NUMBER;
 
     private final Loader loader;
+    protected final TypeMaker typeMaker;
     private final String internalPackageName;
     private final boolean genericTypesSupported;
     protected final ImportsFragment importsFragment;
     protected Tokens tokens;
     private int maxLineNumber;
-    protected String currentInternalTypeName;
+    protected ObjectType currentType;
     private final Map<String, TextToken> textTokenCache = new HashMap<>();
 
     public TypeVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         this.loader = loader;
+        this.typeMaker = new TypeMaker(loader);
         this.genericTypesSupported = majorVersion >= MAJOR_1_5;
         this.importsFragment = importsFragment;
-
         int index = mainInternalTypeName.lastIndexOf('/');
         this.internalPackageName = index == -1 ? "" : mainInternalTypeName.substring(0, index+1);
     }
@@ -151,7 +153,7 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
     @Override
     public void visit(ObjectType type) {
         // Build token for type reference
-        tokens.add(newTypeReferenceToken(type, currentInternalTypeName));
+        tokens.add(newTypeReferenceToken(type, currentType));
 
         if (genericTypesSupported) {
             // Build token for type arguments
@@ -168,15 +170,15 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(InnerObjectType type) {
-        if (currentInternalTypeName == null || !currentInternalTypeName.equals(type.getInternalName()) && !currentInternalTypeName.equals(type.getOuterType().getInternalName())) {
-            BaseType outerType = type.getOuterType();
+        BaseType outerType = type.getOuterType();
+        if (currentType == null || !currentType.getInternalName().equals(type.getInternalName()) && outerType != null && !currentType.getInternalName().equals(outerType.getInternalName())) {
 
-            outerType.accept(this);
+            safeAccept(outerType);
             tokens.add(TextToken.DOT);
         }
 
         // Build token for type reference
-        tokens.add(new ReferenceToken(Printer.TYPE, type.getInternalName(), type.getName(), null, currentInternalTypeName));
+        tokens.add(new ReferenceToken(Printer.TYPE, type.getInternalName(), type.getName(), null, currentType));
 
         if (genericTypesSupported) {
             // Build token for type arguments
@@ -292,25 +294,33 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    protected ReferenceToken newTypeReferenceToken(ObjectType ot, String ownerInternalName) {
+    protected ReferenceToken newTypeReferenceToken(ObjectType ot, ObjectType ownerType) {
         String internalName = ot.getInternalName();
         String qualifiedName = ot.getQualifiedName();
+        
         int printerType = isInInvokeNew() ? Printer.CONSTRUCTOR : Printer.TYPE;
         String name = ot.getName();
         if (packageContainsType(internalPackageName, internalName)) {
             // In the current package
-            return new ReferenceToken(printerType, internalName, name, null, ownerInternalName);
+            if (ownerType != null && ownerType.getInnerTypeNames() != null) {
+                String innerTypeName = ownerType.getInternalName() + '$' + name;
+                if (ownerType.getInnerTypeNames().contains(innerTypeName)) {
+                    return new QualifiedReferenceToken(printerType, internalName, qualifiedName, null, ownerType);
+                }
+                return new ReferenceToken(printerType, internalName, name, null, ownerType);
+            }
+            return new ReferenceToken(printerType, internalName, name, null, ownerType);
         }
         if (packageContainsType("java/lang/", internalName)) {
             // A 'java.lang' class
             String internalLocalTypeName = internalPackageName + name;
 
             if (loader.canLoad(internalLocalTypeName)) {
-                return new ReferenceToken(printerType, internalName, qualifiedName, null, ownerInternalName);
+                return new ReferenceToken(printerType, internalName, qualifiedName, null, ownerType);
             }
-            return new ReferenceToken(printerType, internalName, name, null, ownerInternalName);
+            return new ReferenceToken(printerType, internalName, name, null, ownerType);
         }
-        return new TypeReferenceToken(importsFragment, printerType, internalName, qualifiedName, name, ownerInternalName);
+        return new TypeReferenceToken(importsFragment, printerType, internalName, qualifiedName, name, ownerType);
     }
 
     protected boolean isInInvokeNew() {
@@ -321,12 +331,12 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         return internalClassName.startsWith(internalPackageName) && internalClassName.indexOf('/', internalPackageName.length()) == -1;
     }
 
-    private static class TypeReferenceToken extends ReferenceToken {
-        protected ImportsFragment importsFragment;
-        protected String qualifiedName;
+    private static final class TypeReferenceToken extends ReferenceToken {
+        private ImportsFragment importsFragment;
+        private String qualifiedName;
 
-        public TypeReferenceToken(ImportsFragment importsFragment, int printerType, String internalTypeName, String qualifiedName, String name, String ownerInternalName) {
-            super(printerType, internalTypeName, name, null, ownerInternalName);
+        public TypeReferenceToken(ImportsFragment importsFragment, int printerType, String internalTypeName, String qualifiedName, String name, ObjectType ownerType) {
+            super(printerType, internalTypeName, name, null, ownerType);
             this.importsFragment = importsFragment;
             this.qualifiedName = qualifiedName;
         }
@@ -340,6 +350,20 @@ public class TypeVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
+    private static final class QualifiedReferenceToken extends ReferenceToken {
+        private String qualifiedName;
+        
+        public QualifiedReferenceToken(int printerType, String internalTypeName, String qualifiedName, String name, ObjectType ownerType) {
+            super(printerType, internalTypeName, name, null, ownerType);
+            this.qualifiedName = qualifiedName;
+        }
+        
+        @Override
+        public String getName() {
+            return qualifiedName;
+        }
+    }
+    
     protected TextToken newTextToken(String text) {
         return textTokenCache.computeIfAbsent(text, TextToken::new);
     }

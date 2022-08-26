@@ -86,7 +86,7 @@ public class UpdateClassTypeArgumentsVisitor extends AbstractTypeArgumentVisitor
 
     @Override
     public void visit(InnerObjectType type) {
-        type.getOuterType().accept(this);
+        safeAccept(type.getOuterType());
 
         BaseTypeArgument typeArguments = type.getTypeArguments();
 

@@ -20,13 +20,13 @@ public class JavaTypeParametersToTypeArgumentsBinder extends AbstractTypeParamet
     @Override
     public ClassFileConstructorInvocationExpression newConstructorInvocationExpression(
             int lineNumber, ObjectType objectType, String descriptor, TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
-        return new ClassFileConstructorInvocationExpression(lineNumber, objectType, descriptor, clone(methodTypes.getParameterTypes()), parameters);
+        return new ClassFileConstructorInvocationExpression(lineNumber, objectType, descriptor, clone(methodTypes.getParameterTypes()), parameters, methodTypes.isVarArgs());
     }
 
     @Override
     public ClassFileSuperConstructorInvocationExpression newSuperConstructorInvocationExpression(
             int lineNumber, ObjectType objectType, String descriptor, TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
-        return new ClassFileSuperConstructorInvocationExpression(lineNumber, objectType, descriptor, clone(methodTypes.getParameterTypes()), parameters);
+        return new ClassFileSuperConstructorInvocationExpression(lineNumber, objectType, descriptor, clone(methodTypes.getParameterTypes()), parameters, methodTypes.isVarArgs());
     }
 
     @Override
@@ -35,7 +35,7 @@ public class JavaTypeParametersToTypeArgumentsBinder extends AbstractTypeParamet
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
         return new ClassFileMethodInvocationExpression(
             lineNumber, methodTypes.getTypeParameters(), methodTypes.getReturnedType(), expression,
-            objectType.getInternalName(), name, descriptor, clone(methodTypes.getParameterTypes()), parameters);
+            objectType.getInternalName(), name, descriptor, clone(methodTypes.getParameterTypes()), parameters, methodTypes.isVarArgs());
     }
 
     @Override
@@ -45,5 +45,5 @@ public class JavaTypeParametersToTypeArgumentsBinder extends AbstractTypeParamet
     }
 
     @Override
-    public void bindParameterTypesWithArgumentTypes(Type type, Expression expression) {}
+    public void bindParameterTypesWithArgumentTypes(Type type, Expression expression, boolean parametersFirst) {}
 }

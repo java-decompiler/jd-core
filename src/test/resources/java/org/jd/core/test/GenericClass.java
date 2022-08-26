@@ -7,10 +7,9 @@
 
 package org.jd.core.test;
 
-import org.jd.core.v1.util.DefaultList;
-
 import java.io.Serializable;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +23,16 @@ public class GenericClass<T1,                                                   
                      T7 extends Map<?, ?>,
                      T8 extends Map<? extends Number, ? super Serializable>,
                      T9 extends T8>
-        extends DefaultList<T7>
+        extends ArrayList<T7>
         implements Serializable, Comparable<T1> {
 
     private static final long serialVersionUID = 1L;
-    public List<List<? extends GenericClass>> list1 = new DefaultList<>();
+    public List<List<? extends GenericClass>> list1 = new ArrayList<>();
     public List<List<? super GenericClass>> list2;
 
     public GenericClass() {
         super(10);
-        list2 = new DefaultList<>();
+        list2 = new ArrayList<>();
     }
 
     public <T> void fromArrayToCollection(T[] a, Collection<T> c) {
@@ -60,7 +59,7 @@ public class GenericClass<T1,                                                   
     public int scopesAndVariables(int i) {
         int result;
 
-        List<String> as = new DefaultList<>(i + 1);
+        List<String> as = new ArrayList<>(i + 1);
         System.out.println(as);
 
         {
@@ -73,7 +72,7 @@ public class GenericClass<T1,                                                   
         }
         {
             int k = i;
-            List<Double> l = new DefaultList<>(k + 3);
+            List<Double> l = new ArrayList<>(k + 3);
             System.out.println(l);
             int kk = 456;
             System.out.println(kk);

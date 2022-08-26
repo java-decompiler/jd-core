@@ -14,9 +14,12 @@ import org.jd.core.v1.model.javafragment.LineNumberTokensFragment;
 import org.jd.core.v1.model.javafragment.StartBlockFragment;
 import org.jd.core.v1.model.javafragment.StartBodyFragment;
 import org.jd.core.v1.model.javafragment.TokensFragment;
+import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
+import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameter;
+import org.jd.core.v1.model.javasyntax.declaration.VariableInitializer;
 import org.jd.core.v1.model.javasyntax.expression.ArrayExpression;
 import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
@@ -49,6 +52,7 @@ import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.ParenthesesExpression;
 import org.jd.core.v1.model.javasyntax.expression.PostOperatorExpression;
 import org.jd.core.v1.model.javasyntax.expression.PreOperatorExpression;
+import org.jd.core.v1.model.javasyntax.expression.QualifiedSuperExpression;
 import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.SuperConstructorInvocationExpression;
 import org.jd.core.v1.model.javasyntax.expression.SuperExpression;
@@ -59,6 +63,8 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.token.BooleanConstantToken;
@@ -72,6 +78,7 @@ import org.jd.core.v1.model.token.StartBlockToken;
 import org.jd.core.v1.model.token.StartMarkerToken;
 import org.jd.core.v1.model.token.StringConstantToken;
 import org.jd.core.v1.model.token.TextToken;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileMethodInvocationExpression;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.CharacterUtil;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.JavaFragmentFactory;
 import org.jd.core.v1.service.fragmenter.javasyntaxtojavafragment.util.StringUtil;
@@ -109,19 +116,27 @@ public class ExpressionVisitor extends TypeVisitor {
     protected final LinkedList<Context> contextStack = new LinkedList<>();
     protected Fragments fragments = new Fragments();
     private final boolean diamondOperatorSupported;
+    private final boolean omitNonWildcardTypeArguments;
     protected boolean inExpressionFlag;
     protected boolean inInvokeNewFlag;
+    protected boolean inVarArgsFlag;
     protected Set<String> currentMethodParamNames = new HashSet<>();
     protected String currentTypeName;
     private final HexaExpressionVisitor hexaExpressionVisitor = new HexaExpressionVisitor();
 
+
     public ExpressionVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         super(loader, mainInternalTypeName, majorVersion, importsFragment);
         this.diamondOperatorSupported = majorVersion >= MAJOR_1_7;
+        this.omitNonWildcardTypeArguments = majorVersion > MAJOR_1_7;
     }
 
     public DefaultList<Fragment> getFragments() {
         return fragments;
+    }
+    
+    public String getCurrentTypeInternalName() {
+        return currentType == null ? null : currentType.getInternalName();
     }
 
     @Override
@@ -206,7 +221,7 @@ public class ExpressionVisitor extends TypeVisitor {
         ObjectType ot = expression.getObjectType();
 
         tokens.addLineNumberToken(expression);
-        tokens.add(newTypeReferenceToken(ot, currentInternalTypeName));
+        tokens.add(newTypeReferenceToken(ot, currentType));
         tokens.add(TextToken.COLON_COLON);
         //tokens.add(new ReferenceToken(ReferenceToken.CONSTRUCTOR, ot.getInternalName(), "new", expression.getDescriptor(), currentInternalTypeName));
         tokens.add(NEW);
@@ -224,7 +239,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         ObjectType type = expression.getObjectType();
 
-        tokens.add(new ReferenceToken(Printer.FIELD, type.getInternalName(), expression.getName(), type.getDescriptor(), currentInternalTypeName));
+        tokens.add(new ReferenceToken(Printer.FIELD, type.getInternalName(), expression.getName(), type.getDescriptor(), currentType));
     }
 
     @Override
@@ -262,6 +277,12 @@ public class ExpressionVisitor extends TypeVisitor {
 
             int delta = tokens.size();
 
+            if ("this".equals(expression.getName()) && expression.getExpression() instanceof ObjectTypeReferenceExpression && expression.getExpression().getObjectType() instanceof InnerObjectType) {
+                InnerObjectType innerObjectType = (InnerObjectType) expression.getExpression().getObjectType();
+                InnerObjectType newObjectType = (InnerObjectType) innerObjectType.createType(innerObjectType.getTypeArguments());
+                newObjectType.setOuterType(null);
+                expression.setExpression(new ObjectTypeReferenceExpression(newObjectType));
+            }
             visit(expression, expression.getExpression());
             delta -= tokens.size();
             tokens.addLineNumberToken(expression);
@@ -270,7 +291,7 @@ public class ExpressionVisitor extends TypeVisitor {
                 tokens.add(TextToken.DOT);
             }
 
-            tokens.add(new ReferenceToken(Printer.FIELD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
+            tokens.add(new ReferenceToken(Printer.FIELD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentType));
         }
     }
 
@@ -288,7 +309,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         switch (pt.getJavaPrimitiveFlags()) {
             case FLAG_CHAR:
-                tokens.add(new CharacterConstantToken(CharacterUtil.escapeChar((char)expression.getIntegerValue()), currentInternalTypeName));
+                tokens.add(new CharacterConstantToken(CharacterUtil.escapeChar((char)expression.getIntegerValue()), getCurrentTypeInternalName()));
                 break;
             case FLAG_BOOLEAN:
                 tokens.add(new BooleanConstantToken(expression.getIntegerValue() != 0));
@@ -432,7 +453,7 @@ public class ExpressionVisitor extends TypeVisitor {
             if (exp.isObjectTypeReferenceExpression()) {
                 ObjectType ot = exp.getObjectType();
 
-                if (! ot.getInternalName().equals(currentInternalTypeName)) {
+                if (! ot.getInternalName().equals(getCurrentTypeInternalName())) {
                     visit(expression, exp);
                     tokens.addLineNumberToken(expression);
                     tokens.add(TextToken.DOT);
@@ -443,6 +464,25 @@ public class ExpressionVisitor extends TypeVisitor {
                     tokens.addLineNumberToken(expression);
                     visit(expression, exp);
                 } else {
+                    if (exp instanceof NewExpression) {
+                        NewExpression newExpression = (NewExpression) exp;
+                        newExpression.setDiamondPossible(false);
+                    }
+                    if (exp instanceof ClassFileMethodInvocationExpression) {
+                        ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression) exp;
+                        mie.setShowingNonWildcardTypeArguments(mie.getNonWildcardTypeArguments() != null);
+                        if (mie.getParameterTypes() != null && mie.getNonWildcardTypeArguments() != null) {
+                            mie.getParameterTypes().accept(new AbstractJavaSyntaxVisitor() {
+                                @Override
+                                public void visit(GenericType type) {
+                                    if (type.equals(mie.getNonWildcardTypeArguments())) {
+                                        mie.setShowingNonWildcardTypeArguments(false);
+                                    }
+                                    super.visit(type);
+                                }
+                            });
+                        }
+                    }
                     visit(expression, exp);
                     tokens.addLineNumberToken(expression);
                 }
@@ -454,20 +494,22 @@ public class ExpressionVisitor extends TypeVisitor {
 
         tokens.addLineNumberToken(expression);
 
-        if (nonWildcardTypeArguments != null && dot) {
+        if ((!omitNonWildcardTypeArguments || expression.isShowingNonWildcardTypeArguments()) && nonWildcardTypeArguments != null && dot) {
             tokens.add(TextToken.LEFTANGLEBRACKET);
             nonWildcardTypeArguments.accept(this);
             tokens.add(TextToken.RIGHTANGLEBRACKET);
         }
 
-        tokens.add(new ReferenceToken(Printer.METHOD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
+        tokens.add(new ReferenceToken(Printer.METHOD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentType));
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
         if (parameters != null) {
             boolean ief = inExpressionFlag;
             inExpressionFlag = false;
+            inVarArgsFlag = expression.isVarArgs();
             parameters.accept(this);
             inExpressionFlag = ief;
+            inVarArgsFlag = false;
         }
 
         tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
@@ -478,11 +520,17 @@ public class ExpressionVisitor extends TypeVisitor {
         expression.getExpression().accept(this);
         tokens.addLineNumberToken(expression);
         tokens.add(TextToken.COLON_COLON);
-        tokens.add(new ReferenceToken(Printer.METHOD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentInternalTypeName));
+        tokens.add(new ReferenceToken(Printer.METHOD, expression.getInternalTypeName(), expression.getName(), expression.getDescriptor(), currentType));
     }
 
     @Override
     public void visit(NewArray expression) {
+        if (inVarArgsFlag && expression.isEmptyNewArray()) {
+            if (!tokens.isEmpty() && TextToken.COMMA_SPACE.equals(tokens.get(tokens.size() - 1))) {
+                tokens.remove(tokens.size() - 1);
+            }
+            return;
+        }
         tokens.addLineNumberToken(expression);
         tokens.add(NEW);
         tokens.add(TextToken.SPACE);
@@ -522,14 +570,29 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(NewInitializedArray expression) {
         tokens.addLineNumberToken(expression);
-        tokens.add(NEW);
-        tokens.add(TextToken.SPACE);
-
-        BaseType type = expression.getType();
-
-        type.accept(this);
-        tokens.add(TextToken.SPACE);
-        expression.getArrayInitializer().accept(this);
+        if (inVarArgsFlag && expression.getArrayInitializer() != null) {
+            ArrayVariableInitializer arrayInitializer = expression.getArrayInitializer();
+            if (arrayInitializer.isList()) {
+                Iterator<VariableInitializer> iterator = arrayInitializer.getList().iterator();
+                while (iterator.hasNext()) {
+                    safeAccept(iterator.next());
+                    if (iterator.hasNext()) {
+                        tokens.add(TextToken.COMMA_SPACE);
+                    }
+                }
+            } else {
+                safeAccept(arrayInitializer.getFirst());
+            }
+        } else {
+            tokens.add(NEW);
+            tokens.add(TextToken.SPACE);
+    
+            BaseType type = expression.getType();
+    
+            type.accept(this);
+            tokens.add(TextToken.SPACE);
+            expression.getArrayInitializer().accept(this);
+        }
     }
 
     @Override
@@ -538,15 +601,27 @@ public class ExpressionVisitor extends TypeVisitor {
         BodyDeclaration bodyDeclaration = expression.getBodyDeclaration();
 
         tokens.addLineNumberToken(expression);
+        if (expression.getQualifier() != null) {
+            expression.getQualifier().accept(this);
+            tokens.add(TextToken.DOT);
+        }
         tokens.add(NEW);
         tokens.add(TextToken.SPACE);
 
         ObjectType objectType = expression.getObjectType();
 
-        if (objectType.getTypeArguments() != null && bodyDeclaration == null && diamondOperatorSupported) {
+        if (objectType.getTypeArguments() != null && expression.isDiamondPossible() && diamondOperatorSupported) {
             objectType = objectType.createType(DiamondTypeArgument.DIAMOND);
         }
 
+        if (objectType instanceof InnerObjectType && expression.getQualifier() != null) {
+            InnerObjectType innerObjectType = (InnerObjectType) objectType;
+            InnerObjectType newObjectType = (InnerObjectType) innerObjectType.createType(innerObjectType.getTypeArguments());
+            newObjectType.setOuterType(null);
+            expression.setObjectType(newObjectType);
+            objectType = expression.getObjectType();
+        }
+        
         BaseType type = objectType;
 
         type.accept(this);
@@ -567,7 +642,7 @@ public class ExpressionVisitor extends TypeVisitor {
             ObjectType ot = expression.getObjectType();
 
             storeContext();
-            currentInternalTypeName = bodyDeclaration.getInternalTypeName();
+            currentType = typeMaker.makeFromInternalTypeName(bodyDeclaration.getInternalTypeName());
             currentTypeName = ot.getName();
             bodyDeclaration.accept(this);
 
@@ -628,7 +703,7 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(StringConstantExpression expression) {
         tokens.addLineNumberToken(expression);
-        tokens.add(new StringConstantToken(StringUtil.escapeString(expression.getStringValue()), currentInternalTypeName));
+        tokens.add(new StringConstantToken(StringUtil.escapeString(expression.getStringValue()), getCurrentTypeInternalName()));
     }
 
     @Override
@@ -652,6 +727,15 @@ public class ExpressionVisitor extends TypeVisitor {
         tokens.add(SUPER);
     }
 
+    @Override
+    public void visit(QualifiedSuperExpression expression) {
+        tokens.addLineNumberToken(expression);
+        ObjectType qualifierType = expression.getType();
+        tokens.add(newTypeReferenceToken(qualifierType, qualifierType));
+        tokens.add(TextToken.DOT);
+        tokens.add(SUPER);
+    }
+    
     @Override
     public void visit(TernaryOperatorExpression expression) {
         tokens.addLineNumberToken(expression.getCondition());
@@ -709,12 +793,12 @@ public class ExpressionVisitor extends TypeVisitor {
     }
 
     protected void storeContext() {
-        contextStack.add(new Context(currentInternalTypeName, currentTypeName, currentMethodParamNames));
+        contextStack.add(new Context(currentType, currentTypeName, currentMethodParamNames));
     }
 
     protected void restoreContext() {
         Context currentContext = contextStack.removeLast();
-        currentInternalTypeName = currentContext.currentInternalTypeName;
+        currentType = currentContext.currentType;
         currentTypeName = currentContext.currentTypeName;
         currentMethodParamNames = currentContext.currentMethodParamNames;
     }
@@ -740,12 +824,12 @@ public class ExpressionVisitor extends TypeVisitor {
     }
 
     protected static class Context {
-        private final String currentInternalTypeName;
+        private final ObjectType currentType;
         private final String currentTypeName;
         private final Set<String> currentMethodParamNames;
 
-        public Context(String currentInternalTypeName, String currentTypeName, Set<String> currentMethodParamNames) {
-            this.currentInternalTypeName = currentInternalTypeName;
+        public Context(ObjectType currentType, String currentTypeName, Set<String> currentMethodParamNames) {
+            this.currentType = currentType;
             this.currentTypeName = currentTypeName;
             this.currentMethodParamNames = new HashSet<>(currentMethodParamNames);
         }
@@ -841,6 +925,8 @@ public class ExpressionVisitor extends TypeVisitor {
         public void visit(PostOperatorExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override
         public void visit(PreOperatorExpression expression) { ExpressionVisitor.this.visit(expression); }
+        @Override
+        public void visit(QualifiedSuperExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override
         public void visit(StringConstantExpression expression) { ExpressionVisitor.this.visit(expression); }
         @Override

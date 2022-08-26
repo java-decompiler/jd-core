@@ -28,7 +28,7 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
 
     public ObjectLocalVariable(TypeMaker typeMaker, int index, int offset, Type type, String name, boolean declared) {
         this(typeMaker, index, offset, type, name);
-        this.declared = declared;
+        setDeclared(declared);
     }
 
     public ObjectLocalVariable(TypeMaker typeMaker, int index, int offset, ObjectLocalVariable objectLocalVariable) {
@@ -75,10 +75,10 @@ public class ObjectLocalVariable extends AbstractLocalVariable {
             sb.append(new String(new char[type.getDimension()]).replace("\0", "[]"));
         }
 
-        sb.append(' ').append(name).append(", index=").append(index);
+        sb.append(' ').append(getName()).append(", index=").append(getIndex());
 
-        if (next != null) {
-            sb.append(", next=").append(next);
+        if (getNext() != null) {
+            sb.append(", next=").append(getNext());
         }
 
         return sb.append("}").toString();

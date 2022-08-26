@@ -94,7 +94,6 @@ public class JavaAnonymousClassTest extends AbstractJdTest {
 
             assertEquals(-1, source.indexOf("{ ;"));
             assertEquals(-1, source.indexOf("} ;"));
-            assertEquals(-1, source.indexOf("// Byte code:"));
 
             // Recompile decompiled source code and check errors
             assertTrue(CompilerUtil.compile(

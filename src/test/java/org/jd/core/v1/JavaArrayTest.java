@@ -8,7 +8,6 @@
 package org.jd.core.v1;
 
 import org.jd.core.v1.api.loader.Loader;
-import org.jd.core.v1.api.printer.Printer;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
@@ -19,7 +18,6 @@ import org.jd.core.v1.stub.InitializedArrayInTernaryOperator;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.util.Collections;
 
 public class JavaArrayTest extends AbstractJdTest {
     @Test
@@ -27,7 +25,7 @@ public class JavaArrayTest extends AbstractJdTest {
         String internalClassName = "org/jd/core/test/Array";
         try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.5.0.zip")) {
             Loader loader = new ZipLoader(is);
-            String source = decompile(loader, new PlainTextPrinter(), internalClassName);
+            String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName);
 
             // Check decompiled source code
             assertTrue(source.matches(PatternMaker.make(": 13 */", "int[][] arrayOfInt1 = new int[1][];")));
@@ -50,7 +48,7 @@ public class JavaArrayTest extends AbstractJdTest {
         String internalClassName = "org/jd/core/test/Array";
         try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
             Loader loader = new ZipLoader(is);
-            String source = decompile(loader, new PlainTextPrinter(), internalClassName);
+            String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName);
 
             // Check decompiled source code
             assertTrue(source.matches(PatternMaker.make(": 12 */", "int[] i1 = new int[1];")));
@@ -75,7 +73,7 @@ public class JavaArrayTest extends AbstractJdTest {
     @Test
     public void testInitializedArrayInTernaryOperator() throws Exception {
         String internalClassName = InitializedArrayInTernaryOperator.class.getName().replace('.', '/');
-        String source = decompile(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
 
         // Check decompiled source code
         assertTrue(source.matches(PatternMaker.make(":  5 */", "return (i == 0) ? new Class<?>[] { Object.class } : null;")));
@@ -88,12 +86,5 @@ public class JavaArrayTest extends AbstractJdTest {
 
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
-    }
-
-    @Override
-    protected String decompile(Loader loader, Printer printer, String internalTypeName) throws Exception {
-        String source = decompile(loader, printer, internalTypeName, Collections.emptyMap());
-        assertEquals(-1, source.indexOf("// Byte code:"));
-        return source;
     }
 }

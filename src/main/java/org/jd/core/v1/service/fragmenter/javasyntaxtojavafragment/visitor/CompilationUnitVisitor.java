@@ -114,6 +114,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
     private final AnnotationVisitor annotationVisitor = new AnnotationVisitor();
     private final SingleLineStatementVisitor singleLineStatementVisitor = new SingleLineStatementVisitor();
     private final String mainInternalName;
+    private boolean emptyConstants;
 
     public CompilationUnitVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         super(loader, mainInternalTypeName, majorVersion, importsFragment);
@@ -141,7 +142,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 int fragmentCount2 = fragments.size();
 
                 storeContext();
-                currentInternalTypeName = declaration.getInternalTypeName();
+                currentType = typeMaker.makeFromInternalTypeName(declaration.getInternalTypeName());
                 currentTypeName = declaration.getName();
 
                 if (annotationDeclaratorList != null) {
@@ -332,7 +333,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 int fragmentCount2 = fragments.size();
 
                 storeContext();
-                currentInternalTypeName = declaration.getInternalTypeName();
+                currentType = typeMaker.makeFromInternalTypeName(declaration.getInternalTypeName());
                 currentTypeName = declaration.getName();
                 bodyDeclaration.accept(this);
                 restoreContext();
@@ -355,7 +356,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         // Init
         fragments.clear();
         contextStack.clear();
-        currentInternalTypeName = null;
+        currentType = null;
 
         // Add fragment for package
         int index = mainInternalName.lastIndexOf('/');
@@ -421,7 +422,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 }
 
                 // Build token for type declaration
-                tokens.add(new DeclarationToken(Printer.CONSTRUCTOR, currentInternalTypeName, currentTypeName, declaration.getDescriptor()));
+                tokens.add(new DeclarationToken(Printer.CONSTRUCTOR, getCurrentTypeInternalName(), currentTypeName, declaration.getDescriptor()));
 
                 storeContext();
                 currentMethodParamNames.clear();
@@ -579,12 +580,13 @@ public class CompilationUnitVisitor extends StatementVisitor {
             StartBodyFragment start = JavaFragmentFactory.addStartTypeBody(fragments);
 
             storeContext();
-            currentInternalTypeName = declaration.getInternalTypeName();
+            currentType = typeMaker.makeFromInternalTypeName(declaration.getInternalTypeName());
             currentTypeName = declaration.getName();
 
             List<EnumDeclaration.Constant> constants = declaration.getConstants();
 
             if (constants != null && !constants.isEmpty()) {
+                emptyConstants = false;
                 int preferredLineNumber = 0;
 
                 for (EnumDeclaration.Constant constant : constants) {
@@ -607,12 +609,15 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
                 fragments.add(TokensFragment.SEMICOLON);
                 fragments.add(EndMovableJavaBlockFragment.END_MOVABLE_BLOCK);
+            } else {
+                emptyConstants = true;
             }
 
             BodyDeclaration bodyDeclaration = declaration.getBodyDeclaration();
 
             if (bodyDeclaration != null) {
                 if (constants != null && !constants.isEmpty()) {
+                    emptyConstants = false;
                     Fragments f = fragments;
 
                     fragments = new Fragments();
@@ -625,6 +630,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
                     fragments = f;
                 } else {
+                    emptyConstants = true;
                     bodyDeclaration.accept(this);
                 }
             }
@@ -643,7 +649,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         // Build token for type declaration
         tokens.addLineNumberToken(declaration.getLineNumber());
-        tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, declaration.getName(), 'L' + currentInternalTypeName + ';'));
+        tokens.add(new DeclarationToken(Printer.FIELD, getCurrentTypeInternalName(), declaration.getName(), 'L' + currentType.getInternalName() + ';'));
 
         storeContext();
         currentMethodParamNames.clear();
@@ -675,6 +681,12 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             tokens = new Tokens();
 
+            if (emptyConstants) {
+                tokens.add(TextToken.SEMICOLON);
+                tokens.add(NewLineToken.NEWLINE_1);
+                emptyConstants = false;
+            }
+            
             // Build fragments for annotations
             BaseAnnotationReference annotationReferences = declaration.getAnnotationReferences();
 
@@ -711,7 +723,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
         tokens = new Tokens();
         tokens.add(TextToken.SPACE);
-        tokens.add(new DeclarationToken(Printer.FIELD, currentInternalTypeName, fieldDeclarator.getName(), descriptor));
+        tokens.add(new DeclarationToken(Printer.FIELD, getCurrentTypeInternalName(), fieldDeclarator.getName(), descriptor));
 
         if ((variableInitializer != null)) {
             tokens.add(TextToken.SPACE_EQUAL_SPACE);
@@ -820,7 +832,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 int fragmentCount2 = fragments.size();
 
                 storeContext();
-                currentInternalTypeName = declaration.getInternalTypeName();
+                currentType = typeMaker.makeFromInternalTypeName(declaration.getInternalTypeName());
                 currentTypeName = declaration.getName();
                 bodyDeclaration.accept(this);
                 restoreContext();
@@ -942,14 +954,14 @@ public class CompilationUnitVisitor extends StatementVisitor {
         }
 
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfo.name(), null, null));
+        tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfo.name()));
         tokens.add(TextToken.SEMICOLON);
     }
 
     protected void visitModuleDeclaration(ModuleDeclaration.PackageInfo packageInfo, KeywordToken keywordToken) {
         tokens.add(keywordToken);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.PACKAGE, packageInfo.internalName(), packageInfo.internalName().replace('/', '.'), null, null));
+        tokens.add(new ReferenceToken(Printer.PACKAGE, packageInfo.internalName(), packageInfo.internalName().replace('/', '.')));
 
         if (packageInfo.moduleInfoNames() != null && !packageInfo.moduleInfoNames().isEmpty()) {
             tokens.add(TextToken.SPACE);
@@ -958,7 +970,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             if (packageInfo.moduleInfoNames().size() == 1) {
                 tokens.add(TextToken.SPACE);
                 String moduleInfoName = packageInfo.moduleInfoNames().get(0);
-                tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName, null, null));
+                tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName));
             } else {
                 tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
                 tokens.add(NewLineToken.NEWLINE_1);
@@ -966,13 +978,13 @@ public class CompilationUnitVisitor extends StatementVisitor {
                 Iterator<String> iterator = packageInfo.moduleInfoNames().iterator();
 
                 String moduleInfoName = iterator.next();
-                tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName, null, null));
+                tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName));
 
                 while (iterator.hasNext()) {
                     tokens.add(TextToken.COMMA);
                     tokens.add(NewLineToken.NEWLINE_1);
                     moduleInfoName = iterator.next();
-                    tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName, null, null));
+                    tokens.add(new ReferenceToken(Printer.MODULE, MODULE_INFO, moduleInfoName));
                 }
 
                 tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
@@ -985,7 +997,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
     protected void visitModuleDeclaration(String internalTypeName) {
         tokens.add(USES);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+        tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.')));
         tokens.add(TextToken.SEMICOLON);
     }
 
@@ -993,14 +1005,14 @@ public class CompilationUnitVisitor extends StatementVisitor {
         tokens.add(PROVIDES);
         tokens.add(TextToken.SPACE);
         String internalTypeName = serviceInfo.interfaceTypeName();
-        tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+        tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.')));
         tokens.add(TextToken.SPACE);
         tokens.add(WITH);
 
         if (serviceInfo.implementationTypeNames().size() == 1) {
             tokens.add(TextToken.SPACE);
             internalTypeName = serviceInfo.implementationTypeNames().get(0);
-            tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+            tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.')));
         } else {
             tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
             tokens.add(NewLineToken.NEWLINE_1);
@@ -1008,13 +1020,13 @@ public class CompilationUnitVisitor extends StatementVisitor {
             Iterator<String> iterator = serviceInfo.implementationTypeNames().iterator();
 
             internalTypeName = iterator.next();
-            tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+            tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.')));
 
             while (iterator.hasNext()) {
                 tokens.add(TextToken.COMMA);
                 tokens.add(NewLineToken.NEWLINE_1);
                 internalTypeName = iterator.next();
-                tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.'), null, null));
+                tokens.add(new ReferenceToken(Printer.TYPE, internalTypeName, internalTypeName.replace('/', '.')));
             }
 
             tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
@@ -1131,7 +1143,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
             tokens.add(TextToken.SPACE);
 
             // Build token for type declaration
-            tokens.add(new DeclarationToken(Printer.METHOD, currentInternalTypeName, declaration.getName(), declaration.getDescriptor()));
+            tokens.add(new DeclarationToken(Printer.METHOD, getCurrentTypeInternalName(), declaration.getName(), declaration.getDescriptor()));
 
             storeContext();
             currentMethodParamNames.clear();

@@ -15,8 +15,8 @@ import org.jd.core.v1.model.javasyntax.type.ObjectType;
 public class ClassFileConstructorInvocationExpression extends ConstructorInvocationExpression {
     private BaseType parameterTypes;
 
-    public ClassFileConstructorInvocationExpression(int lineNumber, ObjectType type, String descriptor, BaseType parameterTypes, BaseExpression parameters) {
-        super(lineNumber, type, descriptor, parameters);
+    public ClassFileConstructorInvocationExpression(int lineNumber, ObjectType type, String descriptor, BaseType parameterTypes, BaseExpression parameters, boolean varArgs) {
+        super(lineNumber, type, descriptor, parameters, varArgs);
         this.parameterTypes = parameterTypes;
     }
 

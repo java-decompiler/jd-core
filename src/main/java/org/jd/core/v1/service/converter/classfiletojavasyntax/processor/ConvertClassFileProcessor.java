@@ -261,16 +261,21 @@ public class ConvertClassFileProcessor {
                 list.add(new ClassFileConstructorDeclaration(
                         bodyDeclaration, classFile, method, annotationReferences, methodTypes.getTypeParameters(),
                         methodTypes.getParameterTypes(), methodTypes.getExceptionTypes(), bindings, typeBounds, firstLineNumber));
-            } else if ("<clinit>".equals(name)) {
+            } else if (StringConstants.CLASS_CONSTRUCTOR.equals(name)) {
                 list.add(new ClassFileStaticInitializerDeclaration(bodyDeclaration, classFile, method, bindings, typeBounds, firstLineNumber));
             } else {
                 ClassFileMethodDeclaration methodDeclaration = new ClassFileMethodDeclaration(
                         bodyDeclaration, classFile, method, annotationReferences, name, methodTypes.getTypeParameters(),
                         methodTypes.getReturnedType(), methodTypes.getParameterTypes(), methodTypes.getExceptionTypes(), defaultAnnotationValue,
                         bindings, typeBounds, firstLineNumber);
-                if (classFile.isInterface() && methodDeclaration.getFlags() == Const.ACC_PUBLIC) {
+                if (classFile.isInterface()) {
                     // For interfaces, add 'default' access flag on public methods
-                    methodDeclaration.setFlags(Const.ACC_PUBLIC|Declaration.FLAG_DEFAULT);
+                    if (methodDeclaration.getFlags() == Const.ACC_PUBLIC) {
+                        methodDeclaration.setFlags(Const.ACC_PUBLIC|Declaration.FLAG_DEFAULT);
+                    }
+                    if (methodDeclaration.getFlags() == (Const.ACC_PUBLIC|Const.ACC_VARARGS)) {
+                        methodDeclaration.setFlags(Const.ACC_PUBLIC|Const.ACC_VARARGS|Declaration.FLAG_DEFAULT);
+                    }
                 }
                 list.add(methodDeclaration);
             }

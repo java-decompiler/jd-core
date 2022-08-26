@@ -39,6 +39,12 @@ public class ClassFileLocalVariableReferenceExpression extends LocalVariableRefe
     }
 
     @Override
+    public void setName(String name) {
+        super.setName(name);
+        localVariable.setName(name);
+    }
+    
+    @Override
     public AbstractLocalVariable getLocalVariable() {
         return localVariable;
     }

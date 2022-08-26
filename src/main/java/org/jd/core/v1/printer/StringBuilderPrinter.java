@@ -164,4 +164,9 @@ public class StringBuilderPrinter implements Printer, VersionAware {
     @Override
     public void endMarker(int type) {
     }
+
+    @Override
+    public String toString() {
+        return stringBuffer.toString();
+    }
 }

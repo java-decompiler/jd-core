@@ -55,7 +55,7 @@ public class WriteTokenTest {
         // import javasyntax.util.ArrayList;\n
         tokens.add(IMPORT);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.TYPE, "java/util/ArrayList", "java.util.ArrayList", null, null));
+        tokens.add(new ReferenceToken(Printer.TYPE, "java/util/ArrayList", "java.util.ArrayList"));
         tokens.add(TextToken.SEMICOLON);
         tokens.add(NewLineToken.NEWLINE_1);
 
@@ -64,7 +64,7 @@ public class WriteTokenTest {
         tokens.add(TextToken.SPACE);
         tokens.add(STATIC);
         tokens.add(TextToken.SPACE);
-        tokens.add(new ReferenceToken(Printer.TYPE, "org/junit/Assert/*", "org.junit.Assert.*", null, null));
+        tokens.add(new ReferenceToken(Printer.TYPE, "org/junit/Assert/*", "org.junit.Assert.*"));
         tokens.add(TextToken.SEMICOLON);
         tokens.add(NewLineToken.NEWLINE_2);
 

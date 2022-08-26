@@ -657,7 +657,7 @@ public final class ControlFlowGraphLoopReducer {
                 } else if (bb == end) {
                     member.setNext(LOOP_END);
                 } else if (!members.contains(bb) && bb.getPredecessors().size() > 1) {
-                    member.setNext(newJumpBasicBlock(member, bb));
+                    member.setNext(bb.getControlFlowGraph().newJumpBasicBlock(member, bb));
                 }
             } else if (member.getType() == TYPE_CONDITIONAL_BRANCH) {
                 BasicBlock bb = member.getNext();
@@ -667,7 +667,7 @@ public final class ControlFlowGraphLoopReducer {
                 } else if (bb == end) {
                     member.setNext(LOOP_END);
                 } else if (!members.contains(bb) && bb.getPredecessors().size() > 1) {
-                    member.setNext(newJumpBasicBlock(member, bb));
+                    member.setNext(bb.getControlFlowGraph().newJumpBasicBlock(member, bb));
                 }
 
                 bb = member.getBranch();
@@ -677,7 +677,7 @@ public final class ControlFlowGraphLoopReducer {
                 } else if (bb == end) {
                     member.setBranch(LOOP_END);
                 } else if (!members.contains(bb) && bb.getPredecessors().size() > 1) {
-                    member.setBranch(newJumpBasicBlock(member, bb));
+                    member.setBranch(bb.getControlFlowGraph().newJumpBasicBlock(member, bb));
                 }
             } else if (member.getType() == TYPE_SWITCH_DECLARATION) {
                 BasicBlock bb;
@@ -689,7 +689,7 @@ public final class ControlFlowGraphLoopReducer {
                     } else if (bb == end) {
                         switchCase.setBasicBlock(LOOP_END);
                     } else if (!members.contains(bb) && bb.getPredecessors().size() > 1) {
-                        switchCase.setBasicBlock(newJumpBasicBlock(member, bb));
+                        switchCase.setBasicBlock(bb.getControlFlowGraph().newJumpBasicBlock(member, bb));
                     }
                 }
             }
@@ -708,15 +708,6 @@ public final class ControlFlowGraphLoopReducer {
         loopBB.setToOffset(toOffset);
 
         return loopBB;
-    }
-
-    private static BasicBlock newJumpBasicBlock(BasicBlock bb, BasicBlock target) {
-        Set<BasicBlock> predecessors = new HashSet<>();
-
-        predecessors.add(bb);
-        target.getPredecessors().remove(bb);
-
-        return bb.getControlFlowGraph().newBasicBlock(TYPE_JUMP, bb.getFromOffset(), target.getFromOffset(), predecessors);
     }
 
     public static void reduce(ControlFlowGraph cfg) {

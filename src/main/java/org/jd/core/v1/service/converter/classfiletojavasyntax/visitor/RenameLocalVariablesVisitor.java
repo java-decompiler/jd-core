@@ -13,6 +13,7 @@ import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.EnumConstantReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.FloatConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.IntegerConstantExpression;
+import org.jd.core.v1.model.javasyntax.expression.LambdaIdentifiersExpression;
 import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.NullExpression;
@@ -35,18 +36,29 @@ import java.util.Map;
 
 public class RenameLocalVariablesVisitor extends AbstractJavaSyntaxVisitor {
     private Map<String, String> nameMapping;
+    private boolean visitingLambda;
 
-    public void init(Map<String, String> nameMapping) {
+    public void init(Map<String, String> nameMapping, boolean visitingLambda) {
         this.nameMapping = nameMapping;
+        this.visitingLambda = visitingLambda;
     }
 
     @Override
+    public void visit(LambdaIdentifiersExpression expression) {
+        visitingLambda = true;
+        super.visit(expression);
+        visitingLambda = false;
+    }
+    
+    @Override
     public void visit(LocalVariableReferenceExpression expression) {
-        ClassFileLocalVariableReferenceExpression lvre = (ClassFileLocalVariableReferenceExpression)expression;
-        String newName = nameMapping.get(lvre.getName());
-
-        if (newName != null) {
-            lvre.getLocalVariable().setName(newName);
+        if (visitingLambda) {
+            ClassFileLocalVariableReferenceExpression lvre = (ClassFileLocalVariableReferenceExpression)expression;
+            String newName = nameMapping.get(lvre.getName());
+    
+            if (newName != null) {
+                lvre.getLocalVariable().setName(newName);
+            }
         }
     }
 

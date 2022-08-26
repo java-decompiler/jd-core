@@ -26,7 +26,7 @@ public class UpdateJavaSyntaxTreeStep1Visitor extends AbstractJavaSyntaxVisitor 
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
 
         // Visit inner types
-        if (bodyDeclaration.getInnerTypeDeclarations() != null) {
+        if (bodyDeclaration.hasInnerTypeDeclarations()) {
             acceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
         }
 

@@ -11,7 +11,10 @@ import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.block.api.BlockProcessor;
 import org.jd.core.v1.util.DefaultList;
 
+import java.util.HashSet;
 import java.util.Set;
+
+import static org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.TYPE_JUMP;
 
 public class ControlFlowGraph {
     private final Method method;
@@ -70,6 +73,16 @@ public class ControlFlowGraph {
         return basicBlock;
     }
 
+
+    public BasicBlock newJumpBasicBlock(BasicBlock bb, BasicBlock target) {
+        Set<BasicBlock> predecessors = new HashSet<>();
+
+        predecessors.add(bb);
+        target.getPredecessors().remove(bb);
+
+        return newBasicBlock(TYPE_JUMP, bb.getFromOffset(), target.getFromOffset(), predecessors);
+    }
+    
     public void setOffsetToLineNumbers(int[] offsetToLineNumbers) {
         this.offsetToLineNumbers = offsetToLineNumbers;
     }
@@ -80,5 +93,14 @@ public class ControlFlowGraph {
     
     public void accept(BlockProcessor blockProcessor) {
         blockProcessor.process(this);
+    }
+
+    public boolean contains(int basickBlockType) {
+        for (BasicBlock basicBlock : list) {
+            if (basicBlock.getType() == basickBlockType) {
+                return true;
+            }
+        }
+        return false;
     }
 }

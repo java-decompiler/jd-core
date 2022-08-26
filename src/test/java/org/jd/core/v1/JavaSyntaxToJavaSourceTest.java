@@ -150,10 +150,12 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                                 new ReturnExpressionStatement(new NullExpression(18, ObjectType.TYPE_OBJECT))
                                                             )
                                                         )
-                                                    )
+                                                    ),
+                                                    false
                                                 ),
                                                 new LocalVariableReferenceExpression(21, PrimitiveType.TYPE_CHAR, "c")
-                                            )
+                                            ),
+                                            false
                                         )
                                     )
                                 )
@@ -173,7 +175,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                     "java/io/PrintStream",
                                     "println",
                                     "(I)V",
-                                    new LocalVariableReferenceExpression(22, PrimitiveType.TYPE_INT, "i")
+                                    new LocalVariableReferenceExpression(22, PrimitiveType.TYPE_INT, "i"),
+                                    false
                                 )
                             )
                         )
@@ -439,7 +442,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                     new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "otherMass"),
                                     "*",
                                     new MethodInvocationExpression(
-                                        PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "surfaceGravity", "()D"
+                                        PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "surfaceGravity", "()D", false
                                     ),
                                     4
                                 )
@@ -474,7 +477,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                             "java/io/PrintStream",
                                             "println",
                                             "(Ljava/lang/String;)V",
-                                            new StringConstantExpression("Usage: java Planet <earth_weight>")
+                                            new StringConstantExpression("Usage: java Planet <earth_weight>"),
+                                            false
                                         )),
                                         new ExpressionStatement(new MethodInvocationExpression(
                                             PrimitiveType.TYPE_VOID,
@@ -482,7 +486,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                             StringConstants.JAVA_LANG_SYSTEM,
                                             "exit",
                                             "(I)V",
-                                            new IntegerConstantExpression(PrimitiveType.TYPE_INT, -1)
+                                            new IntegerConstantExpression(PrimitiveType.TYPE_INT, -1),
+                                            false
                                         ))
                                     )
                                 ),
@@ -498,7 +503,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                             new ArrayExpression(
                                                 new LocalVariableReferenceExpression(arrayOfStringType, "args"),
                                                 new IntegerConstantExpression(PrimitiveType.TYPE_INT, 0)
-                                            )
+                                            ),
+                                            false
                                         )
                                     ))
                                 ),
@@ -520,7 +526,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                     "org/jd/core/v1/service/test/Planet"),
                                                 "org/jd/core/v1/service/test/Planet",
                                                 "surfaceGravity",
-                                                "()D"
+                                                "()D",
+                                                false
                                             ),
                                             4
                                         )
@@ -534,7 +541,8 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                         new ObjectTypeReferenceExpression(new ObjectType("org/jd/core/v1/service/test/Planet", "org.jd.core.v1.service.test.Planet", "Planet")),
                                         "org/jd/core/v1/service/test/Planet",
                                         "values",
-                                        "()[Lorg/jd/core/v1/service/test/Planet;"),
+                                        "()[Lorg/jd/core/v1/service/test/Planet;", 
+                                        false),
                                     new ExpressionStatement(new MethodInvocationExpression(
                                         PrimitiveType.TYPE_VOID,
                                         new FieldReferenceExpression(
@@ -556,9 +564,11 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                 "org/jd/core/v1/service/test/Planet",
                                                 "surfaceWeight",
                                                 "(D)D",
-                                                new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "mass")
+                                                new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "mass"),
+                                                false
                                             )
-                                        )
+                                        ),
+                                        false
                                     ))
                                 )
                             )

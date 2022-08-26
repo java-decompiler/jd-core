@@ -9,6 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariab
 
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
+import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 
 import java.util.Map;
@@ -56,10 +57,10 @@ public class GenericLocalVariable extends AbstractLocalVariable {
             sb.append(new String(new char[type.getDimension()]).replace("\0", "[]"));
         }
 
-        sb.append(' ').append(name).append(", index=").append(index);
+        sb.append(' ').append(getName()).append(", index=").append(getIndex());
 
-        if (next != null) {
-            sb.append(", next=").append(next);
+        if (getNext() != null) {
+            sb.append(", next=").append(getNext());
         }
 
         return sb.append("}").toString();
@@ -67,6 +68,13 @@ public class GenericLocalVariable extends AbstractLocalVariable {
 
     @Override
     public boolean isAssignableFrom(Map<String, BaseType> typeBounds, Type otherType) {
+        BaseType boundType = typeBounds.get(type.getName());
+        if (boundType instanceof ObjectType) {
+            ObjectType ot = (ObjectType) boundType;
+            if (ot.rawEquals(otherType)) {
+                return true;
+            }
+        }
         return type.equals(otherType);
     }
     @Override

@@ -218,6 +218,7 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 if (anonymousFlag) {
                     // Mark anonymous class constructor
                     cfcd.setFlags(cfcd.getFlags() | FLAG_ANONYMOUS);
+                    cfcd.getBodyDeclaration().setAnonymous(anonymousFlag);
                 }
             }
         }
@@ -591,6 +592,8 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 // Remove last synthetic parameter
                 cie.setParameters(removeLastSyntheticParameter(cie.getParameters(), cie.getParameterTypes()));
             }
+            
+            safeAccept(parameters);
         }
 
         protected BaseExpression removeFirstItem(BaseExpression parameters) {

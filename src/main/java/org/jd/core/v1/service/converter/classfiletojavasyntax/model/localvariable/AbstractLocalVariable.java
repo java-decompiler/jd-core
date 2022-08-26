@@ -17,12 +17,13 @@ import java.util.Set;
 
 public abstract class AbstractLocalVariable {
     private Frame frame;
-    protected AbstractLocalVariable next;
-    protected boolean declared;
-    protected final int index;
-    protected int fromOffset;
+    private AbstractLocalVariable next;
+    private boolean declared;
+    private final int index;
+    private int fromOffset;
     private int toOffset;
-    protected String name;
+    private String name;
+    private String oldName;
     private final DefaultList<LocalVariableReference> references = new DefaultList<>();
     private Set<AbstractLocalVariable> variablesOnRight;
     private Set<AbstractLocalVariable> variablesOnLeft;
@@ -78,6 +79,9 @@ public abstract class AbstractLocalVariable {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+    
+    public String getOldName() { return oldName; }
+    public void setOldName(String oldName) { this.oldName = oldName; }
 
     public abstract int getDimension();
 

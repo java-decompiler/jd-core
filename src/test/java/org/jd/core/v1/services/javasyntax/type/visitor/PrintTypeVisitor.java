@@ -109,9 +109,9 @@ public class PrintTypeVisitor implements TypeVisitor, TypeArgumentVisitor, TypeP
     @Override
     public void visit(InnerObjectType type) {
         BaseType outerType = type.getOuterType();
-
-        outerType.accept(this);
-
+        if (outerType != null) {
+            outerType.accept(this);
+        }
         sb.append('.').append(type.getName());
         printTypeArguments(type);
         printDimension(type.getDimension());

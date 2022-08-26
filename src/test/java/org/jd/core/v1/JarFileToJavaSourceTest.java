@@ -10,117 +10,108 @@ package org.jd.core.v1;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
-import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.javasyntax.CompilationUnit;
-import org.jd.core.v1.model.message.DecompileContext;
-import org.jd.core.v1.model.token.Token;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 public class JarFileToJavaSourceTest extends AbstractJdTest {
 
+    private static final String META_INF_VERSIONS = "META-INF/versions/";
+
     @Test
     public void testCommonsCodec() throws Exception {
-        // Decompile and recompile 'commons-codec:commons-codec:1.13'
         test(org.apache.commons.codec.Charsets.class);
     }
 
     @Test
     public void testCommonsCollections4() throws Exception {
-        // Decompile and recompile 'commons-collections4-4.1.jar'
         test(org.apache.commons.collections4.CollectionUtils.class);
     }
 
-    @Test
-    public void testCommonsImaging() throws Exception {
-        // Decompile and recompile 'org.apache.commons:commons-imaging:1.0-alpha1'
-        test(org.apache.commons.collections4.CollectionUtils.class);
-    }
+//    @Test
+//    public void testCommonsImaging() throws Exception {
+//        test(org.apache.commons.imaging.Imaging.class);
+//    }
 
     @Test
     public void testCommonsLang3() throws Exception {
-        // Decompile and recompile 'org.apache.commons:commons-lang3:3.9'
         test(org.apache.commons.lang3.JavaVersion.class);
     }
 
     @Test
     public void testDiskLruCache() throws Exception {
-        // Decompile and recompile 'com.jakewharton:disklrucache:2.0.2'
         test(com.jakewharton.disklrucache.DiskLruCache.class);
     }
 
     @Test
     public void testJavaPoet() throws Exception {
-        // Decompile and recompile 'com.squareup:javapoet:1.11.1'
         test(com.squareup.javapoet.JavaFile.class);
     }
 
     @Test
     public void testJavaWriter() throws Exception {
-        // Decompile and recompile 'com.squareup:javawriter:2.5.1'
         test(com.squareup.javawriter.JavaWriter.class);
     }
 
-    // TODO In progress
 //    @Test
 //    public void testJodaTime() throws Exception {
-//        // Decompile and recompile 'joda-time:joda-time:2.10.5'
 //        test(org.joda.time.DateTime.class);
 //    }
 
     @Test
     public void testJSoup() throws Exception {
-        // Decompile and recompile 'org.jsoup:jsoup:1.12.1'
         test(org.jsoup.Jsoup.class);
     }
 
     @Test
     public void testJUnit4() throws Exception {
-        // Decompile and recompile 'junit:junit:4.12'
         test(org.junit.Test.class);
     }
 
     @Test
     public void testMimecraft() throws Exception {
-        // Decompile and recompile 'com.squareup.mimecraft:mimecraft:1.1.1'
         test(com.squareup.mimecraft.Part.class);
     }
 
     @Test
     public void testScribe() throws Exception {
-        // Decompile and recompile 'org.scribe:scribe:1.3.7'
         test(org.scribe.oauth.OAuthService.class);
     }
 
     @Test
     public void testSparkCore() throws Exception {
-        // Decompile and recompile 'com.sparkjava:spark-core:2.9.1'
         test(spark.Spark.class);
     }
 
     @Test
-    public void testLog4j() throws Exception {
-        // Decompile and recompile 'log4j:log4j:1.2.17'
-        test(org.apache.log4j.Category.class);
+    public void testLog4jApi() throws Exception {
+        test(org.apache.logging.log4j.Logger.class);
     }
 
-    // TODO In progress
+    @Test
+    public void testLog4jCore() throws Exception {
+        test(org.apache.logging.log4j.core.Logger.class);
+    }
+    
+//    TODO: in progress    
 //    @Test
 //    public void testGuava() throws Exception {
-//        // Decompile and recompile 'com.google.guava:guava:12.0'
 //        test(com.google.common.collect.Collections2.class);
 //    }
 
     protected void test(Class<?> clazz) throws Exception {
-        try (FileInputStream inputStream = new FileInputStream(Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile())) {
+        File file = Paths.get(clazz.getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
+        System.out.println("====== Decompiling and recompiling " + file.getName() + " ======");
+        try (FileInputStream inputStream = new FileInputStream(file)) {
             test(inputStream);
         }
     }
@@ -139,11 +130,6 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
 
             configuration.put("realignLineNumbers", Boolean.TRUE);
 
-            DecompileContext decompileContext = new DecompileContext();
-            decompileContext.setLoader(loader);
-            decompileContext.setPrinter(printer);
-            decompileContext.setConfiguration(configuration);
-
             long time0 = System.currentTimeMillis();
 
             for (String path : loader.getMap().keySet()) {
@@ -153,37 +139,32 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
                     // TODO DEBUG if (!internalTypeName.endsWith("/Debug")) continue;
                     //if (!internalTypeName.endsWith("/MapUtils")) continue;
 
-                    decompileContext.setMainInternalTypeName(internalTypeName);
                     printer.init();
 
                     fileCounter++;
 
                     try {
                         // Decompile class
-                        ClassFile classFile = deserializer.loadClassFile(loader, internalTypeName);
-                        decompileContext.setClassFile(classFile);
-
-                        CompilationUnit compilationUnit = converter.process(decompileContext);
-                        fragmenter.process(compilationUnit, decompileContext);
-                        layouter.process(decompileContext);
-                        DefaultList<Token> tokens = tokenizer.process(decompileContext.getBody());
-                        decompileContext.setTokens(tokens);
-                        writer.process(decompileContext);
+                        ClassFileToJavaSourceDecompiler classFileToJavaSourceDecompiler = new ClassFileToJavaSourceDecompiler();
+                        classFileToJavaSourceDecompiler.decompile(loader, printer, internalTypeName, configuration);
                     } catch (AssertionError e) {
                         String msg = (e.getMessage() == null) ? "<?>" : e.getMessage();
-                        Integer counter = statistics.get(msg);
-                        statistics.put(msg, (counter == null) ? 1 : counter + 1);
+                        statistics.merge(msg, 1, Integer::sum);
                         assertFailedCounter++;
                     } catch (Throwable t) {
+                        t.printStackTrace();
                         String msg = t.getMessage() == null ? t.getClass().toString() : t.getMessage();
-                        Integer counter = statistics.get(msg);
-                        statistics.put(msg, (counter == null) ? 1 : counter + 1);
+                        statistics.merge(msg, 1, Integer::sum);
                         exceptionCounter++;
                     }
 
                     // Recompile source
                     String source = printer.toString();
 
+                    if (path.startsWith(META_INF_VERSIONS)) {
+                        // TODO: handle this some day
+                        continue;
+                    }
                     if (!CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalTypeName, source))) {
                         recompilationFailedCounter++;
                     }
@@ -214,7 +195,7 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
             for (Map.Entry<String, Integer> stat : statistics.entrySet()) {
                 stats.add("  " + stat.getValue() + " \t: " + stat.getKey());
             }
-            stats.sort((s1, s2) -> Integer.parseInt(s2.substring(0, 5).trim()) - Integer.parseInt(s1.substring(0, 5).trim()));
+            stats.sort(Comparator.comparing(this::getCount).reversed());
             for (String stat : stats) {
                 System.out.println(stat);
             }
@@ -224,6 +205,10 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
             assertEquals(0, printer.errorInMethodCounter);
             assertEquals(0, recompilationFailedCounter);
         }
+    }
+
+    private int getCount(String stat) {
+        return Integer.parseInt(stat.substring(0, 5).trim());
     }
 
     protected static class CounterPrinter extends PlainTextPrinter {

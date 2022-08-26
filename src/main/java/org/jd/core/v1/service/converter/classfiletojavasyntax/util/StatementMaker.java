@@ -7,6 +7,7 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.jd.core.v1.model.classfile.ClassFile;
+import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
@@ -24,6 +25,7 @@ import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.TernaryOperatorExpression;
 import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
+import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.statement.BreakStatement;
 import org.jd.core.v1.model.javasyntax.statement.CommentStatement;
 import org.jd.core.v1.model.javasyntax.statement.ContinueStatement;
@@ -61,8 +63,11 @@ import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.DefaultStack;
 import org.jd.core.v1.util.StringConstants;
 
+import java.util.ArrayDeque;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -139,6 +144,7 @@ public class StatementMaker {
     private final String internalTypeName;
     private final ClassFileBodyDeclaration bodyDeclaration;
     private final DefaultStack<Expression> stack = new DefaultStack<>();
+    private final Deque<Expression> enclosingInstances = new ArrayDeque<>();
     private final RemoveFinallyStatementsVisitor removeFinallyStatementsVisitor;
     private final RemoveBinaryOpReturnStatementsVisitor removeBinaryOpReturnStatementsVisitor;
     private final UpdateIntegerConstantTypeVisitor updateIntegerConstantTypeVisitor;
@@ -250,7 +256,12 @@ public class StatementMaker {
                 makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
                 break;
             case TYPE_RETURN:
-                statements.add(ReturnStatement.RETURN);
+                Method method = basicBlock.getControlFlowGraph().getMethod();
+                if (method.isLambda()) {
+                    parseByteCode(basicBlock, statements);
+                } else {
+                    statements.add(ReturnStatement.RETURN);
+                }
                 break;
             case TYPE_RETURN_VALUE, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_RET:
                 parseByteCode(basicBlock, statements);
@@ -680,6 +691,21 @@ public class StatementMaker {
             int index = statements.size();
             makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
 
+            if (stack.size() == 1 && basicBlock.getNext().matchType(TYPE_GOTO_IN_TERNARY_OPERATOR) && !statements.isEmpty() && statements.getLast() instanceof IfStatement) {
+                IfStatement ifStatement = (IfStatement) statements.getLast();
+                BaseStatement thenStatements = ifStatement.getStatements();
+                if (thenStatements.size() == 1) {
+                    Statement thenStatement = thenStatements.getFirst();
+                    if (thenStatement instanceof ReturnExpressionStatement) {
+                        ReturnExpressionStatement returnExp = (ReturnExpressionStatement) thenStatement;
+                        if (returnExp.getExpression().getType().equals(stack.peek().getType())) {
+                            Expression exp = stack.pop();
+                            statements.add(new ReturnExpressionStatement(exp.getLineNumber(), exp));
+                        }
+                    }
+                }
+            }
+            
             if (subStatements.size() == 1 &&
                     index+1 == statements.size() &&
                     subStatements.getFirst().isReturnExpressionStatement() &&
@@ -999,8 +1025,8 @@ public class StatementMaker {
             if (ot2.getTypeArguments() == null) {
                 return ot1.createType(null);
             }
-            if (!ot1.isTypeArgumentAssignableFrom(typeBounds, ot2)) {
-                if (ot2.isTypeArgumentAssignableFrom(typeBounds, ot1)) {
+            if (!ot1.isTypeArgumentAssignableFrom(typeMaker, Collections.emptyMap(), typeBounds, ot2)) {
+                if (ot2.isTypeArgumentAssignableFrom(typeMaker, Collections.emptyMap(), typeBounds, ot1)) {
                     return ot1.createType(ot2.getTypeArguments());
                 }
                 return ot1.createType(null);
@@ -1048,7 +1074,7 @@ public class StatementMaker {
     }
 
     protected void parseByteCode(BasicBlock basicBlock, Statements statements) {
-        byteCodeParser.parse(basicBlock, statements, stack);
+        byteCodeParser.parse(basicBlock, statements, stack, enclosingInstances);
     }
 
     protected void replacePreOperatorWithPostOperator(Statements statements) {

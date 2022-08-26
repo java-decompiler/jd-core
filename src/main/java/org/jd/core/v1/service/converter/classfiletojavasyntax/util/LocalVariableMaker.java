@@ -474,7 +474,7 @@ public class LocalVariableMaker {
             lv = localVariableSet.remove(index, offset);
 
             if (lv == null) {
-                lv = new ObjectLocalVariable(typeMaker, index, offset, type, null, true);
+                lv = new ObjectLocalVariable(typeMaker, index, offset, type, "e", true);
             } else {
                 lv.setDeclared(true);
             }

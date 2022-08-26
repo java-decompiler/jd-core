@@ -58,6 +58,11 @@ public class ClassFileStaticInitializerDeclaration extends StaticInitializerDecl
     public void setFlags(int flags) {}
 
     @Override
+    public BaseFormalParameter getFormalParameters() {
+        return null;
+    }
+
+    @Override
     public void setFormalParameters(BaseFormalParameter formalParameters) {}
 
     @Override

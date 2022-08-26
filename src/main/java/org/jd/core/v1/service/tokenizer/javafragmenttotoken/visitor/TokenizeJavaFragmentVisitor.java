@@ -295,7 +295,7 @@ public class TokenizeJavaFragmentVisitor implements JavaFragmentVisitor {
         for (ImportsFragment.Import imp : imports) {
             tokens.add(IMPORT);
             tokens.add(TextToken.SPACE);
-            tokens.add(new ReferenceToken(Printer.TYPE, imp.getInternalName(), imp.getQualifiedName(), null, null));
+            tokens.add(new ReferenceToken(Printer.TYPE, imp.getInternalName(), imp.getQualifiedName()));
             tokens.add(TextToken.SEMICOLON);
             tokens.add(NewLineToken.NEWLINE_1);
         }

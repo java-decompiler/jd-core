@@ -419,8 +419,8 @@ public class UpdateIntegerConstantTypeVisitor extends AbstractJavaSyntaxVisitor 
                         return new BooleanExpression(lineNumber, value != 0);
                     case FLAG_CHAR:
                         switch (value) {
-                            case Character.MIN_VALUE:
-                                return new FieldReferenceExpression(lineNumber, TYPE_CHAR, TYPE_CHARACTER_REFERENCE, StringConstants.JAVA_LANG_CHARACTER, StringConstants.MIN_VALUE, "C");
+//                            case Character.MIN_VALUE:
+//                                return new FieldReferenceExpression(lineNumber, TYPE_CHAR, TYPE_CHARACTER_REFERENCE, StringConstants.JAVA_LANG_CHARACTER, StringConstants.MIN_VALUE, "C");
                             case Character.MAX_VALUE:
                                 return new FieldReferenceExpression(lineNumber, TYPE_CHAR, TYPE_CHARACTER_REFERENCE, StringConstants.JAVA_LANG_CHARACTER, StringConstants.MAX_VALUE, "C");
                             default:

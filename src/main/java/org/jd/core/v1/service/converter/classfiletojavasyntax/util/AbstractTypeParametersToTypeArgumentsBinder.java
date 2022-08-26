@@ -35,7 +35,11 @@ public abstract class AbstractTypeParametersToTypeArgumentsBinder {
     public abstract FieldReferenceExpression newFieldReferenceExpression(
             int lineNumber, Type type, Expression expression, ObjectType objectType, String name, String descriptor);
 
-    public abstract void bindParameterTypesWithArgumentTypes(Type type, Expression expression);
+    public void bindParameterTypesWithArgumentTypes(Type type, Expression expression) {
+        bindParameterTypesWithArgumentTypes(type, expression, false);
+    }
+
+    public abstract void bindParameterTypesWithArgumentTypes(Type type, Expression expression, boolean parametersFirst);
 
     public void updateNewExpression(ClassFileNewExpression ne, String descriptor, TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
         ne.set(descriptor, clone(methodTypes.getParameterTypes()), parameters);
@@ -52,4 +56,5 @@ public abstract class AbstractTypeParametersToTypeArgumentsBinder {
 
         return parameterTypes;
     }
+
 }

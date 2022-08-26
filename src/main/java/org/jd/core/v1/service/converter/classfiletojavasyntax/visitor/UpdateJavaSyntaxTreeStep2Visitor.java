@@ -9,6 +9,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.apache.bcel.Const;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
+import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.ClassDeclaration;
@@ -46,7 +47,7 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
         ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
 
         // Visit inner types
-        if (bodyDeclaration.getInnerTypeDeclarations() != null) {
+        if (bodyDeclaration.hasInnerTypeDeclarations()) {
             TypeDeclaration td = typeDeclaration;
             acceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
             typeDeclaration = td;
@@ -63,17 +64,13 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
         AGGREGATE_FIELDS_VISITOR.visit(declaration);
         SORT_MEMBERS_VISITOR.visit(declaration);
 
-        if (bodyDeclaration.getOuterBodyDeclaration() == null) {
-            // Main body declaration
-
-            if (bodyDeclaration.getInnerTypeDeclarations() != null && replaceBridgeMethodVisitor.init(bodyDeclaration)) {
+        if (bodyDeclaration.isMainBodyDeclaration()) {
+            if (bodyDeclaration.hasInnerTypeDeclarations() && replaceBridgeMethodVisitor.init(bodyDeclaration)) {
                 // Replace bridge method invocation
                 replaceBridgeMethodVisitor.visit(bodyDeclaration);
             }
-
             // Add cast expressions
             addCastExpressionVisitor.visit(declaration);
-
             // Autoboxing
             AUTOBOXING_VISITOR.visit(declaration);
         }
@@ -88,7 +85,9 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
     @Override
     public void visit(ClassDeclaration declaration) {
         this.typeDeclaration = declaration;
+        addCastExpressionVisitor.pushContext(declaration);
         safeAccept(declaration.getBodyDeclaration());
+        addCastExpressionVisitor.popContext(declaration);
     }
 
     @Override
@@ -108,5 +107,11 @@ public class UpdateJavaSyntaxTreeStep2Visitor extends AbstractJavaSyntaxVisitor 
         cfed.getBodyDeclaration().accept(this);
         initEnumVisitor.visit(cfed.getBodyDeclaration());
         cfed.setConstants(initEnumVisitor.getConstants());
+    }
+    
+    @Override
+    public void visit(CompilationUnit compilationUnit) {
+        SORT_MEMBERS_VISITOR.init();
+        super.visit(compilationUnit);
     }
 }

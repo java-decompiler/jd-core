@@ -41,7 +41,7 @@ import static org.apache.bcel.Const.ACC_SYNTHETIC;
 
 public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
     private final TypeMaker typeMaker;
-
+    
     public CreateInstructionsVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
     }
@@ -89,7 +89,6 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                     }
                 }
             }
-
             for (ClassFileConstructorOrMethodDeclaration method : methods) {
                 if ((method.getFlags() & (ACC_SYNTHETIC|ACC_BRIDGE)) == 0) {
                     method.accept(this);
@@ -136,7 +135,9 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                     if (controlFlowGraphReducer.reduce(method)) {
                         if (comd.getStatements() instanceof Statements) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
                             Statements stmts = (Statements) comd.getStatements();
-                            comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), stmts));
+                            if (stmts.isEmpty()) {
+                                comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), stmts));
+                            }
                         } else {
                             comd.setStatements(statementMaker.make(controlFlowGraphReducer.getControlFlowGraph(), new Statements()));
                         }
@@ -148,7 +149,7 @@ public class CreateInstructionsVisitor extends AbstractJavaSyntaxVisitor {
                 }
             }
             if (!reduced) {
-                System.err.println("Could not reduce control flow graph in method " + method.getName() + method.getDescriptor() + " from class " + classFile.getInternalTypeName());
+                System.err.println("Could not reduce control flow graph in method " + method.getKey() + " from class " + classFile.getInternalTypeName());
                 comd.setStatements(new Statements(ByteCodeWriter.getLineNumberTableAsStatements(method)));
             }
 

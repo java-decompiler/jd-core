@@ -27,7 +27,7 @@ public class LocalVariableSet {
 
             if (lv == null) {
                 array[index] = newLV;
-            } else if (lv.fromOffset < newLV.fromOffset) {
+            } else if (lv.getFromOffset() < newLV.getFromOffset()) {
                 if (newLV == lv) {
                     throw new IllegalStateException("newLV == lv");
                 }
@@ -38,7 +38,7 @@ public class LocalVariableSet {
 
                 lv = lv.getNext();
 
-                while (lv != null && lv.fromOffset > newLV.fromOffset) {
+                while (lv != null && lv.getFromOffset() > newLV.getFromOffset()) {
                     previous = lv;
                     lv = lv.getNext();
                 }
@@ -80,7 +80,7 @@ public class LocalVariableSet {
             AbstractLocalVariable lv = array[index];
 
             while (lv != null) {
-                if (lv.fromOffset <= offset) {
+                if (lv.getFromOffset() <= offset) {
                     if (previous == null) {
                         array[index] = lv.getNext();
                     } else {
@@ -106,7 +106,7 @@ public class LocalVariableSet {
             AbstractLocalVariable lv = array[index];
 
             while (lv != null) {
-                if (lv.fromOffset <= offset) {
+                if (lv.getFromOffset() <= offset) {
                     return lv;
                 }
 
@@ -127,7 +127,7 @@ public class LocalVariableSet {
             AbstractLocalVariable lv = array[index];
 
             while (lv != null) {
-                if (lv.fromOffset == offset) {
+                if (lv.getFromOffset() == offset) {
                     ObjectLocalVariable olv = (ObjectLocalVariable)lv;
                     olv.type = type;
                     break;
@@ -145,8 +145,8 @@ public class LocalVariableSet {
             AbstractLocalVariable lv = array[index];
 
             while (lv != null) {
-                if (lv.fromOffset == offset) {
-                    GenericLocalVariable glv = new GenericLocalVariable(index, lv.fromOffset, type, lv.name);
+                if (lv.getFromOffset() == offset) {
+                    GenericLocalVariable glv = new GenericLocalVariable(index, lv.getFromOffset(), type, lv.getName());
                     glv.setNext(lv.getNext());
 
                     if (previous == null) {
@@ -183,7 +183,7 @@ public class LocalVariableSet {
                     lv = lv.getNext();
                 }
 
-                if (lv.fromOffset == 0) {
+                if (lv.getFromOffset() == 0) {
                     if (previous == null) {
                         array[index] = lv.getNext();
                     } else {

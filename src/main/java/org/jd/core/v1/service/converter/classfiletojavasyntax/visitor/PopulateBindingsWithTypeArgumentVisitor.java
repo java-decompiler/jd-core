@@ -73,6 +73,10 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
                     return; // Incompatible bounds
                 }
 
+                if (current.isWildcardTypeArgument() && type.isGenericTypeArgument()) {
+                    return; // Incompatible bounds
+                }
+                
                 if (typeArgument == null) {
                     bindings.put(typeName, checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(type));
                 } else if (!current.equals(typeArgument)) {
@@ -88,8 +92,8 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
                         ObjectType ot1 = (ObjectType)t1;
                         ObjectType ot2 = (ObjectType)t2.createType(Math.max(0, t2.getDimension() - type.getDimension()));
 
-                        if (!typeMaker.isAssignable(typeBounds, ot1, ot2)) {
-                            if (typeMaker.isAssignable(typeBounds, ot2, ot1)) {
+                        if (!typeMaker.isAssignable(bindings, typeBounds, ot1, ot2)) {
+                            if (typeMaker.isAssignable(bindings, typeBounds, ot2, ot1)) {
                                 bindings.put(typeName, checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(type));
                             } else {
                                 bindings.put(typeName, WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);

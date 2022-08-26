@@ -42,8 +42,8 @@ public class JavaEnumTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 37 */", "return 6.673E-11D * this.mass / this.radius * this.radius;")));
             assertTrue(source.matches(PatternMaker.make(": 49 */", "double earthWeight = Double.parseDouble(args[0]);")));
             assertTrue(source.matches(PatternMaker.make(": 50 */", "double mass = earthWeight / EARTH.surfaceGravity();")));
-            assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values()) {")));
-            assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, p.surfaceWeight(mass) } );")));
+            assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values())")));
+            assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", p, p.surfaceWeight(mass));")));
 
             assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 
@@ -73,8 +73,8 @@ public class JavaEnumTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 37 */", "return 6.673E-11D * this.mass / this.radius * this.radius;")));
             assertTrue(source.matches(PatternMaker.make(": 49 */", "double earthWeight = Double.parseDouble(args[0]);")));
             assertTrue(source.matches(PatternMaker.make(": 50 */", "double mass = earthWeight / EARTH.surfaceGravity();")));
-            assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values()) {")));
-            assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, p.surfaceWeight(mass) } );")));
+            assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values())")));
+            assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", p, p.surfaceWeight(mass));")));
 
             assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 
@@ -104,8 +104,8 @@ public class JavaEnumTest extends AbstractJdTest {
             assertTrue(source.matches(PatternMaker.make(": 37 */", "return 6.673E-11D * this.mass / this.radius * this.radius;")));
             assertTrue(source.matches(PatternMaker.make(": 49 */", "double earthWeight = Double.parseDouble(args[0]);")));
             assertTrue(source.matches(PatternMaker.make(": 50 */", "double mass = earthWeight / EARTH.surfaceGravity();")));
-            assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values()) {")));
-            assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", new Object[]", "{ p, p.surfaceWeight(mass) } );")));
+            assertTrue(source.matches(PatternMaker.make(": 51 */", "for (Planet p : values())")));
+            assertTrue(source.matches(PatternMaker.make(": 52 */", "System.out.printf(\"Your weight on %s is %f%n\", p, p.surfaceWeight(mass));")));
 
             assertTrue(source.matches(PatternMaker.make("enum EmptyEnum {}")));
 

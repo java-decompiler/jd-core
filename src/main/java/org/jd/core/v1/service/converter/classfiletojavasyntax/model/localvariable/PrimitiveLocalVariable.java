@@ -102,10 +102,10 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
             sb.append("void ");
         }
 
-        sb.append(name).append(", index=").append(index);
+        sb.append(getName()).append(", index=").append(getIndex());
 
-        if (next != null) {
-            sb.append(", next=").append(next);
+        if (getNext() != null) {
+            sb.append(", next=").append(getNext());
         }
 
         return sb.append("}").toString();

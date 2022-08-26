@@ -1074,7 +1074,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test")
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1082,14 +1082,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable"),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable"),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test"),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable"),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1153,7 +1153,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test")
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1161,14 +1161,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable"),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable"),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test"),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable"),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 
@@ -1255,7 +1255,7 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 EXTENDS,
                 TextToken.SPACE,
-                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null)
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test")
         ));
 
         JavaFragmentFactory.addSpacerBeforeImplements(fragments);
@@ -1263,14 +1263,14 @@ public class JavaFragmentToTokenTest extends TestCase {
         fragments.add(new TokensFragment(
                 IMPLEMENTS,
                 TextToken.SPACE,
-                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable", null, null),
+                new ReferenceToken(Printer.TYPE, "java/io/Serializable", "Serializable"),
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_COMPARABLE, "Comparable"),
                 TextToken.LEFTANGLEBRACKET,
-                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test", null, null),
+                new ReferenceToken(Printer.TYPE, "org/jd/core/v1/service/test/Test", "Test"),
                 TextToken.RIGHTANGLEBRACKET,
                 TextToken.COMMA_SPACE,
-                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable", null, null),
+                new ReferenceToken(Printer.TYPE, StringConstants.JAVA_LANG_CLONEABLE, "Cloneable"),
                 EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK
         ));
 

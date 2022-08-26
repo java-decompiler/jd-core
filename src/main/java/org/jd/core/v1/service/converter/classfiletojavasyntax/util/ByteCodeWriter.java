@@ -598,7 +598,7 @@ public final class ByteCodeWriter {
         "tableswitch", "lookupswitch", "ireturn", "lreturn", "freturn",
         "dreturn", "areturn", "return", "getstatic", "putstatic", "getfield",
         "putfield", "invokevirtual", "invokespecial", "invokestatic",
-        "invokeinterface", ILLEGAL_OPCODE, "new", "newarray", "anewarray",
+        "invokeinterface", "invokedynamic", "new", "newarray", "anewarray",
         "arraylength", "athrow", "checkcast", "instanceof", "monitorenter",
         "monitorexit", "wide", "multianewarray", "ifnull", "ifnonnull",
         "goto_w", "jsr_w", "breakpoint", ILLEGAL_OPCODE, ILLEGAL_OPCODE,

@@ -24,7 +24,6 @@ import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.statement.WhileStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
-import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
@@ -494,7 +493,7 @@ public final class LoopStatementMaker {
 
         if (ObjectType.TYPE_OBJECT.equals(item.getType())) {
             ((ObjectLocalVariable)item).setType(typeBounds, type);
-        } else if (item.getType().isGenericType()) {
+        } else if (item.getType().isGenericType() && type.isGenericType()) {
             ((GenericLocalVariable)item).setType((GenericType)type);
         } else {
             item.typeOnRight(typeBounds, type);
@@ -504,6 +503,15 @@ public final class LoopStatementMaker {
         localVariableMaker.removeLocalVariable(syntheticIndex);
         localVariableMaker.removeLocalVariable(syntheticLength);
 
+        if (array instanceof CastExpression) {
+            CastExpression castExpression = (CastExpression) array;
+            Type leftArrayType = item.getType().createType(item.getType().getDimension() + 1);
+            Type rightArrayType = castExpression.getExpression().getType();
+            if (leftArrayType.equals(rightArrayType)) {
+                return new ClassFileForEachStatement(item, castExpression.getExpression(), subStatements);
+            }
+        }
+        
         return new ClassFileForEachStatement(item, array, subStatements);
     }
 
@@ -614,14 +622,12 @@ public final class LoopStatementMaker {
         if (type.isObjectType()) {
             ObjectType listType = (ObjectType)type;
 
-            if (listType.getTypeArguments() == null) {
-                if (!TYPE_OBJECT.equals(item.getType())) {
-                    if (list.isNewExpression()) {
-                        ClassFileNewExpression ne = (ClassFileNewExpression)list;
-                        ne.setType(listType.createType(DiamondTypeArgument.DIAMOND));
-                    } else {
-                        list = new CastExpression(TYPE_ITERABLE.createType(item.getType()), list);
-                    }
+            if (listType.getTypeArguments() == null || listType.getTypeArguments().isWildcardTypeArgument() || listType.getTypeArguments().isGenericTypeArgument()) {
+                if (list.isNewExpression()) {
+                    ClassFileNewExpression ne = (ClassFileNewExpression) list;
+                    ne.setType(listType.createType(item.getType()));
+                } else {
+                    list = new CastExpression(TYPE_ITERABLE.createType(item.getType()), list);
                 }
             } else {
                 CreateTypeFromTypeArgumentVisitor visitor2 = new CreateTypeFromTypeArgumentVisitor();

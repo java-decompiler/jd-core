@@ -39,6 +39,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.LocalVariable
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveTypeUtil;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateLocalVariableVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RenameLocalVariablesVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
@@ -232,6 +233,9 @@ public class Frame {
         Map<Type, Boolean> types = new HashMap<>();
         int length = localVariableArray.length;
 
+        RenameLocalVariablesVisitor renameLocalVariablesVisitor = new RenameLocalVariablesVisitor();
+        Map<String, String> mapping = new HashMap<>();
+
         for (int i=0; i<length; i++) {
             AbstractLocalVariable lv = localVariableArray[i];
 
@@ -243,8 +247,9 @@ public class Frame {
                     // Unique type
                     types.put(lv.getType(), Boolean.FALSE);
                 }
-                if (lv.name != null && !names.add(lv.name)) {
-                    lv.name = null;
+                if (lv.getName() != null && !names.add(lv.getName())) {
+                    lv.setOldName(lv.getName());
+                    lv.setName(null);
                 }
                 assert lv != lv.getNext();
                 lv = lv.getNext();
@@ -269,9 +274,10 @@ public class Frame {
                 lv = localVariableArray[i];
 
                 while (lv != null) {
-                    if (lv.name == null) {
+                    if (lv.getName() == null) {
                         lv.getType().accept(visitor);
-                        lv.name = visitor.getName();
+                        lv.setName(visitor.getName());
+                        mapping.put(lv.getOldName(), lv.getName());
                     }
                     lv = lv.getNext();
                 }
@@ -279,10 +285,15 @@ public class Frame {
 
             if (exceptionLocalVariable != null) {
                 exceptionLocalVariable.getType().accept(visitor);
-                exceptionLocalVariable.name = visitor.getName();
+                exceptionLocalVariable.setName(visitor.getName());
             }
         }
 
+        if (!mapping.isEmpty() && statements != null) {
+            renameLocalVariablesVisitor.init(mapping, false);
+            statements.accept(renameLocalVariablesVisitor);
+        }
+        
         // Recursive call
         if (children != null) {
             for (Frame child : children) {
