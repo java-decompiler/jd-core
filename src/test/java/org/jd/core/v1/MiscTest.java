@@ -874,27 +874,33 @@ public class MiscTest extends AbstractJdTest {
 
     @Test
     public void testLambdaStackWalker1() throws Exception {
-        String internalClassName = LambdaStackWalker1.class.getName().replace('.', '/');
-        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
-        
-        // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make("return StackWalker.getInstance().walk(s -> s.<Class<?>>map(StackWalker.StackFrame::getDeclaringClass).dropWhile(clazz -> !sentinelClass.equals(clazz)).findFirst().orElse(null));")));
-        
-        // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
+        try (InputStream is = this.getClass().getResourceAsStream("/jar/lambda-stackwalker-jdk17.0.1.jar")) {
+            Loader loader = new ZipLoader(is);
+            String internalClassName = LambdaStackWalker1.class.getName().replace('.', '/');
+            String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName);
+            
+            // Check decompiled source code
+            assertTrue(source.matches(PatternMaker.make("return StackWalker.getInstance().walk(s -> s.map(StackWalker.StackFrame::getDeclaringClass).dropWhile(clazz -> !sentinelClass.equals(clazz)).findFirst().orElse(null));")));
+            
+            // Recompile decompiled source code and check errors
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
+        }
     }
 
     @Test
     public void testLambdaStackWalker2() throws Exception {
-        String internalClassName = LambdaStackWalker2.class.getName().replace('.', '/');
-        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
-        
-        // Check decompiled source code
-        assertTrue(source.matches(PatternMaker.make("return StackWalker.getInstance().walk(s -> s.findFirst()).map(s -> s.getDeclaringClass()).orElse(null);")));
-        assertTrue(source.matches(PatternMaker.make("return StackWalker.getInstance().walk(s -> s.findFirst()).map(StackWalker.StackFrame::getDeclaringClass).orElse(null);")));
-        
-        // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
+        try (InputStream is = this.getClass().getResourceAsStream("/jar/lambda-stackwalker2-jdk17.0.1.jar")) {
+            Loader loader = new ZipLoader(is);
+            String internalClassName = LambdaStackWalker2.class.getName().replace('.', '/');
+            String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName);
+            
+            // Check decompiled source code
+            assertTrue(source.matches(PatternMaker.make("return StackWalker.getInstance().walk(s -> s.findFirst()).map(s -> s.getDeclaringClass()).orElse(null);")));
+            assertTrue(source.matches(PatternMaker.make("return StackWalker.getInstance().walk(s -> s.findFirst()).map(StackWalker.StackFrame::getDeclaringClass).orElse(null);")));
+            
+            // Recompile decompiled source code and check errors
+            assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
+        }
     }
     
     public void testNoDiamondJDK6() throws Exception {
