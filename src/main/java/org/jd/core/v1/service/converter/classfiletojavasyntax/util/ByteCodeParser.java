@@ -920,7 +920,10 @@ public class ByteCodeParser {
                                 if (typeTypes != null && typeTypes.getTypeParameters() instanceof TypeParameterWithTypeBounds) {
                                     TypeParameterWithTypeBounds typeParameterWithTypeBounds = (TypeParameterWithTypeBounds) typeTypes.getTypeParameters();
                                     String identifier = typeParameterWithTypeBounds.getIdentifier();
-                                    if (identifier.equals(expression1.getType().getName()) && typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) typeParameterWithTypeBounds.getTypeBounds())) {
+                                    if (identifier.equals(expression1.getType().getName()) 
+                                            && type1 instanceof ObjectType
+                                            && typeParameterWithTypeBounds.getTypeBounds() instanceof ObjectType
+                                            && typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) typeParameterWithTypeBounds.getTypeBounds())) {
                                         castNeeded = false;
                                     }
                                 }
