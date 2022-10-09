@@ -78,47 +78,46 @@ public final class ControlFlowGraphPlantUMLWriter {
     public static String write(ControlFlowGraph cfg) {
         if (cfg.getBasicBlocks() == null) {
             return null;
-        } else {
-            Set<BasicBlock> set = new TreeSet<>(Comparator.comparingInt(BasicBlock::getIndex));
-
-            search(set, cfg.getStart());
-
-            DefaultList<BasicBlock> list = new DefaultList<>(set);
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("@startuml\n");
-            sb.append("skinparam state {\n");
-            sb.append("  BackgroundColor<<Reduced>> #BBD7B7\n");
-            sb.append("  BorderColor<<Reduced>> Green\n");
-            sb.append("  BackgroundColor<<Synthetic>> PowderBlue\n");
-            sb.append("  BorderColor<<Synthetic>> DodgerBlue\n");
-            sb.append("  BackgroundColor<<ToReduce>> Orange\n");
-            sb.append("  BorderColor<<ToReduce>> #FF740E\n");
-            sb.append("}\n");
-
-            sb.append("skinparam BackgroundColor #2B2B2B\n");
-            sb.append("skinparam state {\n");
-            sb.append("  StartColor #999999\n");
-            sb.append("  BackgroundColor #D6BF55\n");
-            sb.append("  BorderColor #F6DF57\n");
-            sb.append("}\n");
-            sb.append("skinparam sequence {\n");
-            sb.append("  ArrowColor #999999\n");
-            sb.append("  ArrowFontColor #AAAAAA\n");
-            sb.append("}\n");
-
-            Method method = cfg.getMethod();
-
-            for (BasicBlock basicBlock : list) {
-                writeState(sb, method, basicBlock);
-            }
-
-            for (BasicBlock basicBlock : list) {
-                writeLink(sb, basicBlock);
-            }
-            sb.append("@enduml\n");
-            return sb.toString();
         }
+        Set<BasicBlock> set = new TreeSet<>(Comparator.comparingInt(BasicBlock::getIndex));
+
+        search(set, cfg.getStart());
+
+        DefaultList<BasicBlock> list = new DefaultList<>(set);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("@startuml\n");
+        sb.append("skinparam state {\n");
+        sb.append("  BackgroundColor<<Reduced>> #BBD7B7\n");
+        sb.append("  BorderColor<<Reduced>> Green\n");
+        sb.append("  BackgroundColor<<Synthetic>> PowderBlue\n");
+        sb.append("  BorderColor<<Synthetic>> DodgerBlue\n");
+        sb.append("  BackgroundColor<<ToReduce>> Orange\n");
+        sb.append("  BorderColor<<ToReduce>> #FF740E\n");
+        sb.append("}\n");
+
+        sb.append("skinparam BackgroundColor #2B2B2B\n");
+        sb.append("skinparam state {\n");
+        sb.append("  StartColor #999999\n");
+        sb.append("  BackgroundColor #D6BF55\n");
+        sb.append("  BorderColor #F6DF57\n");
+        sb.append("}\n");
+        sb.append("skinparam sequence {\n");
+        sb.append("  ArrowColor #999999\n");
+        sb.append("  ArrowFontColor #AAAAAA\n");
+        sb.append("}\n");
+
+        Method method = cfg.getMethod();
+
+        for (BasicBlock basicBlock : list) {
+            writeState(sb, method, basicBlock);
+        }
+
+        for (BasicBlock basicBlock : list) {
+            writeLink(sb, basicBlock);
+        }
+        sb.append("@enduml\n");
+        return sb.toString();
     }
 
     private static void search(Set<BasicBlock> set, BasicBlock basicBlock) {
@@ -286,7 +285,7 @@ public final class ControlFlowGraphPlantUMLWriter {
 
     private static void writeStateCode(StringBuilder sb, String id, Method method, BasicBlock basicBlock) {
         if ((method != null) && basicBlock.matchType(GROUP_CODE) && (basicBlock.getFromOffset() < basicBlock.getToOffset())) {
-            String byteCode = ByteCodeWriter.write("  ", method, basicBlock.getFromOffset(), basicBlock.getToOffset());
+            String byteCode = new ByteCodeWriter().write("  ", method, basicBlock.getFromOffset(), basicBlock.getToOffset());
 
             byteCode = byteCode.substring(0, byteCode.length()-1).replace("\n", EOL).replace('[', '{');
             sb.append(id).append(" : code =").append(EOL).append(byteCode).append("\n");

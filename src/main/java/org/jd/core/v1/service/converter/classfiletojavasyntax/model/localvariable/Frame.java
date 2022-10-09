@@ -6,6 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariable;
 
+import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
 import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.LocalVariableDeclarator;
@@ -15,8 +16,10 @@ import org.jd.core.v1.model.javasyntax.expression.BaseExpression;
 import org.jd.core.v1.model.javasyntax.expression.BinaryOperatorExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.model.javasyntax.expression.Expressions;
+import org.jd.core.v1.model.javasyntax.expression.LocalVariableReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.NewInitializedArray;
 import org.jd.core.v1.model.javasyntax.statement.ExpressionStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForStatement;
 import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
@@ -40,6 +43,7 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.util.PrimitiveType
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.CreateLocalVariableVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.RenameLocalVariablesVisitor;
+import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableReferenceVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchLocalVariableVisitor;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.visitor.SearchUndeclaredLocalVariableVisitor;
 import org.jd.core.v1.util.DefaultList;
@@ -453,7 +457,7 @@ public class Frame {
                 iterator = localStatements.listIterator();
                 undeclaredLocalVariables = entry.getValue();
 
-                while (iterator.hasNext()) {
+                for (int statementIndex = 0; iterator.hasNext(); statementIndex++) {
                     statement = iterator.next();
 
                     searchUndeclaredLocalVariableVisitor.init();
@@ -466,7 +470,7 @@ public class Frame {
                         int index1 = iterator.nextIndex();
 
                         if (statement.isExpressionStatement()) {
-                            createInlineDeclarations(undeclaredLocalVariables, undeclaredLocalVariablesInStatement, iterator, (ExpressionStatement)statement);
+                            createInlineDeclarations(undeclaredLocalVariables, undeclaredLocalVariablesInStatement, iterator, (ExpressionStatement)statement, localStatements, statementIndex);
                         } else if (statement.isForStatement()) {
                             createInlineDeclarations(undeclaredLocalVariables, undeclaredLocalVariablesInStatement, (ClassFileForStatement)statement);
                         }
@@ -525,22 +529,52 @@ public class Frame {
 
     protected void createInlineDeclarations(
             Set<AbstractLocalVariable> undeclaredLocalVariables, Set<AbstractLocalVariable> undeclaredLocalVariablesInStatement,
-            ListIterator<Statement> iterator, ExpressionStatement es) {
+            ListIterator<Statement> iterator, ExpressionStatement es, Statements localStatements, int statementIndex) {
         if (es.getExpression().isBinaryOperatorExpression()) {
             Expression boe = es.getExpression();
 
             if ("=".equals(boe.getOperator())) {
-                Expressions expressions = new Expressions();
 
-                splitMultiAssignment(Integer.MAX_VALUE, undeclaredLocalVariablesInStatement, expressions, boe);
-                iterator.remove();
+                ClassFileLocalVariableReferenceExpression reference = (ClassFileLocalVariableReferenceExpression) boe.getLeftExpression();
+                AbstractLocalVariable localVariable = reference.getLocalVariable();
 
-                for (Expression exp : expressions) {
-                    iterator.add(newDeclarationStatement(undeclaredLocalVariables, undeclaredLocalVariablesInStatement, exp));
+                boolean createDeclaration = false;
+
+                if (localVariable.getOldName() == null) {
+                    createDeclaration = true;
+                } else if (statementIndex + 1 < localStatements.size()) {
+                    List<Statement> nextStatements = localStatements.subList(statementIndex + 1, localStatements.size());
+                    SearchLocalVariableReferenceVisitor searchLocalVariableReferenceVisitor = new SearchLocalVariableReferenceVisitor();
+                    searchLocalVariableReferenceVisitor.init(localVariable);
+                    if (nextStatements.size() > 1) {
+                        searchLocalVariableReferenceVisitor.safeAccept(new Statements(nextStatements));
+                    } else {
+                        searchLocalVariableReferenceVisitor.safeAccept(nextStatements.get(0));
+                    }
+                    createDeclaration = searchLocalVariableReferenceVisitor.containsReference();
                 }
 
-                if (expressions.isEmpty()) {
-                    iterator.add(es);
+                if (createDeclaration) {
+                
+                    Expressions expressions = new Expressions();
+    
+                    splitMultiAssignment(Integer.MAX_VALUE, undeclaredLocalVariablesInStatement, expressions, boe);
+                    iterator.remove();
+    
+                    for (Expression exp : expressions) {
+                        iterator.add(newDeclarationStatement(undeclaredLocalVariables, undeclaredLocalVariablesInStatement, exp));
+                    }
+    
+                    if (expressions.isEmpty()) {
+                        iterator.add(es);
+                    }
+                } else {
+                    undeclaredLocalVariables.remove(localVariable);
+                    undeclaredLocalVariablesInStatement.remove(localVariable);
+                    if (localVariable.getOldName() != null) {
+                        localVariable.setName(localVariable.getOldName());
+                    }
+                    localVariable.setDeclared(true);
                 }
             }
         }
@@ -636,16 +670,47 @@ public class Frame {
             return;
         }
 
-        undeclaredLocalVariables.remove(localVariable);
-        undeclaredLocalVariablesInStatement.remove(localVariable);
-        localVariable.setDeclared(true);
+        boolean[] createDeclaration = { true };
+        if (localVariable.getOldName() != null && parent != null && parent.statements != null) {
+            parent.statements.accept(new AbstractJavaSyntaxVisitor() {
+                
+                boolean foundFor;
+                
+                @Override
+                public void visit(ForStatement statement) {
+                    if (statement == forStatement) {
+                        foundFor = true;
+                    }
+                }
 
-        VariableInitializer variableInitializer = init.getRightExpression().isNewInitializedArray() ?
-                ((NewInitializedArray)init.getRightExpression()).getArrayInitializer() :
-                new ExpressionVariableInitializer(init.getRightExpression());
-
-        forStatement.setDeclaration(new LocalVariableDeclaration(localVariable.getType(), new ClassFileLocalVariableDeclarator(init.getLineNumber(), reference.getLocalVariable(), variableInitializer)));
-        forStatement.setInit(null);
+                @Override
+                public void visit(LocalVariableReferenceExpression expression) {
+                    if (foundFor && ((ClassFileLocalVariableReferenceExpression)expression).getLocalVariable().getName().equals(localVariable.getOldName())) {
+                        createDeclaration[0] = false;
+                    }
+                }
+            });
+        }
+        
+        if (createDeclaration[0]) {
+            undeclaredLocalVariables.remove(localVariable);
+            undeclaredLocalVariablesInStatement.remove(localVariable);
+            localVariable.setDeclared(true);
+    
+            VariableInitializer variableInitializer = init.getRightExpression().isNewInitializedArray() ?
+                    ((NewInitializedArray)init.getRightExpression()).getArrayInitializer() :
+                    new ExpressionVariableInitializer(init.getRightExpression());
+    
+            forStatement.setDeclaration(new LocalVariableDeclaration(localVariable.getType(), new ClassFileLocalVariableDeclarator(init.getLineNumber(), reference.getLocalVariable(), variableInitializer)));
+            forStatement.setInit(null);
+        } else {
+            undeclaredLocalVariables.remove(localVariable);
+            undeclaredLocalVariablesInStatement.remove(localVariable);
+            if (localVariable.getOldName() != null) {
+                localVariable.setName(localVariable.getOldName());
+            }
+            localVariable.setDeclared(true);
+        }
     }
 
     protected void updateForStatement(

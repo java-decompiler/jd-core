@@ -31,10 +31,12 @@ import org.jd.core.v1.model.javasyntax.expression.NewExpression;
 import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.SuperConstructorInvocationExpression;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
+import org.jd.core.v1.model.javasyntax.statement.ForEachStatement;
 import org.jd.core.v1.model.javasyntax.statement.LocalVariableDeclarationStatement;
 import org.jd.core.v1.model.javasyntax.statement.Statement;
 import org.jd.core.v1.model.javasyntax.statement.Statements;
 import org.jd.core.v1.model.javasyntax.statement.TypeDeclarationStatement;
+import org.jd.core.v1.model.javasyntax.statement.TryStatement.CatchClause;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
@@ -641,6 +643,22 @@ public class InitInnerClassVisitor extends AbstractJavaSyntaxVisitor {
                 }
             }
 
+            @Override
+            public void visit(CatchClause statement) {
+                if (finalLocalVariableNameMap.containsKey(statement.getName())) {
+                    statement.setFinal(true);
+                }
+                super.visit(statement);
+            }
+
+            @Override
+            public void visit(ForEachStatement statement) {
+                if (finalLocalVariableNameMap.containsKey(statement.getName())) {
+                    statement.setFinal(true);
+                }
+                super.visit(statement);
+            }
+            
             @Override
             public void visit(LocalVariableDeclarationStatement statement) {
                 fina1 = false;

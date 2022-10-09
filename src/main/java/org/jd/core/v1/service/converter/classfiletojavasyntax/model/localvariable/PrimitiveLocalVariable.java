@@ -35,7 +35,7 @@ public class PrimitiveLocalVariable extends AbstractLocalVariable {
     }
 
     public PrimitiveLocalVariable(int index, int offset, PrimitiveLocalVariable primitiveLocalVariable) {
-        super(index, offset, null);
+        super(index, offset, primitiveLocalVariable.getName());
         int valueFlags = primitiveLocalVariable.flags;
 
         if ((valueFlags & FLAG_INT) != 0) {

@@ -106,8 +106,10 @@ public class SingleLineStatementVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(ExpressionStatement statement) {
-        statement.getExpression().accept(this);
-        minLineNumber = statement.getExpression().getLineNumber();
+        safeAccept(statement.getExpression());
+        if (statement.getExpression() != null) {
+            minLineNumber = statement.getExpression().getLineNumber();
+        }
         statementCount = 1;
     }
 

@@ -2704,6 +2704,12 @@ public class ControlFlowGraphTest extends TestCase {
         }
     }
 
+//    TODO: in progress
+//    @Test
+//    public void testLabelledBreaks() throws Exception {
+//        checkCFGReduction(searchMethod("org/jd/core/v1/Label", "parseInto"));
+//    }
+    
     protected ControlFlowGraph checkCFGReduction(Method method) throws Exception {
         ControlFlowGraph cfg = new ControlFlowGraphMaker().make(method);
 

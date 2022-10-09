@@ -14,7 +14,6 @@ import org.jd.core.v1.model.javafragment.LineNumberTokensFragment;
 import org.jd.core.v1.model.javafragment.StartBlockFragment;
 import org.jd.core.v1.model.javafragment.StartBodyFragment;
 import org.jd.core.v1.model.javafragment.TokensFragment;
-import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.ArrayVariableInitializer;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
@@ -63,7 +62,6 @@ import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
 import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.DiamondTypeArgument;
-import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
@@ -115,20 +113,20 @@ public class ExpressionVisitor extends TypeVisitor {
 
     protected final LinkedList<Context> contextStack = new LinkedList<>();
     protected Fragments fragments = new Fragments();
-    private final boolean diamondOperatorSupported;
-    private final boolean omitNonWildcardTypeArguments;
     protected boolean inExpressionFlag;
     protected boolean inInvokeNewFlag;
-    protected boolean inVarArgsFlag;
+    protected boolean inVarArgMethod;
+    protected boolean inVarArgParam;
+    protected int parameterTypeCount;
     protected Set<String> currentMethodParamNames = new HashSet<>();
     protected String currentTypeName;
     private final HexaExpressionVisitor hexaExpressionVisitor = new HexaExpressionVisitor();
+    private final int majorVersion;
 
 
     public ExpressionVisitor(Loader loader, String mainInternalTypeName, int majorVersion, ImportsFragment importsFragment) {
         super(loader, mainInternalTypeName, majorVersion, importsFragment);
-        this.diamondOperatorSupported = majorVersion >= MAJOR_1_7;
-        this.omitNonWildcardTypeArguments = majorVersion > MAJOR_1_7;
+        this.majorVersion = majorVersion;
     }
 
     public DefaultList<Fragment> getFragments() {
@@ -249,20 +247,31 @@ public class ExpressionVisitor extends TypeVisitor {
 
             if (size > 0) {
                 boolean ief = inExpressionFlag;
+                boolean ivapf = inVarArgParam;
                 Iterator<Expression> iterator = list.iterator();
 
                 while (size-- > 1) {
                     inExpressionFlag = true;
+                    inVarArgParam = inVarArgMethod && list.size() - size >= parameterTypeCount;
+                    if (size == 1 && list.getLast() instanceof NewArray) {
+                        NewArray newArray = (NewArray) list.getLast();
+                        if (newArray.isEmptyNewArray()) {
+                            inExpressionFlag = false;
+                        }
+                    }
                     iterator.next().accept(this);
-
+                    inVarArgParam = ivapf;
+                    
                     if (!tokens.isEmpty()) {
                         tokens.add(TextToken.COMMA_SPACE);
                     }
                 }
 
                 inExpressionFlag = false;
+                inVarArgParam = inVarArgMethod && list.size() - size >= parameterTypeCount;
                 iterator.next().accept(this);
                 inExpressionFlag = ief;
+                inVarArgParam = ivapf;
             }
         }
     }
@@ -453,7 +462,7 @@ public class ExpressionVisitor extends TypeVisitor {
             if (exp.isObjectTypeReferenceExpression()) {
                 ObjectType ot = exp.getObjectType();
 
-                if (! ot.getInternalName().equals(getCurrentTypeInternalName())) {
+                if (expression.getNonWildcardTypeArguments() != null || !ot.getInternalName().equals(getCurrentTypeInternalName())) {
                     visit(expression, exp);
                     tokens.addLineNumberToken(expression);
                     tokens.add(TextToken.DOT);
@@ -468,21 +477,6 @@ public class ExpressionVisitor extends TypeVisitor {
                         NewExpression newExpression = (NewExpression) exp;
                         newExpression.setDiamondPossible(false);
                     }
-                    if (exp instanceof ClassFileMethodInvocationExpression) {
-                        ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression) exp;
-                        mie.setShowingNonWildcardTypeArguments(mie.getNonWildcardTypeArguments() != null);
-                        if (mie.getParameterTypes() != null && mie.getNonWildcardTypeArguments() != null) {
-                            mie.getParameterTypes().accept(new AbstractJavaSyntaxVisitor() {
-                                @Override
-                                public void visit(GenericType type) {
-                                    if (type.equals(mie.getNonWildcardTypeArguments())) {
-                                        mie.setShowingNonWildcardTypeArguments(false);
-                                    }
-                                    super.visit(type);
-                                }
-                            });
-                        }
-                    }
                     visit(expression, exp);
                     tokens.addLineNumberToken(expression);
                 }
@@ -494,7 +488,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         tokens.addLineNumberToken(expression);
 
-        if ((!omitNonWildcardTypeArguments || expression.isShowingNonWildcardTypeArguments()) && nonWildcardTypeArguments != null && dot) {
+        if (nonWildcardTypeArguments != null && dot) {
             tokens.add(TextToken.LEFTANGLEBRACKET);
             nonWildcardTypeArguments.accept(this);
             tokens.add(TextToken.RIGHTANGLEBRACKET);
@@ -505,11 +499,19 @@ public class ExpressionVisitor extends TypeVisitor {
 
         if (parameters != null) {
             boolean ief = inExpressionFlag;
+            boolean ivmf = inVarArgMethod;
+            boolean ivpf = inVarArgParam;
             inExpressionFlag = false;
-            inVarArgsFlag = expression.isVarArgs();
+            inVarArgMethod = expression.isVarArgs();
+            if (expression instanceof ClassFileMethodInvocationExpression) {
+                ClassFileMethodInvocationExpression mie = (ClassFileMethodInvocationExpression) expression;
+                parameterTypeCount = mie.getParameterTypes() == null ? 0 : mie.getParameterTypes().size();
+            }
+            inVarArgParam = inVarArgMethod && parameters.size() == 1;
             parameters.accept(this);
             inExpressionFlag = ief;
-            inVarArgsFlag = false;
+            inVarArgMethod = ivmf;
+            inVarArgParam = ivpf;
         }
 
         tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
@@ -525,7 +527,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
     @Override
     public void visit(NewArray expression) {
-        if (inVarArgsFlag && expression.isEmptyNewArray()) {
+        if (inVarArgParam && expression.isEmptyNewArray()) {
             if (!tokens.isEmpty() && TextToken.COMMA_SPACE.equals(tokens.get(tokens.size() - 1))) {
                 tokens.remove(tokens.size() - 1);
             }
@@ -570,7 +572,7 @@ public class ExpressionVisitor extends TypeVisitor {
     @Override
     public void visit(NewInitializedArray expression) {
         tokens.addLineNumberToken(expression);
-        if (inVarArgsFlag && expression.getArrayInitializer() != null) {
+        if (inVarArgParam && expression.getArrayInitializer() != null) {
             ArrayVariableInitializer arrayInitializer = expression.getArrayInitializer();
             if (arrayInitializer.isList()) {
                 Iterator<VariableInitializer> iterator = arrayInitializer.getList().iterator();
@@ -610,7 +612,7 @@ public class ExpressionVisitor extends TypeVisitor {
 
         ObjectType objectType = expression.getObjectType();
 
-        if (objectType.getTypeArguments() != null && expression.isDiamondPossible() && diamondOperatorSupported) {
+        if (objectType.getTypeArguments() != null && expression.isDiamondPossible() && majorVersion >= MAJOR_1_7) {
             objectType = objectType.createType(DiamondTypeArgument.DIAMOND);
         }
 
@@ -756,6 +758,16 @@ public class ExpressionVisitor extends TypeVisitor {
             }
         }
 
+        if (expression.getTrueExpression() instanceof NewExpression) {
+            NewExpression newExpression = (NewExpression) expression.getTrueExpression();
+            newExpression.setDiamondPossible(newExpression.isDiamondPossible() && majorVersion > MAJOR_1_7);
+        }
+        
+        if (expression.getFalseExpression() instanceof NewExpression) {
+            NewExpression newExpression = (NewExpression) expression.getFalseExpression();
+            newExpression.setDiamondPossible(newExpression.isDiamondPossible() && majorVersion > MAJOR_1_7);
+        }
+        
         printTernaryOperatorExpression(expression.getCondition());
         tokens.add(TextToken.SPACE_QUESTION_SPACE);
         printTernaryOperatorExpression(expression.getTrueExpression());

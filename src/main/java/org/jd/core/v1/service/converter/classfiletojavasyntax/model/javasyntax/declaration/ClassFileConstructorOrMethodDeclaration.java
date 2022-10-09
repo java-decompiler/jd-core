@@ -32,6 +32,8 @@ public interface ClassFileConstructorOrMethodDeclaration extends ClassFileMember
 
     Type getReturnedType();
 
+    BaseType getExceptionTypes();
+
     ClassFileBodyDeclaration getBodyDeclaration();
 
     Map<String, TypeArgument> getBindings();

@@ -64,7 +64,7 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
 
     @Override
     protected Expression updateExpression(Expression expression) {
-        if (expression.isMethodInvocationExpression() && expression.getInternalTypeName().startsWith("java/lang/")) {
+        if (expression != null && expression.isMethodInvocationExpression() && expression.getInternalTypeName().startsWith("java/lang/")) {
             int parameterSize = expression.getParameters() == null ? 0 : expression.getParameters().size();
 
             if (expression.getExpression().isObjectTypeReferenceExpression()) {

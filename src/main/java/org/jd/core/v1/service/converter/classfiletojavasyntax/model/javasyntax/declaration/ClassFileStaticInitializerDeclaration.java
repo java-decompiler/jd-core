@@ -94,6 +94,11 @@ public class ClassFileStaticInitializerDeclaration extends StaticInitializerDecl
     }
 
     @Override
+    public BaseType getExceptionTypes() {
+        return null;
+    }
+    
+    @Override
     public ClassFileBodyDeclaration getBodyDeclaration() {
         return bodyDeclaration;
     }

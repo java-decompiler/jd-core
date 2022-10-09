@@ -9,12 +9,13 @@ package org.jd.core.v1.api;
 
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.api.printer.Printer;
+import org.jd.core.v1.model.message.DecompileContext;
 
 import java.io.IOException;
 import java.util.Map;
 
 public interface Decompiler {
-    void decompile(Loader loader, Printer printer, String internalName) throws IOException;
+    DecompileContext decompile(Loader loader, Printer printer, String internalName) throws IOException;
 
-    void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws IOException;
+    DecompileContext decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws IOException;
 }

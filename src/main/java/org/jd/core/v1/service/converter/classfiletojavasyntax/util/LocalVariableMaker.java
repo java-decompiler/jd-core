@@ -15,6 +15,7 @@ import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTable;
 import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTypeTable;
 import org.jd.core.v1.model.classfile.attribute.AttributeParameterAnnotations;
+import org.jd.core.v1.model.classfile.attribute.LocalVariable;
 import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
@@ -211,7 +212,7 @@ public class LocalVariableMaker {
                 String descriptor;
                 String name;
                 AbstractLocalVariable lv;
-                for (org.jd.core.v1.model.classfile.attribute.LocalVariable localVariable : localVariableTable.localVariableTable()) {
+                for (LocalVariable localVariable : localVariableTable.localVariableTable()) {
                     index = localVariable.index();
                     startPc = !staticFlag && index==0 ? 0 : localVariable.startPc();
                     descriptor = localVariable.descriptor();

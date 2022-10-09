@@ -10,6 +10,7 @@ package org.jd.core.v1;
 import org.jd.core.v1.compiler.CompilerUtil;
 import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ZipLoader;
+import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
@@ -22,10 +23,18 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.apache.bcel.Const.MAJOR_1_1;
+import static org.apache.bcel.Const.MAJOR_1_5;
+import static org.apache.bcel.Const.MAJOR_1_8;
+
+import jd.core.ClassUtil;
 
 public class JarFileToJavaSourceTest extends AbstractJdTest {
 
-    private static final String META_INF_VERSIONS = "META-INF/versions/";
+    private static final Pattern MODULE_INFO_CLASS = Pattern.compile("META-INF/versions/(\\d+)/module-info\\.class");
 
     @Test
     public void testCommonsCodec() throws Exception {
@@ -37,15 +46,20 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
         test(org.apache.commons.collections4.CollectionUtils.class);
     }
 
-//    @Test
-//    public void testCommonsImaging() throws Exception {
-//        test(org.apache.commons.imaging.Imaging.class);
-//    }
+    @Test
+    public void testCommonsImaging() throws Exception {
+        test(org.apache.commons.imaging.Imaging.class);
+    }
 
     @Test
     public void testCommonsLang3() throws Exception {
         test(org.apache.commons.lang3.JavaVersion.class);
     }
+
+//    @Test
+//    public void testCommonsMath3() throws Exception {
+//        test(org.apache.commons.math3.Field.class);
+//    }
 
     @Test
     public void testDiskLruCache() throws Exception {
@@ -62,6 +76,7 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
         test(com.squareup.javawriter.JavaWriter.class);
     }
 
+//    TODO: in progress
 //    @Test
 //    public void testJodaTime() throws Exception {
 //        test(org.joda.time.DateTime.class);
@@ -102,7 +117,6 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
         test(org.apache.logging.log4j.core.Logger.class);
     }
     
-//    TODO: in progress    
 //    @Test
 //    public void testGuava() throws Exception {
 //        test(com.google.common.collect.Collections2.class);
@@ -115,7 +129,7 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
             test(inputStream);
         }
     }
-
+    
     protected void test(InputStream inputStream) throws Exception {
         long fileCounter = 0;
         long exceptionCounter = 0;
@@ -134,7 +148,7 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
 
             for (String path : loader.getMap().keySet()) {
                 if (path.endsWith(StringConstants.CLASS_FILE_SUFFIX) && (path.indexOf('$') == -1)) {
-                    String internalTypeName = path.substring(0, path.length() - 6); // 6 = ".class".length()
+                    String internalTypeName = ClassUtil.getInternalName(path);
 
                     // TODO DEBUG if (!internalTypeName.endsWith("/Debug")) continue;
                     //if (!internalTypeName.endsWith("/MapUtils")) continue;
@@ -143,10 +157,11 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
 
                     fileCounter++;
 
+                    DecompileContext ctx = null;
                     try {
                         // Decompile class
                         ClassFileToJavaSourceDecompiler classFileToJavaSourceDecompiler = new ClassFileToJavaSourceDecompiler();
-                        classFileToJavaSourceDecompiler.decompile(loader, printer, internalTypeName, configuration);
+                        ctx = classFileToJavaSourceDecompiler.decompile(loader, printer, internalTypeName, configuration);
                     } catch (AssertionError e) {
                         String msg = (e.getMessage() == null) ? "<?>" : e.getMessage();
                         statistics.merge(msg, 1, Integer::sum);
@@ -158,14 +173,23 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
                         exceptionCounter++;
                     }
 
-                    // Recompile source
                     String source = printer.toString();
-
-                    if (path.startsWith(META_INF_VERSIONS)) {
-                        // TODO: handle this some day
+                    StringBuilder jdkVersion = new StringBuilder();
+                    Matcher m = MODULE_INFO_CLASS.matcher(path);
+                    if (m.matches()) {
                         continue;
                     }
-                    if (!CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalTypeName, source))) {
+                    int majorVersion = ctx == null ? MAJOR_1_8 : ctx.getMajorVersion();
+                    if (majorVersion >= MAJOR_1_1) {
+                        if (majorVersion >= MAJOR_1_5) {
+                            jdkVersion.append(majorVersion - (MAJOR_1_5 - 5));
+                        } else {
+                            jdkVersion.append(majorVersion - (MAJOR_1_1 - 1));
+                        }
+                    }
+                    
+                    // Recompile source
+                    if (!CompilerUtil.compile(jdkVersion.toString(), new InMemoryJavaSourceFileObject(internalTypeName, source))) {
                         recompilationFailedCounter++;
                     }
                 }

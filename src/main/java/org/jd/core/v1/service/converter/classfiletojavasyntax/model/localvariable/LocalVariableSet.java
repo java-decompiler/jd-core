@@ -106,7 +106,7 @@ public class LocalVariableSet {
             AbstractLocalVariable lv = array[index];
 
             while (lv != null) {
-                if (lv.getFromOffset() <= offset) {
+                if (lv.getFromOffset() <= offset && offset <= lv.getToOffset() + 1) {
                     return lv;
                 }
 

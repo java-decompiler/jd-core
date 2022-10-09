@@ -18,8 +18,7 @@ public class GenericLocalVariable extends AbstractLocalVariable {
     private GenericType type;
 
     public GenericLocalVariable(int index, int offset, GenericType type) {
-        super(index, offset, null);
-        this.type = type;
+        this(index, offset, type, null);
     }
 
     public GenericLocalVariable(int index, int offset, GenericType type, String name) {
@@ -71,7 +70,7 @@ public class GenericLocalVariable extends AbstractLocalVariable {
         BaseType boundType = typeBounds.get(type.getName());
         if (boundType instanceof ObjectType) {
             ObjectType ot = (ObjectType) boundType;
-            if (ot.rawEquals(otherType)) {
+            if (ot.getInternalName().equals(otherType.getInternalName()) && getDimension() == otherType.getDimension()) {
                 return true;
             }
         }

@@ -75,6 +75,7 @@ import java.util.Map;
 import static org.apache.bcel.Const.ACC_SYNTHETIC;
 import static org.apache.bcel.Const.ASTORE;
 import static org.apache.bcel.Const.MAJOR_1_7;
+import static org.apache.bcel.Const.MAJOR_1_8;
 import static org.jd.core.v1.model.javasyntax.expression.Expression.UNKNOWN_LINE_NUMBER;
 import static org.jd.core.v1.model.javasyntax.expression.NoExpression.NO_EXPRESSION;
 import static org.jd.core.v1.model.javasyntax.type.ObjectType.TYPE_UNDEFINED_OBJECT;
@@ -252,8 +253,11 @@ public class StatementMaker {
                 watchdog.check(basicBlock, basicBlock.getNext());
                 // intended fall through
             case TYPE_THROW:
-                parseByteCode(basicBlock, statements);
-                makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
+                if (!basicBlock.isByteCodeParsed()) {
+                    parseByteCode(basicBlock, statements);
+                    makeStatements(watchdog, basicBlock.getNext(), statements, jumps);
+                    basicBlock.setByteCodeParsed(true);
+                }
                 break;
             case TYPE_RETURN:
                 Method method = basicBlock.getControlFlowGraph().getMethod();
@@ -598,9 +602,13 @@ public class StatementMaker {
         if (finallyStatements != null && !finallyStatements.isEmpty() && finallyStatements.getFirst().isMonitorExitStatement()) {
             statement = SynchronizedStatementMaker.make(localVariableMaker, statements, tryStatements);
         } else {
-            if (majorVersion >= MAJOR_1_7) {
-                assert !jsr;
+            if (majorVersion > MAJOR_1_8) {
                 statement = TryWithResourcesStatementMaker.make(localVariableMaker, statements, tryStatements, catchClauses, finallyStatements);
+            } else if (majorVersion >= MAJOR_1_7) {
+                statement = TryWithResourcesStatementMaker.makeLegacy(localVariableMaker, statements, tryStatements, catchClauses, finallyStatements);
+                if (statement == null) {
+                    statement = TryWithResourcesStatementMaker.make(localVariableMaker, statements, tryStatements, catchClauses, finallyStatements);
+                }
             }
             if (statement == null) {
                 statement = new ClassFileTryStatement(tryStatements, catchClauses, finallyStatements, jsr, eclipse);

@@ -82,6 +82,7 @@ public class BasicBlock {
     private BasicBlock branch;
     private BasicBlock condition;
     private boolean inverseCondition;
+    private boolean byteCodeParsed;
     private BasicBlock sub1;
     private BasicBlock sub2;
     private DefaultList<ExceptionHandler> exceptionHandlers = EMPTY_EXCEPTION_HANDLERS;
@@ -562,6 +563,14 @@ public class BasicBlock {
 
     public void setEnclosingLoop(Loop enclosingLoop) {
         this.enclosingLoop = enclosingLoop;
+    }
+
+    public boolean isByteCodeParsed() {
+        return byteCodeParsed;
+    }
+
+    public void setByteCodeParsed(boolean byteCodeParsed) {
+        this.byteCodeParsed = byteCodeParsed;
     }
 
     public void flip() {

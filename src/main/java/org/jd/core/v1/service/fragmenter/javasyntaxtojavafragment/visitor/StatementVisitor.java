@@ -171,7 +171,7 @@ public class StatementVisitor extends ExpressionVisitor {
         tokens = new Tokens();
         tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
 
-        statement.getExpression().accept(this);
+        safeAccept(statement.getExpression());
 
         tokens.add(TextToken.SEMICOLON);
         tokens.add(EndBlockToken.END_DECLARATION_OR_STATEMENT_BLOCK);
@@ -212,6 +212,11 @@ public class StatementVisitor extends ExpressionVisitor {
         tokens.add(TextToken.SPACE);
         tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
 
+        if (statement.isFinal()) {
+            tokens.add(StatementVisitor.FINAL);
+            tokens.add(TextToken.SPACE);
+        }
+        
         BaseType type = statement.getType();
 
         type.accept(this);
@@ -626,6 +631,12 @@ public class StatementVisitor extends ExpressionVisitor {
                 tokens = new Tokens();
                 tokens.add(CATCH);
                 tokens.add(TextToken.SPACE_LEFTROUNDBRACKET);
+                
+                if (cc.isFinal()) {
+                    tokens.add(StatementVisitor.FINAL);
+                    tokens.add(TextToken.SPACE);
+                }
+                
                 type.accept(this);
 
                 if (cc.getOtherTypes() != null) {

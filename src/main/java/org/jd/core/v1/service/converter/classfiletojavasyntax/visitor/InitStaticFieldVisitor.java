@@ -212,7 +212,7 @@ public class InitStaticFieldVisitor extends AbstractJavaSyntaxVisitor {
                     if ((fdn.getFlags() & Const.ACC_STATIC) != 0 && fdn.getType().getDescriptor().equals(fre.getDescriptor())) {
                         expression = expression.getRightExpression();
 
-                        searchLocalVariableReferenceVisitor.init(-1);
+                        searchLocalVariableReferenceVisitor.init(-1, null);
                         expression.accept(searchLocalVariableReferenceVisitor);
 
                         if (!searchLocalVariableReferenceVisitor.containsReference()) {
