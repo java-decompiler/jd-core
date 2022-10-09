@@ -645,7 +645,9 @@ public final class LoopStatementMaker {
                     } else if (item.getType().isGenericType()) {
                         if (item instanceof GenericLocalVariable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
                             GenericLocalVariable glv = (GenericLocalVariable) item;
-                            glv.setType((GenericType) type);
+                            if (type instanceof GenericType) {
+                                glv.setType((GenericType) type);
+                            }
                         }
                     } else {
                         item.typeOnRight(typeBounds, type);

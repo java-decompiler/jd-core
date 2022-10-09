@@ -682,6 +682,9 @@ public class ControlFlowGraphMaker {
                     predecessors.remove(next);
                     predecessors.add(bb);
                     next.setType(TYPE_DELETED);
+                    if (bb.getNext().getNext() == bb) {
+                        bb.setType(TYPE_STATEMENTS);
+                    }
                 } else if (next.getType() == TYPE_CONDITIONAL_BRANCH && ByteCodeUtil.evalStackDepth(constants, code, bb) > 0) {
                     // Merge STATEMENTS and CONDITIONAL_BRANCH
                     bb.setType(TYPE_CONDITIONAL_BRANCH);
