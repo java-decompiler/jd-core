@@ -99,7 +99,7 @@
 		<dependency>
 			<groupId>com.github.nbauma109</groupId>
 			<artifactId>jd-util</artifactId>
-			<version>1.1.10</version>
+			<version>1.1.11</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
