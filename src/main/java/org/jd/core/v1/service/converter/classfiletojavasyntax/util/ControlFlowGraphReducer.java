@@ -208,7 +208,12 @@ public abstract class ControlFlowGraphReducer {
             }
 
             if (nextNext.matchType(GROUP_END) && nextNext.getFromOffset() < maxOffset) {
-                createIf(basicBlock, next, nextNext, branch);
+                BasicBlock branchNext = branch.getNext();
+                if (nextNext.matchType(TYPE_SWITCH_BREAK) && branchNext.matchType(TYPE_SWITCH_BREAK) && next.matchType(TYPE_STATEMENTS) && branch.matchType(TYPE_STATEMENTS)) {
+                    createIfElse(TYPE_IF_ELSE, basicBlock, next, nextLast, branch, branch, nextNext);
+                } else {
+                    createIf(basicBlock, next, nextNext, branch);
+                }
                 return true;
             }
 

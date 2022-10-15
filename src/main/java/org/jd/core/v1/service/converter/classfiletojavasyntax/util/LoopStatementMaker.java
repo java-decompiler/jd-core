@@ -27,6 +27,8 @@ import org.jd.core.v1.model.javasyntax.type.BaseType;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.Type;
+import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
+import org.jd.core.v1.model.javasyntax.type.WildcardSuperTypeArgument;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileLocalVariableReferenceExpression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileNewExpression;
@@ -595,7 +597,7 @@ public final class LoopStatementMaker {
         // Check if 'i$' is not used in sub-statements
         SearchLocalVariableReferenceVisitor visitor1 = new SearchLocalVariableReferenceVisitor();
 
-        visitor1.init(syntheticIterator.getIndex());
+        visitor1.init(syntheticIterator);
 
         for (int i=1, len=subStatements.size(); i<len; i++) {
             subStatements.get(i).accept(visitor1);
@@ -643,7 +645,9 @@ public final class LoopStatementMaker {
                     } else if (item.getType().isGenericType()) {
                         if (item instanceof GenericLocalVariable) { // to convert to jdk16 pattern matching only when spotbugs #1617 and eclipse #577987 are solved
                             GenericLocalVariable glv = (GenericLocalVariable) item;
-                            glv.setType((GenericType) type);
+                            if (type instanceof GenericType) {
+                                glv.setType((GenericType) type);
+                            }
                         }
                     } else {
                         item.typeOnRight(typeBounds, type);
@@ -652,6 +656,14 @@ public final class LoopStatementMaker {
             }
         }
 
+        if (list instanceof MethodInvocationExpression && item.getType() instanceof ObjectType) {
+            MethodInvocationExpression exp = (MethodInvocationExpression) list;
+            ObjectType ot = (ObjectType) item.getType();
+            if (ot.getTypeArguments() instanceof WildcardExtendsTypeArgument || ot.getTypeArguments() instanceof WildcardSuperTypeArgument) {
+                exp.setNonWildcardTypeArguments(null);
+            }
+        }
+        
         return new ClassFileForEachStatement(item, list, subStatements);
     }
 

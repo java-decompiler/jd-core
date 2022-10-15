@@ -184,16 +184,13 @@ import static org.apache.bcel.Const.WIDE;
  //   50    54    57    java/io/IOException
  //   66    70    73    java/io/IOException
  */
-public final class ByteCodeWriter {
+public class ByteCodeWriter {
 
     public static final String DECOMPILATION_FAILED_AT_LINE = "Decompilation failed at line #";
 
     public static final String ILLEGAL_OPCODE = "<illegal opcode>";
 
-    private ByteCodeWriter() {
-    }
-
-    public static String write(String linePrefix, Method method) {
+    public String write(String linePrefix, Method method) {
         AttributeCode attributeCode = method.getAttribute("Code");
 
         if (attributeCode == null) {
@@ -210,7 +207,7 @@ public final class ByteCodeWriter {
         return sb.toString();
     }
 
-    public static String write(String linePrefix, Method method, int fromOffset, int toOffset) {
+    public String write(String linePrefix, Method method, int fromOffset, int toOffset) {
         AttributeCode attributeCode = method.getAttribute("Code");
 
         if (attributeCode == null) {
@@ -225,7 +222,7 @@ public final class ByteCodeWriter {
         return sb.toString();
     }
 
-    private static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+    protected void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
         byte[] code = attributeCode.getCode();
         int length = code.length;
 
@@ -233,7 +230,7 @@ public final class ByteCodeWriter {
         writeByteCode(linePrefix, sb, constants, code, 0, length);
     }
 
-    private static void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, byte[] code, int fromOffset, int toOffset) {
+    protected void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, byte[] code, int fromOffset, int toOffset) {
         for (int offset=fromOffset; offset<toOffset; offset++) {
             int opcode = code[offset] & 255;
 
@@ -414,7 +411,7 @@ public final class ByteCodeWriter {
         }
     }
 
-    private static void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
+    protected void writeLDC(StringBuilder sb, ConstantPool constants, Constant constant) {
         switch (constant.getTag()) {
             case Const.CONSTANT_Integer:
                 sb.append(' ').append(((ConstantInteger) constant).getBytes());
@@ -465,7 +462,7 @@ public final class ByteCodeWriter {
         }
     }
 
-    private static void writeLineNumberTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
+    protected void writeLineNumberTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
         AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
 
         if (lineNumberTable != null) {
@@ -510,7 +507,7 @@ public final class ByteCodeWriter {
         return comments;
     }
 
-    private static void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
+    protected void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
         AttributeLocalVariableTable localVariableTable = attributeCode.getAttribute("LocalVariableTable");
 
         if (localVariableTable != null) {
@@ -544,7 +541,7 @@ public final class ByteCodeWriter {
         }
     }
 
-    private static void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+    protected void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
         CodeException[] codeExceptions = attributeCode.getExceptionTable();
 
         if (codeExceptions != null) {

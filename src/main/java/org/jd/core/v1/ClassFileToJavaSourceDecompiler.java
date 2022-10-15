@@ -23,6 +23,7 @@ import org.jd.core.v1.service.writer.WriteTokenProcessor;
 import org.jd.core.v1.util.DefaultList;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
 public class ClassFileToJavaSourceDecompiler implements Decompiler {
@@ -34,18 +35,12 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     private final WriteTokenProcessor writer = new WriteTokenProcessor();
 
     @Override
-    public void decompile(Loader loader, Printer printer, String internalName) throws IOException {
-        DecompileContext decompileContext = new DecompileContext();
-
-        decompileContext.setMainInternalTypeName(internalName);
-        decompileContext.setLoader(loader);
-        decompileContext.setPrinter(printer);
-
-        decompile(decompileContext);
+    public DecompileContext decompile(Loader loader, Printer printer, String internalName) throws IOException {
+        return decompile(loader, printer, internalName, Collections.emptyMap());
     }
 
     @Override
-    public void decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws IOException {
+    public DecompileContext decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws IOException {
         DecompileContext decompileContext = new DecompileContext();
 
         decompileContext.setMainInternalTypeName(internalName);
@@ -54,6 +49,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
         decompileContext.setPrinter(printer);
 
         decompile(decompileContext);
+        return decompileContext;
     }
 
     protected void decompile(DecompileContext decompileContext) throws IOException {

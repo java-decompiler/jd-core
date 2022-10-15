@@ -20,6 +20,9 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.e
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.expression.ClassFileSuperConstructorInvocationExpression;
 
 public abstract class AbstractTypeParametersToTypeArgumentsBinder {
+    
+    protected BaseType exceptionTypes;
+    
     public abstract ClassFileConstructorInvocationExpression newConstructorInvocationExpression(
             int lineNumber, ObjectType objectType, String descriptor,
             TypeMaker.MethodTypes methodTypes, BaseExpression parameters);
@@ -41,11 +44,15 @@ public abstract class AbstractTypeParametersToTypeArgumentsBinder {
 
     public abstract void bindParameterTypesWithArgumentTypes(Type type, Expression expression, boolean parametersFirst);
 
+    public void setExceptionTypes(BaseType exceptionTypes) {
+        this.exceptionTypes = exceptionTypes;
+    }
+
     public void updateNewExpression(ClassFileNewExpression ne, String descriptor, TypeMaker.MethodTypes methodTypes, BaseExpression parameters) {
         ne.set(descriptor, clone(methodTypes.getParameterTypes()), parameters);
     }
 
-    protected static BaseType clone(BaseType parameterTypes) {
+    public static BaseType clone(BaseType parameterTypes) {
         if (parameterTypes != null && parameterTypes.isList()) {
             parameterTypes = switch (parameterTypes.size()) {
                 case 0 -> null;
@@ -56,5 +63,6 @@ public abstract class AbstractTypeParametersToTypeArgumentsBinder {
 
         return parameterTypes;
     }
+
 
 }

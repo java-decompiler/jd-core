@@ -1,5 +1,7 @@
 package org.jd.core.v1.compiler;
 
+import org.jd.core.v1.util.StringConstants;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -11,7 +13,7 @@ public class InMemoryJavaClassFileObject extends SimpleJavaFileObject {
     private ByteArrayOutputStream byteCode;
 
     public InMemoryJavaClassFileObject(String absClassName) {
-        super(URI.create("memory:///" + absClassName.replace('.', '/') + ".class"), Kind.CLASS);
+        super(URI.create("memory:///" + absClassName.replace('.', '/') + StringConstants.CLASS_FILE_SUFFIX), Kind.CLASS);
     }
 
     @Override

@@ -756,17 +756,17 @@ public class CompilationUnitVisitor extends StatementVisitor {
             tokens.add(TextToken.SPACE);
         }
 
+        if (declaration.isFinal()) {
+            tokens.add(FINAL);
+            tokens.add(TextToken.SPACE);
+        }
+
         if (declaration.isVarargs()) {
             Type arrayType = declaration.getType();
             BaseType type = arrayType.createType(Math.max(0, arrayType.getDimension() - 1));
             type.accept(this);
             tokens.add(TextToken.VARARGS);
         } else {
-            if (declaration.isFinal()) {
-                tokens.add(FINAL);
-                tokens.add(TextToken.SPACE);
-            }
-
             BaseType type = declaration.getType();
 
             type.accept(this);

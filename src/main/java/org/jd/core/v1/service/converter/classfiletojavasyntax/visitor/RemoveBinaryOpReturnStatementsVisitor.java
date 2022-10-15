@@ -32,10 +32,10 @@ public class RemoveBinaryOpReturnStatementsVisitor extends AbstractJavaSyntaxVis
             if (lastStatement.isReturnExpressionStatement() && lastStatement.getExpression().isLocalVariableReferenceExpression()) {
                 ClassFileLocalVariableReferenceExpression lvr1 = (ClassFileLocalVariableReferenceExpression)lastStatement.getExpression();
 
-                if (lvr1.getName() == null) {
+                if (lvr1.getName() == null || lvr1.getLocalVariable().getOriginalVariable() != null) {
                     Statement statement = statements.get(statements.size()-2);
 
-                    if (statement.getExpression().isBinaryOperatorExpression()) {
+                    if (statement.getExpression() != null && statement.getExpression().isBinaryOperatorExpression()) {
                         Expression boe = statement.getExpression();
                         Expression leftExpression = boe.getLeftExpression();
 

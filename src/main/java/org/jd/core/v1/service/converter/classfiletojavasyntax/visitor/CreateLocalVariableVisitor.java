@@ -80,5 +80,6 @@ public class CreateLocalVariableVisitor extends AbstractNopTypeArgumentVisitor i
         } else {
             localVariable = new ObjectLocalVariable(typeMaker, index, offset, lv.getType(), null);
         }
+        localVariable.setOriginalVariable(lv);
     }
 }

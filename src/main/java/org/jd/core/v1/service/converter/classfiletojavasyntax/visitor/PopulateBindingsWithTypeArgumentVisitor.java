@@ -94,7 +94,10 @@ public class PopulateBindingsWithTypeArgumentVisitor implements TypeArgumentVisi
 
                         if (!typeMaker.isAssignable(bindings, typeBounds, ot1, ot2)) {
                             if (typeMaker.isAssignable(bindings, typeBounds, ot2, ot1)) {
-                                bindings.put(typeName, checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(type));
+                                TypeArgument newBoundType = checkTypeClassCheckDimensionAndReturnCurrentAsTypeArgument(type);
+                                if (!ObjectType.TYPE_CLASS_WILDCARD.equals(newBoundType)) {
+                                    bindings.put(typeName, newBoundType);
+                                }
                             } else {
                                 bindings.put(typeName, WildcardTypeArgument.WILDCARD_TYPE_ARGUMENT);
                             }

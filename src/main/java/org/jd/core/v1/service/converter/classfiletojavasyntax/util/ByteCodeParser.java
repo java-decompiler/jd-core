@@ -141,24 +141,30 @@ public class ByteCodeParser {
 
     private final TypeMaker typeMaker;
     private final LocalVariableMaker localVariableMaker;
+    private final boolean diamondSupported;
     private final boolean genericTypesSupported;
+    private final int majorVersion;
     private final String internalTypeName;
     private final AbstractTypeParametersToTypeArgumentsBinder typeParametersToTypeArgumentsBinder;
     private final AttributeBootstrapMethods attributeBootstrapMethods;
     private final ClassFileBodyDeclaration bodyDeclaration;
     private final Map<String, BaseType> typeBounds;
     private Type returnedType;
+    private BaseType exceptionTypes;
 
     public ByteCodeParser(
             TypeMaker typeMaker, LocalVariableMaker localVariableMaker, ClassFile classFile,
             ClassFileBodyDeclaration bodyDeclaration, ClassFileConstructorOrMethodDeclaration comd) {
         this.typeMaker = typeMaker;
         this.localVariableMaker = localVariableMaker;
-        this.genericTypesSupported = classFile.getMajorVersion() >= MAJOR_1_5;
+        this.majorVersion = classFile.getMajorVersion();
+        this.diamondSupported = majorVersion >= MAJOR_1_7;
+        this.genericTypesSupported = majorVersion >= MAJOR_1_5;
         this.internalTypeName = classFile.getInternalTypeName();
         this.attributeBootstrapMethods = classFile.getAttribute("BootstrapMethods");
         this.bodyDeclaration = bodyDeclaration;
         this.returnedType = comd.getReturnedType();
+        this.exceptionTypes = comd.getExceptionTypes();
         this.typeBounds = comd.getTypeBounds();
 
         if (this.genericTypesSupported) {
@@ -295,6 +301,7 @@ public class ByteCodeParser {
                 case ISTORE, LSTORE, FSTORE, DSTORE:
                     valueRef = stack.pop();
                     localVariable = getLocalVariableInAssignment(code[++offset] & 255, offset + 2, valueRef);
+                    localVariable.setAssigned(true);
                     parseSTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
                 case ASTORE:
@@ -327,30 +334,12 @@ public class ByteCodeParser {
                     localVariable = getLocalVariableInAssignment(opcode - 75, offset + 1, valueRef);
                     parseASTORE(statements, stack, lineNumber, offset, localVariable, valueRef);
                     break;
-                case IASTORE:
+                case IASTORE, LASTORE, FASTORE, DASTORE, BASTORE, CASTORE, SASTORE:
                     valueRef = stack.pop();
                     indexRef = stack.pop();
                     arrayRef = stack.pop();
                     type1 = arrayRef.getType();
                     statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, type1.createType(type1.getDimension()-1), new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
-                    break;
-                case LASTORE:
-                    valueRef = stack.pop();
-                    indexRef = stack.pop();
-                    arrayRef = stack.pop();
-                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_LONG, new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
-                    break;
-                case FASTORE:
-                    valueRef = stack.pop();
-                    indexRef = stack.pop();
-                    arrayRef = stack.pop();
-                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_FLOAT, new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
-                    break;
-                case DASTORE:
-                    valueRef = stack.pop();
-                    indexRef = stack.pop();
-                    arrayRef = stack.pop();
-                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_DOUBLE, new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
                     break;
                 case AASTORE:
                     valueRef = stack.pop();
@@ -359,25 +348,7 @@ public class ByteCodeParser {
                     type1 = arrayRef.getType();
                     type2 = type1.createType(type1.getDimension()>0 ? type1.getDimension()-1 : 0);
                     typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(type2, valueRef);
-                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, type2, new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
-                    break;
-                case BASTORE:
-                    valueRef = stack.pop();
-                    indexRef = stack.pop();
-                    arrayRef = stack.pop();
-                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_BYTE, new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
-                    break;
-                case CASTORE:
-                    valueRef = stack.pop();
-                    indexRef = stack.pop();
-                    arrayRef = stack.pop();
-                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_CHAR, new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
-                    break;
-                case SASTORE:
-                    valueRef = stack.pop();
-                    indexRef = stack.pop();
-                    arrayRef = stack.pop();
-                    statements.add(new ExpressionStatement(new BinaryOperatorExpression(lineNumber, TYPE_SHORT, new ArrayExpression(lineNumber, arrayRef, indexRef), "=", valueRef, 16)));
+                    parseAASTORE(statements, stack, lineNumber, new ArrayExpression(lineNumber, arrayRef, indexRef), valueRef);
                     break;
                 case POP, POP2:
                     expression1 = stack.pop();
@@ -826,6 +797,7 @@ public class ByteCodeParser {
                     if (opcode == INVOKESTATIC) {
                         expression1 = typeParametersToTypeArgumentsBinder.newMethodInvocationExpression(lineNumber, new ObjectTypeReferenceExpression(lineNumber, ot), ot, name, descriptor, methodTypes, parameters);
                         if (TYPE_VOID.equals(methodTypes.getReturnedType())) {
+                            typeParametersToTypeArgumentsBinder.setExceptionTypes(exceptionTypes);
                             typeParametersToTypeArgumentsBinder.bindParameterTypesWithArgumentTypes(TYPE_OBJECT, expression1);
                             statements.add(new ExpressionStatement(expression1));
                         } else {
@@ -1191,8 +1163,11 @@ public class ByteCodeParser {
                 }
             }
         }
-
-        stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
+        if (!localVariable.isAssigned() && localVariable.getNext() != null && localVariable.getNext().isAssigned()) {
+            stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable.getNext()));
+        } else {
+            stack.push(new ClassFileLocalVariableReferenceExpression(lineNumber, offset, localVariable));
+        }
     }
 
     private void parseSTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, int offset, AbstractLocalVariable localVariable, Expression valueRef) {
@@ -1628,6 +1603,20 @@ public class ByteCodeParser {
         createAssignment(statements, stack, lineNumber, vre, valueRef);
     }
 
+    private void parseAASTORE(Statements statements, DefaultStack<Expression> stack, int lineNumber, Expression leftExpression, Expression valueRef) {
+        Expression oldValueRef = valueRef;
+        
+        if (valueRef.isNewArray()) {
+            valueRef = NewArrayMaker.make(statements, valueRef);
+        }
+        
+        if (oldValueRef != valueRef) {
+            stack.replace(oldValueRef, valueRef);
+        }
+        
+        createAssignment(statements, stack, lineNumber, leftExpression, valueRef);
+    }
+    
     private void createAssignment(Statements statements, DefaultStack<Expression> stack, int lineNumber, Expression leftExpression, Expression rightExpression) {
         if (!stack.isEmpty() && stack.peek() == rightExpression) {
             stack.push(new BinaryOperatorExpression(lineNumber, leftExpression.getType(), leftExpression, "=", stack.pop(), 16));
@@ -1929,7 +1918,7 @@ public class ByteCodeParser {
             ClassFileTypeDeclaration typeDeclaration = bodyDeclaration.getInnerTypeDeclaration(internalTypeName);
 
             if (typeDeclaration == null) {
-                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT, false);
+                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT, false, diamondSupported);
             }
             if (typeDeclaration.isClassDeclaration()) {
                 ClassFileClassDeclaration declaration = (ClassFileClassDeclaration) typeDeclaration;
@@ -1941,17 +1930,18 @@ public class ByteCodeParser {
                     localBodyDeclaration = declaration.getBodyDeclaration();
                 }
 
+                boolean diamondPossible = majorVersion > MAJOR_1_8 || (localBodyDeclaration == null && majorVersion >= MAJOR_1_7);
                 if (declaration.getInterfaces() != null) {
-                    return new ClassFileNewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), localBodyDeclaration, true, false);
+                    return new ClassFileNewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), localBodyDeclaration, true, false, diamondPossible);
                 }
                 if (declaration.getSuperType() != null) {
-                    return new ClassFileNewExpression(lineNumber, declaration.getSuperType(), localBodyDeclaration, true, false);
+                    return new ClassFileNewExpression(lineNumber, declaration.getSuperType(), localBodyDeclaration, true, false, diamondPossible);
                 }
-                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT, localBodyDeclaration, true, false);
+                return new ClassFileNewExpression(lineNumber, TYPE_OBJECT, localBodyDeclaration, true, false, diamondPossible);
             }
         }
 
-        return new ClassFileNewExpression(lineNumber, objectType, false);
+        return new ClassFileNewExpression(lineNumber, objectType, false, diamondSupported);
     }
 
     /**

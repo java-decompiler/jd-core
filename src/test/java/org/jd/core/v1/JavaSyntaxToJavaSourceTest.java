@@ -151,11 +151,12 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                             )
                                                         )
                                                     ),
+                                                    false,
                                                     false
                                                 ),
                                                 new LocalVariableReferenceExpression(21, PrimitiveType.TYPE_CHAR, "c")
                                             ),
-                                            false
+                                            null
                                         )
                                     )
                                 )
@@ -176,7 +177,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                     "println",
                                     "(I)V",
                                     new LocalVariableReferenceExpression(22, PrimitiveType.TYPE_INT, "i"),
-                                    false
+                                    null
                                 )
                             )
                         )
@@ -442,7 +443,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                     new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "otherMass"),
                                     "*",
                                     new MethodInvocationExpression(
-                                        PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "surfaceGravity", "()D", false
+                                        PrimitiveType.TYPE_DOUBLE, thisExpression, "org/jd/core/v1/service/test/Planet", "surfaceGravity", "()D", null
                                     ),
                                     4
                                 )
@@ -478,7 +479,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                             "println",
                                             "(Ljava/lang/String;)V",
                                             new StringConstantExpression("Usage: java Planet <earth_weight>"),
-                                            false
+                                            null
                                         )),
                                         new ExpressionStatement(new MethodInvocationExpression(
                                             PrimitiveType.TYPE_VOID,
@@ -487,7 +488,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                             "exit",
                                             "(I)V",
                                             new IntegerConstantExpression(PrimitiveType.TYPE_INT, -1),
-                                            false
+                                            null
                                         ))
                                     )
                                 ),
@@ -504,7 +505,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                 new LocalVariableReferenceExpression(arrayOfStringType, "args"),
                                                 new IntegerConstantExpression(PrimitiveType.TYPE_INT, 0)
                                             ),
-                                            false
+                                            null
                                         )
                                     ))
                                 ),
@@ -527,7 +528,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                 "org/jd/core/v1/service/test/Planet",
                                                 "surfaceGravity",
                                                 "()D",
-                                                false
+                                                null
                                             ),
                                             4
                                         )
@@ -542,7 +543,7 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                         "org/jd/core/v1/service/test/Planet",
                                         "values",
                                         "()[Lorg/jd/core/v1/service/test/Planet;", 
-                                        false),
+                                        null),
                                     new ExpressionStatement(new MethodInvocationExpression(
                                         PrimitiveType.TYPE_VOID,
                                         new FieldReferenceExpression(
@@ -565,10 +566,10 @@ public class JavaSyntaxToJavaSourceTest extends TestCase {
                                                 "surfaceWeight",
                                                 "(D)D",
                                                 new LocalVariableReferenceExpression(PrimitiveType.TYPE_DOUBLE, "mass"),
-                                                false
+                                                null
                                             )
                                         ),
-                                        false
+                                        null
                                     ))
                                 )
                             )

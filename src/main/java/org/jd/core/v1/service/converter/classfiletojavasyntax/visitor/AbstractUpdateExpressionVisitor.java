@@ -332,7 +332,7 @@ public abstract class AbstractUpdateExpressionVisitor extends AbstractJavaSyntax
     @Override
     public void visit(ExpressionStatement statement) {
         statement.setExpression(updateExpression(statement.getExpression()));
-        statement.getExpression().accept(this);
+        safeAccept(statement.getExpression());
     }
 
     @Override

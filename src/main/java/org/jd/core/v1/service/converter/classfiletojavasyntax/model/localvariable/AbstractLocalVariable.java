@@ -18,11 +18,13 @@ import java.util.Set;
 public abstract class AbstractLocalVariable {
     private Frame frame;
     private AbstractLocalVariable next;
+    private AbstractLocalVariable originalVariable;
     private boolean declared;
+    private boolean assigned;
     private final int index;
     private int fromOffset;
     private int toOffset;
-    private String name;
+    protected String name;
     private String oldName;
     private final DefaultList<LocalVariableReference> references = new DefaultList<>();
     private Set<AbstractLocalVariable> variablesOnRight;
@@ -138,4 +140,20 @@ public abstract class AbstractLocalVariable {
     }
 
     public boolean isPrimitiveLocalVariable() { return false; }
+
+    public boolean isAssigned() {
+        return assigned;
+    }
+
+    public void setAssigned(boolean assigned) {
+        this.assigned = assigned;
+    }
+
+    public AbstractLocalVariable getOriginalVariable() {
+        return originalVariable;
+    }
+
+    public void setOriginalVariable(AbstractLocalVariable originalVariable) {
+        this.originalVariable = originalVariable;
+    }
 }

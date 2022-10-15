@@ -58,6 +58,7 @@ import org.jd.core.v1.model.javasyntax.type.BaseTypeParameter;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
 import org.jd.core.v1.model.javasyntax.type.InnerObjectType;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
+import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import org.jd.core.v1.model.javasyntax.type.TypeArguments;
@@ -81,6 +82,7 @@ import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.StringConstants;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
@@ -91,6 +93,7 @@ import java.util.Set;
 import static org.apache.bcel.Const.ACC_BRIDGE;
 import static org.apache.bcel.Const.ACC_SYNTHETIC;
 import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_BYTE;
+import static org.jd.core.v1.model.javasyntax.type.PrimitiveType.TYPE_SHORT;
 
 public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     private final SearchFirstLineNumberVisitor searchFirstLineNumberVisitor = new SearchFirstLineNumberVisitor();
@@ -598,6 +601,18 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
             }
         }
 
+        for (PrimitiveType primitiveType : Arrays.asList(TYPE_BYTE, TYPE_SHORT)) {
+            if (primitiveType.createType(type.getDimension()).equals(type) && expression.isNewInitializedArray()) {
+                NewInitializedArray newInitializedArray = (NewInitializedArray) expression;
+                for (VariableInitializer variableInitializer : newInitializedArray.getArrayInitializer()) {
+                    if (variableInitializer instanceof ExpressionVariableInitializer) {
+                        ExpressionVariableInitializer evi = (ExpressionVariableInitializer) variableInitializer;
+                        evi.setExpression(new CastExpression(primitiveType, evi.getExpression()));
+                    }
+                }
+            }
+        }
+        
         return expression;
     }
 
@@ -634,7 +649,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                                 // Incompatible typeArgument arguments => Add cast
                                 t = objectType.createType(ta1.isGenericTypeArgument() ? ta1 :  null);
                             }
-                            if (!expression.isNew() && hasKnownTypeParameters(t)) {
+                            if (!expression.isNew() && hasKnownTypeParameters(t) && !(ta1 instanceof WildcardSuperTypeArgument)) {
                                 expression = addCastExpression(t, expression);
                             }
                         }
@@ -690,7 +705,6 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if (type.isObjectType() && nestedExpressionType.isObjectType()) {
             ObjectType left = (ObjectType) type;
             ObjectType right = (ObjectType) nestedExpressionType;
-
             if (left.equals(right) || unique && typeMaker.isAssignable(typeBindings, localTypeBounds, left, right)) {
                 return true;
             }
