@@ -387,7 +387,7 @@ public class SearchImportsVisitor extends AbstractJavaSyntaxVisitor {
 
                 if (!importTypeNames.contains(typeName)) {
                     if (internalTypeName.startsWith("java/lang/")) {
-                        if (internalTypeName.indexOf('/', 10) != -1) { // 10 = "java/lang/".length()
+                        if (internalTypeName.indexOf('/', 10) != -1 && !loader.canLoad(internalPackagePrefix + typeName)) { // 10 = "java/lang/".length()
                             importsFragment.addImport(internalTypeName, type.getQualifiedName());
                             importTypeNames.add(typeName);
                         }

@@ -37,10 +37,15 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
     private static final Pattern MODULE_INFO_CLASS = Pattern.compile("META-INF/versions/(\\d+)/module-info\\.class");
 
     @Test
+    public void testBCEL() throws Exception {
+        test(org.apache.bcel.Const.class);
+    }
+
+    @Test
     public void testCommonsCodec() throws Exception {
         test(org.apache.commons.codec.Charsets.class);
     }
-
+    
     @Test
     public void testCommonsCollections4() throws Exception {
         test(org.apache.commons.collections4.CollectionUtils.class);

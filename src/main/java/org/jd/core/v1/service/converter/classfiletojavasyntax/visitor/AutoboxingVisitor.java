@@ -8,6 +8,7 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
+import org.jd.core.v1.model.javasyntax.expression.ConstructorInvocationExpression;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileBodyDeclaration;
 import org.jd.core.v1.util.StringConstants;
@@ -86,4 +87,7 @@ public class AutoboxingVisitor extends AbstractUpdateExpressionVisitor {
 
         return expression;
     }
+
+    @Override
+    protected void maybeUpdateParameters(ConstructorInvocationExpression expression) {}
 }

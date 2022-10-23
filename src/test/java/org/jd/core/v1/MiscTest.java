@@ -7,6 +7,8 @@
 
 package org.jd.core.v1;
 
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.generic.PUSH;
 import org.apache.commons.codec.language.DaitchMokotoffSoundex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Factory;
@@ -135,6 +137,24 @@ public class MiscTest extends AbstractJdTest {
     @Test
     public void testTiffImageWriterBase() throws Exception {
         String internalClassName = TiffImageWriterBase.class.getName().replace('.', '/');
+        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+        
+        // Recompile decompiled source code and check errors
+        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
+    }
+    
+    @Test
+    public void testJavaClass() throws Exception {
+        String internalClassName = JavaClass.class.getName().replace('.', '/');
+        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+        
+        // Recompile decompiled source code and check errors
+        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
+    }
+    
+    @Test
+    public void testPUSH() throws Exception {
+        String internalClassName = PUSH.class.getName().replace('.', '/');
         String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
         
         // Recompile decompiled source code and check errors
