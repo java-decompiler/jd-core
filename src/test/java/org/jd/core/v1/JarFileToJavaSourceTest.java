@@ -40,12 +40,17 @@ public class JarFileToJavaSourceTest extends AbstractJdTest {
     public void testBCEL() throws Exception {
         test(org.apache.bcel.Const.class);
     }
+    
+    @Test
+    public void testCommonsIO() throws Exception {
+        test(org.apache.commons.io.IOUtils.class);
+    }
 
     @Test
     public void testCommonsCodec() throws Exception {
         test(org.apache.commons.codec.Charsets.class);
     }
-    
+
     @Test
     public void testCommonsCollections4() throws Exception {
         test(org.apache.commons.collections4.CollectionUtils.class);

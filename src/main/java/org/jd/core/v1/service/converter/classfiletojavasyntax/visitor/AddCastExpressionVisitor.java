@@ -62,7 +62,6 @@ import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 import org.jd.core.v1.model.javasyntax.type.Type;
 import org.jd.core.v1.model.javasyntax.type.TypeArgument;
 import org.jd.core.v1.model.javasyntax.type.TypeArguments;
-import org.jd.core.v1.model.javasyntax.type.TypeParameter;
 import org.jd.core.v1.model.javasyntax.type.TypeParameterWithTypeBounds;
 import org.jd.core.v1.model.javasyntax.type.Types;
 import org.jd.core.v1.model.javasyntax.type.WildcardExtendsTypeArgument;
@@ -102,12 +101,15 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     private Map<String, BaseType> typeBounds;
     private Type returnedType;
     private BaseType exceptionTypes;
-    private Deque<BaseTypeParameter> typeParameters = new ArrayDeque<>();
+    private Deque<TypeParameter> typeParameters = new ArrayDeque<>();
     private Map<String, BaseTypeArgument> parameterTypeArguments = new HashMap<>();
     private Type type;
     private boolean visitingAnonymousClass;
     private boolean visitingLambda;
     private Set<String> fieldNamesInLambda = new HashSet<>();
+    private boolean staticContext;
+    
+    private record TypeParameter(boolean staticContext, BaseTypeParameter type) {}
 
     public AddCastExpressionVisitor(TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
@@ -197,16 +199,19 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                 Map<String, BaseType> tb = typeBounds;
                 Type rt = returnedType;
                 BaseType et = exceptionTypes;
+                boolean sc = staticContext;
 
                 typeBounds = ((ClassFileMethodDeclaration) declaration).getTypeBounds();
                 returnedType = declaration.getReturnedType();
                 exceptionTypes = declaration.getExceptionTypes();
+                staticContext = declaration.isStatic();
                 pushContext(declaration);
                 safeAccept(declaration.getFormalParameters());
                 statements.accept(this);
                 typeBounds = tb;
                 returnedType = rt;
                 exceptionTypes = et;
+                staticContext = sc;
                 popContext(declaration);
             }
         }
@@ -229,7 +234,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
     
     public void pushContext(MethodDeclaration declaration) {
         if (declaration.getTypeParameters() != null) {
-            typeParameters.push(declaration.getTypeParameters());
+            typeParameters.push(new TypeParameter(declaration.isStatic(), declaration.getTypeParameters()));
         }
     }
 
@@ -244,7 +249,7 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     public void pushContext(ClassDeclaration declaration) {
         if (declaration.getTypeParameters() != null) {
-            typeParameters.push(declaration.getTypeParameters());
+            typeParameters.push(new TypeParameter(declaration.isStatic(), declaration.getTypeParameters()));
         }
     }
     
@@ -540,10 +545,10 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     @Override
     public void visit(TypeArguments type) {
-        BaseTypeParameter baseTypeParameter = typeParameters.peek();
+        TypeParameter baseTypeParameter = typeParameters.peek();
         TypeWithBoundsToGenericVisitor typeParameterVisitor = new TypeWithBoundsToGenericVisitor();
         if (baseTypeParameter != null) {
-            baseTypeParameter.accept(typeParameterVisitor);
+            baseTypeParameter.type().accept(typeParameterVisitor);
             type.accept(typeParameterVisitor);
         }
     }
@@ -623,6 +628,8 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
                 expression.accept(searchFirstLineNumberVisitor);
                 expression = new CastExpression(searchFirstLineNumberVisitor.getLineNumber(), type, expression);
             }
+        } else if ("java/util/stream/Collectors".equals(expression.getInternalTypeName()) && "toList".equals(expression.getName())) {
+            return expression;
         } else {
             Type expressionType = expression.getType();
 
@@ -720,9 +727,9 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
 
     private Set<String> findKnownTypeParameters() {
         Set<String> genericIdentifiers = new HashSet<>();
-        for (BaseTypeParameter baseTypeParameters : typeParameters) {
-            for (TypeParameter typeParameter : baseTypeParameters) {
-                genericIdentifiers.add(typeParameter.getIdentifier());
+        for (TypeParameter baseTypeParameters : typeParameters) {
+            if (!staticContext || baseTypeParameters.staticContext()) {
+                baseTypeParameters.type().forEach(typeParameter -> genericIdentifiers.add(typeParameter.getIdentifier()));
             }
         }
         return genericIdentifiers;

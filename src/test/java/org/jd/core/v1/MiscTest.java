@@ -22,6 +22,8 @@ import org.apache.commons.imaging.formats.jpeg.segments.DhtSegment;
 import org.apache.commons.imaging.formats.pnm.PnmImageParser;
 import org.apache.commons.imaging.formats.tiff.write.TiffImageWriterBase;
 import org.apache.commons.imaging.internal.Util;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.function.TriFunction;
@@ -74,6 +76,7 @@ import com.google.common.collect.Sets.SetView;
 import com.squareup.javapoet.CodeBlock;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.invoke.MethodHandle;
@@ -103,6 +106,9 @@ import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.Vector;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MiscTest extends AbstractJdTest {
 
@@ -115,6 +121,22 @@ public class MiscTest extends AbstractJdTest {
 //        // Recompile decompiled source code and check errors
 //        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
 //    }
+    
+    @Test
+    public void testFileFilterUtils() throws Exception {
+        abstract class FileFilterUtils {
+            abstract <R, A> R filterFiles(IOFileFilter filter, Stream<File> stream, Collector<? super File, A, R> collector);
+            @SuppressWarnings("unused")
+            File[] filter(IOFileFilter filter, File... files) {
+                return filterFiles(filter, Stream.of(files), Collectors.toList()).toArray(FileUtils.EMPTY_FILE_ARRAY);
+            }
+        }
+        String internalClassName = FileFilterUtils.class.getName().replace('.', '/');
+        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+        
+        // Recompile decompiled source code and check errors
+        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
+    }
     
     @Test
     public void testCastPrimitive() throws Exception {
