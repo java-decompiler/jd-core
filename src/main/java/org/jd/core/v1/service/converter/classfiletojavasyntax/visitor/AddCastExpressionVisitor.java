@@ -463,11 +463,12 @@ public class AddCastExpressionVisitor extends AbstractJavaSyntaxVisitor {
         if (parameters != null) {
             boolean unique = typeMaker.matchCount(expression.getObjectType().getInternalName(), StringConstants.INSTANCE_CONSTRUCTOR, parameters.size(), true) <= 1;
             boolean forceCast = !unique && typeMaker.matchCount(Collections.emptyMap(), typeBounds, expression.getObjectType().getInternalName(), StringConstants.INSTANCE_CONSTRUCTOR, parameters, true) > 1;
-            boolean rawCast = (returnedType instanceof ObjectType && expression.getType() instanceof ObjectType
-                    && typeMaker.isRawTypeAssignable((ObjectType) returnedType, (ObjectType) expression.getType())
-                    && !typeMaker.isAssignable(typeBounds, (ObjectType) returnedType, (ObjectType) expression.getType()));
+            Type currentType = type == null ? returnedType : type;
+            boolean rawCast = (currentType instanceof ObjectType && expression.getType() instanceof ObjectType
+                    && typeMaker.isRawTypeAssignable((ObjectType) currentType, expression.getObjectType())
+                    && !typeMaker.isAssignable(typeBounds, (ObjectType) currentType, expression.getObjectType()));
             if (rawCast) {
-                expression.setObjectType(expression.getObjectType().createType(((ObjectType) returnedType).getTypeArguments()));
+                expression.setObjectType(expression.getObjectType().createType(((ObjectType) currentType).getTypeArguments()));
             }
             BaseType parameterTypes = ((ClassFileNewExpression)expression).getParameterTypes();
             expression.setParameters(updateParameters(Collections.emptyMap(), typeBounds, parameterTypes, null, parameters, forceCast, unique, rawCast));

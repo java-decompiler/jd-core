@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.nbauma109</groupId>
 	<artifactId>jd-core</artifactId>
@@ -93,6 +94,10 @@
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
+		</repository>
+		<repository>
+			<id>nbauma109</id>
+			<url>https://raw.githubusercontent.com/nbauma109/mvn-repo/main</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -321,6 +326,12 @@
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>ecj</artifactId>
 			<version>3.31.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>jd</groupId>
+			<artifactId>jd-core</artifactId>
+			<version>0.7.1</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

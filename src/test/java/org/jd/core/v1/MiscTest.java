@@ -49,7 +49,6 @@ import org.apache.logging.log4j.message.MapMessage;
 import org.apache.logging.log4j.spi.AbstractLogger;
 import org.apache.logging.log4j.util.IndexedStringMap;
 import org.apache.logging.log4j.util.TriConsumer;
-import org.hamcrest.Matcher;
 import org.jd.core.test.TryResourcesImaging;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.compiler.CompilerUtil;
@@ -109,6 +108,8 @@ import java.util.Vector;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import jd.core.process.analyzer.instruction.fast.FastCodeExceptionAnalyzer;
 
 public class MiscTest extends AbstractJdTest {
 
@@ -326,6 +327,15 @@ public class MiscTest extends AbstractJdTest {
             assertTrue(CompilerUtil.compile("11", new InMemoryJavaSourceFileObject(internalClassName, source)));
         }
     }
+
+    @Test
+    public void testFastCodeExceptionAnalyzer() throws Exception {
+        String internalClassName = FastCodeExceptionAnalyzer.class.getName().replace('.', '/');
+        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+
+        // Recompile decompiled source code and check errors
+        assertTrue(CompilerUtil.compile("1.6", new InMemoryJavaSourceFileObject(internalClassName, source)));
+    }
     
     @Test
     public void testBmpImageParser() throws Exception {
@@ -485,18 +495,14 @@ public class MiscTest extends AbstractJdTest {
     
     @Test
     public void testExpectedExceptionMatcherBuilder() throws Exception {
-        class ExpectedExceptionMatcherBuilder {
-            private final List<Matcher<?>> matchers = new ArrayList<Matcher<?>>();
-            @SuppressWarnings({"unchecked", "rawtypes", "unused"})
-            private List<Matcher<? extends Throwable>> castedMatchers() {
-                return new ArrayList<Matcher<? extends Throwable>>((Collection) matchers);
-            }
-        }
         String internalClassName = ExpectedExceptionMatcherBuilder.class.getName().replace('.', '/');
-        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
-        
-        // Recompile decompiled source code and check errors
-        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
+        try (InputStream is = this.getClass().getResourceAsStream("/jar/expected-exception-matcher-builder-jdk1.6.0u119.jar")) {
+            Loader loader = new ZipLoader(is);
+            String source = decompileSuccess(loader, new PlainTextPrinter(), internalClassName);
+            
+            // Recompile decompiled source code and check errors
+            assertTrue(CompilerUtil.compile("1.6", new InMemoryJavaSourceFileObject(internalClassName, source)));
+        }
     }
     
     @Test
