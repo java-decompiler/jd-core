@@ -1529,13 +1529,6 @@ public class ByteCodeParser {
                                         continue;
                                     }
                                 }
-                                
-                                String name = formalParameter.getName();
-                                String newName = expression.getName();
-
-                                if (name.startsWith("param") && !name.equals(newName)) {
-                                    mapping.put(name, newName);
-                                }
                             }
                         }
                     }
