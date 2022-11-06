@@ -3,6 +3,7 @@
 [![CodeQL](https://github.com/nbauma109/jd-core/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/nbauma109/jd-core/actions/workflows/codeql-analysis.yml)
 [![Maven Release](https://github.com/nbauma109/jd-core/actions/workflows/maven.yml/badge.svg)](https://github.com/nbauma109/jd-core/actions/workflows/maven.yml)
 [![Github Release](https://github.com/nbauma109/jd-core/actions/workflows/release.yml/badge.svg)](https://github.com/nbauma109/jd-core/actions/workflows/release.yml)
+[![Coverage Status](https://codecov.io/gh/nbauma109/jd-core/branch/master/graph/badge.svg)](https://app.codecov.io/gh/nbauma109/jd-core)
 
 # JD-Core
 
