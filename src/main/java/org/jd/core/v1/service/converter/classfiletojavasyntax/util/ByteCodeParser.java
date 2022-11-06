@@ -1475,13 +1475,6 @@ public class ByteCodeParser {
     }
 
     private List<String> prepareLambdaParameterNames(BaseFormalParameter formalParameters, int parameterCount) {
-        if (formalParameters == null && parameterCount > 0) {
-            List<String> ignoredParameters = new ArrayList<>(parameterCount);
-            for (int i = 0; i < parameterCount; i++) {
-                ignoredParameters.add("ignoredParameter" + (i + 1));
-            }
-            return ignoredParameters;
-        }
         if (formalParameters == null || parameterCount == 0) {
             return null;
         }
