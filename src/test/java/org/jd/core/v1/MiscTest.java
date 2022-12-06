@@ -56,6 +56,7 @@ import org.jd.core.v1.compiler.InMemoryClassLoader;
 import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.loader.ClassPathLoader;
 import org.jd.core.v1.loader.ZipLoader;
+import org.jd.core.v1.printer.ClassFilePrinter;
 import org.jd.core.v1.printer.PlainTextPrinter;
 import org.jd.core.v1.regex.PatternMaker;
 import org.jsoup.nodes.Attribute;
@@ -133,7 +134,7 @@ public class MiscTest extends AbstractJdTest {
             }
         }
         String internalClassName = FileFilterUtils.class.getName().replace('.', '/');
-        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+        String source = decompileSuccess(new ClassPathLoader(), new ClassFilePrinter(), internalClassName);
         
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
