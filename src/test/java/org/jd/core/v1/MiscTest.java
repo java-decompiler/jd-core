@@ -123,7 +123,26 @@ public class MiscTest extends AbstractJdTest {
 //        // Recompile decompiled source code and check errors
 //        assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
 //    }
-    
+
+    @Test
+    public void testFREM() throws Exception {
+        class FREM {
+            @SuppressWarnings("unused")
+            float frem(float a, float b) {
+                return a % b;
+            }
+        }
+        String internalClassName = FREM.class.getName().replace('.', '/');
+        String source = decompileSuccess(new ClassPathLoader(), new PlainTextPrinter(), internalClassName);
+        
+        // Check decompiled source code
+        assertTrue(source.matches(PatternMaker.make("float frem(float a, float b) {")));
+        assertTrue(source.matches(PatternMaker.make("return a % b;")));
+        
+        // Recompile decompiled source code and check errors
+        assertTrue(CompilerUtil.compile("1.4", new InMemoryJavaSourceFileObject(internalClassName, source)));
+    }
+
     @Test
     public void testFileFilterUtils() throws Exception {
         abstract class FileFilterUtils {
