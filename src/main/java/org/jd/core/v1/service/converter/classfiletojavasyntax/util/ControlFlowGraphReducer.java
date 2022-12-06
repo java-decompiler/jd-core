@@ -712,15 +712,7 @@ public abstract class ControlFlowGraphReducer {
         }
 
         if (end == END) {
-            if (lastSC != null && lastSC.getBasicBlock() == lastSwitchCaseBasicBlock && searchLoopStart(basicBlock, maxOffset)) {
-                replaceLoopStartWithSwitchBreak(new BitSet(), basicBlock);
-                end = LOOP_START;
-                if (defaultSC != null) {
-                    defaultSC.setBasicBlock(end);
-                }
-            } else {
-                end = lastSwitchCaseBasicBlock;
-            }
+            end = lastSwitchCaseBasicBlock;
         } else {
             visit(v, lastSwitchCaseBasicBlock, end.getFromOffset(), ends);
         }
@@ -791,55 +783,6 @@ public abstract class ControlFlowGraphReducer {
 
         reduced &= reduce(visited, basicBlock.getNext(), jsrTargets);
         return reduced;
-    }
-
-    private static boolean searchLoopStart(BasicBlock basicBlock, int maxOffset) {
-        WatchDog watchdog = new WatchDog();
-
-        BasicBlock bb;
-        for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
-            bb = switchCase.getBasicBlock();
-            if (bb != null) {
-                watchdog.clear();
-
-                BasicBlock next;
-                while (bb != null && bb.getFromOffset() < maxOffset) {
-                    if (bb == LOOP_START) {
-                        return true;
-                    }
-
-                    if (bb.matchType(GROUP_END|GROUP_CONDITION)) {
-                        break;
-                    }
-
-                    next = null;
-
-                    if (bb.matchType(GROUP_SINGLE_SUCCESSOR)) {
-                        next = bb.getNext();
-                    } else if (bb.getType() == TYPE_CONDITIONAL_BRANCH) {
-                        next = bb.getBranch();
-                    } else if (bb.getType() == TYPE_SWITCH_DECLARATION) {
-                        int max = bb.getFromOffset();
-
-                        for (SwitchCase sc : bb.getSwitchCases()) {
-                            if (max < sc.getBasicBlock().getFromOffset()) {
-                                next = sc.getBasicBlock();
-                                max = next.getFromOffset();
-                            }
-                        }
-                    }
-
-                    if (bb == next) {
-                        break;
-                    }
-
-                    watchdog.check(bb, next);
-                    bb = next;
-                }
-            }
-        }
-
-        return false;
     }
 
     protected boolean reduceTryDeclaration(BitSet visited, BasicBlock basicBlock, BitSet jsrTargets) {
@@ -1405,49 +1348,6 @@ public abstract class ControlFlowGraphReducer {
                 case TYPE_SWITCH_DECLARATION:
                     for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
                         visit(visited, switchCase.getBasicBlock(), maxOffset, ends);
-                    }
-                    break;
-            }
-        }
-    }
-
-    private static void replaceLoopStartWithSwitchBreak(BitSet visited, BasicBlock basicBlock) {
-        if (!basicBlock.matchType(GROUP_END) && !visited.get(basicBlock.getIndex())) {
-            visited.set(basicBlock.getIndex());
-            basicBlock.replace(LOOP_START, SWITCH_BREAK);
-
-            switch (basicBlock.getType()) {
-                case TYPE_CONDITIONAL_BRANCH, TYPE_JSR, TYPE_CONDITION:
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getBranch());
-                    // intended fall through
-                case TYPE_START, TYPE_STATEMENTS, TYPE_GOTO, TYPE_GOTO_IN_TERNARY_OPERATOR, TYPE_LOOP:
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getNext());
-                    break;
-                case TYPE_TRY, TYPE_TRY_JSR, TYPE_TRY_ECLIPSE:
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub1());
-                    // intended fall through
-                case TYPE_TRY_DECLARATION:
-                    for (ExceptionHandler exceptionHandler : basicBlock.getExceptionHandlers()) {
-                        replaceLoopStartWithSwitchBreak(visited, exceptionHandler.getBasicBlock());
-                    }
-                    break;
-                case TYPE_IF_ELSE, TYPE_TERNARY_OPERATOR:
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub2());
-                    // intended fall through
-                case TYPE_IF:
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub1());
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getNext());
-                    break;
-                case TYPE_CONDITION_OR, TYPE_CONDITION_AND:
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub1());
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getSub2());
-                    break;
-                case TYPE_SWITCH:
-                    replaceLoopStartWithSwitchBreak(visited, basicBlock.getNext());
-                    // intended fall through
-                case TYPE_SWITCH_DECLARATION:
-                    for (SwitchCase switchCase : basicBlock.getSwitchCases()) {
-                        replaceLoopStartWithSwitchBreak(visited, switchCase.getBasicBlock());
                     }
                     break;
             }
