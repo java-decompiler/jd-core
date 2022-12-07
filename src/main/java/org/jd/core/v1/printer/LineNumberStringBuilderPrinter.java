@@ -107,14 +107,18 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
     public void extraLine(int count) {
         if (realignmentLineNumber) {
             while (count-- > 0) {
-                if (maxLineNumber > 0) {
-                    stringBuffer.append(lineNumberBeginPrefix);
-                    stringBuffer.append(unknownLineNumberPrefix);
-                    stringBuffer.append(lineNumberEndPrefix);
-                }
+                printLineNumber();
 
                 stringBuffer.append(NEWLINE);
             }
+        }
+    }
+
+    private void printLineNumber() {
+        if (maxLineNumber > 0) {
+            stringBuffer.append(lineNumberBeginPrefix);
+            stringBuffer.append(unknownLineNumberPrefix);
+            stringBuffer.append(lineNumberEndPrefix);
         }
     }
 
@@ -149,6 +153,7 @@ public class LineNumberStringBuilderPrinter extends StringBuilderPrinter {
                 if (majorVersion >= MAJOR_1_5) {
                     stringBuffer.append(majorVersion - (MAJOR_1_5 - 5));
                 } else {
+                    stringBuffer.append("1.");
                     stringBuffer.append(majorVersion - (MAJOR_1_1 - 1));
                 }
 
