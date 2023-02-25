@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantCP;
 import org.apache.bcel.classfile.ConstantNameAndType;
-import org.jd.core.v1.model.classfile.ConstantPool;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
+import org.apache.bcel.classfile.ConstantPool;
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
@@ -39,13 +39,13 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
     private final TypeMaker typeMaker;
     private final SearchFieldVisitor searchFieldVisitor = new SearchFieldVisitor();
 
-    public UpdateOuterFieldTypeVisitor(TypeMaker typeMaker) {
+    public UpdateOuterFieldTypeVisitor(final TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
     }
 
     @Override
-    public void visit(BodyDeclaration declaration) {
-        ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
+    public void visit(final BodyDeclaration declaration) {
+        final ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
 
         if (!bodyDeclaration.getClassFile().isStatic()) {
             safeAcceptListDeclaration(bodyDeclaration.getMethodDeclarations());
@@ -55,13 +55,13 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    public void visit(ConstructorDeclaration declaration) {
+    public void visit(final ConstructorDeclaration declaration) {
         if (!declaration.isStatic()) {
-            ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration) declaration;
+            final ClassFileConstructorDeclaration cfcd = (ClassFileConstructorDeclaration) declaration;
 
             if (cfcd.getClassFile().getOuterClassFile() != null && !declaration.isStatic()) {
-                Method method = cfcd.getMethod();
-                byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
+                final Method method = cfcd.getMethod();
+                final byte[] code = method.getCode().getCode();
                 int offset = 0;
                 int opcode = code[offset] & 255;
 
@@ -81,26 +81,26 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
                     return;
                 }
 
-                int index = (code[++offset] & 255) << 8 | code[++offset] & 255;
-                ConstantPool constants = method.getConstants();
-                ConstantMemberRef constantMemberRef = constants.getConstant(index);
-                String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
-                ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
-                TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(descriptor.substring(1, descriptor.length() - 1));
+                final int index = (code[++offset] & 255) << 8 | code[++offset] & 255;
+                final ConstantPool constants = method.getConstantPool();
+                final ConstantCP constantMemberRef = constants.getConstant(index);
+                final String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), Const.CONSTANT_Class);
+                final ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
+                final String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), Const.CONSTANT_Utf8);
+                final TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(descriptor.substring(1, descriptor.length() - 1));
 
                 if (typeTypes != null && typeTypes.getTypeParameters() != null) {
-                    String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+                    final String name = constants.getConstantString(constantNameAndType.getNameIndex(), Const.CONSTANT_Utf8);
                     searchFieldVisitor.init(name);
 
-                    for (ClassFileFieldDeclaration field : cfcd.getBodyDeclaration().getFieldDeclarations()) {
+                    for (final ClassFileFieldDeclaration field : cfcd.getBodyDeclaration().getFieldDeclarations()) {
                         field.getFieldDeclarators().accept(searchFieldVisitor);
                         if (searchFieldVisitor.found()) {
                             BaseTypeArgument typeArguments;
 
                             if (typeTypes.getTypeParameters().isList()) {
-                                TypeArguments tas = new TypeArguments(typeTypes.getTypeParameters().size());
-                                for (TypeParameter typeParameter : typeTypes.getTypeParameters()) {
+                                final TypeArguments tas = new TypeArguments(typeTypes.getTypeParameters().size());
+                                for (final TypeParameter typeParameter : typeTypes.getTypeParameters()) {
                                     tas.add(new GenericType(typeParameter.getIdentifier()));
                                 }
                                 typeArguments = tas;
@@ -119,30 +119,30 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
     }
 
     @Override
-    public void visit(MethodDeclaration declaration) {}
+    public void visit(final MethodDeclaration declaration) {}
     @Override
-    public void visit(StaticInitializerDeclaration declaration) {}
+    public void visit(final StaticInitializerDeclaration declaration) {}
 
     @Override
-    public void visit(ClassDeclaration declaration) {
+    public void visit(final ClassDeclaration declaration) {
         safeAccept(declaration.getBodyDeclaration());
     }
 
     @Override
-    public void visit(InterfaceDeclaration declaration) {
+    public void visit(final InterfaceDeclaration declaration) {
         safeAccept(declaration.getBodyDeclaration());
     }
 
     @Override
-    public void visit(AnnotationDeclaration declaration) {}
+    public void visit(final AnnotationDeclaration declaration) {}
     @Override
-    public void visit(EnumDeclaration declaration) {}
+    public void visit(final EnumDeclaration declaration) {}
 
     protected static class SearchFieldVisitor extends AbstractJavaSyntaxVisitor {
         private String name;
         private boolean found;
 
-        public void init(String name) {
+        public void init(final String name) {
             this.name = name;
             this.found = false;
         }
@@ -152,7 +152,7 @@ public class UpdateOuterFieldTypeVisitor extends AbstractJavaSyntaxVisitor {
         }
 
         @Override
-        public void visit(FieldDeclarator declaration) {
+        public void visit(final FieldDeclarator declaration) {
             found |= declaration.getName().equals(name);
         }
     }

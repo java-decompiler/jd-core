@@ -7,9 +7,11 @@
 
 package org.jd.core.v1;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.RuntimeInvisibleAnnotations;
+import org.apache.bcel.classfile.RuntimeVisibleAnnotations;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.attribute.Annotations;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationReference;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationReferences;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
@@ -18,7 +20,6 @@ import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.AnnotationConverter;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.TypeMaker;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
-import org.jd.core.v1.util.StringConstants;
 import org.junit.Test;
 
 import java.io.InputStream;
@@ -33,7 +34,6 @@ public class AnnotationConverterTest extends TestCase {
         try (InputStream is = this.getClass().getResourceAsStream("/zip/data-java-jdk-1.7.0.zip")) {
             ZipLoader loader = new ZipLoader(is);
             TypeMaker typeMaker = new TypeMaker(loader);
-            AnnotationConverter converter = new AnnotationConverter(typeMaker);
             ClassFileDeserializer deserializer = new ClassFileDeserializer();
 
             DecompileContext decompileContext = new DecompileContext();
@@ -42,13 +42,15 @@ public class AnnotationConverterTest extends TestCase {
 
             ClassFile classFile = deserializer.loadClassFile(loader, decompileContext.getMainInternalTypeName());
             decompileContext.setClassFile(classFile);
+            AnnotationConverter converter = new AnnotationConverter(typeMaker);
 
             // Check class
             assertNotNull(classFile);
 
-            Annotations visibles = classFile.getAttribute(StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-            Annotations invisibles = classFile.getAttribute(StringConstants.RUNTIMEINVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-            BaseAnnotationReference annotationReferences = converter.convert(visibles, invisibles);
+            RuntimeVisibleAnnotations visibles = classFile.getAttribute(Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS);
+            RuntimeInvisibleAnnotations invisibles = classFile.getAttribute(Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS);
+            BaseAnnotationReference annotationReferences = converter.convert(visibles == null ? null : visibles.getAnnotationEntries(),
+                                                                           invisibles == null ? null : invisibles.getAnnotationEntries());
 
             assertNotNull(annotationReferences);
             assertTrue(annotationReferences instanceof AnnotationReferences);
@@ -58,7 +60,7 @@ public class AnnotationConverterTest extends TestCase {
             assertEquals(2, annotationReferenceList.size());
 
             AnnotationReference annotationReference0 = annotationReferenceList.getFirst();
-
+            
             assertEquals("org/jd/core/test/annotation/Quality", annotationReference0.getType().getInternalName());
             assertEquals("Quality", annotationReference0.getType().getName());
             assertNotNull(annotationReference0.getElementValue());

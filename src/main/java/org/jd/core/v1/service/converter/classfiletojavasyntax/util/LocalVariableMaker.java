@@ -7,16 +7,17 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
+import org.apache.bcel.classfile.AnnotationEntry;
+import org.apache.bcel.classfile.Code;
+import org.apache.bcel.classfile.Field;
+import org.apache.bcel.classfile.LocalVariable;
+import org.apache.bcel.classfile.LocalVariableTable;
+import org.apache.bcel.classfile.LocalVariableTypeTable;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.classfile.ParameterAnnotationEntry;
+import org.apache.bcel.classfile.RuntimeInvisibleParameterAnnotations;
+import org.apache.bcel.classfile.RuntimeVisibleParameterAnnotations;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Field;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.Annotations;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTable;
-import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTypeTable;
-import org.jd.core.v1.model.classfile.attribute.AttributeParameterAnnotations;
-import org.jd.core.v1.model.classfile.attribute.LocalVariable;
-import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.FormalParameters;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
@@ -47,6 +48,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.apache.bcel.Const.ACC_STATIC;
 
@@ -77,14 +79,12 @@ public class LocalVariableMaker {
         this.createLocalVariableVisitor = new CreateLocalVariableVisitor(typeMaker);
 
         // Initialize local black list variable names
-        if (classFile.getFields() != null) {
-            String descriptor;
-            for (Field field : classFile.getFields()) {
-                descriptor = field.getDescriptor();
+        String descriptor;
+        for (Field field : classFile.getFields()) {
+            descriptor = field.getSignature();
 
-                if (descriptor.charAt(descriptor.length() - 1) == ';') {
-                    typeMaker.makeFromDescriptor(descriptor).accept(populateBlackListNamesVisitor);
-                }
+            if (descriptor.charAt(descriptor.length() - 1) == ';') {
+                typeMaker.makeFromDescriptor(descriptor).accept(populateBlackListNamesVisitor);
             }
         }
 
@@ -94,10 +94,8 @@ public class LocalVariableMaker {
             typeMaker.makeFromInternalTypeName(classFile.getSuperTypeName()).accept(populateBlackListNamesVisitor);
         }
 
-        if (classFile.getInterfaceTypeNames() != null) {
-            for (String interfaceTypeName : classFile.getInterfaceTypeNames()) {
-                typeMaker.makeFromInternalTypeName(interfaceTypeName).accept(populateBlackListNamesVisitor);
-            }
+        for (String interfaceTypeName : classFile.getInterfaceTypeNames()) {
+            typeMaker.makeFromInternalTypeName(interfaceTypeName).accept(populateBlackListNamesVisitor);
         }
 
         if (parameterTypes != null) {
@@ -151,8 +149,8 @@ public class LocalVariableMaker {
             // Create list of parameterTypes
             fp = new FormalParameters();
 
-            AttributeParameterAnnotations rvpa = method.getAttribute("RuntimeVisibleParameterAnnotations");
-            AttributeParameterAnnotations ripa = method.getAttribute("RuntimeInvisibleParameterAnnotations");
+            RuntimeVisibleParameterAnnotations rvpa = (RuntimeVisibleParameterAnnotations) Stream.of(method.getAttributes()).filter(RuntimeVisibleParameterAnnotations.class::isInstance).findAny().orElse(null);
+            RuntimeInvisibleParameterAnnotations ripa = (RuntimeInvisibleParameterAnnotations) Stream.of(method.getAttributes()).filter(RuntimeInvisibleParameterAnnotations.class::isInstance).findAny().orElse(null);
 
             if (rvpa == null && ripa == null) {
                 AbstractLocalVariable lv;
@@ -167,20 +165,22 @@ public class LocalVariableMaker {
                     }
                 }
             } else {
-                Annotations[] visiblesArray = rvpa == null ? null : rvpa.parameterAnnotations();
-                Annotations[] invisiblesArray = ripa == null ? null : ripa.parameterAnnotations();
+                ParameterAnnotationEntry[] visiblesArray = rvpa == null ? null : rvpa.getParameterAnnotationEntries();
+                ParameterAnnotationEntry[] invisiblesArray = ripa == null ? null : ripa.getParameterAnnotationEntries();
                 AnnotationConverter annotationConverter = new AnnotationConverter(typeMaker);
 
                 AbstractLocalVariable lv;
-                Annotations visibles;
-                Annotations invisibles;
+                ParameterAnnotationEntry visibles;
+                ParameterAnnotationEntry invisibles;
                 BaseAnnotationReference annotationReferences;
                 for (int parameterIndex=0, variableIndex=firstVariableIndex; parameterIndex<=lastParameterIndex; parameterIndex++, variableIndex++) {
                     lv = localVariableSet.root(variableIndex);
 
                     visibles = visiblesArray == null || visiblesArray.length <= parameterIndex ? null : visiblesArray[parameterIndex];
                     invisibles = invisiblesArray == null || invisiblesArray.length <= parameterIndex ? null : invisiblesArray[parameterIndex];
-                    annotationReferences = annotationConverter.convert(visibles, invisibles);
+                    AnnotationEntry[] visibleEntries = visibles == null ? null : visibles.getAnnotationEntries();
+                    AnnotationEntry[] invisibleEntries = invisibles == null ? null : invisibles.getAnnotationEntries();
+                    annotationReferences = annotationConverter.convert(visibleEntries, invisibleEntries);
 
                     fp.add(new ClassFileFormalParameter(annotationReferences, lv, varargs && parameterIndex==lastParameterIndex));
 
@@ -198,11 +198,11 @@ public class LocalVariableMaker {
     }
 
     protected void initLocalVariablesFromAttributes(Method method) {
-        AttributeCode code = method.getAttribute("Code");
+        Code code = method.getCode();
 
         // Init local variables from attributes
         if (code != null) {
-            AttributeLocalVariableTable localVariableTable = code.getAttribute("LocalVariableTable");
+            LocalVariableTable localVariableTable = code.getLocalVariableTable();
 
             if (localVariableTable != null) {
                 boolean staticFlag = (method.getAccessFlags() & ACC_STATIC) != 0;
@@ -212,11 +212,11 @@ public class LocalVariableMaker {
                 String descriptor;
                 String name;
                 AbstractLocalVariable lv;
-                for (LocalVariable localVariable : localVariableTable.localVariableTable()) {
-                    index = localVariable.index();
-                    startPc = !staticFlag && index==0 ? 0 : localVariable.startPc();
-                    descriptor = localVariable.descriptor();
-                    name = localVariable.name();
+                for (LocalVariable localVariable : localVariableTable.getLocalVariableTable()) {
+                    index = localVariable.getIndex();
+                    startPc = !staticFlag && index==0 ? 0 : localVariable.getStartPC();
+                    descriptor = localVariable.getSignature();
+                    name = localVariable.getName();
                     if (descriptor.charAt(descriptor.length() - 1) == ';') {
                         lv = new ObjectLocalVariable(typeMaker, index, startPc, typeMaker.makeFromDescriptor(descriptor), name);
                     } else {
@@ -234,14 +234,14 @@ public class LocalVariableMaker {
                 }
             }
 
-            AttributeLocalVariableTypeTable localVariableTypeTable = code.getAttribute("LocalVariableTypeTable");
+            LocalVariableTypeTable localVariableTypeTable = (LocalVariableTypeTable) Stream.of(code.getAttributes()).filter(LocalVariableTypeTable.class::isInstance).findAny().orElse(null);
 
             if (localVariableTypeTable != null) {
                 UpdateTypeVisitor updateTypeVisitor = new UpdateTypeVisitor(localVariableSet);
 
-                for (LocalVariableType lv : localVariableTypeTable.localVariableTypeTable()) {
+                for (LocalVariable lv : localVariableTypeTable.getLocalVariableTypeTable()) {
                     updateTypeVisitor.setLocalVariableType(lv);
-                    typeMaker.makeFromSignature(lv.signature()).accept(updateTypeVisitor);
+                    typeMaker.makeFromSignature(lv.getSignature()).accept(updateTypeVisitor);
                 }
             }
         }

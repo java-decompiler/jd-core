@@ -8,26 +8,24 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Code;
+import org.apache.bcel.classfile.CodeException;
 import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantCP;
 import org.apache.bcel.classfile.ConstantClass;
 import org.apache.bcel.classfile.ConstantDouble;
 import org.apache.bcel.classfile.ConstantFloat;
 import org.apache.bcel.classfile.ConstantInteger;
 import org.apache.bcel.classfile.ConstantLong;
 import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantPool;
 import org.apache.bcel.classfile.ConstantString;
 import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.LineNumber;
-import org.jd.core.v1.model.classfile.ConstantPool;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
-import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTable;
-import org.jd.core.v1.model.classfile.attribute.AttributeLocalVariableTypeTable;
-import org.jd.core.v1.model.classfile.attribute.CodeException;
-import org.jd.core.v1.model.classfile.attribute.LocalVariable;
-import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
-import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
+import org.apache.bcel.classfile.LineNumberTable;
+import org.apache.bcel.classfile.LocalVariable;
+import org.apache.bcel.classfile.LocalVariableTable;
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
 import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.statement.AssertStatement;
@@ -191,12 +189,12 @@ public class ByteCodeWriter {
     public static final String ILLEGAL_OPCODE = "<illegal opcode>";
 
     public String write(String linePrefix, Method method) {
-        AttributeCode attributeCode = method.getAttribute("Code");
+        Code attributeCode = method.getCode();
 
         if (attributeCode == null) {
             return null;
         }
-        ConstantPool constants = method.getConstants();
+        ConstantPool constants = method.getConstantPool();
         StringBuilder sb = new StringBuilder(5 * 1024);
 
         writeByteCode(linePrefix, sb, constants, attributeCode);
@@ -208,12 +206,12 @@ public class ByteCodeWriter {
     }
 
     public String write(String linePrefix, Method method, int fromOffset, int toOffset) {
-        AttributeCode attributeCode = method.getAttribute("Code");
+        Code attributeCode = method.getCode();
 
         if (attributeCode == null) {
             return null;
         }
-        ConstantPool constants = method.getConstants();
+        ConstantPool constants = method.getConstantPool();
         StringBuilder sb = new StringBuilder(1024);
         byte[] code = attributeCode.getCode();
 
@@ -222,7 +220,7 @@ public class ByteCodeWriter {
         return sb.toString();
     }
 
-    protected void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+    protected void writeByteCode(String linePrefix, StringBuilder sb, ConstantPool constants, Code attributeCode) {
         byte[] code = attributeCode.getCode();
         int length = code.length;
 
@@ -293,34 +291,34 @@ public class ByteCodeWriter {
                     offset = i - 1;
                     break;
                 case GETSTATIC, PUTSTATIC:
-                    ConstantMemberRef constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
-                    String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+                    ConstantCP constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
+                    String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), Const.CONSTANT_Class);
                     ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    String name = constants.getConstantString(constantNameAndType.getNameIndex(), Const.CONSTANT_Utf8);
+                    String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), Const.CONSTANT_Utf8);
 
                     sb.append(" ").append(typeName).append('.').append(name).append(" : ").append(descriptor);
                     break;
                 case GETFIELD, PUTFIELD, INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    name = constants.getConstantString(constantNameAndType.getNameIndex(), Const.CONSTANT_Utf8);
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), Const.CONSTANT_Utf8);
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
                     break;
                 case INVOKEINTERFACE, INVOKEDYNAMIC:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    name = constants.getConstantString(constantNameAndType.getNameIndex(), Const.CONSTANT_Utf8);
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), Const.CONSTANT_Utf8);
 
                     sb.append(" ").append(name).append(" : ").append(descriptor);
 
                     offset += 2; // Skip 2 bytes
                     break;
                 case NEW, ANEWARRAY, CHECKCAST, INSTANCEOF:
-                    typeName = constants.getConstantTypeName((code[++offset] & 255) << 8 | code[++offset] & 255);
+                    typeName = constants.getConstantString((code[++offset] & 255) << 8 | code[++offset] & 255, Const.CONSTANT_Class);
                     sb.append(" ").append(typeName);
                     break;
                 case NEWARRAY:
@@ -396,7 +394,7 @@ public class ByteCodeWriter {
                     }
                     break;
                 case MULTIANEWARRAY:
-                    typeName = constants.getConstantTypeName((code[++offset] & 255) << 8 | code[++offset] & 255);
+                    typeName = constants.getConstantString((code[++offset] & 255) << 8 | code[++offset] & 255, Const.CONSTANT_Class);
                     sb.append(typeName).append(' ').append(code[++offset] & 255);
                     break;
                 case IFNULL, IFNONNULL:
@@ -432,7 +430,7 @@ public class ByteCodeWriter {
             case Const.CONSTANT_String:
                 sb.append(" '");
                 int stringIndex = ((ConstantString) constant).getStringIndex();
-                String str = constants.getConstantUtf8(stringIndex);
+                String str = constants.getConstantString(stringIndex, Const.CONSTANT_Utf8);
 
                 for (char c : str.toCharArray()) {
                     switch (c) {
@@ -462,14 +460,14 @@ public class ByteCodeWriter {
         }
     }
 
-    protected void writeLineNumberTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
-        AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
+    protected void writeLineNumberTable(String linePrefix, StringBuilder sb, Code attributeCode) {
+        LineNumberTable lineNumberTable = attributeCode.getLineNumberTable();
 
         if (lineNumberTable != null) {
             sb.append(linePrefix).append("Line number table:\n");
             sb.append(linePrefix).append("  Java source line number -> byte code offset\n");
 
-            for (LineNumber lineNumber : lineNumberTable.lineNumberTable()) {
+            for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
                 sb.append(linePrefix).append("  #");
                 sb.append(lineNumber.getLineNumber()).append("\t-> ");
                 sb.append(lineNumber.getStartPC()).append('\n');
@@ -481,7 +479,7 @@ public class ByteCodeWriter {
 
         List<Statement> comments = new ArrayList<>();
 
-        AttributeCode attributeCode = method.getAttribute("Code");
+        Code attributeCode = method.getCode();
 
         if (attributeCode == null) {
             return null;
@@ -489,11 +487,11 @@ public class ByteCodeWriter {
 
         TreeMap<Integer, List<Integer>> lineNumberToOffsets = new TreeMap<>();
 
-        AttributeLineNumberTable lineNumberTable = attributeCode.getAttribute("LineNumberTable");
+        LineNumberTable lineNumberTable = attributeCode.getLineNumberTable();
 
         if (lineNumberTable != null) {
 
-            for (LineNumber lineNumber : lineNumberTable.lineNumberTable()) {
+            for (LineNumber lineNumber : lineNumberTable.getLineNumberTable()) {
                 lineNumberToOffsets.computeIfAbsent(lineNumber.getLineNumber(), k -> new ArrayList<>()).add(lineNumber.getStartPC());
             }
             for (Entry<Integer, List<Integer>> entry : lineNumberToOffsets.entrySet()) {
@@ -507,41 +505,41 @@ public class ByteCodeWriter {
         return comments;
     }
 
-    protected void writeLocalVariableTable(String linePrefix, StringBuilder sb, AttributeCode attributeCode) {
-        AttributeLocalVariableTable localVariableTable = attributeCode.getAttribute("LocalVariableTable");
+    protected void writeLocalVariableTable(String linePrefix, StringBuilder sb, Code attributeCode) {
+        LocalVariableTable localVariableTable = attributeCode.getLocalVariableTable();
 
         if (localVariableTable != null) {
             sb.append(linePrefix).append("Local variable table:\n");
             sb.append(linePrefix).append("  start\tlength\tslot\tname\tdescriptor\n");
 
-            for (LocalVariable localVariable : localVariableTable.localVariableTable()) {
+            for (LocalVariable localVariable : localVariableTable.getLocalVariableTable()) {
                 sb.append(linePrefix).append("  ");
-                sb.append(localVariable.startPc()).append('\t');
-                sb.append(localVariable.length()).append('\t');
-                sb.append(localVariable.index()).append('\t');
-                sb.append(localVariable.name()).append('\t');
-                sb.append(localVariable.descriptor()).append('\n');
+                sb.append(localVariable.getStartPC()).append('\t');
+                sb.append(localVariable.getLength()).append('\t');
+                sb.append(localVariable.getIndex()).append('\t');
+                sb.append(localVariable.getName()).append('\t');
+                sb.append(localVariable.getSignature()).append('\n');
             }
         }
 
-        AttributeLocalVariableTypeTable localVariableTypeTable = attributeCode.getAttribute("LocalVariableTypeTable");
-
-        if (localVariableTypeTable != null) {
-            sb.append(linePrefix).append("Local variable type table:\n");
-            sb.append(linePrefix).append("  start\tlength\tslot\tname\tsignature\n");
-
-            for (LocalVariableType localVariable : localVariableTypeTable.localVariableTypeTable()) {
-                sb.append(linePrefix).append("  ");
-                sb.append(localVariable.startPc()).append('\t');
-                sb.append(localVariable.length()).append('\t');
-                sb.append(localVariable.index()).append('\t');
-                sb.append(localVariable.name()).append('\t');
-                sb.append(localVariable.signature()).append('\n');
-            }
-        }
+//        LocalVariableTypeTable localVariableTypeTable = attributeCode.getLocalVariableTypeTable();
+//
+//        if (localVariableTypeTable != null) {
+//            sb.append(linePrefix).append("Local variable type table:\n");
+//            sb.append(linePrefix).append("  start\tlength\tslot\tname\tsignature\n");
+//
+//            for (LocalVariable localVariable : localVariableTypeTable.getLocalVariableTypeTable()) {
+//                sb.append(linePrefix).append("  ");
+//                sb.append(localVariable.getStartPC()).append('\t');
+//                sb.append(localVariable.getLength()).append('\t');
+//                sb.append(localVariable.getIndex()).append('\t');
+//                sb.append(localVariable.getName()).append('\t');
+//                sb.append(localVariable.getSignature()).append('\n');
+//            }
+//        }
     }
 
-    protected void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, AttributeCode attributeCode) {
+    protected void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, Code attributeCode) {
         CodeException[] codeExceptions = attributeCode.getExceptionTable();
 
         if (codeExceptions != null) {
@@ -550,14 +548,14 @@ public class ByteCodeWriter {
 
             for (CodeException codeException : codeExceptions) {
                 sb.append(linePrefix).append("  ");
-                sb.append(codeException.startPc()).append('\t');
-                sb.append(codeException.endPc()).append('\t');
-                sb.append(codeException.handlerPc()).append('\t');
+                sb.append(codeException.getStartPC()).append('\t');
+                sb.append(codeException.getEndPC()).append('\t');
+                sb.append(codeException.getHandlerPC()).append('\t');
 
-                if (codeException.catchType() == 0) {
+                if (codeException.getCatchType() == 0) {
                     sb.append("finally");
                 } else {
-                    sb.append(constants.getConstantTypeName(codeException.catchType()));
+                    sb.append(constants.getConstantString(codeException.getCatchType(), Const.CONSTANT_Class));
                 }
 
                 sb.append('\n');

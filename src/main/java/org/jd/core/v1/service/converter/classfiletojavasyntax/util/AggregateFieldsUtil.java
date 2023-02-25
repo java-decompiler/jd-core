@@ -20,45 +20,43 @@ public final class AggregateFieldsUtil {
     }
 
     public static void aggregate(List<ClassFileFieldDeclaration> fields) {
-        if (fields != null) {
-            int size = fields.size();
+        int size = fields.size();
 
-            if (size > 1) {
-                int firstIndex=0;
-                int lastIndex=0;
-                ClassFileFieldDeclaration firstField = fields.get(0);
+        if (size > 1) {
+            int firstIndex=0;
+            int lastIndex=0;
+            ClassFileFieldDeclaration firstField = fields.get(0);
 
-                for (int index=1; index<size; index++) {
-                    ClassFileFieldDeclaration field = fields.get(index);
+            for (int index=1; index<size; index++) {
+                ClassFileFieldDeclaration field = fields.get(index);
 
-                    if (firstField.getFirstLineNumber() == 0 || firstField.getFlags() != field.getFlags() || !firstField.getType().equals(field.getType())) {
-                        firstField = field;
-                        firstIndex = lastIndex = index;
-                    } else {
-                        int lineNumber = field.getFirstLineNumber();
+                if (firstField.getFirstLineNumber() == 0 || firstField.getFlags() != field.getFlags() || !firstField.getType().equals(field.getType())) {
+                    firstField = field;
+                    firstIndex = lastIndex = index;
+                } else {
+                    int lineNumber = field.getFirstLineNumber();
 
-                        if (lineNumber > 0) {
-                            if (lineNumber == firstField.getFirstLineNumber()) {
-                                // Compatible field -> Keep index
-                                lastIndex = index;
-                            } else {
-                                // Aggregate declarators from 'firstIndex' to 'lastIndex'
-                                aggregate(fields, firstField, firstIndex, lastIndex);
+                    if (lineNumber > 0) {
+                        if (lineNumber == firstField.getFirstLineNumber()) {
+                            // Compatible field -> Keep index
+                            lastIndex = index;
+                        } else {
+                            // Aggregate declarators from 'firstIndex' to 'lastIndex'
+                            aggregate(fields, firstField, firstIndex, lastIndex);
 
-                                int length = lastIndex-firstIndex;
-                                index -= length;
-                                size -= length;
+                            int length = lastIndex-firstIndex;
+                            index -= length;
+                            size -= length;
 
-                                firstField = field;
-                                firstIndex = lastIndex = index;
-                            }
+                            firstField = field;
+                            firstIndex = lastIndex = index;
                         }
                     }
                 }
-
-                // Aggregate declarators from 'firstIndex' to 'lastIndex'
-                aggregate(fields, firstField, firstIndex, lastIndex);
             }
+
+            // Aggregate declarators from 'firstIndex' to 'lastIndex'
+            aggregate(fields, firstField, firstIndex, lastIndex);
         }
     }
 

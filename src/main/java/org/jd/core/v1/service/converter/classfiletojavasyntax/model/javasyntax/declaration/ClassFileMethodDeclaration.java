@@ -7,8 +7,8 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration;
 
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
@@ -34,7 +34,7 @@ public class ClassFileMethodDeclaration extends MethodDeclaration implements Cla
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, String name,
             Type returnedType, BaseType parameterTypes, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber) {
-        super(null, method.getAccessFlags(), name, null, returnedType, null, null, method.getDescriptor(), null, null);
+        super(null, method.getAccessFlags(), name, null, returnedType, null, null, method.getSignature(), null, null);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;
@@ -49,7 +49,7 @@ public class ClassFileMethodDeclaration extends MethodDeclaration implements Cla
             String name, BaseTypeParameter typeParameters, Type returnedType, BaseType parameterTypes, BaseType exceptionTypes,
             BaseElementValue defaultAnnotationValue, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber) {
-        super(annotationReferences, method.getAccessFlags(), name, typeParameters, returnedType, null, exceptionTypes, method.getDescriptor(), null, defaultAnnotationValue);
+        super(annotationReferences, method.getAccessFlags(), name, typeParameters, returnedType, null, exceptionTypes, method.getSignature(), null, defaultAnnotationValue);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;

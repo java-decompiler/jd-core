@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
-import org.jd.core.v1.model.classfile.Method;
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.processor.block.api.BlockProcessor;
 import org.jd.core.v1.util.DefaultList;
 

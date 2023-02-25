@@ -6,9 +6,8 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.MethodDeclaration;
@@ -261,7 +260,7 @@ public class StatementMaker {
                 break;
             case TYPE_RETURN:
                 Method method = basicBlock.getControlFlowGraph().getMethod();
-                if (method.isLambda()) {
+                if (method.isSynthetic() && method.getName().contains("lambda$")) {
                     parseByteCode(basicBlock, statements);
                 } else {
                     statements.add(ReturnStatement.RETURN);
@@ -555,7 +554,7 @@ public class StatementMaker {
                 int index = ByteCodeParser.getExceptionLocalVariableIndex(bb);
                 ObjectType ot = typeMaker.makeFromInternalTypeName(exceptionHandler.getInternalThrowableName());
                 int offset = bb.getFromOffset();
-                byte[] code = bb.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
+                byte[] code = bb.getControlFlowGraph().getMethod().getCode().getCode();
 
                 if (code[offset] == ASTORE) {
                     offset += 2;

@@ -7,7 +7,7 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
-import org.jd.core.v1.model.classfile.attribute.LocalVariableType;
+import org.apache.bcel.classfile.LocalVariable;
 import org.jd.core.v1.model.javasyntax.type.AbstractNopTypeArgumentVisitor;
 import org.jd.core.v1.model.javasyntax.type.BaseTypeArgument;
 import org.jd.core.v1.model.javasyntax.type.GenericType;
@@ -18,29 +18,29 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.localvariabl
 public class UpdateTypeVisitor extends AbstractNopTypeArgumentVisitor {
     private final UpdateClassTypeArgumentsVisitor updateClassTypeArgumentsVisitor = new UpdateClassTypeArgumentsVisitor();
     private final LocalVariableSet localVariableSet;
-    private LocalVariableType localVariableType;
+    private LocalVariable localVariableType;
 
     public UpdateTypeVisitor(LocalVariableSet localVariableSet) {
         this.localVariableSet = localVariableSet;
     }
 
-    public void setLocalVariableType(LocalVariableType localVariableType) {
-        this.localVariableType = localVariableType;
+    public void setLocalVariableType(LocalVariable lv) {
+        this.localVariableType = lv;
     }
 
     @Override
     public void visit(ObjectType type) {
-        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), updateType(type));
+        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPC(), updateType(type));
     }
 
     @Override
     public void visit(InnerObjectType type) {
-        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), updateType(type));
+        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPC(), updateType(type));
     }
 
     @Override
     public void visit(GenericType type) {
-        localVariableSet.update(localVariableType.index(), localVariableType.startPc(), type);
+        localVariableSet.update(localVariableType.getIndex(), localVariableType.getStartPC(), type);
     }
 
     protected ObjectType updateType(ObjectType type) {

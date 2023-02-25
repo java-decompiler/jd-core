@@ -7,8 +7,13 @@
 
 package org.jd.core.v1;
 
+import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.classfile.Method;
+import org.jd.core.v1.compiler.CompilerUtil;
+import org.jd.core.v1.compiler.InMemoryClassLoader;
+import org.jd.core.v1.compiler.InMemoryJavaSourceFileObject;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.declaration.FieldDeclarator;
 import org.jd.core.v1.model.javasyntax.declaration.MemberDeclarations;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
@@ -19,10 +24,10 @@ import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.d
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration.ClassFileMethodDeclaration;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.util.MergeMembersUtil;
 import org.jd.core.v1.util.DefaultList;
-import org.jd.core.v1.util.StringConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -235,10 +240,11 @@ public class MergeMembersUtilTest {
         return fields;
     }
 
-    protected DefaultList<ClassFileMemberDeclaration> newMethods() {
+    protected DefaultList<ClassFileMemberDeclaration> newMethods() throws Exception {
         DefaultList<ClassFileMemberDeclaration> methods = new DefaultList<>();
-        ClassFile classFile = null;
-        Method method = new Method(0, "method", "()V", null, null, null);
+        
+        ClassFile classFile = createClassFile();
+        Method method = getMethod(classFile, "method");
 
         methods.add(newMethodDeclaration(classFile, method, "a"));
         methods.add(newMethodDeclaration(classFile, method, "b"));
@@ -254,13 +260,32 @@ public class MergeMembersUtilTest {
         return methods;
     }
 
-    protected DefaultList<ClassFileMemberDeclaration> newInnerTypes(int lineNumber) {
+    private static Method getMethod(ClassFile classFile, String name) {
+        for (Method method : classFile.getMethods()) {
+            if (name.equals(method.getName())) {
+               return method; 
+            }
+        }
+        return null;
+    }
+
+    private static ClassFile createClassFile() throws Exception {
+        InMemoryJavaSourceFileObject javaSourceFileObject = new InMemoryJavaSourceFileObject("A", "class A { void method() {} }");
+        InMemoryClassLoader classLoader = new InMemoryClassLoader();
+        CompilerUtil.compile("1.8", classLoader, javaSourceFileObject);
+        byte[] a = classLoader.load("A");
+        ClassParser classParser = new ClassParser(new ByteArrayInputStream(a), "A");
+        JavaClass javaClass = classParser.parse();
+        return new ClassFile(javaClass);
+    }
+
+    protected DefaultList<ClassFileMemberDeclaration> newInnerTypes(int lineNumber) throws Exception {
         DefaultList<ClassFileMemberDeclaration> innerTypes = new DefaultList<>();
 
         DefaultList<ClassFileFieldDeclaration> fields = new DefaultList<>();
         fields.add(new ClassFileFieldDeclaration(0, PrimitiveType.TYPE_INT, new FieldDeclarator("d"), lineNumber));
 
-        ClassFile classFile = new ClassFile(49, 0, 0, "A", StringConstants.JAVA_LANG_OBJECT, null, null, null, null);
+        ClassFile classFile = createClassFile();
         ClassFileBodyDeclaration bodyDeclaration = new ClassFileBodyDeclaration(classFile, null, null, null);
         bodyDeclaration.setFieldDeclarations(fields);
 

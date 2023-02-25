@@ -6,8 +6,7 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.javasyntax.expression.Expression;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock.ExceptionHandler;
@@ -656,7 +655,7 @@ public abstract class ControlFlowGraphReducer {
 
     private static boolean checkJdk118TernaryOperatorPattern(BasicBlock next, BasicBlock nextNext, int ifByteCode) {
         if (nextNext.getToOffset() - nextNext.getFromOffset() == 3) {
-            byte[] code = next.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
+            byte[] code = next.getControlFlowGraph().getMethod().getCode().getCode();
             int nextFromOffset = next.getFromOffset();
             int nextNextFromOffset = nextNext.getFromOffset();
             return code[nextFromOffset] == ICONST_0 &&

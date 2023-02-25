@@ -192,7 +192,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
         if (elementValue == null) {
             BaseElementValuePair elementValuePairs = reference.getElementValuePairs();
 
-            if (elementValuePairs != null) {
+            if (elementValuePairs != null && elementValuePairs.size() > 0) {
                 tokens.add(StartBlockToken.START_PARAMETERS_BLOCK);
                 elementValuePairs.accept(this);
                 tokens.add(EndBlockToken.END_PARAMETERS_BLOCK);
@@ -287,7 +287,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             // Build fragments for super type
             BaseType superType = declaration.getSuperType();
-            if (superType != null && !superType.equals(ObjectType.TYPE_OBJECT)) {
+            if (superType != null && !superType.equals(ObjectType.TYPE_OBJECT) && superType.size() > 0) {
                 fragments.addTokensFragment(tokens);
 
                 JavaFragmentFactory.addSpacerBeforeExtends(fragments);
@@ -303,7 +303,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             // Build fragments for interfaces
             BaseType interfaces = declaration.getInterfaces();
-            if (interfaces != null) {
+            if (interfaces != null && interfaces.size() > 0) {
                 if (!tokens.isEmpty()) {
                     fragments.addTokensFragment(tokens);
                 }
@@ -515,9 +515,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
     @Override
     public void visit(ElementValues references) {
         Iterator<BaseElementValue> iterator = references.iterator();
-
-        iterator.next().accept(this);
-
+        if (iterator.hasNext()) {
+            iterator.next().accept(this);
+        }
         while (iterator.hasNext()) {
             tokens.add(TextToken.COMMA_SPACE);
             iterator.next().accept(this);
@@ -532,9 +532,9 @@ public class CompilationUnitVisitor extends StatementVisitor {
     @Override
     public void visit(ElementValuePairs references) {
         Iterator<ElementValuePair> iterator = references.iterator();
-
-        iterator.next().accept(this);
-
+        if (iterator.hasNext()) {
+            iterator.next().accept(this);
+        }
         while (iterator.hasNext()) {
             tokens.add(TextToken.COMMA_SPACE);
             iterator.next().accept(this);
@@ -557,7 +557,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             // Build fragments for interfaces
             BaseType interfaces = declaration.getInterfaces();
-            if (interfaces != null) {
+            if (interfaces != null && interfaces.size() > 0) {
                 tokens.add(StartBlockToken.START_DECLARATION_OR_STATEMENT_BLOCK);
 
                 fragments.addTokensFragment(tokens);
@@ -751,7 +751,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
     public void visit(FormalParameter declaration) {
         BaseAnnotationReference annotationReferences = declaration.getAnnotationReferences();
 
-        if (annotationReferences != null) {
+        if (annotationReferences != null && !annotationReferences.isEmpty()) {
             annotationReferences.accept(this);
             tokens.add(TextToken.SPACE);
         }
@@ -805,7 +805,7 @@ public class CompilationUnitVisitor extends StatementVisitor {
 
             // Build fragments for interfaces
             BaseType interfaces = declaration.getInterfaces();
-            if (interfaces != null) {
+            if (interfaces != null && interfaces.size() > 0) {
                 fragments.addTokensFragment(tokens);
 
                 JavaFragmentFactory.addSpacerBeforeImplements(fragments);

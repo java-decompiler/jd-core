@@ -7,24 +7,30 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.processor;
 
 import org.apache.bcel.Const;
+import org.apache.bcel.classfile.AnnotationDefault;
+import org.apache.bcel.classfile.AnnotationEntry;
+import org.apache.bcel.classfile.Annotations;
+import org.apache.bcel.classfile.Code;
 import org.apache.bcel.classfile.Constant;
 import org.apache.bcel.classfile.ConstantDouble;
 import org.apache.bcel.classfile.ConstantFloat;
 import org.apache.bcel.classfile.ConstantInteger;
 import org.apache.bcel.classfile.ConstantLong;
-import org.apache.bcel.classfile.ConstantUtf8;
+import org.apache.bcel.classfile.ConstantPool;
+import org.apache.bcel.classfile.ConstantString;
+import org.apache.bcel.classfile.ConstantValue;
+import org.apache.bcel.classfile.Field;
+import org.apache.bcel.classfile.FieldOrMethod;
+import org.apache.bcel.classfile.LineNumberTable;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.classfile.Module;
+import org.apache.bcel.classfile.ModuleExports;
+import org.apache.bcel.classfile.ModuleOpens;
+import org.apache.bcel.classfile.ModuleProvides;
+import org.apache.bcel.classfile.ModuleRequires;
+import org.apache.bcel.classfile.RuntimeInvisibleAnnotations;
+import org.apache.bcel.classfile.RuntimeVisibleAnnotations;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Field;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.Annotations;
-import org.jd.core.v1.model.classfile.attribute.AttributeAnnotationDefault;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.attribute.AttributeConstantValue;
-import org.jd.core.v1.model.classfile.attribute.AttributeLineNumberTable;
-import org.jd.core.v1.model.classfile.attribute.AttributeModule;
-import org.jd.core.v1.model.classfile.attribute.ModuleInfo;
-import org.jd.core.v1.model.classfile.attribute.PackageInfo;
-import org.jd.core.v1.model.classfile.attribute.ServiceInfo;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.Declaration;
 import org.jd.core.v1.model.javasyntax.declaration.ExpressionVariableInitializer;
@@ -68,6 +74,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * Convert ClassFile model to Java syntax model.<br><br>
@@ -186,9 +193,6 @@ public class ConvertClassFileProcessor {
     protected List<ClassFileFieldDeclaration> convertFields(TypeMaker parser, AnnotationConverter converter, ClassFile classFile) {
         Field[] fields = classFile.getFields();
 
-        if (fields == null) {
-            return null;
-        }
         DefaultList<ClassFileFieldDeclaration> list = new DefaultList<>(fields.length);
         BaseAnnotationReference annotationReferences;
         Type typeField;
@@ -208,27 +212,23 @@ public class ConvertClassFileProcessor {
     protected List<ClassFileConstructorOrMethodDeclaration> convertMethods(TypeMaker parser, AnnotationConverter converter, ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile) {
         Method[] methods = classFile.getMethods();
 
-        if (methods == null) {
-            return null;
-        }
         DefaultList<ClassFileConstructorOrMethodDeclaration> list = new DefaultList<>(methods.length);
         String name;
         BaseAnnotationReference annotationReferences;
-        AttributeAnnotationDefault annotationDefault;
         BaseElementValue defaultAnnotationValue;
         TypeMaker.MethodTypes methodTypes;
         Map<String, TypeArgument> bindings;
         Map<String, BaseType> typeBounds;
-        AttributeCode code;
+        Code code;
         int firstLineNumber;
         for (Method method : methods) {
             name = method.getName();
             annotationReferences = convertAnnotationReferences(converter, method);
-            annotationDefault = method.getAttribute("AnnotationDefault");
+            AnnotationDefault annotationDefault = (AnnotationDefault) Stream.of(method.getAttributes()).filter(AnnotationDefault.class::isInstance).findAny().orElse(null);
             defaultAnnotationValue = null;
 
             if (annotationDefault != null) {
-                defaultAnnotationValue = converter.convert(annotationDefault.defaultValue());
+                defaultAnnotationValue = converter.convert(annotationDefault.getDefaultValue());
             }
 
             methodTypes = parser.parseMethodSignature(classFile, method);
@@ -247,13 +247,13 @@ public class ConvertClassFileProcessor {
                 methodTypes.getTypeParameters().accept(populateBindingsWithTypeParameterVisitor);
            }
 
-            code = method.getAttribute("Code");
+            code = method.getCode();
             firstLineNumber = 0;
 
             if (code != null) {
-                AttributeLineNumberTable lineNumberTable = code.getAttribute("LineNumberTable");
+                LineNumberTable lineNumberTable = code.getLineNumberTable();
                 if (lineNumberTable != null) {
-                    firstLineNumber = lineNumberTable.getLineNumberTable(0).getLineNumber();
+                    firstLineNumber = lineNumberTable.getLineNumberTable()[0].getLineNumber();
                 }
             }
 
@@ -308,91 +308,154 @@ public class ConvertClassFileProcessor {
     }
 
     protected BaseAnnotationReference convertAnnotationReferences(AnnotationConverter converter, ClassFile classFile) {
-        Annotations visibles = classFile.getAttribute(StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-        Annotations invisibles = classFile.getAttribute(StringConstants.RUNTIMEINVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
+        Annotations visibles = classFile.getAttribute(Const.ATTR_RUNTIME_VISIBLE_ANNOTATIONS);
+        Annotations invisibles = classFile.getAttribute(Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS);
 
-        return converter.convert(visibles, invisibles);
+        AnnotationEntry[] visibleEntries = visibles == null ? null : visibles.getAnnotationEntries();
+        AnnotationEntry[] invisibleEntries = invisibles == null ? null : invisibles.getAnnotationEntries();
+        
+        return converter.convert(visibleEntries, invisibleEntries);
     }
 
-    protected BaseAnnotationReference convertAnnotationReferences(AnnotationConverter converter, Field field) {
-        Annotations visibles = field.getAttribute(StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-        Annotations invisibles = field.getAttribute(StringConstants.RUNTIMEINVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
+    protected BaseAnnotationReference convertAnnotationReferences(AnnotationConverter converter, FieldOrMethod fieldOrMethod) {
+        Annotations visibles = (Annotations) Stream.of(fieldOrMethod.getAttributes()).filter(RuntimeVisibleAnnotations.class::isInstance).findAny().orElse(null);
+        Annotations invisibles = (Annotations) Stream.of(fieldOrMethod.getAttributes()).filter(RuntimeInvisibleAnnotations.class::isInstance).findAny().orElse(null);
 
-        return converter.convert(visibles, invisibles);
-    }
-
-    protected BaseAnnotationReference convertAnnotationReferences(AnnotationConverter converter, Method method) {
-        Annotations visibles = method.getAttribute(StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-        Annotations invisibles = method.getAttribute(StringConstants.RUNTIMEINVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-
-        return converter.convert(visibles, invisibles);
+        AnnotationEntry[] visibleEntries = visibles == null ? null : visibles.getAnnotationEntries();
+        AnnotationEntry[] invisibleEntries = invisibles == null ? null : invisibles.getAnnotationEntries();
+        
+        return converter.convert(visibleEntries, invisibleEntries);
     }
 
     protected ExpressionVariableInitializer convertFieldInitializer(Field field, Type typeField) {
-        AttributeConstantValue acv = field.getAttribute("ConstantValue");
+        ConstantValue acv = field.getConstantValue();
         if (acv == null) {
             return null;
         }
-        Constant constantValue = acv.constantValue();
+        Constant constantValue = acv.getConstantPool().getConstant(acv.getConstantValueIndex());
         Expression expression = switch (constantValue.getTag()) {
             case Const.CONSTANT_Integer -> new IntegerConstantExpression(typeField, ((ConstantInteger)constantValue).getBytes());
             case Const.CONSTANT_Float -> new FloatConstantExpression(((ConstantFloat)constantValue).getBytes());
             case Const.CONSTANT_Long -> new LongConstantExpression(((ConstantLong)constantValue).getBytes());
             case Const.CONSTANT_Double -> new DoubleConstantExpression(((ConstantDouble)constantValue).getBytes());
-            case Const.CONSTANT_Utf8 -> new StringConstantExpression(((ConstantUtf8)constantValue).getBytes());
+            case Const.CONSTANT_String -> new StringConstantExpression(((ConstantString)constantValue).getBytes(acv.getConstantPool()));
             default -> throw new ConvertClassFileException("Invalid attributes");
         };
         return new ExpressionVariableInitializer(expression);
     }
 
     protected ModuleDeclaration convertModuleDeclaration(ClassFile classFile) {
-        AttributeModule attributeModule = classFile.getAttribute("Module");
-        List<ModuleDeclaration.ModuleInfo> requires = convertModuleDeclarationModuleInfo(attributeModule.requires());
-        List<ModuleDeclaration.PackageInfo> exports = convertModuleDeclarationPackageInfo(attributeModule.exports());
-        List<ModuleDeclaration.PackageInfo> opens = convertModuleDeclarationPackageInfo(attributeModule.opens());
-        DefaultList<String> uses = new DefaultList<>(attributeModule.uses());
-        List<ModuleDeclaration.ServiceInfo> provides = convertModuleDeclarationServiceInfo(attributeModule.provides());
+        Module attributeModule = classFile.getAttribute(Const.ATTR_MODULE);
+        String fieldName = "usesIndex";
+        int[] usesIndexes = getFieldValue(attributeModule, fieldName);
+        final String[] usedClassNames = new String[usesIndexes.length];
+        for (int i = 0; i < usesIndexes.length; i++) {
+            usedClassNames[i] = classFile.getConstantPool().getConstantString(usesIndexes[i], Const.CONSTANT_Class);
+        }
+        List<ModuleDeclaration.ModuleInfo> requires = convertModuleRequiresToModuleInfo(attributeModule.getRequiresTable(), classFile.getConstantPool());
+        List<ModuleDeclaration.PackageInfo> exports = convertModuleExportsToPackageInfo(attributeModule.getExportsTable(), classFile.getConstantPool());
+        List<ModuleDeclaration.PackageInfo> opens = convertModuleOpensToPackageInfo(attributeModule.getOpensTable(), classFile.getConstantPool());
+        DefaultList<String> uses = new DefaultList<>(usedClassNames);
+        List<ModuleDeclaration.ServiceInfo> provides = convertModuleProvidesToServiceInfo(attributeModule.getProvidesTable(), classFile.getConstantPool());
 
+        int moduleFlags = getFieldValue(attributeModule, "moduleFlags");
+        int moduleNameIndex = getFieldValue(attributeModule, "moduleNameIndex");
+        int moduleVersionIndex = getFieldValue(attributeModule, "moduleVersionIndex");
+        String moduleName = classFile.getConstantPool().getConstantString(moduleNameIndex, Const.CONSTANT_Module);
+        String moduleVersion = classFile.getConstantPool().getConstantString(moduleVersionIndex, Const.CONSTANT_Utf8);
         return new ModuleDeclaration(
-                attributeModule.flags(), classFile.getInternalTypeName(), attributeModule.name(),
-                attributeModule.version(), requires, exports, opens, uses, provides);
+                moduleFlags, classFile.getInternalTypeName(), moduleName,
+                moduleVersion, requires, exports, opens, uses, provides);
     }
 
-    protected List<ModuleDeclaration.ModuleInfo> convertModuleDeclarationModuleInfo(ModuleInfo[] moduleInfos) {
-        if (moduleInfos == null || moduleInfos.length == 0) {
+    @SuppressWarnings("all")
+    private static <T> T getFieldValue(Object o, String fieldName) {
+        try {
+            java.lang.reflect.Field f = o.getClass().getDeclaredField(fieldName);
+            f.setAccessible(true);
+            return (T) f.get(o);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected List<ModuleDeclaration.ModuleInfo> convertModuleRequiresToModuleInfo(ModuleRequires[] moduleRequires, ConstantPool constantPool) {
+        if (moduleRequires == null || moduleRequires.length == 0) {
             return null;
         }
-        DefaultList<ModuleDeclaration.ModuleInfo> list = new DefaultList<>(moduleInfos.length);
-        for (ModuleInfo moduleInfo : moduleInfos) {
-            list.add(new ModuleDeclaration.ModuleInfo(moduleInfo.name(), moduleInfo.flags(), moduleInfo.version()));
+        DefaultList<ModuleDeclaration.ModuleInfo> list = new DefaultList<>(moduleRequires.length);
+        for (ModuleRequires moduleRequire : moduleRequires) {
+            int requiresFlags = getFieldValue(moduleRequire, "requiresFlags");
+            int requiresIndex = getFieldValue(moduleRequire, "requiresIndex");
+            int requiresVersionIndex = getFieldValue(moduleRequire, "requiresVersionIndex");
+            String moduleName = constantPool.constantToString(requiresIndex, Const.CONSTANT_Module);
+            String version = requiresVersionIndex == 0 ? "0" : constantPool.getConstantString(requiresVersionIndex, Const.CONSTANT_Utf8);
+            list.add(new ModuleDeclaration.ModuleInfo(moduleName, requiresFlags, version));
         }
         return list;
     }
 
-    protected List<ModuleDeclaration.PackageInfo> convertModuleDeclarationPackageInfo(PackageInfo[] packageInfos) {
-        if (packageInfos == null || packageInfos.length == 0) {
+    protected List<ModuleDeclaration.PackageInfo> convertModuleOpensToPackageInfo(ModuleOpens[] moduleOpens, ConstantPool constantPool) {
+        if (moduleOpens == null || moduleOpens.length == 0) {
             return null;
         }
-        DefaultList<ModuleDeclaration.PackageInfo> list = new DefaultList<>(packageInfos.length);
+        DefaultList<ModuleDeclaration.PackageInfo> list = new DefaultList<>(moduleOpens.length);
         DefaultList<String> moduleInfoNames;
-        for (PackageInfo packageInfo : packageInfos) {
-            moduleInfoNames = packageInfo.moduleInfoNames() == null ?
-                    null : new DefaultList<>(packageInfo.moduleInfoNames());
-            list.add(new ModuleDeclaration.PackageInfo(packageInfo.internalName(), packageInfo.flags(), moduleInfoNames));
+        for (ModuleOpens moduleOpen : moduleOpens) {
+            int opensToCount = getFieldValue(moduleOpen, "opensToCount");
+            int[] opensToIndexes = getFieldValue(moduleOpen, "opensToIndex");
+            String[] toModuleNames = new String[opensToCount];
+            for (int i = 0; i < opensToCount; i++) {
+                toModuleNames[i] = constantPool.getConstantString(opensToIndexes[i], Const.CONSTANT_Module);
+            }
+            moduleInfoNames = new DefaultList<>(toModuleNames);
+            int exportsIndex = getFieldValue(moduleOpen, "opensIndex");
+            int opensFlags = getFieldValue(moduleOpen, "opensFlags");
+            String packageName = constantPool.constantToString(exportsIndex, Const.CONSTANT_Package);
+            list.add(new ModuleDeclaration.PackageInfo(packageName, opensFlags, moduleInfoNames));
         }
         return list;
     }
 
-    protected List<ModuleDeclaration.ServiceInfo> convertModuleDeclarationServiceInfo(ServiceInfo[] serviceInfos) {
-        if (serviceInfos == null || serviceInfos.length == 0) {
+    protected List<ModuleDeclaration.PackageInfo> convertModuleExportsToPackageInfo(ModuleExports[] moduleExports, ConstantPool constantPool) {
+        if (moduleExports == null || moduleExports.length == 0) {
             return null;
         }
-        DefaultList<ModuleDeclaration.ServiceInfo> list = new DefaultList<>(serviceInfos.length);
+        DefaultList<ModuleDeclaration.PackageInfo> list = new DefaultList<>(moduleExports.length);
+        DefaultList<String> moduleInfoNames;
+        for (ModuleExports moduleExport : moduleExports) {
+            int exportsToCount = getFieldValue(moduleExport, "exportsToCount");
+            int[] exportsToIndexes = getFieldValue(moduleExport, "exportsToIndex");
+            String[] toModuleNames = new String[exportsToCount];
+            for (int i = 0; i < exportsToCount; i++) {
+                toModuleNames[i] = constantPool.getConstantString(exportsToIndexes[i], Const.CONSTANT_Module);
+            }
+            moduleInfoNames = new DefaultList<>(toModuleNames);
+            int exportsIndex = getFieldValue(moduleExport, "exportsIndex");
+            int exportsFlags = getFieldValue(moduleExport, "exportsFlags");
+            String packageName = constantPool.constantToString(exportsIndex, Const.CONSTANT_Package);
+            list.add(new ModuleDeclaration.PackageInfo(packageName, exportsFlags, moduleInfoNames));
+        }
+        return list;
+    }
+    
+    protected List<ModuleDeclaration.ServiceInfo> convertModuleProvidesToServiceInfo(ModuleProvides[] moduleProvides, ConstantPool constantPool) {
+        if (moduleProvides == null || moduleProvides.length == 0) {
+            return null;
+        }
+        DefaultList<ModuleDeclaration.ServiceInfo> list = new DefaultList<>(moduleProvides.length);
         DefaultList<String> implementationTypeNames;
-        for (ServiceInfo serviceInfo : serviceInfos) {
-            implementationTypeNames = serviceInfo.implementationTypeNames() == null ?
-                    null : new DefaultList<>(serviceInfo.implementationTypeNames());
-            list.add(new ModuleDeclaration.ServiceInfo(serviceInfo.interfaceTypeName(), implementationTypeNames));
+        for (ModuleProvides serviceInfo : moduleProvides) {
+            int providesIndex = getFieldValue(serviceInfo, "providesIndex");
+            int providesWithCount = getFieldValue(serviceInfo, "providesWithCount");
+            int[] providesWithIndexes = getFieldValue(serviceInfo, "providesWithIndex");
+            String[] implementationClassNames = new String[providesWithCount];
+            for (int i = 0; i < providesWithCount; i++) {
+                implementationClassNames[i] = constantPool.getConstantString(providesWithIndexes[i], Const.CONSTANT_Class);
+            }
+            implementationTypeNames = new DefaultList<>(implementationClassNames);
+            String interfaceName = constantPool.getConstantString(providesIndex, Const.CONSTANT_Class);
+            list.add(new ModuleDeclaration.ServiceInfo(interfaceName, implementationTypeNames));
         }
         return list;
     }

@@ -7,8 +7,8 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration;
 
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.StaticInitializerDeclaration;
 import org.jd.core.v1.model.javasyntax.statement.BaseStatement;
@@ -30,7 +30,7 @@ public class ClassFileStaticInitializerDeclaration extends StaticInitializerDecl
     public ClassFileStaticInitializerDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber) {
-        super(method.getDescriptor(), null);
+        super(method.getSignature(), null);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;
@@ -42,7 +42,7 @@ public class ClassFileStaticInitializerDeclaration extends StaticInitializerDecl
     public ClassFileStaticInitializerDeclaration(
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber, BaseStatement statements) {
-        super(method.getDescriptor(), statements);
+        super(method.getSignature(), statements);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;

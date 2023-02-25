@@ -1,8 +1,8 @@
 package org.jd.core.v1.cfg;
 
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.CompilationUnit;
 import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BaseTypeDeclaration;

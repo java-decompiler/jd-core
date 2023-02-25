@@ -205,7 +205,7 @@ public class UpdateBridgeMethodVisitor extends AbstractUpdateExpressionVisitor {
             ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
             List<ClassFileConstructorOrMethodDeclaration> methodDeclarations = bodyDeclaration.getMethodDeclarations();
 
-            if (methodDeclarations != null && !methodDeclarations.isEmpty()) {
+            if (!methodDeclarations.isEmpty()) {
                 Map<String, ClassFileMethodDeclaration> backup = map;
 
                 map = new HashMap<>();

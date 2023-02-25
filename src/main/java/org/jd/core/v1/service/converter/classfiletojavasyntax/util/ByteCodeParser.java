@@ -8,7 +8,9 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
 import org.apache.bcel.classfile.BootstrapMethod;
+import org.apache.bcel.classfile.BootstrapMethods;
 import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantCP;
 import org.apache.bcel.classfile.ConstantClass;
 import org.apache.bcel.classfile.ConstantDouble;
 import org.apache.bcel.classfile.ConstantFloat;
@@ -17,14 +19,11 @@ import org.apache.bcel.classfile.ConstantLong;
 import org.apache.bcel.classfile.ConstantMethodHandle;
 import org.apache.bcel.classfile.ConstantMethodType;
 import org.apache.bcel.classfile.ConstantNameAndType;
+import org.apache.bcel.classfile.ConstantPool;
 import org.apache.bcel.classfile.ConstantString;
 import org.apache.bcel.classfile.ConstantUtf8;
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.ConstantPool;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.AttributeBootstrapMethods;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.AbstractNopDeclarationVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
@@ -99,7 +98,6 @@ import org.jd.core.v1.util.DefaultList;
 import org.jd.core.v1.util.DefaultStack;
 import org.jd.core.v1.util.StringConstants;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -146,7 +144,7 @@ public class ByteCodeParser {
     private final int majorVersion;
     private final String internalTypeName;
     private final AbstractTypeParametersToTypeArgumentsBinder typeParametersToTypeArgumentsBinder;
-    private final AttributeBootstrapMethods attributeBootstrapMethods;
+    private final BootstrapMethods attributeBootstrapMethods;
     private final ClassFileBodyDeclaration bodyDeclaration;
     private final Map<String, BaseType> typeBounds;
     private Type returnedType;
@@ -161,7 +159,7 @@ public class ByteCodeParser {
         this.diamondSupported = majorVersion >= MAJOR_1_7;
         this.genericTypesSupported = majorVersion >= MAJOR_1_5;
         this.internalTypeName = classFile.getInternalTypeName();
-        this.attributeBootstrapMethods = classFile.getAttribute("BootstrapMethods");
+        this.attributeBootstrapMethods = classFile.getAttribute(ATTR_BOOTSTRAP_METHODS);
         this.bodyDeclaration = bodyDeclaration;
         this.returnedType = comd.getReturnedType();
         this.exceptionTypes = comd.getExceptionTypes();
@@ -180,8 +178,8 @@ public class ByteCodeParser {
         int toOffset = basicBlock.getToOffset();
 
         Method method = cfg.getMethod();
-        ConstantPool constants = method.getConstants();
-        byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
+        ConstantPool constants = method.getConstantPool();
+        byte[] code = method.getCode().getCode();
         boolean syntheticFlag = (method.getAccessFlags() & ACC_SYNTHETIC) != 0;
 
         Expression indexRef;
@@ -193,7 +191,7 @@ public class ByteCodeParser {
         Type type1;
         Type type2;
         Type type3;
-        ConstantMemberRef constantMemberRef;
+        ConstantCP constantMemberRef;
         ConstantNameAndType constantNameAndType;
         String typeName;
         String name;
@@ -762,7 +760,7 @@ public class ByteCodeParser {
                     parseXRETURN(statements, stack, lineNumber);
                     break;
                 case Const.RETURN:
-                    if (method.isLambda() && !stack.isEmpty()) {
+                    if ((method.isSynthetic() && method.getName().contains("lambda$")) && !stack.isEmpty()) {
                         statements.add(new ExpressionStatement(stack.pop()));
                     } else {
                         statements.add(RETURN);
@@ -782,11 +780,11 @@ public class ByteCodeParser {
                     break;
                 case INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC, INVOKEINTERFACE:
                     constantMemberRef = constants.getConstant( (code[++offset] & 255) << 8 | code[++offset] & 255 );
-                    typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+                    typeName = constants.getConstantString(constantMemberRef.getClassIndex(), CONSTANT_Class);
                     ot = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    name = constants.getConstantString(constantNameAndType.getNameIndex(), CONSTANT_Utf8);
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     
                     TypeMaker.MethodTypes methodTypes = makeMethodTypes(ot.getInternalName(), name, descriptor);
 
@@ -832,7 +830,7 @@ public class ByteCodeParser {
                             }
                         } else {
                             if (opcode == INVOKEVIRTUAL && "toString".equals(name) && "()Ljava/lang/String;".equals(descriptor)) {
-                                typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+                                typeName = constants.getConstantString(constantMemberRef.getClassIndex(), CONSTANT_Class);
                                 if (StringConstants.JAVA_LANG_STRING_BUILDER.equals(typeName) || StringConstants.JAVA_LANG_STRING_BUFFER.equals(typeName)) {
                                     stack.push(StringConcatenationUtil.create(expression1, lineNumber, typeName));
                                     break;
@@ -848,7 +846,7 @@ public class ByteCodeParser {
                     offset += 2; // Skip 2 bytes
                     break;
                 case NEW:
-                    typeName = constants.getConstantTypeName( (code[++offset] & 255) << 8 | code[++offset] & 255 );
+                    typeName = constants.getConstantString((code[++offset] & 255) << 8 | code[++offset] & 255, CONSTANT_Class);
                     stack.push(newNewExpression(lineNumber, typeName));
                     break;
                 case NEWARRAY:
@@ -856,7 +854,7 @@ public class ByteCodeParser {
                     stack.push(new NewArray(lineNumber, type1, stack.pop()));
                     break;
                 case ANEWARRAY:
-                    typeName = constants.getConstantTypeName( (code[++offset] & 255) << 8 | code[++offset] & 255 );
+                    typeName = constants.getConstantString((code[++offset] & 255) << 8 | code[++offset] & 255, CONSTANT_Class);
                     if (typeName.charAt(0) == '[') {
                         type1 = typeMaker.makeFromDescriptor(typeName);
                         type1 = type1.createType(type1.getDimension()+1);
@@ -878,7 +876,7 @@ public class ByteCodeParser {
                     statements.add(new ThrowStatement(stack.pop()));
                     break;
                 case CHECKCAST:
-                    typeName = constants.getConstantTypeName( (code[++offset] & 255) << 8 | code[++offset] & 255 );
+                    typeName = constants.getConstantString((code[++offset] & 255) << 8 | code[++offset] & 255, CONSTANT_Class);
                     type1 = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
                     expression1 = stack.peek();
                     if (!type1.isObjectType() || !expression1.getType().isObjectType() || !typeMaker.isRawTypeAssignable((ObjectType) type1, (ObjectType) expression1.getType())) {
@@ -910,7 +908,7 @@ public class ByteCodeParser {
                     }
                     break;
                 case INSTANCEOF:
-                    typeName = constants.getConstantTypeName( (code[++offset] & 255) << 8 | code[++offset] & 255 );
+                    typeName = constants.getConstantString((code[++offset] & 255) << 8 | code[++offset] & 255, CONSTANT_Class);
                     type1 = typeMaker.makeFromDescriptorOrInternalTypeName(typeName);
                     if (type1 == null) {
                         type1 = PrimitiveTypeUtil.getPrimitiveTypeFromDescriptor(typeName);
@@ -970,7 +968,7 @@ public class ByteCodeParser {
                     }
                     break;
                 case MULTIANEWARRAY:
-                    typeName = constants.getConstantTypeName( (code[++offset] & 255) << 8 | code[++offset] & 255 );
+                    typeName = constants.getConstantString((code[++offset] & 255) << 8 | code[++offset] & 255, CONSTANT_Class);
                     type1 = typeMaker.makeFromDescriptor(typeName);
                     i = code[++offset] & 255;
 
@@ -1143,7 +1141,7 @@ public class ByteCodeParser {
                 break;
             case CONSTANT_String:
                 int stringIndex = ((ConstantString)constant).getStringIndex();
-                stack.push(new StringConstantExpression(lineNumber, constants.getConstantUtf8(stringIndex)));
+                stack.push(new StringConstantExpression(lineNumber, constants.getConstantString(stringIndex, CONSTANT_Utf8)));
                 break;
         }
     }
@@ -1406,20 +1404,20 @@ public class ByteCodeParser {
         }
 
         // Create expression
-        ConstantMemberRef constantMemberRef = constants.getConstant(index);
+        ConstantCP constantMemberRef = constants.getConstant(index);
 
         ConstantNameAndType indyCnat = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String indyMethodName = constants.getConstantUtf8(indyCnat.getNameIndex());
-        String indyDescriptor = constants.getConstantUtf8(indyCnat.getSignatureIndex());
+        String indyMethodName = constants.getConstantString(indyCnat.getNameIndex(), CONSTANT_Utf8);
+        String indyDescriptor = constants.getConstantString(indyCnat.getSignatureIndex(), CONSTANT_Utf8);
         TypeMaker.MethodTypes indyMethodTypes = typeMaker.makeMethodTypes(indyDescriptor);
         
         BaseExpression indyParameters = extractParametersFromStack(statements, stack, indyMethodTypes.getParameterTypes());
-        BootstrapMethod bootstrapMethod = attributeBootstrapMethods.getBootstrapMethod(constantMemberRef.getClassIndex());
+        BootstrapMethod bootstrapMethod = attributeBootstrapMethods.getBootstrapMethods()[constantMemberRef.getClassIndex()];
         int[] bootstrapArguments = bootstrapMethod.getBootstrapArguments();
 
         if ("makeConcatWithConstants".equals(indyMethodName)) {
             // Create Java 9+ string concatenation
-            String recipe = constants.getConstantString(bootstrapArguments[0]);
+            String recipe = constants.getConstantString(bootstrapArguments[0], CONSTANT_String);
             stack.push(StringConcatenationUtil.create(recipe, indyParameters));
             return;
         }
@@ -1430,19 +1428,19 @@ public class ByteCodeParser {
         }
 
         ConstantMethodType cmt0 = constants.getConstant(bootstrapArguments[0]);
-        String descriptor0 = constants.getConstantUtf8(cmt0.getDescriptorIndex());
+        String descriptor0 = constants.getConstantString(cmt0.getDescriptorIndex(), CONSTANT_Utf8);
         TypeMaker.MethodTypes methodTypes0 = typeMaker.makeMethodTypes(descriptor0);
         int parameterCount = methodTypes0.getParameterTypes() == null ? 0 : methodTypes0.getParameterTypes().size();
         ConstantMethodHandle constantMethodHandle1 = constants.getConstant(bootstrapArguments[1]);
-        ConstantMemberRef cmr1 = constants.getConstant(constantMethodHandle1.getReferenceIndex());
-        String typeName = constants.getConstantTypeName(cmr1.getClassIndex());
+        ConstantCP cmr1 = constants.getConstant(constantMethodHandle1.getReferenceIndex());
+        String typeName = constants.getConstantString(cmr1.getClassIndex(), CONSTANT_Class);
         ConstantNameAndType cnat1 = constants.getConstant(cmr1.getNameAndTypeIndex());
-        String name1 = constants.getConstantUtf8(cnat1.getNameIndex());
-        String descriptor1 = constants.getConstantUtf8(cnat1.getSignatureIndex());
+        String name1 = constants.getConstantString(cnat1.getNameIndex(), CONSTANT_Utf8);
+        String descriptor1 = constants.getConstantString(cnat1.getSignatureIndex(), CONSTANT_Utf8);
 
         if (typeName.equals(internalTypeName)) {
             for (ClassFileConstructorOrMethodDeclaration methodDeclaration : bodyDeclaration.getMethodDeclarations()) {
-                if ((methodDeclaration.getFlags() & (ACC_SYNTHETIC|ACC_PRIVATE)) == (ACC_SYNTHETIC|ACC_PRIVATE) && methodDeclaration.getMethod().getName().equals(name1) && methodDeclaration.getMethod().getDescriptor().equals(descriptor1)) {
+                if ((methodDeclaration.getFlags() & (ACC_SYNTHETIC|ACC_PRIVATE)) == (ACC_SYNTHETIC|ACC_PRIVATE) && methodDeclaration.getMethod().getName().equals(name1) && methodDeclaration.getMethod().getSignature().equals(descriptor1)) {
                     // Create lambda expression
                     ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration)methodDeclaration;
                     if (cfmd.getStatements() == null) {
@@ -1471,7 +1469,12 @@ public class ByteCodeParser {
         }
 
         // Create method reference
-        stack.push(new MethodReferenceExpression(lineNumber, indyMethodTypes.getReturnedType(), (Expression)indyParameters, typeName, name1, descriptor1));
+        if (indyParameters instanceof Expression) {
+            stack.push(new MethodReferenceExpression(lineNumber, indyMethodTypes.getReturnedType(), (Expression)indyParameters, typeName, name1, descriptor1));
+        }
+        if (indyParameters instanceof Expressions) {
+            stack.push(new MethodReferenceExpression(lineNumber, indyMethodTypes.getReturnedType(), ((Expressions)indyParameters).getFirst(), typeName, name1, descriptor1));
+        }
     }
 
     private List<String> prepareLambdaParameterNames(BaseFormalParameter formalParameters, int parameterCount) {
@@ -1799,10 +1802,10 @@ public class ByteCodeParser {
     }
 
     private void parseGetStatic(DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, int index) {
-        ConstantMemberRef constantMemberRef = constants.getConstant(index);
-        String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+        ConstantCP constantMemberRef = constants.getConstant(index);
+        String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), CONSTANT_Class);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+        String name = constants.getConstantString(constantNameAndType.getNameIndex(), CONSTANT_Utf8);
 
         if ("TYPE".equals(name) && typeName.startsWith("java/lang/")) {
             switch (typeName) {
@@ -1837,19 +1840,19 @@ public class ByteCodeParser {
         }
 
         ObjectType ot = typeMaker.makeFromInternalTypeName(typeName);
-        String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+        String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
         Type type = makeFieldType(ot.getInternalName(), name, descriptor);
         Expression objectRef = new ObjectTypeReferenceExpression(lineNumber, ot, !internalTypeName.equals(typeName) || localVariableMaker.containsName(name));
         stack.push(typeParametersToTypeArgumentsBinder.newFieldReferenceExpression(lineNumber, type, objectRef, ot, name, descriptor));
     }
 
     private void parsePutStatic(Statements statements, DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, int index) {
-        ConstantMemberRef constantMemberRef = constants.getConstant(index);
-        String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+        ConstantCP constantMemberRef = constants.getConstant(index);
+        String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), CONSTANT_Class);
         ObjectType ot = typeMaker.makeFromInternalTypeName(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-        String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+        String name = constants.getConstantString(constantNameAndType.getNameIndex(), CONSTANT_Utf8);
+        String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
         Type type = makeFieldType(ot.getInternalName(), name, descriptor);
         Expression valueRef = stack.pop();
         Expression objectRef = new ObjectTypeReferenceExpression(lineNumber, ot, !internalTypeName.equals(typeName) || localVariableMaker.containsName(name));
@@ -1858,24 +1861,24 @@ public class ByteCodeParser {
     }
 
     private void parseGetField(DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, int index) {
-        ConstantMemberRef constantMemberRef = constants.getConstant(index);
-        String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+        ConstantCP constantMemberRef = constants.getConstant(index);
+        String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), CONSTANT_Class);
         ObjectType ot = typeMaker.makeFromInternalTypeName(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-        String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+        String name = constants.getConstantString(constantNameAndType.getNameIndex(), CONSTANT_Utf8);
+        String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
         Type type = makeFieldType(ot.getInternalName(), name, descriptor);
         Expression objectRef = stack.pop();
         stack.push(typeParametersToTypeArgumentsBinder.newFieldReferenceExpression(lineNumber, type, getFieldInstanceReference(objectRef, ot,  name), ot, name, descriptor));
     }
 
     private void parsePutField(Statements statements, DefaultStack<Expression> stack, ConstantPool constants, int lineNumber, int index) {
-        ConstantMemberRef constantMemberRef = constants.getConstant(index);
-        String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+        ConstantCP constantMemberRef = constants.getConstant(index);
+        String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), CONSTANT_Class);
         ObjectType ot = typeMaker.makeFromInternalTypeName(typeName);
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-        String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+        String name = constants.getConstantString(constantNameAndType.getNameIndex(), CONSTANT_Utf8);
+        String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
         Type type = makeFieldType(ot.getInternalName(), name, descriptor);
         Expression valueRef = stack.pop();
         Expression objectRef = stack.pop();
@@ -1917,7 +1920,7 @@ public class ByteCodeParser {
                 }
 
                 boolean diamondPossible = majorVersion > MAJOR_1_8 || (localBodyDeclaration == null && majorVersion >= MAJOR_1_7);
-                if (declaration.getInterfaces() != null) {
+                if (declaration.getInterfaces() != null && declaration.getInterfaces().size() > 0) {
                     return new ClassFileNewExpression(lineNumber, (ObjectType) declaration.getInterfaces(), localBodyDeclaration, true, false, diamondPossible);
                 }
                 if (declaration.getSuperType() != null) {
@@ -2081,7 +2084,7 @@ public class ByteCodeParser {
      * @return expression, 'this' or 'super'
      */
     private Expression getFieldInstanceReference(Expression expression, ObjectType ot, String name) {
-        if (bodyDeclaration.getFieldDeclarations() != null && expression.isThisExpression()) {
+        if (expression.isThisExpression()) {
             String internalName = expression.getType().getInternalName();
 
             if (!ot.getInternalName().equals(internalName)) {
@@ -2112,7 +2115,7 @@ public class ByteCodeParser {
                     member.accept(memberVisitor);
                     if (memberVisitor.found()) {
                         String[] interfaceTypeNames = member.getClassFile().getInterfaceTypeNames();
-                        if (interfaceTypeNames != null && Arrays.asList(interfaceTypeNames).contains(ot.getInternalName())) {
+                        if (Arrays.asList(interfaceTypeNames).contains(ot.getInternalName())) {
                             return new QualifiedSuperExpression(expression.getLineNumber(), ot);
                         }
                         return new SuperExpression(expression.getLineNumber(), expression.getType());
@@ -2147,29 +2150,29 @@ public class ByteCodeParser {
         }
 
         Method method = cfg.getMethod();
-        byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
+        byte[] code = method.getCode().getCode();
         int opcode = code[offset] & 255;
 
         if (opcode != GETSTATIC) {
             return false;
         }
 
-        ConstantPool constants = method.getConstants();
-        ConstantMemberRef constantMemberRef = constants.getConstant( (code[++offset] & 255) << 8 | code[++offset] & 255 );
+        ConstantPool constants = method.getConstantPool();
+        ConstantCP constantMemberRef = constants.getConstant( (code[++offset] & 255) << 8 | code[++offset] & 255 );
         ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-        String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
+        String name = constants.getConstantString(constantNameAndType.getNameIndex(), CONSTANT_Utf8);
 
         if (! "$assertionsDisabled".equals(name)) {
             return false;
         }
 
-        String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+        String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
 
         if (! "Z".equals(descriptor)) {
             return false;
         }
 
-        String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
+        String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), CONSTANT_Class);
 
         return internalTypeName.equals(typeName);
     }
@@ -2184,7 +2187,7 @@ public class ByteCodeParser {
         }
 
         Method method = cfg.getMethod();
-        byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
+        byte[] code = method.getCode().getCode();
         int opcode = code[offset] & 255;
 
         return switch (opcode) {

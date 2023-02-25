@@ -7,8 +7,8 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.model.javasyntax.declaration;
 
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Method;
 import org.jd.core.v1.model.javasyntax.declaration.BaseFormalParameter;
 import org.jd.core.v1.model.javasyntax.declaration.ConstructorDeclaration;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
@@ -33,7 +33,7 @@ public class ClassFileConstructorDeclaration extends ConstructorDeclaration impl
             ClassFileBodyDeclaration bodyDeclaration, ClassFile classFile, Method method, BaseAnnotationReference annotationReferences,
             BaseTypeParameter typeParameters, BaseType parameterTypes, BaseType exceptionTypes, Map<String, TypeArgument> bindings,
             Map<String, BaseType> typeBounds, int firstLineNumber) {
-        super(annotationReferences, method.getAccessFlags(), typeParameters, null, exceptionTypes, method.getDescriptor(), null);
+        super(annotationReferences, method.getAccessFlags(), typeParameters, null, exceptionTypes, method.getSignature(), null);
         this.bodyDeclaration = bodyDeclaration;
         this.classFile = classFile;
         this.method = method;

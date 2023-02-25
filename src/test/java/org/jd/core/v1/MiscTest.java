@@ -176,7 +176,7 @@ public class MiscTest extends AbstractJdTest {
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
-    
+
     @Test
     public void testTiffImageWriterBase() throws Exception {
         String internalClassName = TiffImageWriterBase.class.getName().replace('.', '/');
@@ -186,6 +186,9 @@ public class MiscTest extends AbstractJdTest {
         assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
     
+    /*
+     * TODO FIXME Eclipse compiler incompatibility
+     */
     @Test
     public void testJavaClass() throws Exception {
         String internalClassName = JavaClass.class.getName().replace('.', '/');
@@ -785,6 +788,9 @@ public class MiscTest extends AbstractJdTest {
         assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
 
+    /*
+     * TODO FIXME Eclipse compiler incompatibility
+     */
     @Test
     public void testConsumer() throws Exception {
         class Consumer {
@@ -1400,7 +1406,10 @@ public class MiscTest extends AbstractJdTest {
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
-    
+
+    /*
+     * TODO FIXME Eclipse compiler incompatibility
+     */
     @Test
     public void testLambdaVariables() throws Exception {
         class LambdaVariables {
@@ -1550,5 +1559,4 @@ public class MiscTest extends AbstractJdTest {
         // Recompile decompiled source code and check errors
         assertTrue(CompilerUtil.compile("1.8", new InMemoryJavaSourceFileObject(internalClassName, source)));
     }
-
 }

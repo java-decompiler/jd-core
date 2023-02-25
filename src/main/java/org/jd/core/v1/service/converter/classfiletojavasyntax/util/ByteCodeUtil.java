@@ -8,11 +8,11 @@
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
 import org.apache.bcel.Const;
+import org.apache.bcel.classfile.Code;
+import org.apache.bcel.classfile.ConstantCP;
 import org.apache.bcel.classfile.ConstantNameAndType;
-import org.jd.core.v1.model.classfile.ConstantPool;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
+import org.apache.bcel.classfile.ConstantPool;
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg.BasicBlock;
 
 import static org.apache.bcel.Const.*;
@@ -23,8 +23,8 @@ public final class ByteCodeUtil {
         super();
     }
 
-    public static int searchNextOpcode(BasicBlock basicBlock, int maxOffset) {
-        byte[] code = basicBlock.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
+    public static int searchNextOpcode(final BasicBlock basicBlock, final int maxOffset) {
+        final byte[] code = basicBlock.getControlFlowGraph().getMethod().getCode().getCode();
         int offset = basicBlock.getFromOffset();
         int toOffset = basicBlock.getToOffset();
 
@@ -33,7 +33,7 @@ public final class ByteCodeUtil {
         }
 
         for (; offset<toOffset; offset++) {
-            int opcode = code[offset] & 255;
+            final int opcode = code[offset] & 255;
 
             offset = computeNextOffset(code, offset, opcode);
         }
@@ -44,10 +44,10 @@ public final class ByteCodeUtil {
         return 0;
     }
 
-    public static int getLastOpcode(BasicBlock basicBlock) {
-        byte[] code = basicBlock.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
+    public static int getLastOpcode(final BasicBlock basicBlock) {
+        final byte[] code = basicBlock.getControlFlowGraph().getMethod().getCode().getCode();
         int offset = basicBlock.getFromOffset();
-        int toOffset = basicBlock.getToOffset();
+        final int toOffset = basicBlock.getToOffset();
 
         if (offset >= toOffset) {
             return 0;
@@ -56,7 +56,7 @@ public final class ByteCodeUtil {
         int lastOffset = offset;
 
         for (; offset<toOffset; offset++) {
-            int opcode = code[offset] & 255;
+            final int opcode = code[offset] & 255;
 
             lastOffset = offset;
 
@@ -66,10 +66,10 @@ public final class ByteCodeUtil {
         return code[lastOffset] & 255;
     }
 
-    public static void invertLastOpCode(BasicBlock basicBlock) {
-        byte[] code = basicBlock.getControlFlowGraph().getMethod().<AttributeCode>getAttribute("Code").getCode();
+    public static void invertLastOpCode(final BasicBlock basicBlock) {
+        final byte[] code = basicBlock.getControlFlowGraph().getMethod().getCode().getCode();
         int offset = basicBlock.getFromOffset();
-        int toOffset = basicBlock.getToOffset();
+        final int toOffset = basicBlock.getToOffset();
 
         if (offset >= toOffset) {
             return;
@@ -78,7 +78,7 @@ public final class ByteCodeUtil {
         int lastOffset = offset;
 
         for (; offset<toOffset; offset++) {
-            int opcode = code[offset] & 255;
+            final int opcode = code[offset] & 255;
 
             lastOffset = offset;
 
@@ -86,13 +86,13 @@ public final class ByteCodeUtil {
         }
 
         code[lastOffset] = (byte) getOppositeOpCode(code[lastOffset] & 255);
-        int delta = basicBlock.getBranch().getFromOffset() - lastOffset;
+        final int delta = basicBlock.getBranch().getFromOffset() - lastOffset;
         // Big Endian
         code[lastOffset+1] = (byte) ((delta >> 8) & 0xFF);
         code[lastOffset+2] = (byte) (delta & 0xFF);
     }
     
-    private static int getOppositeOpCode(int opCode) {
+    private static int getOppositeOpCode(final int opCode) {
         return switch(opCode) {
             case IFNONNULL -> IFNULL;
             case IFNULL -> IFNONNULL;
@@ -114,7 +114,7 @@ public final class ByteCodeUtil {
         };
     }
 
-    private static int computeNextOffset(byte[] code, int offset, int opcode) {
+    private static int computeNextOffset(final byte[] code, int offset, int opcode) {
         switch (opcode) {
             case BIPUSH, LDC,
                  ILOAD, LLOAD, FLOAD, DLOAD, ALOAD,
@@ -156,8 +156,8 @@ public final class ByteCodeUtil {
                 offset = offset + 4 & 0xFFFC; // Skip padding
                 offset += 4; // Skip default offset
 
-                int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
-                int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                final int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                final int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
                 offset += 4 * (high - low + 1) - 1;
                 break;
@@ -165,7 +165,7 @@ public final class ByteCodeUtil {
                 offset = offset + 4 & 0xFFFC; // Skip padding
                 offset += 4; // Skip default offset
 
-                int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                final int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
                 offset += 8 * count - 1;
                 break;
@@ -182,16 +182,16 @@ public final class ByteCodeUtil {
         return offset;
     }
 
-    public static int evalStackDepth(BasicBlock bb) {
-        Method method = bb.getControlFlowGraph().getMethod();
-        ConstantPool constants = method.getConstants();
-        AttributeCode attributeCode = method.getAttribute("Code");
-        byte[] code = attributeCode.getCode();
+    public static int evalStackDepth(final BasicBlock bb) {
+        final Method method = bb.getControlFlowGraph().getMethod();
+        final ConstantPool constants = method.getConstantPool();
+        final Code attributeCode = method.getCode();
+        final byte[] code = attributeCode.getCode();
         return evalStackDepth(constants, code, bb);
     }
 
-    public static int evalStackDepth(ConstantPool constants, byte[] code, BasicBlock bb) {
-        ConstantMemberRef constantMemberRef;
+    public static int evalStackDepth(final ConstantPool constants, final byte[] code, final BasicBlock bb) {
+        ConstantCP constantMemberRef;
         ConstantNameAndType constantNameAndType;
         String descriptor;
         int depth = 0;
@@ -287,8 +287,8 @@ public final class ByteCodeUtil {
                     offset = offset + 4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
-                    int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
-                    int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                    final int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                    final int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
                     offset += 4 * (high - low + 1) - 1;
                     depth--;
@@ -297,7 +297,7 @@ public final class ByteCodeUtil {
                     offset = offset + 4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
-                    int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                    final int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
                     offset += 8 * count - 1;
                     depth--;
@@ -305,7 +305,7 @@ public final class ByteCodeUtil {
                 case INVOKEVIRTUAL, INVOKESPECIAL:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     depth -= 1 + countMethodParameters(descriptor);
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
@@ -315,7 +315,7 @@ public final class ByteCodeUtil {
                 case INVOKESTATIC:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     depth -= countMethodParameters(descriptor);
 
                     if (descriptor.charAt(descriptor.length()-1) != 'V') {
@@ -325,7 +325,7 @@ public final class ByteCodeUtil {
                 case INVOKEINTERFACE:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     depth -= 1 + countMethodParameters(descriptor);
                     offset += 2; // Skip 'count' and one byte
 
@@ -336,7 +336,7 @@ public final class ByteCodeUtil {
                 case INVOKEDYNAMIC:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     depth -= countMethodParameters(descriptor);
                     offset += 2; // Skip 2 bytes
 
@@ -381,16 +381,16 @@ public final class ByteCodeUtil {
         return depth;
     }
 
-    public static int getMinDepth(BasicBlock bb) {
-        Method method = bb.getControlFlowGraph().getMethod();
-        ConstantPool constants = method.getConstants();
-        AttributeCode attributeCode = method.getAttribute("Code");
-        byte[] code = attributeCode.getCode();
+    public static int getMinDepth(final BasicBlock bb) {
+        final Method method = bb.getControlFlowGraph().getMethod();
+        final ConstantPool constants = method.getConstantPool();
+        final Code attributeCode = method.getCode();
+        final byte[] code = attributeCode.getCode();
         return getMinDepth(constants, code, bb);
     }
 
-    private static int getMinDepth(ConstantPool constants, byte[] code, BasicBlock bb) {
-        ConstantMemberRef constantMemberRef;
+    private static int getMinDepth(final ConstantPool constants, final byte[] code, final BasicBlock bb) {
+        ConstantCP constantMemberRef;
         ConstantNameAndType constantNameAndType;
         String descriptor;
         int depth = 0;
@@ -563,8 +563,8 @@ public final class ByteCodeUtil {
                     offset = offset + 4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
-                    int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
-                    int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                    final int low = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                    final int high = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
                     offset += 4 * (high - low + 1) - 1;
                     depth--;
@@ -576,7 +576,7 @@ public final class ByteCodeUtil {
                     offset = offset + 4 & 0xFFFC; // Skip padding
                     offset += 4; // Skip default offset
 
-                    int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
+                    final int count = (code[offset++] & 255) << 24 | (code[offset++] & 255) << 16 | (code[offset++] & 255) << 8 | code[offset++] & 255;
 
                     offset += 8 * count - 1;
                     depth--;
@@ -587,7 +587,7 @@ public final class ByteCodeUtil {
                 case INVOKEVIRTUAL, INVOKESPECIAL:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     depth -= 1 + countMethodParameters(descriptor);
                     if (minDepth > depth) {
                         minDepth = depth;
@@ -600,7 +600,7 @@ public final class ByteCodeUtil {
                 case INVOKESTATIC:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     depth -= countMethodParameters(descriptor);
                     if (minDepth > depth) {
                         minDepth = depth;
@@ -613,7 +613,7 @@ public final class ByteCodeUtil {
                 case INVOKEINTERFACE:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     depth -= 1 + countMethodParameters(descriptor);
                     if (minDepth > depth) {
                         minDepth = depth;
@@ -627,7 +627,7 @@ public final class ByteCodeUtil {
                 case INVOKEDYNAMIC:
                     constantMemberRef = constants.getConstant((code[++offset] & 255) << 8 | code[++offset] & 255);
                     constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
+                    descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), CONSTANT_Utf8);
                     depth -= countMethodParameters(descriptor);
                     if (minDepth > depth) {
                         minDepth = depth;
@@ -682,7 +682,7 @@ public final class ByteCodeUtil {
         return minDepth;
     }
 
-    private static int countMethodParameters(String descriptor) {
+    private static int countMethodParameters(final String descriptor) {
         int count = 0;
         int i = 2;
         char c = descriptor.charAt(1);
@@ -705,8 +705,8 @@ public final class ByteCodeUtil {
         return count;
     }
 
-    public static boolean isStaticAccess(byte[] code, int offset) {
-        int opCode = code[offset] & 255;
+    public static boolean isStaticAccess(final byte[] code, final int offset) {
+        final int opCode = code[offset] & 255;
         return opCode == GETSTATIC
             || opCode == INVOKESTATIC
             || opCode == LDC
@@ -714,8 +714,8 @@ public final class ByteCodeUtil {
             || opCode == LDC2_W;
     }
 
-    public static boolean isLoad(byte[] code, int offset) {
-        int opCode = code[offset] & 255;
+    public static boolean isLoad(final byte[] code, final int offset) {
+        final int opCode = code[offset] & 255;
         return opCode >= 18 && opCode <= 53;
     }
 }

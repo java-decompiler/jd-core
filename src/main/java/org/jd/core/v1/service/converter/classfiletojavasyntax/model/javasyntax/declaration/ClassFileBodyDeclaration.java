@@ -48,10 +48,8 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     }
 
     public void setFieldDeclarations(List<ClassFileFieldDeclaration> fieldDeclarations) {
-        if (fieldDeclarations != null) {
-            this.fieldDeclarations = fieldDeclarations;
-            updateFirstLineNumber(this.fieldDeclarations);
-        }
+        this.fieldDeclarations = fieldDeclarations;
+        updateFirstLineNumber(this.fieldDeclarations);
     }
 
     public List<ClassFileConstructorOrMethodDeclaration> getMethodDeclarations() {
@@ -59,10 +57,8 @@ public class ClassFileBodyDeclaration extends BodyDeclaration implements ClassFi
     }
 
     public void setMethodDeclarations(List<ClassFileConstructorOrMethodDeclaration> methodDeclarations) {
-        if (methodDeclarations != null) {
-            this.methodDeclarations = methodDeclarations;
-            updateFirstLineNumber(this.methodDeclarations);
-        }
+        this.methodDeclarations = methodDeclarations;
+        updateFirstLineNumber(this.methodDeclarations);
     }
 
     public List<ClassFileTypeDeclaration> getInnerTypeDeclarations() {

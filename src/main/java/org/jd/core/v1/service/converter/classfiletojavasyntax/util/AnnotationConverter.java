@@ -6,19 +6,13 @@
  */
 package org.jd.core.v1.service.converter.classfiletojavasyntax.util;
 
-import org.apache.bcel.classfile.ConstantDouble;
-import org.apache.bcel.classfile.ConstantFloat;
-import org.apache.bcel.classfile.ConstantInteger;
-import org.apache.bcel.classfile.ConstantLong;
-import org.apache.bcel.classfile.ConstantUtf8;
-import org.jd.core.v1.model.classfile.attribute.Annotation;
-import org.jd.core.v1.model.classfile.attribute.Annotations;
-import org.jd.core.v1.model.classfile.attribute.AttributeElementValue;
-import org.jd.core.v1.model.classfile.attribute.ElementValueAnnotationValue;
-import org.jd.core.v1.model.classfile.attribute.ElementValueArrayValue;
-import org.jd.core.v1.model.classfile.attribute.ElementValueClassInfo;
-import org.jd.core.v1.model.classfile.attribute.ElementValueEnumConstValue;
-import org.jd.core.v1.model.classfile.attribute.ElementValuePrimitiveType;
+import org.apache.bcel.classfile.AnnotationElementValue;
+import org.apache.bcel.classfile.AnnotationEntry;
+import org.apache.bcel.classfile.ArrayElementValue;
+import org.apache.bcel.classfile.ClassElementValue;
+import org.apache.bcel.classfile.ElementValue;
+import org.apache.bcel.classfile.EnumElementValue;
+import org.apache.bcel.classfile.SimpleElementValue;
 import org.jd.core.v1.model.classfile.attribute.ElementValueVisitor;
 import org.jd.core.v1.model.javasyntax.expression.DoubleConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.FieldReferenceExpression;
@@ -28,7 +22,6 @@ import org.jd.core.v1.model.javasyntax.expression.LongConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.ObjectTypeReferenceExpression;
 import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
 import org.jd.core.v1.model.javasyntax.expression.TypeReferenceDotClassExpression;
-import org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationReference;
 import org.jd.core.v1.model.javasyntax.reference.AnnotationReferences;
 import org.jd.core.v1.model.javasyntax.reference.BaseAnnotationReference;
@@ -41,9 +34,6 @@ import org.jd.core.v1.model.javasyntax.reference.ExpressionElementValue;
 import org.jd.core.v1.model.javasyntax.type.ObjectType;
 import org.jd.core.v1.model.javasyntax.type.PrimitiveType;
 
-import java.util.List;
-import java.util.Map.Entry;
-
 public class AnnotationConverter implements ElementValueVisitor {
     private final TypeMaker typeMaker;
     private BaseElementValue elementValue;
@@ -52,7 +42,7 @@ public class AnnotationConverter implements ElementValueVisitor {
         this.typeMaker = typeMaker;
     }
 
-    public BaseAnnotationReference convert(Annotations visibles, Annotations invisibles) {
+    public BaseAnnotationReference convert(AnnotationEntry[] visibles, AnnotationEntry[] invisibles) {
         if (visibles == null) {
             if (invisibles == null) {
                 return null;
@@ -64,46 +54,42 @@ public class AnnotationConverter implements ElementValueVisitor {
         }
         AnnotationReferences<AnnotationReference> aral = new AnnotationReferences<>();
 
-        for (Annotation a : visibles.getAnnotations()) {
+        for (AnnotationEntry a : visibles) {
             aral.add(convert(a));
         }
-        for (Annotation a : invisibles.getAnnotations()) {
+        for (AnnotationEntry a : invisibles) {
             aral.add(convert(a));
         }
 
         return aral;
     }
 
-    protected BaseAnnotationReference convert(Annotations annotations) {
-        Annotation[] as = annotations.getAnnotations();
+    protected BaseAnnotationReference convert(AnnotationEntry[] as) {
 
         if (as.length == 1) {
             return convert(as[0]);
         }
         AnnotationReferences<AnnotationReference> aral = new AnnotationReferences<>(as.length);
 
-        for (Annotation a : as) {
+        for (AnnotationEntry a : as) {
             aral.add(convert(a));
         }
 
         return aral;
     }
 
-    protected AnnotationReference convert(Annotation annotation) {
-        String descriptor = annotation.descriptor();
+    protected AnnotationReference convert(AnnotationEntry annotation) {
+        String descriptor = annotation.getAnnotationType();
 
         assert descriptor != null && descriptor.length() > 2 && descriptor.charAt(0) == 'L' && descriptor.charAt(descriptor.length()-1) == ';';
 
         ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
-        List<Entry<String, AttributeElementValue>> elementValuePairs = annotation.elementValuePairs();
+        org.apache.bcel.classfile.ElementValuePair[] elementValuePairs = annotation.getElementValuePairs();
 
-        if (elementValuePairs == null) {
-            return new AnnotationReference(ot);
-        }
-        if (elementValuePairs.size() == 1) {
-            Entry<String, AttributeElementValue> elementValuePair = elementValuePairs.get(0);
-            String elementName = elementValuePair.getKey();
-            AttributeElementValue elemValue = elementValuePair.getValue();
+        if (elementValuePairs.length == 1) {
+            org.apache.bcel.classfile.ElementValuePair elementValuePair = elementValuePairs[0];
+            String elementName = elementValuePair.getNameString();
+            ElementValue elemValue = elementValuePair.getValue();
 
             if ("value".equals(elementName)) {
                 return new AnnotationReference(ot, convert(elemValue));
@@ -112,81 +98,97 @@ public class AnnotationConverter implements ElementValueVisitor {
                     ot,
                     new ElementValuePair(elementName, convert(elemValue)));
         }
-        ElementValuePairs list = new ElementValuePairs(elementValuePairs.size());
+        ElementValuePairs list = new ElementValuePairs(elementValuePairs.length);
         String elementName;
-        AttributeElementValue elemValue;
-        for (Entry<String, AttributeElementValue> elementValuePair : elementValuePairs) {
-            elementName = elementValuePair.getKey();
+        ElementValue elemValue;
+        for (org.apache.bcel.classfile.ElementValuePair elementValuePair : elementValuePairs) {
+            elementName = elementValuePair.getNameString();
             elemValue = elementValuePair.getValue();
             list.add(new ElementValuePair(elementName, convert(elemValue)));
         }
         return new AnnotationReference(ot, list);
     }
 
-    public BaseElementValue convert(AttributeElementValue ev) {
-        ev.accept(this);
+    public BaseElementValue convert(ElementValue ev) {
+        visit(ev);
         return elementValue;
+    }
+
+    public void visit(ElementValue ev) {
+        if (ev instanceof SimpleElementValue) {
+            visit((SimpleElementValue) ev);
+        }
+        if (ev instanceof ClassElementValue) {
+            visit((ClassElementValue) ev);
+        }
+        if (ev instanceof AnnotationElementValue) {
+            visit((AnnotationElementValue) ev);
+        }
+        if (ev instanceof EnumElementValue) {
+            visit((EnumElementValue) ev);
+        }
+        if (ev instanceof ArrayElementValue) {
+            visit((ArrayElementValue) ev);
+        }
     }
 
     /** --- ElementValueVisitor --- */
     @Override
-    public void visit(ElementValuePrimitiveType elementValuePrimitiveType) {
-        elementValue = switch (elementValuePrimitiveType.getType()) {
-            case 'B' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_BYTE, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
-            case 'D' -> new ExpressionElementValue(new DoubleConstantExpression(elementValuePrimitiveType.<ConstantDouble>getConstValue().getBytes()));
-            case 'F' -> new ExpressionElementValue(new FloatConstantExpression(elementValuePrimitiveType.<ConstantFloat>getConstValue().getBytes()));
-            case 'I' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_INT, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
-            case 'J' -> new ExpressionElementValue(new LongConstantExpression(elementValuePrimitiveType.<ConstantLong>getConstValue().getBytes()));
-            case 'S' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_SHORT, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
-            case 'Z' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_BOOLEAN, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
-            case 'C' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_CHAR, elementValuePrimitiveType.<ConstantInteger>getConstValue().getBytes()));
-            case 's' -> new ExpressionElementValue(new StringConstantExpression(elementValuePrimitiveType.<ConstantUtf8>getConstValue().getBytes()));
+    public void visit(SimpleElementValue elementValuePrimitiveType) {
+        elementValue = switch (elementValuePrimitiveType.getElementValueType()) {
+            case 'B' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_BYTE, elementValuePrimitiveType.getValueByte()));
+            case 'D' -> new ExpressionElementValue(new DoubleConstantExpression(elementValuePrimitiveType.getValueDouble()));
+            case 'F' -> new ExpressionElementValue(new FloatConstantExpression(elementValuePrimitiveType.getValueFloat()));
+            case 'I' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_INT, elementValuePrimitiveType.getValueInt()));
+            case 'J' -> new ExpressionElementValue(new LongConstantExpression(elementValuePrimitiveType.getValueLong()));
+            case 'S' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_SHORT, elementValuePrimitiveType.getValueShort()));
+            case 'Z' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_BOOLEAN, elementValuePrimitiveType.getValueBoolean() ? 1 : 0));
+            case 'C' -> new ExpressionElementValue(new IntegerConstantExpression(PrimitiveType.TYPE_CHAR, elementValuePrimitiveType.getValueChar()));
+            case 's' -> new ExpressionElementValue(new StringConstantExpression(elementValuePrimitiveType.getValueString()));
             default -> elementValue;
         };
     }
 
     @Override
-    public void visit(ElementValueClassInfo elementValueClassInfo) {
-        String classInfo = elementValueClassInfo.classInfo();
+    public void visit(ClassElementValue elementValueClassInfo) {
+        String classInfo = elementValueClassInfo.getClassString();
         ObjectType ot = typeMaker.makeFromDescriptor(classInfo);
         elementValue = new ExpressionElementValue(new TypeReferenceDotClassExpression(ot));
     }
 
     @Override
-    public void visit(ElementValueAnnotationValue elementValueAnnotationValue) {
-        Annotation annotationValue = elementValueAnnotationValue.annotationValue();
+    public void visit(AnnotationElementValue elementValueAnnotationValue) {
+        AnnotationEntry annotationValue = elementValueAnnotationValue.getAnnotationEntry();
         AnnotationReference annotationReference = convert(annotationValue);
-        elementValue = new AnnotationElementValue(annotationReference);
+        elementValue = new org.jd.core.v1.model.javasyntax.reference.AnnotationElementValue(annotationReference);
     }
 
     @Override
-    public void visit(ElementValueEnumConstValue elementValueEnumConstValue) {
-        String descriptor = elementValueEnumConstValue.descriptor();
+    public void visit(EnumElementValue elementValueEnumConstValue) {
+        String descriptor = elementValueEnumConstValue.getEnumTypeString();
 
         if (descriptor == null || descriptor.length() <= 2 || descriptor.charAt(0) != 'L' || descriptor.charAt(descriptor.length()-1) != ';') {
             throw new IllegalArgumentException("AnnotationConverter.visit(elementValueEnumConstValue)");
         }
 
         ObjectType ot = typeMaker.makeFromDescriptor(descriptor);
-        String constName = elementValueEnumConstValue.constName();
+        String constName = elementValueEnumConstValue.getEnumValueString();
         String internalTypeName = descriptor.substring(1, descriptor.length()-1);
         elementValue = new ExpressionElementValue(new FieldReferenceExpression(ot, new ObjectTypeReferenceExpression(ot), internalTypeName, constName, descriptor));
     }
 
     @Override
-    public void visit(ElementValueArrayValue elementValueArrayValue) {
-        AttributeElementValue[] values = elementValueArrayValue.values();
+    public void visit(ArrayElementValue elementValueArrayValue) {
+        ElementValue[] values = elementValueArrayValue.getElementValuesArray();
 
-        if (values == null) {
-            elementValue = new ElementValueArrayInitializerElementValue();
-        } else if (values.length == 1) {
-            values[0].accept(this);
+        if (values.length == 1) {
+            visit(values[0]);
             elementValue = new ElementValueArrayInitializerElementValue(elementValue);
         } else {
             ElementValues list = new ElementValues(values.length);
 
-            for (AttributeElementValue value : values) {
-                value.accept(this);
+            for (ElementValue value : values) {
+                visit(value);
                 list.add(elementValue);
             }
 

@@ -7,15 +7,14 @@
 
 package org.jd.core.v1;
 
-import org.apache.bcel.classfile.ConstantInteger;
-import org.apache.bcel.classfile.ConstantUtf8;
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.AnnotationElementValue;
+import org.apache.bcel.classfile.Annotations;
+import org.apache.bcel.classfile.Field;
+import org.apache.bcel.classfile.SimpleElementValue;
 import org.jd.core.v1.api.loader.Loader;
 import org.jd.core.v1.loader.ZipLoader;
 import org.jd.core.v1.model.classfile.ClassFile;
-import org.jd.core.v1.model.classfile.Field;
-import org.jd.core.v1.model.classfile.attribute.Annotations;
-import org.jd.core.v1.model.classfile.attribute.ElementValueAnnotationValue;
-import org.jd.core.v1.model.classfile.attribute.ElementValuePrimitiveType;
 import org.jd.core.v1.model.message.DecompileContext;
 import org.jd.core.v1.service.deserializer.classfile.ClassFileDeserializer;
 import org.jd.core.v1.util.StringConstants;
@@ -69,21 +68,20 @@ public class ClassFileDeserializerTest extends TestCase {
             assertEquals("org/jd/core/test/AnnotatedClass", classFile.getInternalTypeName());
             assertEquals("java/util/ArrayList", classFile.getSuperTypeName());
 
-            Annotations invAttr = classFile.getAttribute(StringConstants.RUNTIMEINVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-            assertNotNull(invAttr.getAnnotations());
-            assertEquals(2, invAttr.getAnnotations().length);
-            assertNotNull(invAttr.getAnnotations()[0].elementValuePairs());
-            assertEquals(1, invAttr.getAnnotations()[0].elementValuePairs().size());
+            Annotations invAttr = classFile.getAttribute(Const.ATTR_RUNTIME_INVISIBLE_ANNOTATIONS);
+            assertNotNull(invAttr.getAnnotationEntries());
+            assertEquals(2, invAttr.getNumAnnotations());
+            assertNotNull(invAttr.getAnnotationEntries()[0].getElementValuePairs());
+            assertEquals(1, invAttr.getAnnotationEntries()[0].getNumElementValuePairs());
 
-            ElementValueAnnotationValue annotationValue = (ElementValueAnnotationValue) invAttr.getAnnotations()[1].elementValuePairs().get(0).getValue();
-            assertEquals("Lorg/jd/core/test/annotation/Name;", annotationValue.annotationValue().descriptor());
-            assertNotNull(annotationValue.annotationValue().elementValuePairs());
-            assertEquals(3, annotationValue.annotationValue().elementValuePairs().size());
-            assertEquals("salutation", annotationValue.annotationValue().elementValuePairs().get(0).getKey());
+            AnnotationElementValue annotationValue = (AnnotationElementValue) invAttr.getAnnotationEntries()[1].getElementValuePairs()[0].getValue();
+            assertEquals("Lorg/jd/core/test/annotation/Name;", annotationValue.getAnnotationEntry().getAnnotationType());
+            assertNotNull(annotationValue.getAnnotationEntry().getElementValuePairs());
+            assertEquals(3, annotationValue.getAnnotationEntry().getNumElementValuePairs());
+            assertEquals("salutation", annotationValue.getAnnotationEntry().getElementValuePairs()[0].getNameString());
 
-            ElementValuePrimitiveType primitiveType = (ElementValuePrimitiveType) annotationValue.annotationValue().elementValuePairs().get(1).getValue();
-            ConstantUtf8 cu = primitiveType.getConstValue();
-            assertEquals("Donald", cu.getBytes());
+            SimpleElementValue ev = (SimpleElementValue) annotationValue.getAnnotationEntry().getElementValuePairs()[1].getValue();
+            assertEquals("Donald", ev.toString());
 
             // Check fields
             assertNotNull(classFile.getFields());
@@ -92,34 +90,30 @@ public class ClassFileDeserializerTest extends TestCase {
             // Check 1st field
             Field field = classFile.getFields()[1];
             assertEquals("b1", field.getName());
-            assertEquals("B", field.getDescriptor());
+            assertEquals("B", field.getSignature());
 
-            Annotations attr = field.getAttribute(StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-            assertNotNull(attr.getAnnotations());
-            assertEquals(1, attr.getAnnotations().length);
-            assertNotNull(attr.getAnnotations()[0].elementValuePairs());
-            assertEquals(1, attr.getAnnotations()[0].elementValuePairs().size());
-            assertEquals("b", attr.getAnnotations()[0].elementValuePairs().get(0).getKey());
+            assertNotNull(field.getAnnotationEntries());
+            assertEquals(1, field.getAnnotationEntries().length);
+            assertNotNull(field.getAnnotationEntries()[0].getElementValuePairs());
+            assertEquals(1, field.getAnnotationEntries()[0].getElementValuePairs().length);
+            assertEquals("b", field.getAnnotationEntries()[0].getElementValuePairs()[0].getNameString());
 
-            primitiveType = (ElementValuePrimitiveType) attr.getAnnotations()[0].elementValuePairs().get(0).getValue();
-            ConstantInteger ci = primitiveType.getConstValue();
-            assertEquals(-15, ci.getBytes());
+            ev = (SimpleElementValue) field.getAnnotationEntries()[0].getElementValuePairs()[0].getValue();
+            assertEquals(-15, ev.getValueByte());
 
             // Check 8th field
             field = classFile.getFields()[8];
             assertEquals("str2", field.getName());
-            assertEquals("Ljava/lang/String;", field.getDescriptor());
+            assertEquals("Ljava/lang/String;", field.getSignature());
 
-            attr = field.getAttribute(StringConstants.RUNTIMEVISIBLEANNOTATIONS_ATTRIBUTE_NAME);
-            assertNotNull(attr.getAnnotations());
-            assertEquals(1, attr.getAnnotations().length);
-            assertNotNull(attr.getAnnotations()[0].elementValuePairs());
-            assertEquals(1, attr.getAnnotations()[0].elementValuePairs().size());
-            assertEquals("str", attr.getAnnotations()[0].elementValuePairs().get(0).getKey());
+            assertNotNull(field.getAnnotationEntries());
+            assertEquals(1, field.getAnnotationEntries().length);
+            assertNotNull(field.getAnnotationEntries()[0].getElementValuePairs());
+            assertEquals(1, field.getAnnotationEntries()[0].getElementValuePairs().length);
+            assertEquals("str", field.getAnnotationEntries()[0].getElementValuePairs()[0].getNameString());
 
-            primitiveType = (ElementValuePrimitiveType) attr.getAnnotations()[0].elementValuePairs().get(0).getValue();
-            cu = primitiveType.getConstValue();
-            assertEquals("str \u0083 \u0909 \u1109", cu.getBytes());
+            ev = (SimpleElementValue) field.getAnnotationEntries()[0].getElementValuePairs()[0].getValue();
+            assertEquals("str \u0083 \u0909 \u1109", ev.toString());
 
             // Check getters
             assertNotNull(classFile.getMethods());
@@ -127,8 +121,8 @@ public class ClassFileDeserializerTest extends TestCase {
 
             // Check constructor
             assertEquals(StringConstants.INSTANCE_CONSTRUCTOR, classFile.getMethods()[0].getName());
-            assertEquals("()V", classFile.getMethods()[0].getDescriptor());
-            assertNotNull(classFile.getMethods()[0].getAttribute("Code"));
+            assertEquals("()V", classFile.getMethods()[0].getSignature());
+            assertNotNull(classFile.getMethods()[0].getCode());
         }
     }
 }

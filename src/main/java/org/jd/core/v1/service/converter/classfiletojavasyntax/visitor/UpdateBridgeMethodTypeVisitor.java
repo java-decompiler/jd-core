@@ -7,11 +7,11 @@
 
 package org.jd.core.v1.service.converter.classfiletojavasyntax.visitor;
 
+import org.apache.bcel.Const;
+import org.apache.bcel.classfile.ConstantCP;
 import org.apache.bcel.classfile.ConstantNameAndType;
-import org.jd.core.v1.model.classfile.ConstantPool;
-import org.jd.core.v1.model.classfile.Method;
-import org.jd.core.v1.model.classfile.attribute.AttributeCode;
-import org.jd.core.v1.model.classfile.constant.ConstantMemberRef;
+import org.apache.bcel.classfile.ConstantPool;
+import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.javasyntax.AbstractJavaSyntaxVisitor;
 import org.jd.core.v1.model.javasyntax.declaration.AnnotationDeclaration;
 import org.jd.core.v1.model.javasyntax.declaration.BodyDeclaration;
@@ -34,27 +34,27 @@ import static org.apache.bcel.Const.PUTFIELD;
 public class UpdateBridgeMethodTypeVisitor extends AbstractJavaSyntaxVisitor {
     private final TypeMaker typeMaker;
 
-    public UpdateBridgeMethodTypeVisitor(TypeMaker typeMaker) {
+    public UpdateBridgeMethodTypeVisitor(final TypeMaker typeMaker) {
         this.typeMaker = typeMaker;
     }
 
     @Override
-    public void visit(BodyDeclaration declaration) {
-        ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
+    public void visit(final BodyDeclaration declaration) {
+        final ClassFileBodyDeclaration bodyDeclaration = (ClassFileBodyDeclaration)declaration;
 
         safeAcceptListDeclaration(bodyDeclaration.getMethodDeclarations());
         safeAcceptListDeclaration(bodyDeclaration.getInnerTypeDeclarations());
     }
 
     @Override
-    public void visit(MethodDeclaration declaration) {
+    public void visit(final MethodDeclaration declaration) {
         if (declaration.isStatic() && declaration.getReturnedType().isObjectType() && declaration.getName().startsWith("access$")) {
-            TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(declaration.getReturnedType().getInternalName());
+            final TypeMaker.TypeTypes typeTypes = typeMaker.makeTypeTypes(declaration.getReturnedType().getInternalName());
 
             if (typeTypes != null && typeTypes.getTypeParameters() != null) {
-                ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration) declaration;
-                Method method = cfmd.getMethod();
-                byte[] code = method.<AttributeCode>getAttribute("Code").getCode();
+                final ClassFileMethodDeclaration cfmd = (ClassFileMethodDeclaration) declaration;
+                final Method method = cfmd.getMethod();
+                final byte[] code = method.getCode().getCode();
                 int offset = 0;
                 int opcode = code[offset] & 255;
 
@@ -64,27 +64,27 @@ public class UpdateBridgeMethodTypeVisitor extends AbstractJavaSyntaxVisitor {
                 }
 
                 if (opcode >= GETSTATIC && opcode <= PUTFIELD) {
-                    int index = (code[++offset] & 255) << 8 | code[++offset] & 255;
-                    ConstantPool constants = method.getConstants();
-                    ConstantMemberRef constantMemberRef = constants.getConstant(index);
-                    String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
-                    ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
-                    Type type = typeMaker.makeFieldType(typeName, name, descriptor);
+                    final int index = (code[++offset] & 255) << 8 | code[++offset] & 255;
+                    final ConstantPool constants = method.getConstantPool();
+                    final ConstantCP constantMemberRef = constants.getConstant(index);
+                    final String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), Const.CONSTANT_Class);
+                    final ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
+                    final String name = constants.getConstantString(constantNameAndType.getNameIndex(), Const.CONSTANT_Utf8);
+                    final String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), Const.CONSTANT_Utf8);
+                    final Type type = typeMaker.makeFieldType(typeName, name, descriptor);
 
                     // Update returned generic type of bridge method
                     typeMaker.setMethodReturnedType(typeName, cfmd.getName(), cfmd.getDescriptor(), type);
                 }
                 if (opcode >= INVOKEVIRTUAL && opcode <= INVOKEINTERFACE) {
-                    int index = (code[++offset] & 255) << 8 | code[++offset] & 255;
-                    ConstantPool constants = method.getConstants();
-                    ConstantMemberRef constantMemberRef = constants.getConstant(index);
-                    String typeName = constants.getConstantTypeName(constantMemberRef.getClassIndex());
-                    ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
-                    String name = constants.getConstantUtf8(constantNameAndType.getNameIndex());
-                    String descriptor = constants.getConstantUtf8(constantNameAndType.getSignatureIndex());
-                    TypeMaker.MethodTypes methodTypes = typeMaker.makeMethodTypes(typeName, name, descriptor);
+                    final int index = (code[++offset] & 255) << 8 | code[++offset] & 255;
+                    final ConstantPool constants = method.getConstantPool();
+                    final ConstantCP constantMemberRef = constants.getConstant(index);
+                    final String typeName = constants.getConstantString(constantMemberRef.getClassIndex(), Const.CONSTANT_Class);
+                    final ConstantNameAndType constantNameAndType = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
+                    final String name = constants.getConstantString(constantNameAndType.getNameIndex(), Const.CONSTANT_Utf8);
+                    final String descriptor = constants.getConstantString(constantNameAndType.getSignatureIndex(), Const.CONSTANT_Utf8);
+                    final TypeMaker.MethodTypes methodTypes = typeMaker.makeMethodTypes(typeName, name, descriptor);
 
                     // Update returned generic type of bridge method
                     typeMaker.setMethodReturnedType(typeName, cfmd.getName(), cfmd.getDescriptor(), methodTypes.getReturnedType());
@@ -93,19 +93,19 @@ public class UpdateBridgeMethodTypeVisitor extends AbstractJavaSyntaxVisitor {
         }
     }
 
-    @Override public void visit(ConstructorDeclaration declaration) {}
-    @Override public void visit(StaticInitializerDeclaration declaration) {}
+    @Override public void visit(final ConstructorDeclaration declaration) {}
+    @Override public void visit(final StaticInitializerDeclaration declaration) {}
 
     @Override
-    public void visit(ClassDeclaration declaration) {
+    public void visit(final ClassDeclaration declaration) {
         safeAccept(declaration.getBodyDeclaration());
     }
 
     @Override
-    public void visit(InterfaceDeclaration declaration) {
+    public void visit(final InterfaceDeclaration declaration) {
         safeAccept(declaration.getBodyDeclaration());
     }
 
-    @Override public void visit(AnnotationDeclaration declaration) {}
-    @Override public void visit(EnumDeclaration declaration) {}
+    @Override public void visit(final AnnotationDeclaration declaration) {}
+    @Override public void visit(final EnumDeclaration declaration) {}
 }
