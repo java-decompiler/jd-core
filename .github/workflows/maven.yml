@@ -1,16 +1,11 @@
 name: "Maven Release"
 
 on:
-  push:
-    branches: [ master ]
-    paths-ignore:
-      - '**/README.md'
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-    if: "contains(github.event.head_commit.message, '[ready for release]')"
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 17
