@@ -25,7 +25,7 @@ JD-Core is the engine of JD-GUI.
 # Strategy and goals 
 
 Pursuing strategy described in this research paper : 
-[https://www.researchgate.net/profile/Cesar_Soto-Valero/publication/334465294_The_Strengths_and_Behavioral_Quirks_of_Java_Bytecode_Decompilers/links/](The Strengths and Behavioral Quirks of Java Bytecode Decompilers)
+[The Strengths and Behavioral Quirks of Java Bytecode Decompilers](https://www.researchgate.net/profile/Cesar_Soto-Valero/publication/334465294_The_Strengths_and_Behavioral_Quirks_of_Java_Bytecode_Decompilers/links/ )
 Improved recompilation of decompiled source codes
 Decompiling and recompiling without any errors :
 - commons-io:commons-io:2.11.0
