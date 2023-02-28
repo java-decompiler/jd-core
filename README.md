@@ -24,17 +24,17 @@ JD-Core is the engine of JD-GUI.
 
 ## Strategy and goals 
 
-Pursuing strategy described in this research paper : 
+- Pursuing strategy described in this research paper : 
 [The Strengths and Behavioral Quirks of Java Bytecode Decompilers](https://www.researchgate.net/profile/Cesar_Soto-Valero/publication/334465294_The_Strengths_and_Behavioral_Quirks_of_Java_Bytecode_Decompilers/links/ )
-Improved recompilation of decompiled source codes
-Decompiling and recompiling without any errors :
-- commons-io:commons-io:2.11.0
-- commons-codec:commons-codec:1.15
-- org.apache.commons:commons-collections4:4.4
-- org.apache.commons:commons-lang3:3.12.0
-- org.apache.logging.log4j:log4j-core:2.20.0
-- junit:junit:4.13.2
-- and more ... (check unit tests)
+- Improved recompilation of decompiled source codes
+- Decompiling and recompiling without any errors :
+    - commons-io:commons-io:2.11.0
+    - commons-codec:commons-codec:1.15
+    - org.apache.commons:commons-collections4:4.4
+    - org.apache.commons:commons-lang3:3.12.0
+    - org.apache.logging.log4j:log4j-core:2.20.0
+    - junit:junit:4.13.2
+    - and more ... (check unit tests)
 
 ## How to build JD-Core ?
 ```
