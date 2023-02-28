@@ -22,7 +22,7 @@ JD-Core is a standalone JAVA library containing the JAVA decompiler of
 including Lambda expressions, method references and default methods.
 JD-Core is the engine of JD-GUI.
 
-# Strategy and goals 
+## Strategy and goals 
 
 Pursuing strategy described in this research paper : 
 [The Strengths and Behavioral Quirks of Java Bytecode Decompilers](https://www.researchgate.net/profile/Cesar_Soto-Valero/publication/334465294_The_Strengths_and_Behavioral_Quirks_of_Java_Bytecode_Decompilers/links/ )
