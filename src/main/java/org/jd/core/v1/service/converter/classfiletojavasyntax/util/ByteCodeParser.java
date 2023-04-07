@@ -180,7 +180,6 @@ public class ByteCodeParser {
         Method method = cfg.getMethod();
         ConstantPool constants = method.getConstantPool();
         byte[] code = method.getCode().getCode();
-        boolean syntheticFlag = (method.getAccessFlags() & ACC_SYNTHETIC) != 0;
 
         Expression indexRef;
         Expression arrayRef;
@@ -206,7 +205,7 @@ public class ByteCodeParser {
         int lineNumber;
         for (int offset=fromOffset; offset<toOffset; offset++) {
             opcode = code[offset] & 255;
-            lineNumber = syntheticFlag ? Expression.UNKNOWN_LINE_NUMBER : cfg.getLineNumber(offset);
+            lineNumber = cfg.getLineNumber(offset);
 
             switch (opcode) {
                 case NOP:
@@ -842,7 +841,7 @@ public class ByteCodeParser {
                     }
                     break;
                 case INVOKEDYNAMIC:
-                    parseInvokeDynamic(statements, stack, constants, lineNumber,  (code[++offset] & 255) << 8 | code[++offset] & 255);
+                    parseInvokeDynamic(statements, stack, constants, lineNumber, (code[++offset] & 255) << 8 | code[++offset] & 255);
                     offset += 2; // Skip 2 bytes
                     break;
                 case NEW:
