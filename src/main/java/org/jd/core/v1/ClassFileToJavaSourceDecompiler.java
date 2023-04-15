@@ -40,7 +40,7 @@ public class ClassFileToJavaSourceDecompiler implements Decompiler {
     }
 
     @Override
-    public DecompileContext decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws IOException {
+    public synchronized DecompileContext decompile(Loader loader, Printer printer, String internalName, Map<String, Object> configuration) throws IOException {
         DecompileContext decompileContext = new DecompileContext();
 
         decompileContext.setMainInternalTypeName(internalName);
