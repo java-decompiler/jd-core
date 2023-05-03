@@ -8,6 +8,7 @@ package org.jd.core.v1.service.converter.classfiletojavasyntax.model.cfg;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 public class Loop {
@@ -89,6 +90,6 @@ public class Loop {
             }
         }
 
-        return str + "], end=" + (end ==null ? "" : end.getIndex()) + "}";
+        return str + "], end=" + Optional.ofNullable(end).map(BasicBlock::getIndex).orElse(-1) + "}";
     }
 }

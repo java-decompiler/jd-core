@@ -25,6 +25,7 @@ import org.apache.bcel.classfile.LineNumber;
 import org.apache.bcel.classfile.LineNumberTable;
 import org.apache.bcel.classfile.LocalVariable;
 import org.apache.bcel.classfile.LocalVariableTable;
+import org.apache.bcel.classfile.LocalVariableTypeTable;
 import org.apache.bcel.classfile.Method;
 import org.jd.core.v1.model.javasyntax.expression.BooleanExpression;
 import org.jd.core.v1.model.javasyntax.expression.StringConstantExpression;
@@ -34,7 +35,9 @@ import org.jd.core.v1.model.javasyntax.statement.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import static org.apache.bcel.Const.ALOAD;
 import static org.apache.bcel.Const.ANEWARRAY;
@@ -522,21 +525,22 @@ public class ByteCodeWriter {
             }
         }
 
-//        LocalVariableTypeTable localVariableTypeTable = attributeCode.getLocalVariableTypeTable();
-//
-//        if (localVariableTypeTable != null) {
-//            sb.append(linePrefix).append("Local variable type table:\n");
-//            sb.append(linePrefix).append("  start\tlength\tslot\tname\tsignature\n");
-//
-//            for (LocalVariable localVariable : localVariableTypeTable.getLocalVariableTypeTable()) {
-//                sb.append(linePrefix).append("  ");
-//                sb.append(localVariable.getStartPC()).append('\t');
-//                sb.append(localVariable.getLength()).append('\t');
-//                sb.append(localVariable.getIndex()).append('\t');
-//                sb.append(localVariable.getName()).append('\t');
-//                sb.append(localVariable.getSignature()).append('\n');
-//            }
-//        }
+        LocalVariableTypeTable localVariableTypeTable = (LocalVariableTypeTable) Optional.ofNullable(attributeCode.getAttributes())
+                .map(Stream::of).orElseGet(Stream::empty).filter(LocalVariableTypeTable.class::isInstance).findAny().orElse(null);
+
+        if (localVariableTypeTable != null) {
+            sb.append(linePrefix).append("Local variable type table:\n");
+            sb.append(linePrefix).append("  start\tlength\tslot\tname\tsignature\n");
+
+            for (LocalVariable localVariable : localVariableTypeTable.getLocalVariableTypeTable()) {
+                sb.append(linePrefix).append("  ");
+                sb.append(localVariable.getStartPC()).append('\t');
+                sb.append(localVariable.getLength()).append('\t');
+                sb.append(localVariable.getIndex()).append('\t');
+                sb.append(localVariable.getName()).append('\t');
+                sb.append(localVariable.getSignature()).append('\n');
+            }
+        }
     }
 
     protected void writeExceptionTable(String linePrefix, StringBuilder sb, ConstantPool constants, Code attributeCode) {

@@ -1408,7 +1408,7 @@ public class ByteCodeParser {
         ConstantNameAndType indyCnat = constants.getConstant(constantMemberRef.getNameAndTypeIndex());
         String indyMethodName = constants.getConstantString(indyCnat.getNameIndex(), CONSTANT_Utf8);
         String indyDescriptor = constants.getConstantString(indyCnat.getSignatureIndex(), CONSTANT_Utf8);
-        TypeMaker.MethodTypes indyMethodTypes = typeMaker.makeMethodTypes(indyDescriptor);
+        TypeMaker.MethodTypes indyMethodTypes = typeMaker.makeMethodTypes(internalTypeName, indyMethodName, indyDescriptor);
         
         BaseExpression indyParameters = extractParametersFromStack(statements, stack, indyMethodTypes.getParameterTypes());
         BootstrapMethod bootstrapMethod = attributeBootstrapMethods.getBootstrapMethods()[constantMemberRef.getClassIndex()];
@@ -1428,7 +1428,7 @@ public class ByteCodeParser {
 
         ConstantMethodType cmt0 = constants.getConstant(bootstrapArguments[0]);
         String descriptor0 = constants.getConstantString(cmt0.getDescriptorIndex(), CONSTANT_Utf8);
-        TypeMaker.MethodTypes methodTypes0 = typeMaker.makeMethodTypes(descriptor0);
+        TypeMaker.MethodTypes methodTypes0 = typeMaker.makeMethodTypes(internalTypeName, null, descriptor0);
         int parameterCount = methodTypes0.getParameterTypes() == null ? 0 : methodTypes0.getParameterTypes().size();
         ConstantMethodHandle constantMethodHandle1 = constants.getConstant(bootstrapArguments[1]);
         ConstantCP cmr1 = constants.getConstant(constantMethodHandle1.getReferenceIndex());

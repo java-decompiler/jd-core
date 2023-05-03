@@ -7,6 +7,8 @@
 
 package org.jd.core.v1.printer;
 
+import java.util.Optional;
+
 public class PlainTextMetaPrinter extends PlainTextPrinter {
     // --- Printer --- //
     @Override
@@ -35,7 +37,7 @@ public class PlainTextMetaPrinter extends PlainTextPrinter {
         sb.append("<META-REFERENCE type='");
         printType(type);
         sb.append("' internalName='");
-        sb.append(internalTypeName==null ? "?" : internalTypeName);
+        sb.append(Optional.ofNullable(internalTypeName).orElse("?"));
         sb.append("' descriptor='");
         sb.append(descriptor);
         sb.append("' ownerInternalName='");
