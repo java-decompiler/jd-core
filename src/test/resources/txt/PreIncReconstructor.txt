@@ -1,0 +1,349 @@
+//Byte code:
+//  0: aload_0
+//  1: invokeinterface size : ()I
+//  6: istore_1
+//  7: iconst_0
+//  8: istore_2
+//  9: goto -> 707
+//  12: aload_0
+//  13: iload_2
+//  14: invokeinterface get : (I)Ljava/lang/Object;
+//  19: checkcast jd/core/model/instruction/bytecode/instruction/Instruction
+//  22: getfield opcode : I
+//  25: sipush #264
+//  28: if_icmpeq -> 34
+//  31: goto -> 704
+//  34: aload_0
+//  35: iload_2
+//  36: invokeinterface get : (I)Ljava/lang/Object;
+//  41: checkcast jd/core/model/instruction/bytecode/instruction/DupStore
+//  44: astore_3
+//  45: aload_3
+//  46: getfield objectref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  49: getfield opcode : I
+//  52: sipush #267
+//  55: if_icmpeq -> 61
+//  58: goto -> 704
+//  61: aload_3
+//  62: getfield objectref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  65: checkcast jd/core/model/instruction/bytecode/instruction/BinaryOperatorInstruction
+//  68: astore #4
+//  70: aload #4
+//  72: getfield value2 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  75: getfield opcode : I
+//  78: sipush #256
+//  81: if_icmpeq -> 129
+//  84: aload #4
+//  86: getfield value2 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  89: getfield opcode : I
+//  92: sipush #257
+//  95: if_icmpeq -> 129
+//  98: aload #4
+//  100: getfield value2 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  103: getfield opcode : I
+//  106: sipush #259
+//  109: if_icmpeq -> 129
+//  112: aload #4
+//  114: getfield value2 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  117: getfield opcode : I
+//  120: sipush #258
+//  123: if_icmpeq -> 129
+//  126: goto -> 704
+//  129: aload #4
+//  131: getfield value2 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  134: checkcast jd/core/model/instruction/bytecode/instruction/ConstInstruction
+//  137: astore #5
+//  139: aload #5
+//  141: getfield value : I
+//  144: iconst_1
+//  145: if_icmpeq -> 151
+//  148: goto -> 704
+//  151: aload #4
+//  153: getfield operator : Ljava/lang/String;
+//  156: ldc '+'
+//  158: invokevirtual equals : (Ljava/lang/Object;)Z
+//  161: ifeq -> 170
+//  164: iconst_1
+//  165: istore #6
+//  167: goto -> 186
+//  170: aload #4
+//  172: getfield operator : Ljava/lang/String;
+//  175: ldc '-'
+//  177: invokevirtual equals : (Ljava/lang/Object;)Z
+//  180: ifeq -> 704
+//  183: iconst_m1
+//  184: istore #6
+//  186: iload_2
+//  187: istore #7
+//  189: goto -> 695
+//  192: aload_0
+//  193: iload #7
+//  195: invokeinterface get : (I)Ljava/lang/Object;
+//  200: checkcast jd/core/model/instruction/bytecode/instruction/Instruction
+//  203: astore #8
+//  205: aconst_null
+//  206: astore #9
+//  208: aload #8
+//  210: getfield opcode : I
+//  213: lookupswitch default -> 604, 54 -> 332, 58 -> 264, 179 -> 538, 181 -> 469, 269 -> 400
+//  264: aload #4
+//  266: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  269: getfield opcode : I
+//  272: bipush #25
+//  274: if_icmpne -> 604
+//  277: aload #8
+//  279: checkcast jd/core/model/instruction/bytecode/instruction/StoreInstruction
+//  282: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  285: getfield opcode : I
+//  288: sipush #263
+//  291: if_icmpne -> 604
+//  294: aload #8
+//  296: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  299: getfield index : I
+//  302: aload #4
+//  304: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  307: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  310: getfield index : I
+//  313: if_icmpne -> 604
+//  316: aload #8
+//  318: checkcast jd/core/model/instruction/bytecode/instruction/StoreInstruction
+//  321: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  324: checkcast jd/core/model/instruction/bytecode/instruction/DupLoad
+//  327: astore #9
+//  329: goto -> 604
+//  332: aload #4
+//  334: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  337: getfield opcode : I
+//  340: bipush #21
+//  342: if_icmpne -> 604
+//  345: aload #8
+//  347: checkcast jd/core/model/instruction/bytecode/instruction/StoreInstruction
+//  350: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  353: getfield opcode : I
+//  356: sipush #263
+//  359: if_icmpne -> 604
+//  362: aload #8
+//  364: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  367: getfield index : I
+//  370: aload #4
+//  372: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  375: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  378: getfield index : I
+//  381: if_icmpne -> 604
+//  384: aload #8
+//  386: checkcast jd/core/model/instruction/bytecode/instruction/StoreInstruction
+//  389: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  392: checkcast jd/core/model/instruction/bytecode/instruction/DupLoad
+//  395: astore #9
+//  397: goto -> 604
+//  400: aload #4
+//  402: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  405: getfield opcode : I
+//  408: sipush #268
+//  411: if_icmpne -> 604
+//  414: aload #8
+//  416: checkcast jd/core/model/instruction/bytecode/instruction/StoreInstruction
+//  419: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  422: getfield opcode : I
+//  425: sipush #263
+//  428: if_icmpne -> 604
+//  431: aload #8
+//  433: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  436: getfield index : I
+//  439: aload #4
+//  441: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  444: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  447: getfield index : I
+//  450: if_icmpne -> 604
+//  453: aload #8
+//  455: checkcast jd/core/model/instruction/bytecode/instruction/StoreInstruction
+//  458: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  461: checkcast jd/core/model/instruction/bytecode/instruction/DupLoad
+//  464: astore #9
+//  466: goto -> 604
+//  469: aload #4
+//  471: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  474: getfield opcode : I
+//  477: sipush #180
+//  480: if_icmpne -> 604
+//  483: aload #8
+//  485: checkcast jd/core/model/instruction/bytecode/instruction/PutField
+//  488: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  491: getfield opcode : I
+//  494: sipush #263
+//  497: if_icmpne -> 604
+//  500: aload #8
+//  502: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  505: getfield index : I
+//  508: aload #4
+//  510: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  513: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  516: getfield index : I
+//  519: if_icmpne -> 604
+//  522: aload #8
+//  524: checkcast jd/core/model/instruction/bytecode/instruction/PutField
+//  527: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  530: checkcast jd/core/model/instruction/bytecode/instruction/DupLoad
+//  533: astore #9
+//  535: goto -> 604
+//  538: aload #4
+//  540: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  543: getfield opcode : I
+//  546: sipush #178
+//  549: if_icmpne -> 604
+//  552: aload #8
+//  554: checkcast jd/core/model/instruction/bytecode/instruction/PutStatic
+//  557: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  560: getfield opcode : I
+//  563: sipush #263
+//  566: if_icmpne -> 604
+//  569: aload #8
+//  571: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  574: getfield index : I
+//  577: aload #4
+//  579: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  582: checkcast jd/core/model/instruction/bytecode/instruction/IndexInstruction
+//  585: getfield index : I
+//  588: if_icmpne -> 604
+//  591: aload #8
+//  593: checkcast jd/core/model/instruction/bytecode/instruction/PutStatic
+//  596: getfield valueref : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  599: checkcast jd/core/model/instruction/bytecode/instruction/DupLoad
+//  602: astore #9
+//  604: aload #9
+//  606: ifnull -> 695
+//  609: aload #9
+//  611: getfield offset : I
+//  614: aload_3
+//  615: getfield offset : I
+//  618: if_icmpeq -> 624
+//  621: goto -> 695
+//  624: new jd/core/model/instruction/bytecode/instruction/IncInstruction
+//  627: dup
+//  628: sipush #277
+//  631: aload #4
+//  633: getfield offset : I
+//  636: aload #4
+//  638: getfield lineNumber : I
+//  641: aload #4
+//  643: getfield value1 : Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  646: iload #6
+//  648: invokespecial <init> : (IIILjd/core/model/instruction/bytecode/instruction/Instruction;I)V
+//  651: astore #10
+//  653: aload_0
+//  654: iload #7
+//  656: iconst_1
+//  657: iadd
+//  658: aload_3
+//  659: aload #10
+//  661: invokestatic ReplaceDupLoad : (Ljava/util/List;ILjd/core/model/instruction/bytecode/instruction/DupStore;Ljd/core/model/instruction/bytecode/instruction/Instruction;)Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  664: pop
+//  665: aload_0
+//  666: iload #7
+//  668: invokeinterface remove : (I)Ljava/lang/Object;
+//  673: pop
+//  674: aload_0
+//  675: iload_2
+//  676: invokeinterface remove : (I)Ljava/lang/Object;
+//  681: pop
+//  682: iinc #2, -1
+//  685: aload_0
+//  686: invokeinterface size : ()I
+//  691: istore_1
+//  692: goto -> 704
+//  695: iinc #7, 1
+//  698: iload #7
+//  700: iload_1
+//  701: if_icmplt -> 192
+//  704: iinc #2, 1
+//  707: iload_2
+//  708: iload_1
+//  709: if_icmplt -> 12
+//  712: return
+//Line number table:
+//  Java source line number -> byte code offset
+//  #31	-> 0
+//  #33	-> 7
+//  #35	-> 12
+//  #36	-> 31
+//  #39	-> 34
+//  #41	-> 45
+//  #42	-> 58
+//  #45	-> 61
+//  #44	-> 68
+//  #47	-> 70
+//  #48	-> 84
+//  #49	-> 98
+//  #50	-> 112
+//  #51	-> 126
+//  #53	-> 129
+//  #55	-> 139
+//  #56	-> 148
+//  #60	-> 151
+//  #61	-> 164
+//  #62	-> 170
+//  #63	-> 183
+//  #67	-> 186
+//  #69	-> 189
+//  #71	-> 192
+//  #72	-> 205
+//  #74	-> 208
+//  #77	-> 264
+//  #78	-> 277
+//  #79	-> 294
+//  #81	-> 316
+//  #82	-> 329
+//  #84	-> 332
+//  #85	-> 345
+//  #86	-> 362
+//  #88	-> 384
+//  #89	-> 397
+//  #91	-> 400
+//  #92	-> 414
+//  #93	-> 431
+//  #95	-> 453
+//  #96	-> 466
+//  #98	-> 469
+//  #99	-> 483
+//  #100	-> 500
+//  #102	-> 522
+//  #103	-> 535
+//  #105	-> 538
+//  #106	-> 552
+//  #107	-> 569
+//  #109	-> 591
+//  #113	-> 604
+//  #114	-> 621
+//  #116	-> 624
+//  #117	-> 628
+//  #118	-> 636
+//  #116	-> 648
+//  #121	-> 653
+//  #120	-> 661
+//  #123	-> 665
+//  #124	-> 674
+//  #125	-> 682
+//  #126	-> 685
+//  #127	-> 692
+//  #69	-> 695
+//  #33	-> 704
+//  #130	-> 712
+//Local variable table:
+//  start	length	slot	name	descriptor
+//  0	713	0	list	Ljava/util/List;
+//  7	706	1	length	I
+//  9	703	2	dupStoreIndex	I
+//  45	659	3	dupstore	Ljd/core/model/instruction/bytecode/instruction/DupStore;
+//  70	634	4	boi	Ljd/core/model/instruction/bytecode/instruction/BinaryOperatorInstruction;
+//  139	565	5	ci	Ljd/core/model/instruction/bytecode/instruction/ConstInstruction;
+//  167	3	6	value	I
+//  186	518	6	value	I
+//  189	515	7	xstorePutfieldPutstaticIndex	I
+//  205	490	8	i	Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  208	487	9	dupload	Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//  653	42	10	preinc	Ljd/core/model/instruction/bytecode/instruction/Instruction;
+//Local variable type table:
+//  start	length	slot	name	signature
+//  0	713	0	list	Ljava/util/List<Ljd/core/model/instruction/bytecode/instruction/Instruction;>;
+//Exception table:
+//  from	to	target	type
